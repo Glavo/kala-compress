@@ -109,7 +109,7 @@ public class ZipEightByteIntegerTest {
         assertEquals("symmetric", zl2, zl);
 
         assertNotEquals("null handling", null, zl);
-        assertNotEquals("non ZipEightByteInteger handling", zl, new Integer(0x1234));
+        assertNotEquals("non ZipEightByteInteger handling", zl, 0x1234);
     }
 
     /**

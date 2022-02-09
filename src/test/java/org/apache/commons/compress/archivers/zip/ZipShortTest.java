@@ -83,7 +83,7 @@ public class ZipShortTest {
         assertEquals("symmetric", zs2, zs);
 
         assertNotEquals("null handling", null, zs);
-        assertNotEquals("non ZipShort handling", zs, new Integer(0x1234));
+        assertNotEquals("non ZipShort handling", zs, 0x1234);
     }
 
     /**

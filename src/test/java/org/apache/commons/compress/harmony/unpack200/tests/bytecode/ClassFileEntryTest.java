@@ -58,30 +58,30 @@ public class ClassFileEntryTest extends TestCase {
     }
 
     public void testCPInteger() {
-        CPInteger cp1 = new CPInteger(new Integer(3), 3);
-        CPInteger cp2 = new CPInteger(new Integer(3), 3);
-        CPInteger cp3 = new CPInteger(new Integer(5), 5);
+        CPInteger cp1 = new CPInteger(3, 3);
+        CPInteger cp2 = new CPInteger(3, 3);
+        CPInteger cp3 = new CPInteger(5, 5);
         checkEquality(cp1, cp2, "3", cp3); //$NON-NLS-1$
     }
 
     public void testCPLong() {
-        CPLong cp1 = new CPLong(new Long(3), 3);
-        CPLong cp2 = new CPLong(new Long(3), 3);
-        CPLong cp3 = new CPLong(new Long(5), 5);
+        CPLong cp1 = new CPLong(3L, 3);
+        CPLong cp2 = new CPLong(3L, 3);
+        CPLong cp3 = new CPLong(5L, 5);
         checkEquality(cp1, cp2, "3", cp3); //$NON-NLS-1$
     }
 
     public void testCPDouble() {
-        CPDouble cp1 = new CPDouble(new Double(3), 3);
-        CPDouble cp2 = new CPDouble(new Double(3), 3);
-        CPDouble cp3 = new CPDouble(new Double(5), 5);
+        CPDouble cp1 = new CPDouble(3.0, 3);
+        CPDouble cp2 = new CPDouble(3.0, 3);
+        CPDouble cp3 = new CPDouble(5.0, 5);
         checkEquality(cp1, cp2, "3", cp3); //$NON-NLS-1$
     }
 
     public void testCPFloat() {
-        CPFloat cp1 = new CPFloat(new Float(3), 3);
-        CPFloat cp2 = new CPFloat(new Float(3), 3);
-        CPFloat cp3 = new CPFloat(new Float(5), 5);
+        CPFloat cp1 = new CPFloat(3F, 3);
+        CPFloat cp2 = new CPFloat(3F, 3);
+        CPFloat cp3 = new CPFloat(5F, 5);
         checkEquality(cp1, cp2, "3", cp3); //$NON-NLS-1$
     }
 

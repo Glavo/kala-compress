@@ -68,7 +68,7 @@ public class BcBandsTest extends AbstractBandsTestCase {
         }
 
         public CPInteger cpIntegerValue(int index) {
-            return new CPInteger(new Integer(21), index);
+            return new CPInteger(21, index);
         }
 
         public CPClass cpClassValue(int index) {
@@ -76,15 +76,15 @@ public class BcBandsTest extends AbstractBandsTestCase {
         }
 
         public CPFloat cpFloatValue(int index) {
-            return new CPFloat(new Float(2.5F), index);
+            return new CPFloat(2.5F, index);
         }
 
         public CPLong cpLongValue(int index) {
-            return new CPLong(new Long(21L), index);
+            return new CPLong(21L, index);
         }
 
         public CPDouble cpDoubleValue(int index) {
-            return new CPDouble(new Double(2.5D), index);
+            return new CPDouble(2.5D, index);
         }
 
         public CPFieldRef cpFieldValue(int index) {

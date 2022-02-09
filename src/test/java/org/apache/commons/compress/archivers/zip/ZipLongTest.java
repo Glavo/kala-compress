@@ -85,7 +85,7 @@ public class ZipLongTest {
         assertEquals("symmetric", zl2, zl);
 
         assertNotEquals("null handling", null, zl);
-        assertNotEquals("non ZipLong handling", zl, new Integer(0x1234));
+        assertNotEquals("non ZipLong handling", zl, 0x1234);
     }
 
     /**
