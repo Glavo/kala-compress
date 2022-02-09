@@ -22,13 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.commons.compress.archivers.ar.ArArchiveInputStream;
 import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream;
@@ -44,9 +38,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.ServiceLoaderIterator;
-import org.apache.commons.compress.utils.Sets;
 
 /**
  * Factory to create Archive[In|Out]putStreams from names or the first bytes of
@@ -163,7 +155,9 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     private SortedMap<String, ArchiveStreamProvider> archiveOutputStreamProviders;
 
     private static ArrayList<ArchiveStreamProvider> findArchiveStreamProviders() {
-        return Lists.newArrayList(serviceLoaderIterator());
+        ArrayList<ArchiveStreamProvider> res = new ArrayList<>();
+        serviceLoaderIterator().forEachRemaining(res::add);
+        return res;
     }
 
     static void putAll(final Set<String> names, final ArchiveStreamProvider provider,
@@ -577,12 +571,18 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
 
     @Override
     public Set<String> getInputStreamArchiveNames() {
-        return Sets.newHashSet(AR, ARJ, ZIP, TAR, JAR, CPIO, DUMP, SEVEN_Z);
+        final String[] elements = new String[]{AR, ARJ, ZIP, TAR, JAR, CPIO, DUMP, SEVEN_Z};
+        final HashSet<String> set = new HashSet<>(elements.length);
+        Collections.addAll(set, elements);
+        return set;
     }
 
     @Override
     public Set<String> getOutputStreamArchiveNames() {
-        return Sets.newHashSet(AR, ZIP, TAR, JAR, CPIO, SEVEN_Z);
+        final String[] elements = new String[]{AR, ZIP, TAR, JAR, CPIO, SEVEN_Z};
+        final HashSet<String> set = new HashSet<>(elements.length);
+        Collections.addAll(set, elements);
+        return set;
     }
 
 }

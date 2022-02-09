@@ -21,13 +21,7 @@ package org.apache.commons.compress.compressors;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.commons.compress.compressors.brotli.BrotliCompressorInputStream;
 import org.apache.commons.compress.compressors.brotli.BrotliUtils;
@@ -58,9 +52,7 @@ import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStre
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream;
 import org.apache.commons.compress.compressors.zstandard.ZstdUtils;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.ServiceLoaderIterator;
-import org.apache.commons.compress.utils.Sets;
 
 /**
  * <p>
@@ -287,7 +279,9 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         return map;
     }
     private static ArrayList<CompressorStreamProvider> findCompressorStreamProviders() {
-        return Lists.newArrayList(serviceLoaderIterator());
+        ArrayList<CompressorStreamProvider> res = new ArrayList<>();
+        serviceLoaderIterator().forEachRemaining(res::add);
+        return res;
     }
 
     public static String getBrotli() {
@@ -745,13 +739,18 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
 
     @Override
     public Set<String> getInputStreamCompressorNames() {
-        return Sets.newHashSet(GZIP, BROTLI, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_RAW, SNAPPY_FRAMED, Z, LZ4_BLOCK,
-            LZ4_FRAMED, ZSTANDARD, DEFLATE64);
+        final String[] elements = new String[]{GZIP, BROTLI, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_RAW, SNAPPY_FRAMED, Z, LZ4_BLOCK, LZ4_FRAMED, ZSTANDARD, DEFLATE64};
+        final HashSet<String> set = new HashSet<>(elements.length);
+        Collections.addAll(set, elements);
+        return set;
     }
 
     @Override
     public Set<String> getOutputStreamCompressorNames() {
-        return Sets.newHashSet(GZIP, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_FRAMED, LZ4_BLOCK, LZ4_FRAMED, ZSTANDARD);
+        final String[] elements = new String[]{GZIP, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_FRAMED, LZ4_BLOCK, LZ4_FRAMED, ZSTANDARD};
+        final HashSet<String> set = new HashSet<>(elements.length);
+        Collections.addAll(set, elements);
+        return set;
     }
 
     /**
