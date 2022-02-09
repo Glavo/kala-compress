@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.SortedMap;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -56,24 +54,18 @@ public abstract class Pack200 {
      *
      * @return an instance of {@code Packer}
      */
+    @SuppressWarnings("deprecation")
     public static Pack200.Packer newPacker() {
-        return (Packer) AccessController
-                .doPrivileged(new PrivilegedAction<Object>() {
-                    public Object run() {
-                        String className = System
-                                .getProperty(SYSTEM_PROPERTY_PACKER,
-                                        "org.apache.commons.compress.harmony.pack200.Pack200PackerAdapter"); //$NON-NLS-1$
-                        try {
-                            // TODO Not sure if this will cause problems with
-                            // loading the packer
-                            return ClassLoader.getSystemClassLoader()
-                                    .loadClass(className).newInstance();
-                        } catch (Exception e) {
-                            throw new Error(Messages.getString("archive.3E",className), e); //$NON-NLS-1$
-                        }
-                    }
-                });
-
+        String className = System
+                .getProperty(SYSTEM_PROPERTY_PACKER,
+                        "org.apache.commons.compress.harmony.pack200.Pack200PackerAdapter"); //$NON-NLS-1$
+        try {
+            // TODO Not sure if this will cause problems with
+            // loading the packer
+            return (Packer) ClassLoader.getSystemClassLoader().loadClass(className).newInstance();
+        } catch (Exception e) {
+            throw new Error(Messages.getString("archive.3E",className), e); //$NON-NLS-1$
+        }
     }
 
     /**
@@ -86,21 +78,16 @@ public abstract class Pack200 {
      *
      * @return a instance of {@code Unpacker}.
      */
+    @SuppressWarnings("deprecation")
     public static Pack200.Unpacker newUnpacker() {
-        return (Unpacker) AccessController
-                .doPrivileged(new PrivilegedAction<Object>() {
-                    public Object run() {
-                        String className = System
-                                .getProperty(SYSTEM_PROPERTY_UNPACKER,
-                                        "org.apache.commons.compress.harmony.unpack200.Pack200UnpackerAdapter");//$NON-NLS-1$
-                        try {
-                            return ClassLoader.getSystemClassLoader()
-                                    .loadClass(className).newInstance();
-                        } catch (Exception e) {
-                            throw new Error(Messages.getString("archive.3E",className), e); //$NON-NLS-1$
-                        }
-                    }
-                });
+        String className = System
+                .getProperty(SYSTEM_PROPERTY_UNPACKER,
+                        "org.apache.commons.compress.harmony.unpack200.Pack200UnpackerAdapter");//$NON-NLS-1$
+        try {
+            return (Unpacker) ClassLoader.getSystemClassLoader().loadClass(className).newInstance();
+        } catch (Exception e) {
+            throw new Error(Messages.getString("archive.3E",className), e); //$NON-NLS-1$
+        }
     }
 
     /**

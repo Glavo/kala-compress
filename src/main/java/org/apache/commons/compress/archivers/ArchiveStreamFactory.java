@@ -22,8 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -211,14 +209,12 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * @since 1.13
      */
     public static SortedMap<String, ArchiveStreamProvider> findAvailableArchiveInputStreamProviders() {
-        return AccessController.doPrivileged((PrivilegedAction<SortedMap<String, ArchiveStreamProvider>>) () -> {
-            final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
-            putAll(DEFAULT.getInputStreamArchiveNames(), DEFAULT, map);
-            for (final ArchiveStreamProvider provider : findArchiveStreamProviders()) {
-                putAll(provider.getInputStreamArchiveNames(), provider, map);
-            }
-            return map;
-        });
+        final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
+        putAll(DEFAULT.getInputStreamArchiveNames(), DEFAULT, map);
+        for (final ArchiveStreamProvider provider : findArchiveStreamProviders()) {
+            putAll(provider.getInputStreamArchiveNames(), provider, map);
+        }
+        return map;
     }
 
     /**
@@ -249,14 +245,12 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * @since 1.13
      */
     public static SortedMap<String, ArchiveStreamProvider> findAvailableArchiveOutputStreamProviders() {
-        return AccessController.doPrivileged((PrivilegedAction<SortedMap<String, ArchiveStreamProvider>>) () -> {
-            final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
-            putAll(DEFAULT.getOutputStreamArchiveNames(), DEFAULT, map);
-            for (final ArchiveStreamProvider provider : findArchiveStreamProviders()) {
-                putAll(provider.getOutputStreamArchiveNames(), provider, map);
-            }
-            return map;
-        });
+        final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
+        putAll(DEFAULT.getOutputStreamArchiveNames(), DEFAULT, map);
+        for (final ArchiveStreamProvider provider : findArchiveStreamProviders()) {
+            putAll(provider.getOutputStreamArchiveNames(), provider, map);
+        }
+        return map;
     }
 
     /**
