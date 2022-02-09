@@ -126,11 +126,6 @@ public class ZipFile implements Closeable {
     private final ZipEncoding zipEncoding;
 
     /**
-     * File name of actual source.
-     */
-    private final String archiveName;
-
-    /**
      * The actual data source.
      */
     private final SeekableByteChannel archive;
@@ -139,11 +134,6 @@ public class ZipFile implements Closeable {
      * Whether to look for and use Unicode extra fields.
      */
     private final boolean useUnicodeExtraFields;
-
-    /**
-     * Whether the file is closed.
-     */
-    private volatile boolean closed = true;
 
     /**
      * Whether the zip archive is a split zip archive
@@ -365,7 +355,6 @@ public class ZipFile implements Closeable {
         throws IOException {
         isSplitZipArchive = (channel instanceof ZipSplitReadOnlySeekableByteChannel);
 
-        this.archiveName = archiveName;
         this.encoding = encoding;
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
@@ -382,7 +371,6 @@ public class ZipFile implements Closeable {
         } catch (final IOException e) {
             throw new IOException("Error on ZipFile " + archiveName, e);
         } finally {
-            closed = !success;
             if (!success && closeOnError) {
                 IOUtils.closeQuietly(archive);
             }
@@ -404,11 +392,6 @@ public class ZipFile implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        // this flag is only written here and read in finalize() which
-        // can never be run in parallel.
-        // no synchronization needed.
-        closed = true;
-
         archive.close();
     }
 
@@ -649,24 +632,6 @@ public class ZipFile implements Closeable {
             }
         }
         return null;
-    }
-
-    /**
-     * Ensures that the close method of this zipfile is called when
-     * there are no more references to it.
-     * @see #close()
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            if (!closed) {
-                System.err.println("Cleaning up unclosed ZipFile for archive "
-                                   + archiveName);
-                close();
-            }
-        } finally {
-            super.finalize();
-        }
     }
 
     /**
