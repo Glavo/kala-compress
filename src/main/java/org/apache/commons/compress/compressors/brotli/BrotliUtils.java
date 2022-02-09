@@ -18,8 +18,6 @@
  */
 package org.apache.commons.compress.compressors.brotli;
 
-import org.apache.commons.compress.utils.OsgiUtils;
-
 /**
  * Utility code for the Brotli compression format.
  * @ThreadSafe
@@ -35,7 +33,7 @@ public class BrotliUtils {
 
     static {
         cachedBrotliAvailability = CachedAvailability.DONT_CACHE;
-        setCacheBrotliAvailablity(!OsgiUtils.isRunningInOsgiEnvironment());
+        setCacheBrotliAvailablity(true);
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

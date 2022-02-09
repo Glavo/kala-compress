@@ -21,7 +21,6 @@ package org.apache.commons.compress.compressors.lzma;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.compress.compressors.FileNameUtil;
-import org.apache.commons.compress.utils.OsgiUtils;
 
 /**
  * Utility code for the lzma compression format.
@@ -51,7 +50,7 @@ public class LZMAUtils {
         uncompressSuffix.put("-lzma", "");
         fileNameUtil = new FileNameUtil(uncompressSuffix, ".lzma");
         cachedLZMAAvailability = CachedAvailability.DONT_CACHE;
-        setCacheLZMAAvailablity(!OsgiUtils.isRunningInOsgiEnvironment());
+        setCacheLZMAAvailablity(true);
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

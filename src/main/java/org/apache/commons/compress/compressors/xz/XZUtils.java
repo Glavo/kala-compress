@@ -21,7 +21,6 @@ package org.apache.commons.compress.compressors.xz;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.compress.compressors.FileNameUtil;
-import org.apache.commons.compress.utils.OsgiUtils;
 
 /**
  * Utility code for the xz compression format.
@@ -55,7 +54,7 @@ public class XZUtils {
         uncompressSuffix.put("-xz", "");
         fileNameUtil = new FileNameUtil(uncompressSuffix, ".xz");
         cachedXZAvailability = CachedAvailability.DONT_CACHE;
-        setCacheXZAvailablity(!OsgiUtils.isRunningInOsgiEnvironment());
+        setCacheXZAvailablity(true);
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

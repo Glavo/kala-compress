@@ -18,8 +18,6 @@
  */
 package org.apache.commons.compress.compressors.zstandard;
 
-import org.apache.commons.compress.utils.OsgiUtils;
-
 /**
  * Utility code for the Zstandard compression format.
  * @ThreadSafe
@@ -49,7 +47,7 @@ public class ZstdUtils {
 
     static {
         cachedZstdAvailability = CachedAvailability.DONT_CACHE;
-        setCacheZstdAvailablity(!OsgiUtils.isRunningInOsgiEnvironment());
+        setCacheZstdAvailablity(true);
     }
 
     /** Private constructor to prevent instantiation of this utility class. */
