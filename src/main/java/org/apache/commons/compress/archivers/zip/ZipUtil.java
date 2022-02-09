@@ -269,7 +269,7 @@ public abstract class ZipUtil {
                                                  final byte[] orig) {
         if (f != null) {
             final CRC32 crc32 = new CRC32();
-            crc32.update(orig);
+            crc32.update(orig, 0, orig.length);
             final long origCRC32 = crc32.getValue();
 
             if (origCRC32 == f.getNameCRC32()) {
