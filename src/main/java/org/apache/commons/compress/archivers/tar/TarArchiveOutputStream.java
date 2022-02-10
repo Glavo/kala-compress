@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -122,7 +121,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
     final String encoding;
 
     private boolean addPaxHeadersForNonAsciiNames;
-    private static final CharsetEncoder ASCIIEncoder = StandardCharsets.US_ASCII.newEncoder();
 
     private static final int BLOCK_SIZE_UNSPECIFIED = -511;
 
@@ -378,13 +376,13 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath
-                && !ASCIIEncoder.canEncode(entryName)) {
+                && !StandardCharsets.US_ASCII.newEncoder().canEncode(entryName)) {
                 paxHeaders.put("path", entryName);
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsLinkPath
                 && (entry.isLink() || entry.isSymbolicLink())
-                && !ASCIIEncoder.canEncode(linkName)) {
+                && !StandardCharsets.US_ASCII.newEncoder().canEncode(linkName)) {
                 paxHeaders.put("linkpath", linkName);
             }
             paxHeaders.putAll(entry.getExtraPaxHeaders());
