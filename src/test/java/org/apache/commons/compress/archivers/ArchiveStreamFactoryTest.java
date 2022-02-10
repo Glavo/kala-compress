@@ -191,7 +191,7 @@ public class ArchiveStreamFactoryTest {
         Charset dflt;
         dflt = UNKNOWN;
         try {
-            dflt = getField(new ArjArchiveInputStream(Files.newInputStream(getFile("bla.arj").toPath())), "charsetName");
+            dflt = getField(new ArjArchiveInputStream(Files.newInputStream(getFile("bla.arj").toPath())), "charset");
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -250,9 +250,9 @@ public class ArchiveStreamFactoryTest {
     }
 
     static final TestData[] TESTS = {
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, ARJ_DEFAULT, FACTORY, "charsetName"),
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.UTF_8, FACTORY_UTF8, "charsetName"),
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "charsetName"),
+        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, ARJ_DEFAULT, FACTORY, "charset"),
+        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),
+        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "charset"),
 
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "charset"),
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),

@@ -23,6 +23,7 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.zip.CRC32;
 
@@ -31,6 +32,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.CRC32VerifyingInputStream;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -46,22 +48,44 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
     private static final int ARJ_MAGIC_1 = 0x60;
     private static final int ARJ_MAGIC_2 = 0xEA;
     private final DataInputStream in;
-    private final String charsetName;
+    private final Charset charset;
     private final MainHeader mainHeader;
     private LocalFileHeader currentLocalFileHeader;
     private InputStream currentInputStream;
 
     /**
+     * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in,
+     * and using the CP437 character encoding.
+     * @param inputStream the underlying stream, whose ownership is taken
+     * @throws ArchiveException if an exception occurs while reading
+     */
+    public ArjArchiveInputStream(final InputStream inputStream)
+            throws ArchiveException {
+        this(inputStream, "CP437");
+    }
+
+    /**
      * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in.
      * @param inputStream the underlying stream, whose ownership is taken
      * @param charsetName the charset used for file names and comments
-     *   in the archive. May be {@code null} to use the platform default.
+     *   in the archive. May be {@code null} to use the UTF-8.
+     * @throws ArchiveException if an exception occurs while reading
+     */
+    public ArjArchiveInputStream(final InputStream inputStream, final String charsetName) throws ArchiveException {
+        this(inputStream, Charsets.toCharset(charsetName));
+    }
+
+    /**
+     * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in.
+     * @param inputStream the underlying stream, whose ownership is taken
+     * @param charset the charset used for file names and comments
+     *   in the archive. May be {@code null} to use the UTF-8.
      * @throws ArchiveException if an exception occurs while reading
      */
     public ArjArchiveInputStream(final InputStream inputStream,
-            final String charsetName) throws ArchiveException {
+                                 final Charset charset) throws ArchiveException {
         in = new DataInputStream(inputStream);
-        this.charsetName = charsetName;
+        this.charset = charset;
         try {
             mainHeader = readMainHeader();
             if ((mainHeader.arjFlags & MainHeader.Flags.GARBLED) != 0) {
@@ -73,17 +97,6 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
         } catch (final IOException ioException) {
             throw new ArchiveException(ioException.getMessage(), ioException);
         }
-    }
-
-    /**
-     * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in,
-     * and using the CP437 character encoding.
-     * @param inputStream the underlying stream, whose ownership is taken
-     * @throws ArchiveException if an exception occurs while reading
-     */
-    public ArjArchiveInputStream(final InputStream inputStream)
-            throws ArchiveException {
-        this(inputStream, "CP437");
     }
 
     @Override
@@ -115,11 +128,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
             while ((nextByte = dataIn.readUnsignedByte()) != 0) {
                 buffer.write(nextByte);
             }
-            if (charsetName != null) {
-                return buffer.toString(charsetName);
-            }
-            // intentionally using the default encoding as that's the contract for a null charsetName
-            return buffer.toString();
+            return buffer.toString(charset.name());
         }
     }
 
@@ -152,7 +161,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
                 basicHeaderBytes = readRange(in, basicHeaderSize);
                 final long basicHeaderCrc32 = read32(in) & 0xFFFFFFFFL;
                 final CRC32 crc32 = new CRC32();
-                crc32.update(basicHeaderBytes);
+                crc32.update(basicHeaderBytes, 0, basicHeaderBytes.length);
                 if (basicHeaderCrc32 == crc32.getValue()) {
                     found = true;
                 }
@@ -209,7 +218,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
             hdr.extendedHeaderBytes = readRange(in, extendedHeaderSize);
             final long extendedHeaderCrc32 = 0xffffFFFFL & read32(in);
             final CRC32 crc32 = new CRC32();
-            crc32.update(hdr.extendedHeaderBytes);
+            crc32.update(hdr.extendedHeaderBytes, 0, hdr.extendedHeaderBytes.length);
             if (extendedHeaderCrc32 != crc32.getValue()) {
                 throw new IOException("Extended header CRC32 verification failure");
             }
@@ -259,7 +268,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
                     final byte[] extendedHeaderBytes = readRange(in, extendedHeaderSize);
                     final long extendedHeaderCrc32 = 0xffffFFFFL & read32(in);
                     final CRC32 crc32 = new CRC32();
-                    crc32.update(extendedHeaderBytes);
+                    crc32.update(extendedHeaderBytes, 0, extendedHeaderBytes.length);
                     if (extendedHeaderCrc32 != crc32.getValue()) {
                         throw new IOException("Extended header CRC32 verification failure");
                     }
