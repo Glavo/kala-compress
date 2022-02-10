@@ -161,7 +161,14 @@ public class ArjArchiveEntry implements ArchiveEntry {
         return localFileHeader.equals(other.localFileHeader);
     }
 
+    /**
+     * This is a copy of {@link org.apache.commons.compress.archivers.zip.ZipUtil#dosToJavaTime(long)}.
+     * Copy it to avoid the ARJ module depending on the zip module.
+     *
+     * @see org.apache.commons.compress.archivers.zip.ZipUtil#dosToJavaTime(long)
+     */
     private static long dosToJavaTime(final long dosTime) {
+        //noinspection DuplicatedCode
         final Calendar cal = Calendar.getInstance();
         // CheckStyle:MagicNumberCheck OFF - no point
         cal.set(Calendar.YEAR, (int) ((dosTime >> 25) & 0x7f) + 1980);
