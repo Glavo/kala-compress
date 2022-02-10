@@ -32,15 +32,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
@@ -385,19 +377,46 @@ public class ZipFile implements Closeable {
     }
 
     /**
+     * Returns all entries.
+     *
+     * <p>Entries will be returned in the same order they appear
+     * within the archive's central directory.</p>
+     *
+     * @return all entries as {@link ZipArchiveEntry} instances
+     * @since 1.21.0.1
+     */
+    public Iterator<ZipArchiveEntry> getEntriesIterator() {
+        return entries.iterator();
+    }
+
+    /**
      * Returns all entries in physical order.
      *
      * <p>Entries will be returned in the same order their contents
      * appear within the archive.</p>
      *
      * @return all entries as {@link ZipArchiveEntry} instances
-     *
      * @since 1.1
      */
     public Enumeration<ZipArchiveEntry> getEntriesInPhysicalOrder() {
         final ZipArchiveEntry[] allEntries = entries.toArray(ZipArchiveEntry.EMPTY_ZIP_ARCHIVE_ENTRY_ARRAY);
         Arrays.sort(allEntries, offsetComparator);
         return Collections.enumeration(Arrays.asList(allEntries));
+    }
+
+    /**
+     * Returns all entries in physical order.
+     *
+     * <p>Entries will be returned in the same order their contents
+     * appear within the archive.</p>
+     *
+     * @return all entries as {@link ZipArchiveEntry} instances
+     * @since 1.21.0.1
+     */
+    public Iterator<ZipArchiveEntry> getEntriesIteratorInPhysicalOrder() {
+        final ZipArchiveEntry[] allEntries = entries.toArray(ZipArchiveEntry.EMPTY_ZIP_ARCHIVE_ENTRY_ARRAY);
+        Arrays.sort(allEntries, offsetComparator);
+        return Arrays.asList(allEntries).iterator();
     }
 
     /**
