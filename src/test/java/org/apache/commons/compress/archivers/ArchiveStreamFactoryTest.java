@@ -198,7 +198,7 @@ public class ArchiveStreamFactoryTest {
         ARJ_DEFAULT = dflt;
         dflt = UNKNOWN;
         try {
-            dflt = getField(new DumpArchiveInputStream(Files.newInputStream(getFile("bla.dump").toPath())), "encoding");
+            dflt = getField(new DumpArchiveInputStream(Files.newInputStream(getFile("bla.dump").toPath())), "charset");
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -258,9 +258,9 @@ public class ArchiveStreamFactoryTest {
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8, FACTORY_UTF8, "encoding"),
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "encoding"),
 
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, DUMP_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.UTF_8, FACTORY_UTF8, "encoding"),
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "encoding"),
+        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, DUMP_DEFAULT, FACTORY, "charset"),
+        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),
+        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "charset"),
 
         new TestData("bla.tar", ArchiveStreamFactory.TAR, true, TAR_DEFAULT, FACTORY, "charset"),
         new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),

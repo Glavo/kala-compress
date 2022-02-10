@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,9 +77,6 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      */
     private final Charset charset;
 
-    // the provided encoding (for unit tests)
-    final String encoding;
-
     /**
      * Constructor using the platform's default encoding for file
      * names.
@@ -87,7 +85,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      * @throws ArchiveException on error
      */
     public DumpArchiveInputStream(final InputStream is) throws ArchiveException {
-        this(is, null);
+        this(is, StandardCharsets.UTF_8);
     }
 
     /**
@@ -99,11 +97,22 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      * @since 1.6
      * @throws ArchiveException on error
      */
-    public DumpArchiveInputStream(final InputStream is, final String encoding)
-        throws ArchiveException {
+    public DumpArchiveInputStream(final InputStream is, final String encoding) throws ArchiveException {
+        this(is, Charsets.toCharset(encoding));
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param is stream to read from
+     * @param encoding the encoding to use for file names, use null
+     * for the platform's default encoding
+     * @since 1.6
+     * @throws ArchiveException on error
+     */
+    public DumpArchiveInputStream(final InputStream is, final Charset encoding) throws ArchiveException {
         this.raw = new TapeInputStream(is);
         this.hasHitEOF = false;
-        this.encoding = encoding;
         this.charset = Charsets.toCharset(encoding);
 
         try {
