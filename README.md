@@ -15,3 +15,4 @@ Task list:
 - [ ] Enhanced NIO2 Path API support
 - [ ] Split compressors and archivers into separate modules
 - [ ] Full support for JPMS
+- [ ] Rename the package and publish it to Maven Central
