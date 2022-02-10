@@ -154,31 +154,6 @@ public class ZipFile implements Closeable {
     }
 
     /**
-     * Opens the given file for reading, assuming "UTF8".
-     *
-     * @param name name of the archive.
-     *
-     * @throws IOException if an error occurs while reading the file.
-     */
-    public ZipFile(final String name) throws IOException {
-        this(new File(name), CharsetNames.UTF_8);
-    }
-
-    /**
-     * Opens the given file for reading, assuming the specified
-     * encoding for file names, scanning unicode extra fields.
-     *
-     * @param name name of the archive.
-     * @param encoding the encoding to use for file names, use null
-     * for the platform's default encoding
-     *
-     * @throws IOException if an error occurs while reading the file.
-     */
-    public ZipFile(final String name, final String encoding) throws IOException {
-        this(new File(name), encoding, true);
-    }
-
-    /**
      * Opens the given file for reading, assuming the specified
      * encoding for file names and scanning for unicode extra fields.
      *
