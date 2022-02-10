@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.compress.utils.CharsetNames;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 import static org.apache.commons.compress.archivers.tar.TarConstants.CHKSUMLEN;
@@ -301,7 +301,7 @@ public class TarUtils {
         if (len > 0) {
             final byte[] b = new byte[len];
             System.arraycopy(buffer, offset, b, 0, len);
-            return CharsetUtils.decode(charset, b);
+            return Charsets.decode(charset, b);
         }
         return "";
     }
@@ -411,9 +411,9 @@ public class TarUtils {
                                       final Charset charset)
         throws IOException {
         int len = name.length();
-        ByteBuffer b = CharsetUtils.encode(charset, name);
+        ByteBuffer b = Charsets.encode(charset, name);
         while (b.limit() > length && len > 0) {
-            b = CharsetUtils.encode(charset, name.substring(0, --len));
+            b = Charsets.encode(charset, name.substring(0, --len));
         }
         final int limit = b.limit() - b.position();
         System.arraycopy(b.array(), b.arrayOffset(), buf, offset, limit);

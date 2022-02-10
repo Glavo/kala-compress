@@ -205,7 +205,7 @@ public class ZipFile implements Closeable {
                    final boolean ignoreLocalFileHeader)
         throws IOException {
         this(Files.newByteChannel(f.toPath(), EnumSet.of(StandardOpenOption.READ)),
-                encoding, useUnicodeExtraFields, true, ignoreLocalFileHeader);
+                Charsets.toCharset(encoding), useUnicodeExtraFields, true, ignoreLocalFileHeader);
     }
 
     /**
@@ -265,7 +265,7 @@ public class ZipFile implements Closeable {
     public ZipFile(final SeekableByteChannel channel,
                    final String encoding, final boolean useUnicodeExtraFields)
         throws IOException {
-        this(channel, encoding, useUnicodeExtraFields, false, false);
+        this(channel, Charsets.toCharset(encoding), useUnicodeExtraFields, false, false);
     }
 
     /**
@@ -300,14 +300,7 @@ public class ZipFile implements Closeable {
                    final String encoding, final boolean useUnicodeExtraFields,
                    final boolean ignoreLocalFileHeader)
         throws IOException {
-        this(channel, encoding, useUnicodeExtraFields, false, ignoreLocalFileHeader);
-    }
-
-    private ZipFile(final SeekableByteChannel channel,
-                    final String encoding, final boolean useUnicodeExtraFields,
-                    final boolean closeOnError, final boolean ignoreLocalFileHeader)
-        throws IOException {
-        this(channel, CharsetUtils.getCharset(encoding), useUnicodeExtraFields, closeOnError, ignoreLocalFileHeader);
+        this(channel, Charsets.toCharset(encoding), useUnicodeExtraFields, false, ignoreLocalFileHeader);
     }
 
     private ZipFile(final SeekableByteChannel channel,
@@ -615,7 +608,7 @@ public class ZipFile implements Closeable {
     public String getUnixSymlink(final ZipArchiveEntry entry) throws IOException {
         if (entry != null && entry.isUnixSymlink()) {
             try (InputStream in = getInputStream(entry)) {
-                return CharsetUtils.decode(charset, IOUtils.toByteArray(in));
+                return Charsets.decode(charset, IOUtils.toByteArray(in));
             }
         }
         return null;
@@ -775,7 +768,7 @@ public class ZipFile implements Closeable {
         if (fileName.length < fileNameLen) {
             throw new EOFException();
         }
-        ze.setName(CharsetUtils.decode(entryEncoding, fileName), fileName);
+        ze.setName(Charsets.decode(entryEncoding, fileName), fileName);
 
         // LFH offset,
         ze.setLocalHeaderOffset(ZipLong.getValue(cfhBuf, off));
@@ -801,7 +794,7 @@ public class ZipFile implements Closeable {
         if (comment.length < commentLen) {
             throw new EOFException();
         }
-        ze.setComment(CharsetUtils.decode(entryEncoding, comment));
+        ze.setComment(Charsets.decode(entryEncoding, comment));
 
         if (!hasUTF8Flag && useUnicodeExtraFields) {
             noUTF8Flag.put(ze, new NameAndComment(fileName, comment));

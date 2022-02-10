@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import org.apache.commons.compress.utils.ByteUtils;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 
 /**
  * Various utilities for dump archives.
@@ -117,6 +117,6 @@ class DumpArchiveUtil {
      */
     static String decode(final Charset encoding, final byte[] b, final int offset, final int len)
             throws IOException {
-        return CharsetUtils.decode(encoding, Arrays.copyOfRange(b, offset, offset + len));
+        return Charsets.decode(encoding, Arrays.copyOfRange(b, offset, offset + len));
     }
 }

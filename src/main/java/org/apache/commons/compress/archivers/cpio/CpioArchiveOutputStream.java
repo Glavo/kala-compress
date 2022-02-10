@@ -32,7 +32,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.CharsetNames;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 
 /**
  * CpioArchiveOutputStream is a stream for writing CPIO streams. All formats of
@@ -164,7 +164,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
         this.entryFormat = format;
         this.blockSize = blockSize;
         this.encoding = encoding;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
     }
 
     /**
@@ -550,7 +550,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      * @return result of encoding the string
      */
     private byte[] encode(final String str) throws IOException {
-        final ByteBuffer buf = CharsetUtils.encode(charset, str);
+        final ByteBuffer buf = Charsets.encode(charset, str);
         final int len = buf.limit() - buf.position();
         return Arrays.copyOfRange(buf.array(), buf.arrayOffset(), buf.arrayOffset() + len);
     }

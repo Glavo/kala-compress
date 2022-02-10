@@ -249,7 +249,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
                                  final boolean allowStoredEntriesWithDataDescriptor,
                                  final boolean skipSplitSig) {
         this.encoding = encoding;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         in = new PushbackInputStream(inputStream, buf.capacity());
         this.allowStoredEntriesWithDataDescriptor =
@@ -340,7 +340,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
         off += SHORT; // NOSONAR - assignment as documentation
 
         final byte[] fileName = readRange(fileNameLen);
-        current.entry.setName(CharsetUtils.decode(entryEncoding, fileName), fileName);
+        current.entry.setName(Charsets.decode(entryEncoding, fileName), fileName);
         if (hasUTF8Flag) {
             current.entry.setNameSource(ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG);
         }

@@ -27,7 +27,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.CharsetNames;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -158,7 +158,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
         }
         this.blockSize = blockSize;
         this.encoding = encoding;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
     }
 
     /**
@@ -493,7 +493,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
         if (this.in.read() == -1) {
             throw new EOFException();
         }
-        return CharsetUtils.decode(charset, tmpBuffer);
+        return Charsets.decode(charset, tmpBuffer);
     }
 
     /**

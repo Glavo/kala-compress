@@ -204,7 +204,7 @@ public class TarFile implements Closeable {
     public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient) throws IOException {
         this.archive = archive;
         this.hasHitEOF = false;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
         this.recordSize = recordSize;
         this.recordBuffer = ByteBuffer.allocate(this.recordSize);
         this.blockSize = blockSize;
@@ -262,7 +262,7 @@ public class TarFile implements Closeable {
                 // entry
                 return null;
             }
-            currEntry.setLinkName(CharsetUtils.decode(charset, longLinkData));
+            currEntry.setLinkName(Charsets.decode(charset, longLinkData));
         }
 
         if (currEntry.isGNULongNameEntry()) {
@@ -275,7 +275,7 @@ public class TarFile implements Closeable {
             }
 
             // COMPRESS-509 : the name of directories should end with '/'
-            final String name = CharsetUtils.decode(charset, longNameData);
+            final String name = Charsets.decode(charset, longNameData);
             currEntry.setName(name);
             if (currEntry.isDirectory() && !name.endsWith("/")) {
                 currEntry.setName(name + "/");

@@ -12,7 +12,7 @@ import java.nio.charset.*;
  *
  * @since 1.21.0.1
  */
-public class CharsetUtils {
+public class Charsets {
     private static final char REPLACEMENT = '?';
     private static final byte[] REPLACEMENT_BYTES = {(byte) REPLACEMENT};
     private static final String REPLACEMENT_STRING = String.valueOf(REPLACEMENT);
@@ -29,7 +29,7 @@ public class CharsetUtils {
      * @param name The name of the encoding. Specify null for the platform's default encoding.
      * @return A charset object for the named encoding
      */
-    public static Charset getCharset(String name) {
+    public static Charset toCharset(String name) {
         if (name == null) {
             return StandardCharsets.UTF_8;
         }
@@ -38,6 +38,16 @@ public class CharsetUtils {
         } catch (Throwable ignored) {
         }
         return StandardCharsets.UTF_8;
+    }
+
+    /**
+     * Returns the given charset or the UTF-8 if the given charset is null.
+     *
+     * @param charset A charset or null.
+     * @return the given Charset or the UTF-8 if the given Charset is null
+     */
+    public static Charset toCharset(Charset charset) {
+        return charset == null ? StandardCharsets.UTF_8 : charset;
     }
 
     /**

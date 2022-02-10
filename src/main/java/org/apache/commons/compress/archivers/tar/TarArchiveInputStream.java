@@ -37,7 +37,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.BoundedInputStream;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -188,7 +188,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
         this.inputStream = is;
         this.hasHitEOF = false;
         this.encoding = encoding;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
         this.recordSize = recordSize;
         this.recordBuffer = new byte[recordSize];
         this.blockSize = blockSize;
@@ -392,7 +392,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
                 // entry
                 return null;
             }
-            currEntry.setLinkName(CharsetUtils.decode(charset, longLinkData));
+            currEntry.setLinkName(Charsets.decode(charset, longLinkData));
         }
 
         if (currEntry.isGNULongNameEntry()) {
@@ -405,7 +405,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
             }
 
             // COMPRESS-509 : the name of directories should end with '/'
-            final String name = CharsetUtils.decode(charset, longNameData);
+            final String name = Charsets.decode(charset, longNameData);
             currEntry.setName(name);
             if (currEntry.isDirectory() && !name.endsWith("/")) {
                 currEntry.setName(name + "/");

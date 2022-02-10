@@ -34,7 +34,7 @@ import java.util.Map;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.CountingOutputStream;
 import org.apache.commons.compress.utils.FixedLengthBlockOutputStream;
 
@@ -181,7 +181,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         out = new FixedLengthBlockOutputStream(countingOut = new CountingOutputStream(os),
                                                RECORD_SIZE);
         this.encoding = encoding;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
 
         this.recordBuf = new byte[RECORD_SIZE];
         this.recordsPerBlock = realBlockSize / RECORD_SIZE;
@@ -621,7 +621,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         final Map<String, String> paxHeaders,
         final String paxHeaderName, final byte linkType, final String fieldName)
         throws IOException {
-        final ByteBuffer encodedName = CharsetUtils.encode(charset, name);
+        final ByteBuffer encodedName = Charsets.encode(charset, name);
         final int len = encodedName.limit() - encodedName.position();
         if (len >= TarConstants.NAMELEN) {
 

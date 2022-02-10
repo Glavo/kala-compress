@@ -20,7 +20,7 @@ package org.apache.commons.compress.archivers.dump;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.EOFException;
@@ -104,7 +104,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
         this.raw = new TapeInputStream(is);
         this.hasHitEOF = false;
         this.encoding = encoding;
-        this.charset = CharsetUtils.getCharset(encoding);
+        this.charset = Charsets.toCharset(encoding);
 
         try {
             // read header, verify it's a dump archive.

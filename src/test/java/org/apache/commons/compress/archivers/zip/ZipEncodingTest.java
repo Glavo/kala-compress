@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,7 +47,7 @@ public class ZipEncodingTest {
 
     @Test
     public void testGetNonexistentEncoding() throws IOException {
-        final Charset charset = CharsetUtils.getCharset("I-am-a-banana");
+        final Charset charset = Charsets.toCharset("I-am-a-banana");
         assertNotNull(charset);
         Assert.assertEquals(Charset.defaultCharset(), charset);
     }
@@ -150,7 +150,7 @@ public class ZipEncodingTest {
     private void doSimpleEncodingTest(final String name, byte[] testBytes)
         throws IOException {
 
-        final Charset enc = CharsetUtils.getCharset(name);
+        final Charset enc = Charsets.toCharset(name);
         if (testBytes == null) {
 
             testBytes = new byte[256];
@@ -159,18 +159,18 @@ public class ZipEncodingTest {
             }
         }
 
-        final String decoded = CharsetUtils.decode(enc, testBytes);
+        final String decoded = Charsets.decode(enc, testBytes);
 
-        assertTrue(CharsetUtils.canEncode(enc, decoded));
+        assertTrue(Charsets.canEncode(enc, decoded));
 
-        final ByteBuffer encoded = CharsetUtils.encode(enc, decoded);
+        final ByteBuffer encoded = Charsets.encode(enc, decoded);
 
         assertEquals(testBytes, encoded);
 
-        assertFalse(CharsetUtils.canEncode(enc, UNENC_STRING));
-        assertEquals("%U2016".getBytes(name), CharsetUtils.encode(enc, UNENC_STRING));
-        assertFalse(CharsetUtils.canEncode(enc, BAD_STRING));
-        assertEquals(BAD_STRING_ENC.getBytes(name), CharsetUtils.encode(enc, BAD_STRING));
+        assertFalse(Charsets.canEncode(enc, UNENC_STRING));
+        assertEquals("%U2016".getBytes(name), Charsets.encode(enc, UNENC_STRING));
+        assertFalse(Charsets.canEncode(enc, BAD_STRING));
+        assertEquals(BAD_STRING_ENC.getBytes(name), Charsets.encode(enc, BAD_STRING));
     }
 
 }

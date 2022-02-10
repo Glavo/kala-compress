@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.commons.compress.AbstractTestCase;
 import org.apache.commons.compress.utils.CharsetNames;
-import org.apache.commons.compress.utils.CharsetUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.junit.Test;
 
 public class TarArchiveEntryTest implements TarConstants {
@@ -266,7 +266,7 @@ public class TarArchiveEntryTest implements TarConstants {
                 "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
                 "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000" +
                 "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000").getBytes(StandardCharsets.UTF_8);
-        new TarArchiveEntry(entryContent, CharsetUtils.getCharset(CharsetNames.ISO_8859_1), false, -1);
+        new TarArchiveEntry(entryContent, Charsets.toCharset(CharsetNames.ISO_8859_1), false, -1);
     }
 
     @Test(expected = IllegalArgumentException.class)
