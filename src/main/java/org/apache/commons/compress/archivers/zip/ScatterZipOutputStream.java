@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -198,6 +199,31 @@ public class ScatterZipOutputStream implements Closeable {
      * @throws FileNotFoundException if the file cannot be found
      */
     public static ScatterZipOutputStream fileBased(final File file, final int compressionLevel) throws FileNotFoundException {
+        return fileBased(file.toPath(), compressionLevel);
+    }
+
+    /**
+     * Create a {@link ScatterZipOutputStream} with default compression level that is backed by a file
+     *
+     * @param file The file to offload compressed data into.
+     * @return A ScatterZipOutputStream that is ready for use.
+     * @throws FileNotFoundException if the file cannot be found
+     * @since 1.21.0.1
+     */
+    public static ScatterZipOutputStream fileBased(final Path file) throws FileNotFoundException {
+        return fileBased(file, Deflater.DEFAULT_COMPRESSION);
+    }
+
+    /**
+     * Create a {@link ScatterZipOutputStream} that is backed by a file
+     *
+     * @param file             The file to offload compressed data into.
+     * @param compressionLevel The compression level to use, @see #Deflater
+     * @return A  ScatterZipOutputStream that is ready for use.
+     * @throws FileNotFoundException if the file cannot be found
+     * @since 1.21.0.1
+     */
+    public static ScatterZipOutputStream fileBased(final Path file, final int compressionLevel) throws FileNotFoundException {
         final ScatterGatherBackingStore bs = new FileBasedScatterGatherBackingStore(file);
         // lifecycle is bound to the ScatterZipOutputStream returned
         final StreamCompressor sc = StreamCompressor.create(compressionLevel, bs); //NOSONAR
