@@ -28,12 +28,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import static org.apache.commons.compress.AbstractTestCase.getFile;
+import static org.apache.commons.compress.AbstractTestCase.getPath;
 
 public class ZipSplitReadOnlySeekableByteChannelTest {
     @Rule
@@ -107,22 +109,22 @@ public class ZipSplitReadOnlySeekableByteChannelTest {
     @Test
     public void forFilesThrowsOnNullArg() throws IOException {
         thrown.expect(NullPointerException.class);
-        ZipSplitReadOnlySeekableByteChannel.forFiles((File[]) null);
+        ZipSplitReadOnlySeekableByteChannel.forFiles((Path[]) null);
     }
 
     @Test
     public void forFilesOfTwoParametersThrowsOnNullArg() throws IOException {
         thrown.expect(NullPointerException.class);
-        ZipSplitReadOnlySeekableByteChannel.forFiles(null, null);
+        ZipSplitReadOnlySeekableByteChannel.forFiles((Path) null, null);
     }
 
     @Test
     public void forFilesReturnCorrectClass() throws IOException {
-        final File firstFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
-        final File secondFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z02");
-        final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
+        final Path firstFile = getPath("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
+        final Path secondFile = getPath("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z02");
+        final Path lastFile = getPath("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
 
-        final ArrayList<File> list = new ArrayList<>();
+        final ArrayList<Path> list = new ArrayList<>();
         list.add(firstFile);
         list.add(secondFile);
 
