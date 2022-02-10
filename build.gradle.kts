@@ -29,7 +29,6 @@ dependencies {
     testImplementation("org.apache.felix:org.apache.felix.framework:7.0.0")
     testImplementation("javax.inject:javax.inject:1")
     testImplementation("org.slf4j:slf4j-api:1.7.30")
-    compileOnly("org.osgi:org.osgi.core:6.0.0")
 }
 
 

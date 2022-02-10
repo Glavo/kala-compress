@@ -8,5 +8,5 @@ After I finish modularizing it, I will publish it to Maven Central. Please look 
 Task list:
 
 - [x] Deprecate `org.apache.commons.compress.archivers.zip.Encoding`
-- [ ] Deprecate osgi support
+- [x] Deprecate OSGi support
 - [ ] Full support for JPMS
