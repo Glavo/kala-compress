@@ -19,6 +19,7 @@
 package org.apache.commons.compress.utils;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Generic file name utilities.
@@ -38,16 +39,23 @@ public class FileNameUtils {
      * @param filename the name of the file to obtain the extension of.
      */
     public static String getExtension(final String filename) {
-        if (filename == null) {
-            return null;
-        }
+        return filename == null ? null : getFileNameExtension(new File(filename).getName());
+    }
 
-        final String name = new File(filename).getName();
-        final int extensionPosition = name.lastIndexOf('.');
-        if (extensionPosition < 0) {
-            return "";
-        }
-        return name.substring(extensionPosition + 1);
+    /**
+     * Returns the extension (i.e. the part after the last ".") of a file.
+     *
+     * <p>Will return an empty string if the file name doesn't contain
+     * any dots. Only the last segment of a the file name is consulted
+     * - i.e. all leading directories of the {@code filename}
+     * parameter are skipped.</p>
+     *
+     * @return the extension of filename
+     * @param path the path to obtain the extension of.
+     * @since 1.21.0.1
+     */
+    public static String getExtension(final Path path) {
+        return path == null ? null : getFileNameExtension(path.getFileName().toString());
     }
 
     /**
@@ -62,17 +70,38 @@ public class FileNameUtils {
      * @param filename the name of the file to obtain the basename of.
      */
     public static String getBaseName(final String filename) {
-        if (filename == null) {
-            return null;
-        }
+        return filename == null ? null : getFileNameBase(new File(filename).getName());
+    }
 
-        final String name = new File(filename).getName();
+    /**
+     * Returns the basename (i.e. the part up to and not including the
+     * last ".") of the last path segment of a filename.
+     *
+     * <p>Will return the file name itself if it doesn't contain any
+     * dots. All leading directories of the {@code filename} parameter
+     * are skipped.</p>
+     *
+     * @return the basename of filename
+     * @param path the path to obtain the basename of.
+     * @since 1.21.0.1
+     */
+    public static String getBaseName(final Path path) {
+        return path == null ? null : getFileNameBase(path.getFileName().toString());
+    }
 
-        final int extensionPosition = name.lastIndexOf('.');
+    private static String getFileNameExtension(final String filename) {
+        final int extensionPosition = filename.lastIndexOf('.');
         if (extensionPosition < 0) {
-            return name;
+            return "";
         }
+        return filename.substring(extensionPosition + 1);
+    }
 
-        return name.substring(0, extensionPosition);
+    private static String getFileNameBase(final String filename) {
+        final int extensionPosition = filename.lastIndexOf('.');
+        if (extensionPosition < 0) {
+            return filename;
+        }
+        return filename.substring(0, extensionPosition);
     }
 }

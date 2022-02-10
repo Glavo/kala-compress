@@ -20,6 +20,9 @@ package org.apache.commons.compress.utils;
 
 import org.junit.Test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -29,13 +32,20 @@ public class FileNameUtilsTest {
     public void getExtensionBaseCases() {
         assertEquals("foo", FileNameUtils.getExtension("a/b/c/bar.foo"));
         assertEquals("", FileNameUtils.getExtension("foo"));
+
+        assertEquals("foo", FileNameUtils.getExtension(Paths.get("a/b/c/bar.foo")));
+        assertEquals("", FileNameUtils.getExtension(Paths.get("foo")));
     }
 
     @Test
     public void getExtensionCornerCases() {
-        assertNull(FileNameUtils.getExtension(null));
+        assertNull(FileNameUtils.getExtension((String) null));
         assertEquals("", FileNameUtils.getExtension("foo."));
         assertEquals("foo", FileNameUtils.getExtension("bar/.foo"));
+
+        assertNull(FileNameUtils.getExtension((Path) null));
+        assertEquals("", FileNameUtils.getExtension(Paths.get("foo.")));
+        assertEquals("foo", FileNameUtils.getExtension(Paths.get("bar/.foo")));
     }
 
     @Test
@@ -46,8 +56,12 @@ public class FileNameUtilsTest {
 
     @Test
     public void getBaseNameCornerCases() {
-        assertNull(FileNameUtils.getBaseName(null));
+        assertNull(FileNameUtils.getBaseName((String) null));
         assertEquals("foo", FileNameUtils.getBaseName("foo."));
         assertEquals("", FileNameUtils.getBaseName("bar/.foo"));
+
+        assertNull(FileNameUtils.getBaseName((Path) null));
+        assertEquals("foo", FileNameUtils.getBaseName(Paths.get("foo.")));
+        assertEquals("", FileNameUtils.getBaseName(Paths.get("bar/.foo")));
     }
 }
