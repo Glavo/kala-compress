@@ -107,8 +107,8 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      * @param is stream to read from
      * @param encoding the encoding to use for file names, use null
      * for the platform's default encoding
-     * @since 1.6
      * @throws ArchiveException on error
+     * @since 1.21.0.1
      */
     public DumpArchiveInputStream(final InputStream is, final Charset encoding) throws ArchiveException {
         this.raw = new TapeInputStream(is);

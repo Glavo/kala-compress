@@ -183,7 +183,7 @@ public class ArchiveStreamFactoryTest {
     private static final Charset DUMP_DEFAULT;
 
     private static final Charset ZIP_DEFAULT = getField(new ZipArchiveInputStream(null),"charset");
-    private static final Charset CPIO_DEFAULT = getField(new CpioArchiveInputStream(null),"encoding");
+    private static final Charset CPIO_DEFAULT = getField(new CpioArchiveInputStream(null),"charset");
     private static final Charset TAR_DEFAULT = getField(new TarArchiveInputStream(null),"charset");
     private static final Charset JAR_DEFAULT = getField(new JarArchiveInputStream(null),"charset");
 
@@ -254,9 +254,9 @@ public class ArchiveStreamFactoryTest {
         new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.UTF_8, FACTORY_UTF8, "charsetName"),
         new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "charsetName"),
 
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8, FACTORY_UTF8, "encoding"),
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "encoding"),
+        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "charset"),
+        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),
+        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "charset"),
 
         new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, DUMP_DEFAULT, FACTORY, "charset"),
         new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),

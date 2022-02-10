@@ -97,9 +97,6 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      */
     private final Charset charset;
 
-    // the provided encoding (for unit tests)
-    final String encoding;
-
     /**
      * Construct the cpio output stream with a specified format, a
      * blocksize of {@link CpioConstants#BLOCK_SIZE BLOCK_SIZE} and
@@ -143,28 +140,46 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      * @param blockSize
      *            The block size of the archive.
      * @param encoding
-     *            The encoding of file names to write - use null for
-     *            the platform's default.
+     *            The encoding of file names to write - use null for the UTF-8.
      *
      * @since 1.6
      */
     public CpioArchiveOutputStream(final OutputStream out, final short format,
                                    final int blockSize, final String encoding) {
+        this(out, format, blockSize, Charsets.toCharset(encoding));
+    }
+
+    /**
+     * Construct the cpio output stream with a specified format using
+     * ASCII as the file name encoding.
+     *
+     * @param out
+     *            The cpio stream
+     * @param format
+     *            The format of the stream
+     * @param blockSize
+     *            The block size of the archive.
+     * @param charset
+     *            The charset of file names to write - use null for the UTF-8.
+     *
+     * @since 1.21.0.1
+     */
+    public CpioArchiveOutputStream(final OutputStream out, final short format,
+                                   final int blockSize, final Charset charset) {
         this.out = out;
         switch (format) {
-        case FORMAT_NEW:
-        case FORMAT_NEW_CRC:
-        case FORMAT_OLD_ASCII:
-        case FORMAT_OLD_BINARY:
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown format: "+format);
+            case FORMAT_NEW:
+            case FORMAT_NEW_CRC:
+            case FORMAT_OLD_ASCII:
+            case FORMAT_OLD_BINARY:
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown format: "+format);
 
         }
         this.entryFormat = format;
         this.blockSize = blockSize;
-        this.encoding = encoding;
-        this.charset = Charsets.toCharset(encoding);
+        this.charset = Charsets.toCharset(charset);
     }
 
     /**
@@ -191,6 +206,20 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      */
     public CpioArchiveOutputStream(final OutputStream out, final String encoding) {
         this(out, FORMAT_NEW, BLOCK_SIZE, encoding);
+    }
+
+    /**
+     * Construct the cpio output stream. The format for this CPIO stream is the
+     * "new" format.
+     *
+     * @param out
+     *            The cpio stream
+     * @param charset
+     *            The encoding of file names to write - use null for the UTF-8.
+     * @since 1.21.0.1
+     */
+    public CpioArchiveOutputStream(final OutputStream out, final Charset charset) {
+        this(out, FORMAT_NEW, BLOCK_SIZE, charset);
     }
 
     /**
