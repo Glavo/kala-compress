@@ -7,6 +7,11 @@ After I finish modularizing it, I will publish it to Maven Central. Please look 
 
 Task list:
 
-- [x] Deprecate `org.apache.commons.compress.archivers.zip.Encoding`
+- [x] Deprecate `ZipEncoding`, replace it with Charset
+- [x] Better support for Java `Charset`
+- [x] Use UTF-8 by default
+- [x] Clean up all deprecated features
 - [x] Deprecate OSGi support
+- [ ] Enhanced NIO2 Path API support
+- [ ] Split compressors and archivers into separate modules
 - [ ] Full support for JPMS
