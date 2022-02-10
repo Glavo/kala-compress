@@ -215,21 +215,12 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
         new HashMap<>();
 
     /**
-     * The encoding to use for file names and the file comment.
-     *
-     * <p>For a list of possible values see <a
-     * href="http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html">http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html</a>.
-     * Defaults to UTF-8.</p>
-     */
-    private String encoding = DEFAULT_ENCODING;
-
-    /**
      * The zip encoding to use for file names and the file comment.
      *
      * This field is of internal use and will be set in {@link
-     * #setEncoding(String)}.
+     * #setEncoding(String)}. Defaults to UTF-8.
      */
-    private Charset charset = Charsets.toCharset(DEFAULT_ENCODING);
+    private Charset charset = StandardCharsets.UTF_8;
 
     /**
      * This Deflater object is used for output.
@@ -404,11 +395,9 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      * <p>For a list of possible values see <a
      * href="http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html">http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html</a>.
      * Defaults to UTF-8.</p>
-     * @param encoding the encoding to use for file names, use null
-     * for the platform's default encoding
+     * @param encoding the encoding to use for file names, use null for the UTF-8.
      */
     public void setEncoding(final String encoding) {
-        this.encoding = encoding;
         this.charset = Charsets.toCharset(encoding);
         if (useUTF8Flag && charset != StandardCharsets.UTF_8) {
             useUTF8Flag = false;
@@ -418,10 +407,33 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     /**
      * The encoding to use for file names and the file comment.
      *
-     * @return null if using the platform's default character encoding.
+     * @return the encoding to use for file names
      */
     public String getEncoding() {
-        return encoding;
+        return charset.name();
+    }
+
+    /**
+     * The charset to use for file names and the file comment. Defaults to UTF-8.
+     *
+     * @param charset the charset to use for file names, use null for the UTF-8.
+     * @since 1.21.0.1
+     */
+    public void setCharset(Charset charset) {
+        this.charset = Charsets.toCharset(charset);
+        if (useUTF8Flag && charset != StandardCharsets.UTF_8) {
+            useUTF8Flag = false;
+        }
+    }
+
+    /**
+     * The encoding to use for file names and the file comment.
+     *
+     * @return the encoding to use for file names.
+     * @since 1.21.0.1
+     */
+    public Charset getCharset() {
+        return charset;
     }
 
     /**

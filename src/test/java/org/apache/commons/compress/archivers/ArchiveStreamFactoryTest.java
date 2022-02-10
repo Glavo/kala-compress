@@ -31,7 +31,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import org.apache.commons.compress.MockEvilInputStream;
 import org.apache.commons.compress.archivers.arj.ArjArchiveInputStream;
@@ -45,7 +48,7 @@ import org.junit.Test;
 
 public class ArchiveStreamFactoryTest {
 
-    private static final String UNKNOWN = "??";
+    private static final Charset UNKNOWN = null;
 
     /**
      * see https://issues.apache.org/jira/browse/COMPRESS-171
@@ -147,15 +150,15 @@ public class ArchiveStreamFactoryTest {
 
     static class TestData {
         final String testFile;
-        final String expectedEncoding;
+        final Charset expectedCharset;
         final ArchiveStreamFactory fac;
         final String fieldName;
         final String type;
         final boolean hasOutputStream;
 
-        TestData(final String testFile, final String type, final boolean hasOut, final String expectedEncoding, final ArchiveStreamFactory fac, final String fieldName) {
+        TestData(final String testFile, final String type, final boolean hasOut, final Charset expectedCharset, final ArchiveStreamFactory fac, final String fieldName) {
             this.testFile = testFile;
-            this.expectedEncoding = expectedEncoding;
+            this.expectedCharset = expectedCharset;
             this.fac = fac;
             this.fieldName = fieldName;
             this.type = type;
@@ -164,7 +167,7 @@ public class ArchiveStreamFactoryTest {
 
         @Override
         public String toString() {
-            return "TestData [testFile=" + testFile + ", expectedEncoding=" + expectedEncoding + ", fac=" + fac
+            return "TestData [testFile=" + testFile + ", expectedCharset=" + expectedCharset + ", fac=" + fac
                     + ", fieldName=" + fieldName + ", type=" + type + ", hasOutputStream=" + hasOutputStream + "]";
         }
     }
@@ -176,16 +179,16 @@ public class ArchiveStreamFactoryTest {
 
     // Default encoding if none is provided (not even null)
     // The test currently assumes that the output default is the same as the input default
-    private static final String ARJ_DEFAULT;
-    private static final String DUMP_DEFAULT;
+    private static final Charset ARJ_DEFAULT;
+    private static final Charset DUMP_DEFAULT;
 
-    private static final String ZIP_DEFAULT = getField(new ZipArchiveInputStream(null),"encoding");
-    private static final String CPIO_DEFAULT = getField(new CpioArchiveInputStream(null),"encoding");
-    private static final String TAR_DEFAULT = getField(new TarArchiveInputStream(null),"encoding");
-    private static final String JAR_DEFAULT = getField(new JarArchiveInputStream(null),"encoding");
+    private static final Charset ZIP_DEFAULT = getField(new ZipArchiveInputStream(null),"encoding");
+    private static final Charset CPIO_DEFAULT = getField(new CpioArchiveInputStream(null),"encoding");
+    private static final Charset TAR_DEFAULT = getField(new TarArchiveInputStream(null),"encoding");
+    private static final Charset JAR_DEFAULT = getField(new JarArchiveInputStream(null),"encoding");
 
     static {
-        String dflt;
+        Charset dflt;
         dflt = UNKNOWN;
         try {
             dflt = getField(new ArjArchiveInputStream(Files.newInputStream(getFile("bla.arj").toPath())), "charsetName");
@@ -248,28 +251,28 @@ public class ArchiveStreamFactoryTest {
 
     static final TestData[] TESTS = {
         new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, ARJ_DEFAULT, FACTORY, "charsetName"),
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, "UTF-8", FACTORY_UTF8, "charsetName"),
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, "ASCII", FACTORY_ASCII, "charsetName"),
+        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.UTF_8, FACTORY_UTF8, "charsetName"),
+        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "charsetName"),
 
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, "UTF-8", FACTORY_UTF8, "encoding"),
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, "ASCII", FACTORY_ASCII, "encoding"),
+        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8, FACTORY_UTF8, "encoding"),
+        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "encoding"),
 
         new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, DUMP_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, "UTF-8", FACTORY_UTF8, "encoding"),
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, "ASCII", FACTORY_ASCII, "encoding"),
+        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.UTF_8, FACTORY_UTF8, "encoding"),
+        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.US_ASCII, FACTORY_ASCII, "encoding"),
 
         new TestData("bla.tar", ArchiveStreamFactory.TAR, true, TAR_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.tar", ArchiveStreamFactory.TAR, true, "UTF-8", FACTORY_UTF8, "encoding"),
-        new TestData("bla.tar", ArchiveStreamFactory.TAR, true, "ASCII", FACTORY_ASCII, "encoding"),
+        new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.UTF_8, FACTORY_UTF8, "encoding"),
+        new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "encoding"),
 
-        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, JAR_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, "UTF-8", FACTORY_UTF8, "encoding"),
-        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, "ASCII", FACTORY_ASCII, "encoding"),
+        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, JAR_DEFAULT, FACTORY, "charset"),
+        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),
+        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "charset"),
 
-        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, ZIP_DEFAULT, FACTORY, "encoding"),
-        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, "UTF-8", FACTORY_UTF8, "encoding"),
-        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, "ASCII", FACTORY_ASCII, "encoding"),
+        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, ZIP_DEFAULT, FACTORY, "charset"),
+        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, StandardCharsets.UTF_8, FACTORY_UTF8, "charset"),
+        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, StandardCharsets.US_ASCII, FACTORY_ASCII, "charset"),
     };
 
     @Test
@@ -278,9 +281,10 @@ public class ArchiveStreamFactoryTest {
         for (int i = 1; i <= TESTS.length; i++) {
             final TestData test = TESTS[i - 1];
             try (final ArchiveInputStream ais = getInputStreamFor(test.testFile, test.fac)) {
-                final String field = getField(ais, test.fieldName);
-                if (!eq(test.expectedEncoding, field)) {
-                    System.out.println("Failed test " + i + ". expected: " + test.expectedEncoding + " actual: " + field
+                final Charset field = getField(ais, test.fieldName);
+
+                if (!eq(test.expectedCharset, field)) {
+                    System.out.println("Failed test " + i + ". expected: " + test.expectedCharset + " actual: " + field
                             + " type: " + test.type);
                     failed++;
                 }
@@ -297,9 +301,9 @@ public class ArchiveStreamFactoryTest {
         for (int i = 1; i <= TESTS.length; i++) {
             final TestData test = TESTS[i - 1];
             try (final ArchiveInputStream ais = getInputStreamFor(test.type, test.testFile, test.fac)) {
-                final String field = getField(ais, test.fieldName);
-                if (!eq(test.expectedEncoding, field)) {
-                    System.out.println("Failed test " + i + ". expected: " + test.expectedEncoding + " actual: " + field
+                final Charset field = getField(ais, test.fieldName);
+                if (!eq(test.expectedCharset, field)) {
+                    System.out.println("Failed test " + i + ". expected: " + test.expectedCharset + " actual: " + field
                             + " type: " + test.type);
                     failed++;
                 }
@@ -317,9 +321,9 @@ public class ArchiveStreamFactoryTest {
             final TestData test = TESTS[i-1];
             if (test.hasOutputStream) {
                 try (final ArchiveOutputStream ais = getOutputStreamFor(test.type, test.fac)) {
-                    final String field = getField(ais, test.fieldName);
-                    if (!eq(test.expectedEncoding, field)) {
-                        System.out.println("Failed test " + i + ". expected: " + test.expectedEncoding + " actual: "
+                    final Charset field = getField(ais, test.fieldName);
+                    if (!eq(test.expectedCharset, field)) {
+                        System.out.println("Failed test " + i + ". expected: " + test.expectedCharset + " actual: "
                                 + field + " type: " + test.type);
                         failed++;
                     }
@@ -332,14 +336,12 @@ public class ArchiveStreamFactoryTest {
     }
 
     // equals allowing null
-    private static boolean eq(final String exp, final String act) {
-        if (exp == null) {
-            return act == null;
-        }
-        return exp.equals(act);
+    private static boolean eq(final Object exp, final Object act) {
+        return Objects.equals(exp, act);
     }
 
-    private static String getField(final Object instance, final String name) {
+    @SuppressWarnings("deprecation")
+    private static Charset getField(final Object instance, final String name) {
         final Class<?> cls = instance.getClass();
         Field fld;
         try {
@@ -358,8 +360,13 @@ public class ArchiveStreamFactoryTest {
                 fld.setAccessible(true);
             }
             final Object object = fld.get(instance);
-            if (object instanceof String || object == null) {
-                return (String) object;
+
+            if (object == null) {
+                return StandardCharsets.UTF_8;
+            } if (object instanceof Charset) {
+                return (Charset) object;
+            } else if (object instanceof String) {
+                return Charset.forName(((String) object));
             }
             System.out.println("Wrong type: " + object.getClass().getCanonicalName() + " for " + name + " in class " + instance.getClass().getSimpleName());
             return UNKNOWN;

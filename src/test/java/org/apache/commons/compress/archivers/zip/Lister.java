@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -56,7 +57,7 @@ public final class Lister {
         if (cl.useStream) {
             try (BufferedInputStream fs = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
                 final ZipArchiveInputStream zs =
-                        new ZipArchiveInputStream(fs, cl.encoding, true,
+                        new ZipArchiveInputStream(fs, Charsets.toCharset(cl.encoding), true,
                                 cl.allowStoredEntriesWithDataDescriptor);
                 for (ArchiveEntry entry = zs.getNextEntry();
                      entry != null;

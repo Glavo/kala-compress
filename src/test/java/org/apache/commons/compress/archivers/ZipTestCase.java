@@ -723,7 +723,7 @@ public final class ZipTestCase extends AbstractTestCase {
         try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile);
             InputStream inputStream = Channels.newInputStream(channel);
             ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream,
-                StandardCharsets.UTF_8.toString(), true, false, true)) {
+                StandardCharsets.UTF_8, true, false, true)) {
 
             ArchiveEntry entry;
             final int filesNum = countNonDirectories(directoryToZip);

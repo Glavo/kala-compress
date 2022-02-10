@@ -30,6 +30,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Enumeration;
 
@@ -104,6 +105,6 @@ public class ZipFileIgnoringLocalFileHeaderTest {
     }
 
     private static ZipFile openZipWithoutLFH(final String fileName) throws IOException {
-        return new ZipFile(AbstractTestCase.getFile(fileName), CharsetNames.UTF_8, true, true);
+        return new ZipFile(AbstractTestCase.getFile(fileName), StandardCharsets.UTF_8, true, true);
     }
 }

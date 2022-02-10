@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -71,7 +72,7 @@ public class Maven221MultiVolumeTest {
     public void testRead7ZipMultiVolumeArchiveForStream() throws IOException {
 
         try (final InputStream archive = Files.newInputStream(getFile("apache-maven-2.2.1.zip.001").toPath());
-             ZipArchiveInputStream zi = new ZipArchiveInputStream(archive, null, false)) {
+             ZipArchiveInputStream zi = new ZipArchiveInputStream(archive, StandardCharsets.UTF_8, false)) {
 
             // these are the entries that are supposed to be processed
             // correctly without any problems

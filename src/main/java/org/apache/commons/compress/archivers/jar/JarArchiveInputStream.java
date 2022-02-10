@@ -37,7 +37,7 @@ public class JarArchiveInputStream extends ZipArchiveInputStream {
      *
      * @param inputStream the input stream to wrap
      */
-    public JarArchiveInputStream( final InputStream inputStream ) {
+    public JarArchiveInputStream(final InputStream inputStream) {
         super(inputStream);
     }
 
@@ -48,7 +48,7 @@ public class JarArchiveInputStream extends ZipArchiveInputStream {
      * @param encoding the encoding to use
      * @since 1.10
      */
-    public JarArchiveInputStream( final InputStream inputStream, final String encoding ) {
+    public JarArchiveInputStream(final InputStream inputStream, final String encoding) {
         super(inputStream, encoding);
     }
 

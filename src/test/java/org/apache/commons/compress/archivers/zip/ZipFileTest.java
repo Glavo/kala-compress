@@ -102,7 +102,7 @@ public class ZipFileTest {
             data = IOUtils.toByteArray(fis);
         }
 
-        zf = new ZipFile(new SeekableInMemoryByteChannel(data), CharsetNames.UTF_8);
+        zf = new ZipFile(new SeekableInMemoryByteChannel(data), StandardCharsets.UTF_8);
         final ArrayList<ZipArchiveEntry> l = Collections.list(zf.getEntries());
         assertEntryName(l, 0, "AbstractUnicodeExtraField");
         assertEntryName(l, 1, "AsiExtraField");
@@ -370,7 +370,7 @@ public class ZipFileTest {
         try (InputStream fis = Files.newInputStream(getFile("mixed.zip").toPath())) {
             data = IOUtils.toByteArray(fis);
         }
-        zf = new ZipFile(new SeekableInMemoryByteChannel(data), CharsetNames.UTF_8);
+        zf = new ZipFile(new SeekableInMemoryByteChannel(data), StandardCharsets.UTF_8);
 
         final Map<String, byte[]> content = new HashMap<>();
         for (final ZipArchiveEntry entry: Collections.list(zf.getEntries())) {
