@@ -33,15 +33,9 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.CharsetEncoder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.CRC32;
 
@@ -111,6 +105,28 @@ public class SevenZFile implements Closeable {
     };
 
     /**
+     * Reads a file as unencrypted 7z archive
+     *
+     * @param fileName the file to read
+     * @throws IOException if reading the archive fails
+     */
+    public SevenZFile(final File fileName) throws IOException {
+        this(fileName, SevenZFileOptions.DEFAULT);
+    }
+
+    /**
+     * Reads a file as unencrypted 7z archive
+     *
+     * @param fileName the file to read
+     * @param options the options to apply
+     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
+     * @since 1.19
+     */
+    public SevenZFile(final File fileName, final SevenZFileOptions options) throws IOException {
+        this(fileName, null, options);
+    }
+
+    /**
      * Reads a file as 7z archive
      *
      * @param fileName the file to read
@@ -132,8 +148,55 @@ public class SevenZFile implements Closeable {
      * @since 1.19
      */
     public SevenZFile(final File fileName, final char[] password, final SevenZFileOptions options) throws IOException {
-        this(Files.newByteChannel(fileName.toPath(), EnumSet.of(StandardOpenOption.READ)), // NOSONAR
-                fileName.getAbsolutePath(), utf16Decode(password), true, options);
+        this(fileName.toPath(), password, options);
+    }
+
+    /**
+     * Reads a file as unencrypted 7z archive
+     *
+     * @param fileName the file to read
+     * @throws IOException if reading the archive fails
+     */
+    public SevenZFile(final Path fileName) throws IOException {
+        this(fileName, SevenZFileOptions.DEFAULT);
+    }
+
+    /**
+     * Reads a file as unencrypted 7z archive
+     *
+     * @param fileName the file to read
+     * @param options the options to apply
+     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
+     * @since 1.21.0.1
+     */
+    public SevenZFile(final Path fileName, final SevenZFileOptions options) throws IOException {
+        this(fileName, null, options);
+    }
+
+    /**
+     * Reads a file as 7z archive
+     *
+     * @param fileName the file to read
+     * @param password optional password if the archive is encrypted
+     * @throws IOException if reading the archive fails
+     * @since 1.21.0.1
+     */
+    public SevenZFile(final Path fileName, final char[] password) throws IOException {
+        this(fileName, password, SevenZFileOptions.DEFAULT);
+    }
+
+    /**
+     * Reads a file as 7z archive with additional options.
+     *
+     * @param fileName the file to read
+     * @param password optional password if the archive is encrypted
+     * @param options the options to apply
+     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
+     * @since 1.21.0.1
+     */
+    public SevenZFile(final Path fileName, final char[] password, final SevenZFileOptions options) throws IOException {
+        this(Files.newByteChannel(fileName, Collections.singleton(StandardOpenOption.READ)), // NOSONAR
+                fileName.toAbsolutePath().toString(), utf16Decode(password), true, options);
     }
 
     /**
@@ -296,28 +359,6 @@ public class SevenZFile implements Closeable {
     }
 
     /**
-     * Reads a file as unencrypted 7z archive
-     *
-     * @param fileName the file to read
-     * @throws IOException if reading the archive fails
-     */
-    public SevenZFile(final File fileName) throws IOException {
-        this(fileName, SevenZFileOptions.DEFAULT);
-    }
-
-    /**
-     * Reads a file as unencrypted 7z archive
-     *
-     * @param fileName the file to read
-     * @param options the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     */
-    public SevenZFile(final File fileName, final SevenZFileOptions options) throws IOException {
-        this(fileName, null, options);
-    }
-
-    /**
      * Closes the archive.
      * @throws IOException if closing the file fails
      */
@@ -473,7 +514,7 @@ public class SevenZFile implements Closeable {
         readFully(buf);
         if (verifyCrc) {
             final CRC32 crc = new CRC32();
-            crc.update(buf.array());
+            crc.update(buf.array(), 0, buf.array().length);
             if (startHeader.nextHeaderCrc != crc.getValue()) {
                 throw new IOException("NextHeader CRC mismatch");
             }

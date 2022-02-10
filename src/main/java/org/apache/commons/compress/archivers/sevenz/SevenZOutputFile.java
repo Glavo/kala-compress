@@ -74,9 +74,20 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if opening the file fails
      */
     public SevenZOutputFile(final File fileName) throws IOException {
-        this(Files.newByteChannel(fileName.toPath(),
-            EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-                       StandardOpenOption.TRUNCATE_EXISTING)));
+        this(fileName.toPath());
+    }
+
+    /**
+     * Opens file to write a 7z archive to.
+     *
+     * @param fileName the file to write to
+     * @throws IOException if opening the file fails
+     * @since 1.21.0.1
+     */
+    public SevenZOutputFile(final Path fileName) throws IOException {
+        this(Files.newByteChannel(fileName,
+                EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+                        StandardOpenOption.TRUNCATE_EXISTING)));
     }
 
     /**
@@ -316,7 +327,7 @@ public class SevenZOutputFile implements Closeable {
         channel.write(ByteBuffer.wrap(headerBytes));
 
         final CRC32 crc32 = new CRC32();
-        crc32.update(headerBytes);
+        crc32.update(headerBytes, 0, headerBytes.length);
 
         final ByteBuffer bb = ByteBuffer.allocate(SevenZFile.sevenZSignature.length
                                             + 2 /* version */
@@ -388,7 +399,7 @@ public class SevenZOutputFile implements Closeable {
             @Override
             public void write(final byte[] b) throws IOException {
                 super.write(b);
-                crc32.update(b);
+                crc32.update(b, 0, b.length);
             }
 
             @Override
