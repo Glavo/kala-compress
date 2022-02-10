@@ -162,7 +162,7 @@ class ZipSplitOutputStream extends OutputStream {
             throw new IOException("This archive has already been finished");
         }
 
-        final String zipFileBaseName = FileNameUtils.getBaseName(zipFile.getFileName().toString());
+        final String zipFileBaseName = FileNameUtils.getBaseName(zipFile);
         final Path lastZipSplitSegmentFile = zipFile.resolveSibling(zipFileBaseName + ".zip");
         outputStream.close();
 
@@ -227,7 +227,7 @@ class ZipSplitOutputStream extends OutputStream {
      */
     private Path createNewSplitSegmentFile(final Integer zipSplitSegmentSuffixIndex) throws IOException {
         final int newZipSplitSegmentSuffixIndex = zipSplitSegmentSuffixIndex == null ? (currentSplitSegmentIndex + 2) : zipSplitSegmentSuffixIndex;
-        final String baseName = FileNameUtils.getBaseName(zipFile.getFileName().toString());
+        final String baseName = FileNameUtils.getBaseName(zipFile);
         String extension = ".z";
         if (newZipSplitSegmentSuffixIndex <= 9) {
             extension += "0" + newZipSplitSegmentSuffixIndex;
