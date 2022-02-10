@@ -54,9 +54,14 @@ tasks.withType<JavaCompile>() {
 }
 
 tasks.test {
-    exclude("**/*IT")
-    exclude("**/zip/*IT")
-    exclude("**/tar/*IT")
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+
+    if (project.findProperty("run-tarit") != "true") {
+        exclude("**/tar/*IT.class")
+    }
+    if (project.findProperty("run-zipit") != "true") {
+        exclude("**/zip/*IT.class")
+    }
 }
 
 tasks.processTestResources {
