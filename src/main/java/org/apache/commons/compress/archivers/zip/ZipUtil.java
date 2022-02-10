@@ -17,8 +17,11 @@
  */
 package org.apache.commons.compress.archivers.zip;
 
+import org.apache.commons.compress.utils.CharsetUtils;
+
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -274,8 +277,7 @@ public abstract class ZipUtil {
 
             if (origCRC32 == f.getNameCRC32()) {
                 try {
-                    return ZipEncodingHelper
-                        .UTF8_ZIP_ENCODING.decode(f.getUnicodeName());
+                    return CharsetUtils.decode(StandardCharsets.UTF_8, f.getUnicodeName());
                 } catch (final IOException ex) {
                     // UTF-8 unsupported?  should be impossible the
                     // Unicode*ExtraField must contain some bad bytes

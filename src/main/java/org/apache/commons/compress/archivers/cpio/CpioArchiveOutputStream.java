@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -29,10 +30,9 @@ import java.util.HashMap;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.CharsetNames;
+import org.apache.commons.compress.utils.CharsetUtils;
 
 /**
  * CpioArchiveOutputStream is a stream for writing CPIO streams. All formats of
@@ -95,7 +95,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
     /**
      * The encoding to use for file names and labels.
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     // the provided encoding (for unit tests)
     final String encoding;
@@ -164,7 +164,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
         this.entryFormat = format;
         this.blockSize = blockSize;
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
     }
 
     /**
@@ -550,7 +550,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      * @return result of encoding the string
      */
     private byte[] encode(final String str) throws IOException {
-        final ByteBuffer buf = zipEncoding.encode(str);
+        final ByteBuffer buf = CharsetUtils.encode(charset, str);
         final int len = buf.limit() - buf.position();
         return Arrays.copyOfRange(buf.array(), buf.arrayOffset(), buf.arrayOffset() + len);
     }

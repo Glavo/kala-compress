@@ -20,6 +20,8 @@ package org.apache.commons.compress.archivers.tar;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -43,7 +45,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.EntryStreamOffsets;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.IOUtils;
 
@@ -528,14 +529,14 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * to null.
      *
      * @param headerBuf The header bytes from a tar archive entry.
-     * @param encoding encoding to use for file names
+     * @param charset encoding to use for file names
      * @since 1.4
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format
      * @throws IOException on error
      */
-    public TarArchiveEntry(final byte[] headerBuf, final ZipEncoding encoding)
+    public TarArchiveEntry(final byte[] headerBuf, final Charset charset)
         throws IOException {
-        this(headerBuf, encoding, false);
+        this(headerBuf, charset, false);
     }
 
     /**
@@ -543,23 +544,23 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * to null.
      *
      * @param headerBuf The header bytes from a tar archive entry.
-     * @param encoding encoding to use for file names
+     * @param charset encoding to use for file names
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
      * ignored and the fields set to {@link #UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @since 1.19
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format
      * @throws IOException on error
      */
-    public TarArchiveEntry(final byte[] headerBuf, final ZipEncoding encoding, final boolean lenient)
+    public TarArchiveEntry(final byte[] headerBuf, final Charset charset, final boolean lenient)
         throws IOException {
         this(false);
-        parseTarHeader(headerBuf, encoding, false, lenient);
+        parseTarHeader(headerBuf, charset, false, lenient);
     }
 
     /**
      * Construct an entry from an archive's header bytes for random access tar. File is set to null.
      * @param headerBuf the header bytes from a tar archive entry.
-     * @param encoding encoding to use for file names.
+     * @param charset encoding to use for file names.
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
      * ignored and the fields set to {@link #UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @param dataOffset position of the entry data in the random access file.
@@ -567,9 +568,9 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format.
      * @throws IOException on error.
      */
-    public TarArchiveEntry(final byte[] headerBuf, final ZipEncoding encoding, final boolean lenient,
+    public TarArchiveEntry(final byte[] headerBuf, final Charset charset, final boolean lenient,
             final long dataOffset) throws IOException {
-        this(headerBuf, encoding, lenient);
+        this(headerBuf, charset, lenient);
         setDataOffset(dataOffset);
     }
 
@@ -1478,10 +1479,10 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
             writeEntryHeader(outbuf, TarUtils.DEFAULT_ENCODING, false);
         } catch (final IOException ex) { // NOSONAR
             try {
-                writeEntryHeader(outbuf, TarUtils.FALLBACK_ENCODING, false);
+                writeEntryHeaderFallback(outbuf, false);
             } catch (final IOException ex2) {
                 // impossible
-                throw new RuntimeException(ex2); //NOSONAR
+                throw new UncheckedIOException(ex2); //NOSONAR
             }
         }
     }
@@ -1490,27 +1491,23 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * Write an entry's header information to a header buffer.
      *
      * @param outbuf The tar entry header buffer to fill in.
-     * @param encoding encoding to use when writing the file name.
+     * @param charset encoding to use when writing the file name.
      * @param starMode whether to use the star/GNU tar/BSD tar
      * extension for numeric fields if their value doesn't fit in the
      * maximum size of standard tar archives
      * @since 1.4
      * @throws IOException on error
      */
-    public void writeEntryHeader(final byte[] outbuf, final ZipEncoding encoding,
+    public void writeEntryHeader(final byte[] outbuf, final Charset charset,
                                  final boolean starMode) throws IOException {
         int offset = 0;
 
-        offset = TarUtils.formatNameBytes(name, outbuf, offset, NAMELEN,
-                                          encoding);
+        offset = TarUtils.formatNameBytes(name, outbuf, offset, NAMELEN, charset);
         offset = writeEntryHeaderField(mode, outbuf, offset, MODELEN, starMode);
-        offset = writeEntryHeaderField(userId, outbuf, offset, UIDLEN,
-                                       starMode);
-        offset = writeEntryHeaderField(groupId, outbuf, offset, GIDLEN,
-                                       starMode);
+        offset = writeEntryHeaderField(userId, outbuf, offset, UIDLEN, starMode);
+        offset = writeEntryHeaderField(groupId, outbuf, offset, GIDLEN, starMode);
         offset = writeEntryHeaderField(size, outbuf, offset, SIZELEN, starMode);
-        offset = writeEntryHeaderField(modTime, outbuf, offset, MODTIMELEN,
-                                       starMode);
+        offset = writeEntryHeaderField(modTime, outbuf, offset, MODTIMELEN, starMode);
 
         final int csOffset = offset;
 
@@ -1519,18 +1516,54 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         }
 
         outbuf[offset++] = linkFlag;
-        offset = TarUtils.formatNameBytes(linkName, outbuf, offset, NAMELEN,
-                                          encoding);
+        offset = TarUtils.formatNameBytes(linkName, outbuf, offset, NAMELEN, charset);
         offset = TarUtils.formatNameBytes(magic, outbuf, offset, MAGICLEN);
         offset = TarUtils.formatNameBytes(version, outbuf, offset, VERSIONLEN);
-        offset = TarUtils.formatNameBytes(userName, outbuf, offset, UNAMELEN,
-                                          encoding);
-        offset = TarUtils.formatNameBytes(groupName, outbuf, offset, GNAMELEN,
-                                          encoding);
+        offset = TarUtils.formatNameBytes(userName, outbuf, offset, UNAMELEN, charset);
+        offset = TarUtils.formatNameBytes(groupName, outbuf, offset, GNAMELEN, charset);
         offset = writeEntryHeaderField(devMajor, outbuf, offset, DEVLEN,
                                        starMode);
         offset = writeEntryHeaderField(devMinor, outbuf, offset, DEVLEN,
                                        starMode);
+
+        while (offset < outbuf.length) {
+            outbuf[offset++] = 0;
+        }
+
+        final long chk = TarUtils.computeCheckSum(outbuf);
+
+        TarUtils.formatCheckSumOctalBytes(chk, outbuf, csOffset, CHKSUMLEN);
+    }
+
+    public void writeEntryHeaderFallback(final byte[] outbuf, final boolean starMode) throws IOException {
+        int offset = 0;
+
+        offset = TarUtils.formatNameBytesFallback(name, outbuf, offset, NAMELEN);
+        offset = writeEntryHeaderField(mode, outbuf, offset, MODELEN, starMode);
+        offset = writeEntryHeaderField(userId, outbuf, offset, UIDLEN,
+                starMode);
+        offset = writeEntryHeaderField(groupId, outbuf, offset, GIDLEN,
+                starMode);
+        offset = writeEntryHeaderField(size, outbuf, offset, SIZELEN, starMode);
+        offset = writeEntryHeaderField(modTime, outbuf, offset, MODTIMELEN,
+                starMode);
+
+        final int csOffset = offset;
+
+        for (int c = 0; c < CHKSUMLEN; ++c) {
+            outbuf[offset++] = (byte) ' ';
+        }
+
+        outbuf[offset++] = linkFlag;
+        offset = TarUtils.formatNameBytesFallback(linkName, outbuf, offset, NAMELEN);
+        offset = TarUtils.formatNameBytes(magic, outbuf, offset, MAGICLEN);
+        offset = TarUtils.formatNameBytes(version, outbuf, offset, VERSIONLEN);
+        offset = TarUtils.formatNameBytesFallback(userName, outbuf, offset, UNAMELEN);
+        offset = TarUtils.formatNameBytesFallback(groupName, outbuf, offset, GNAMELEN);
+        offset = writeEntryHeaderField(devMajor, outbuf, offset, DEVLEN,
+                starMode);
+        offset = writeEntryHeaderField(devMinor, outbuf, offset, DEVLEN,
+                starMode);
 
         while (offset < outbuf.length) {
             outbuf[offset++] = 0;
@@ -1577,34 +1610,34 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * Parse an entry's header information from a header buffer.
      *
      * @param header The tar entry header buffer to get information from.
-     * @param encoding encoding to use for file names
+     * @param charset encoding to use for file names
      * @since 1.4
      * @throws IllegalArgumentException if any of the numeric fields
      * have an invalid format
      * @throws IOException on error
      */
-    public void parseTarHeader(final byte[] header, final ZipEncoding encoding)
+    public void parseTarHeader(final byte[] header, final Charset charset)
         throws IOException {
-        parseTarHeader(header, encoding, false, false);
+        parseTarHeader(header, charset, false, false);
     }
 
-    private void parseTarHeader(final byte[] header, final ZipEncoding encoding,
+    private void parseTarHeader(final byte[] header, final Charset charset,
                                 final boolean oldStyle, final boolean lenient)
         throws IOException {
         try {
-            parseTarHeaderUnwrapped(header, encoding, oldStyle, lenient);
+            parseTarHeaderUnwrapped(header, charset, oldStyle, lenient);
         } catch (IllegalArgumentException ex) {
             throw new IOException("Corrupted TAR archive.", ex);
         }
     }
 
-    private void parseTarHeaderUnwrapped(final byte[] header, final ZipEncoding encoding,
+    private void parseTarHeaderUnwrapped(final byte[] header, final Charset charset,
                                          final boolean oldStyle, final boolean lenient)
         throws IOException {
         int offset = 0;
 
         name = oldStyle ? TarUtils.parseName(header, offset, NAMELEN)
-            : TarUtils.parseName(header, offset, NAMELEN, encoding);
+            : TarUtils.parseName(header, offset, NAMELEN, charset);
         offset += NAMELEN;
         mode = (int) parseOctalOrBinary(header, offset, MODELEN, lenient);
         offset += MODELEN;
@@ -1623,17 +1656,17 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         offset += CHKSUMLEN;
         linkFlag = header[offset++];
         linkName = oldStyle ? TarUtils.parseName(header, offset, NAMELEN)
-            : TarUtils.parseName(header, offset, NAMELEN, encoding);
+            : TarUtils.parseName(header, offset, NAMELEN, charset);
         offset += NAMELEN;
         magic = TarUtils.parseName(header, offset, MAGICLEN);
         offset += MAGICLEN;
         version = TarUtils.parseName(header, offset, VERSIONLEN);
         offset += VERSIONLEN;
         userName = oldStyle ? TarUtils.parseName(header, offset, UNAMELEN)
-            : TarUtils.parseName(header, offset, UNAMELEN, encoding);
+            : TarUtils.parseName(header, offset, UNAMELEN, charset);
         offset += UNAMELEN;
         groupName = oldStyle ? TarUtils.parseName(header, offset, GNAMELEN)
-            : TarUtils.parseName(header, offset, GNAMELEN, encoding);
+            : TarUtils.parseName(header, offset, GNAMELEN, charset);
         offset += GNAMELEN;
         if (linkFlag == LF_CHR || linkFlag == LF_BLK) {
             devMajor = (int) parseOctalOrBinary(header, offset, DEVLEN, lenient);
@@ -1664,7 +1697,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         case FORMAT_XSTAR: {
             final String xstarPrefix = oldStyle
                 ? TarUtils.parseName(header, offset, PREFIXLEN_XSTAR)
-                : TarUtils.parseName(header, offset, PREFIXLEN_XSTAR, encoding);
+                : TarUtils.parseName(header, offset, PREFIXLEN_XSTAR, charset);
             if (!xstarPrefix.isEmpty()) {
                 name = xstarPrefix + "/" + name;
             }
@@ -1674,7 +1707,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         default: {
             final String prefix = oldStyle
                 ? TarUtils.parseName(header, offset, PREFIXLEN)
-                : TarUtils.parseName(header, offset, PREFIXLEN, encoding);
+                : TarUtils.parseName(header, offset, PREFIXLEN, charset);
             // SunOS tar -E does not add / to directory names, so fix
             // up to be consistent
             if (isDirectory() && !name.endsWith("/")){

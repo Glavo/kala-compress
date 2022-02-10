@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,13 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
-import org.apache.commons.compress.utils.ArchiveUtils;
-import org.apache.commons.compress.utils.BoundedInputStream;
-import org.apache.commons.compress.utils.BoundedArchiveInputStream;
-import org.apache.commons.compress.utils.BoundedSeekableByteChannelInputStream;
-import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
+import org.apache.commons.compress.utils.*;
 
 /**
  * The TarFile provides random access to UNIX archives.
@@ -55,7 +50,7 @@ public class TarFile implements Closeable {
     /**
      * The encoding of the tar file
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     private final LinkedList<TarArchiveEntry> entries = new LinkedList<>();
 
@@ -209,7 +204,7 @@ public class TarFile implements Closeable {
     public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient) throws IOException {
         this.archive = archive;
         this.hasHitEOF = false;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
         this.recordSize = recordSize;
         this.recordBuffer = ByteBuffer.allocate(this.recordSize);
         this.blockSize = blockSize;
@@ -254,7 +249,7 @@ public class TarFile implements Closeable {
         }
 
         try {
-            currEntry = new TarArchiveEntry(headerBuf.array(), zipEncoding, lenient, archive.position());
+            currEntry = new TarArchiveEntry(headerBuf.array(), charset, lenient, archive.position());
         } catch (final IllegalArgumentException e) {
             throw new IOException("Error detected parsing the header", e);
         }
@@ -267,7 +262,7 @@ public class TarFile implements Closeable {
                 // entry
                 return null;
             }
-            currEntry.setLinkName(zipEncoding.decode(longLinkData));
+            currEntry.setLinkName(CharsetUtils.decode(charset, longLinkData));
         }
 
         if (currEntry.isGNULongNameEntry()) {
@@ -280,7 +275,7 @@ public class TarFile implements Closeable {
             }
 
             // COMPRESS-509 : the name of directories should end with '/'
-            final String name = zipEncoding.decode(longNameData);
+            final String name = CharsetUtils.decode(charset, longNameData);
             currEntry.setName(name);
             if (currEntry.isDirectory() && !name.endsWith("/")) {
                 currEntry.setName(name + "/");

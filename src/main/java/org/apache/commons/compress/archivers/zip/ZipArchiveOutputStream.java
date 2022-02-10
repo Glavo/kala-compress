@@ -36,6 +36,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
@@ -53,6 +55,7 @@ import java.util.zip.ZipException;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.utils.ByteUtils;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -137,7 +140,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     /**
      * default encoding for file names and comment.
      */
-    static final String DEFAULT_ENCODING = ZipEncodingHelper.UTF8;
+    static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.name();
 
     /**
      * General purpose flag, which indicates that file names are
@@ -234,9 +237,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      * This field is of internal use and will be set in {@link
      * #setEncoding(String)}.
      */
-    private ZipEncoding zipEncoding =
-        ZipEncodingHelper.getZipEncoding(DEFAULT_ENCODING);
-
+    private Charset charset = CharsetUtils.getCharset(DEFAULT_ENCODING);
 
     /**
      * This Deflater object is used for output.
@@ -416,8 +417,8 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      */
     public void setEncoding(final String encoding) {
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
-        if (useUTF8Flag && !ZipEncodingHelper.isUTF8(encoding)) {
+        this.charset = CharsetUtils.getCharset(encoding);
+        if (useUTF8Flag && charset != StandardCharsets.UTF_8) {
             useUTF8Flag = false;
         }
     }
@@ -441,7 +442,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      * name encoding is UTF-8
      */
     public void setUseLanguageEncodingFlag(final boolean b) {
-        useUTF8Flag = b && ZipEncodingHelper.isUTF8(encoding);
+        useUTF8Flag = b && charset == StandardCharsets.UTF_8;
     }
 
     /**
@@ -548,7 +549,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
         cdLength = streamCompressor.getTotalBytesWritten() - cdOverallOffset;
 
         // calculate the length of end of central directory, as it may be used in writeZip64CentralDirectory
-        final ByteBuffer commentData = this.zipEncoding.encode(comment);
+        final ByteBuffer commentData = CharsetUtils.encode(charset, comment);
         final long commentLength = (long) commentData.limit() - commentData.position();
         eocdLength = WORD /* length of EOCD_SIG */
                 + SHORT /* number of this disk */
@@ -1153,7 +1154,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     }
 
     private void writeLocalFileHeader(final ZipArchiveEntry ze, final boolean phased) throws IOException {
-        final boolean encodable = zipEncoding.canEncode(ze.getName());
+        final boolean encodable = CharsetUtils.canEncode(charset, ze.getName());
         final ByteBuffer name = getName(ze);
 
         if (createUnicodeExtraFields != UnicodeExtraFieldPolicy.NEVER) {
@@ -1285,11 +1286,11 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
         final String comm = ze.getComment();
         if (comm != null && !"".equals(comm)) {
 
-            final boolean commentEncodable = zipEncoding.canEncode(comm);
+            final boolean commentEncodable = CharsetUtils.canEncode(charset, comm);
 
             if (createUnicodeExtraFields == UnicodeExtraFieldPolicy.ALWAYS
                 || !commentEncodable) {
-                final ByteBuffer commentB = getEntryEncoding(ze).encode(comm);
+                final ByteBuffer commentB = CharsetUtils.encode(getEntryEncoding(ze), comm);
                 ze.addExtraField(new UnicodeCommentExtraField(comm,
                                                               commentB.array(),
                                                               commentB.arrayOffset(),
@@ -1389,7 +1390,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
             comm = "";
         }
 
-        final ByteBuffer commentB = getEntryEncoding(ze).encode(comm);
+        final ByteBuffer commentB = CharsetUtils.encode(getEntryEncoding(ze), comm);
         final int nameLen = name.limit() - name.position();
         final int commentLen = commentB.limit() - commentB.position();
         final int len= CFH_FILENAME_OFFSET + nameLen + extraLength + commentLen;
@@ -1403,7 +1404,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
                 buf, CFH_VERSION_MADE_BY_OFFSET);
 
         final int zipMethod = ze.getMethod();
-        final boolean encodable = zipEncoding.canEncode(ze.getName());
+        final boolean encodable = CharsetUtils.canEncode(charset, ze.getName());
         putShort(versionNeededToExtract(zipMethod, needsZip64Extra, entryMetaData.usesDataDescriptor),
             buf, CFH_VERSION_NEEDED_OFFSET);
         getGeneralPurposeBits(!encodable && fallbackToUTF8, entryMetaData.usesDataDescriptor).encode(buf, CFH_GPB_OFFSET);
@@ -1556,7 +1557,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
         writeCounted(ZipLong.getBytes(Math.min(cdOffset, ZIP64_MAGIC)));
 
         // ZIP file comment
-        final ByteBuffer data = this.zipEncoding.encode(comment);
+        final ByteBuffer data = CharsetUtils.encode(charset, comment);
         final int dataLen = data.limit() - data.position();
         writeCounted(ZipShort.getBytes(dataLen));
         streamCompressor.writeCounted(data.array(), data.arrayOffset(), dataLen);
@@ -1895,14 +1896,13 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
         return Zip64Mode.Never;
     }
 
-    private ZipEncoding getEntryEncoding(final ZipArchiveEntry ze) {
-        final boolean encodable = zipEncoding.canEncode(ze.getName());
-        return !encodable && fallbackToUTF8
-            ? ZipEncodingHelper.UTF8_ZIP_ENCODING : zipEncoding;
+    private Charset getEntryEncoding(final ZipArchiveEntry ze) {
+        final boolean encodable = CharsetUtils.canEncode(charset, ze.getName());
+        return !encodable && fallbackToUTF8 ? StandardCharsets.UTF_8 : charset;
     }
 
     private ByteBuffer getName(final ZipArchiveEntry ze) throws IOException {
-        return getEntryEncoding(ze).encode(ze.getName());
+        return CharsetUtils.encode(getEntryEncoding(ze), ze.getName());
     }
 
     /**

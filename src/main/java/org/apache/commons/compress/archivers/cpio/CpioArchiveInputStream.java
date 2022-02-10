@@ -21,13 +21,13 @@ package org.apache.commons.compress.archivers.cpio;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.CharsetNames;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -91,7 +91,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
     /**
      * The encoding to use for file names and labels.
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     // the provided encoding (for unit tests)
     final String encoding;
@@ -158,7 +158,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
         }
         this.blockSize = blockSize;
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
     }
 
     /**
@@ -493,7 +493,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
         if (this.in.read() == -1) {
             throw new EOFException();
         }
-        return zipEncoding.decode(tmpBuffer);
+        return CharsetUtils.decode(charset, tmpBuffer);
     }
 
     /**

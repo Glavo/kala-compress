@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
@@ -37,9 +39,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.deflate64.Deflate64CompressorInputStream;
-import org.apache.commons.compress.utils.ArchiveUtils;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.compress.utils.InputStreamStatistics;
+import org.apache.commons.compress.utils.*;
 
 import static org.apache.commons.compress.archivers.zip.ZipConstants.DWORD;
 import static org.apache.commons.compress.archivers.zip.ZipConstants.SHORT;
@@ -80,8 +80,8 @@ import static org.apache.commons.compress.archivers.zip.ZipConstants.ZIP64_MAGIC
  */
 public class ZipArchiveInputStream extends ArchiveInputStream implements InputStreamStatistics {
 
-    /** The zip encoding to use for file names and the file comment. */
-    private final ZipEncoding zipEncoding;
+    /** The charset to use for file names and the file comment. */
+    private final Charset charset;
 
     // the provided encoding (for unit tests)
     final String encoding;
@@ -185,7 +185,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
      * @param inputStream the stream to wrap
      */
     public ZipArchiveInputStream(final InputStream inputStream) {
-        this(inputStream, ZipEncodingHelper.UTF8);
+        this(inputStream, CharsetNames.UTF_8);
     }
 
     /**
@@ -249,7 +249,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
                                  final boolean allowStoredEntriesWithDataDescriptor,
                                  final boolean skipSplitSig) {
         this.encoding = encoding;
-        zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         in = new PushbackInputStream(inputStream, buf.capacity());
         this.allowStoredEntriesWithDataDescriptor =
@@ -305,7 +305,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(lfhBuf, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
-        final ZipEncoding entryEncoding = hasUTF8Flag ? ZipEncodingHelper.UTF8_ZIP_ENCODING : zipEncoding;
+        final Charset entryEncoding = hasUTF8Flag ? StandardCharsets.UTF_8 : charset;
         current.hasDataDescriptor = gpFlag.usesDataDescriptor();
         current.entry.setGeneralPurposeBit(gpFlag);
 
@@ -340,7 +340,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
         off += SHORT; // NOSONAR - assignment as documentation
 
         final byte[] fileName = readRange(fileNameLen);
-        current.entry.setName(entryEncoding.decode(fileName), fileName);
+        current.entry.setName(CharsetUtils.decode(entryEncoding, fileName), fileName);
         if (hasUTF8Flag) {
             current.entry.setNameSource(ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG);
         }

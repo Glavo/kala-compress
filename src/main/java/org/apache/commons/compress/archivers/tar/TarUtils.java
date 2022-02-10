@@ -21,8 +21,10 @@ package org.apache.commons.compress.archivers.tar;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,9 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.CharsetNames;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.apache.commons.compress.utils.IOUtils;
 
 import static org.apache.commons.compress.archivers.tar.TarConstants.CHKSUMLEN;
@@ -50,44 +51,36 @@ public class TarUtils {
 
     private static final int BYTE_MASK = 255;
 
-    static final ZipEncoding DEFAULT_ENCODING =
-        ZipEncodingHelper.getZipEncoding(null);
+    static final Charset DEFAULT_ENCODING = Charset.defaultCharset();
 
-    /**
-     * Encapsulates the algorithms used up to Commons Compress 1.3 as
-     * ZipEncoding.
+    /*
+     * See org.apache.commons.compress.archivers.tar.TarUtils#FALLBACK_ENCODING
      */
-    static final ZipEncoding FALLBACK_ENCODING = new ZipEncoding() {
-            @Override
-            public boolean canEncode(final String name) { return true; }
 
-            @Override
-            public ByteBuffer encode(final String name) {
-                final int length = name.length();
-                final byte[] buf = new byte[length];
+    static ByteBuffer fallbackEncode(String name) {
+        final int length = name.length();
+        final byte[] buf = new byte[length];
 
-                // copy until end of input or output is reached.
-                for (int i = 0; i < length; ++i) {
-                    buf[i] = (byte) name.charAt(i);
-                }
-                return ByteBuffer.wrap(buf);
+        // copy until end of input or output is reached.
+        for (int i = 0; i < length; ++i) {
+            buf[i] = (byte) name.charAt(i);
+        }
+        return ByteBuffer.wrap(buf);
+    }
+
+    static String fallbackDecode(final byte[] buffer) {
+        final int length = buffer.length;
+        final StringBuilder result = new StringBuilder(length);
+
+        for (final byte b : buffer) {
+            if (b == 0) { // Trailing null
+                break;
             }
+            result.append((char) (b & 0xFF)); // Allow for sign-extension
+        }
 
-            @Override
-            public String decode(final byte[] buffer) {
-                final int length = buffer.length;
-                final StringBuilder result = new StringBuilder(length);
-
-                for (final byte b : buffer) {
-                    if (b == 0) { // Trailing null
-                        break;
-                    }
-                    result.append((char) (b & 0xFF)); // Allow for sign-extension
-                }
-
-                return result.toString();
-            }
-        };
+        return result.toString();
+    }
 
     /** Private constructor to prevent instantiation of this utility class. */
     private TarUtils(){
@@ -275,10 +268,10 @@ public class TarUtils {
             return parseName(buffer, offset, length, DEFAULT_ENCODING);
         } catch (final IOException ex) { // NOSONAR
             try {
-                return parseName(buffer, offset, length, FALLBACK_ENCODING);
+                return parseNameFallback(buffer, offset, length);
             } catch (final IOException ex2) {
                 // impossible
-                throw new RuntimeException(ex2); //NOSONAR
+                throw new UncheckedIOException(ex2); //NOSONAR
             }
         }
     }
@@ -291,14 +284,14 @@ public class TarUtils {
      * @param buffer The buffer from which to parse.
      * @param offset The offset into the buffer from which to parse.
      * @param length The maximum number of bytes to parse.
-     * @param encoding name of the encoding to use for file names
+     * @param charset name of the encoding to use for file names
      * @since 1.4
      * @return The entry name.
      * @throws IOException on error
      */
     public static String parseName(final byte[] buffer, final int offset,
                                    final int length,
-                                   final ZipEncoding encoding)
+                                   final Charset charset)
         throws IOException {
 
         int len = 0;
@@ -308,7 +301,21 @@ public class TarUtils {
         if (len > 0) {
             final byte[] b = new byte[len];
             System.arraycopy(buffer, offset, b, 0, len);
-            return encoding.decode(b);
+            return CharsetUtils.decode(charset, b);
+        }
+        return "";
+    }
+
+    private static String parseNameFallback(final byte[] buffer, final int offset, final int length) throws IOException {
+        int len = 0;
+        for (int i = offset; len < length && buffer[i] != 0; i++) {
+            len++;
+        }
+        if (len > 0) {
+            final byte[] b = new byte[len];
+            System.arraycopy(buffer, offset, b, 0, len);
+
+            return fallbackDecode(b);
         }
         return "";
     }
@@ -373,11 +380,10 @@ public class TarUtils {
             return formatNameBytes(name, buf, offset, length, DEFAULT_ENCODING);
         } catch (final IOException ex) { // NOSONAR
             try {
-                return formatNameBytes(name, buf, offset, length,
-                                       FALLBACK_ENCODING);
+                return formatNameBytesFallback(name, buf, offset, length);
             } catch (final IOException ex2) {
                 // impossible
-                throw new RuntimeException(ex2); //NOSONAR
+                throw new UncheckedIOException(ex2); //NOSONAR
             }
         }
     }
@@ -395,19 +401,36 @@ public class TarUtils {
      * @param buf The buffer where the name is to be stored.
      * @param offset The starting offset into the buffer
      * @param length The maximum number of header bytes to copy.
-     * @param encoding name of the encoding to use for file names
+     * @param charset name of the encoding to use for file names
      * @since 1.4
      * @return The updated offset, i.e. offset + length
      * @throws IOException on error
      */
     public static int formatNameBytes(final String name, final byte[] buf, final int offset,
                                       final int length,
-                                      final ZipEncoding encoding)
+                                      final Charset charset)
         throws IOException {
         int len = name.length();
-        ByteBuffer b = encoding.encode(name);
+        ByteBuffer b = CharsetUtils.encode(charset, name);
         while (b.limit() > length && len > 0) {
-            b = encoding.encode(name.substring(0, --len));
+            b = CharsetUtils.encode(charset, name.substring(0, --len));
+        }
+        final int limit = b.limit() - b.position();
+        System.arraycopy(b.array(), b.arrayOffset(), buf, offset, limit);
+
+        // Pad any remaining output bytes with NUL
+        for (int i = limit; i < length; ++i) {
+            buf[offset + i] = 0;
+        }
+
+        return offset + length;
+    }
+
+    static int formatNameBytesFallback(final String name, final byte[] buf, final int offset, final int length) throws IOException {
+        int len = name.length();
+        ByteBuffer b = fallbackEncode(name);
+        while (b.limit() > length && len > 0) {
+            b = fallbackEncode(name.substring(0, --len));
         }
         final int limit = b.limit() - b.position();
         System.arraycopy(b.array(), b.arrayOffset(), buf, offset, limit);
@@ -854,7 +877,7 @@ public class TarUtils {
         try {
             return parseFromPAX01SparseHeaders(sparseMap);
         } catch (IOException ex) {
-            throw new RuntimeException(ex.getMessage(), ex);
+            throw new UncheckedIOException(ex.getMessage(), ex);
         }
     }
 

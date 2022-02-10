@@ -21,13 +21,13 @@ package org.apache.commons.compress.archivers.zip;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import org.hamcrest.core.IsInstanceOf;
+
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -46,27 +46,10 @@ public class ZipEncodingTest {
         "%U2016%U2015%U2016%U2015%U2016%U2015%U2016%U2015%U2016%U2015%U2016";
 
     @Test
-    public void testNothingToMakeCoverallsHappier() {
-        final Object o = new ZipEncodingHelper() {
-        };
-        assertNotNull(o);
-    }
-
-    @Test
     public void testGetNonexistentEncoding() throws IOException {
-        final ZipEncoding ze = ZipEncodingHelper.getZipEncoding("I-am-a-banana");
-        assertNotNull(ze);
-        if (ze instanceof CharsetAccessor) {
-            final CharsetAccessor hasCharset = (CharsetAccessor) ze;
-            Assert.assertEquals(Charset.defaultCharset(), hasCharset.getCharset());
-        }
-    }
-
-    @Test
-    public void testIsUTF8() throws IOException {
-       assertTrue(ZipEncodingHelper.isUTF8("UTF-8"));
-       assertTrue(ZipEncodingHelper.isUTF8("UTF8"));
-       Assert.assertEquals(Charset.defaultCharset().name().equals("UTF-8"), ZipEncodingHelper.isUTF8(null));
+        final Charset charset = CharsetUtils.getCharset("I-am-a-banana");
+        assertNotNull(charset);
+        Assert.assertEquals(Charset.defaultCharset(), charset);
     }
 
     @Test
@@ -167,8 +150,7 @@ public class ZipEncodingTest {
     private void doSimpleEncodingTest(final String name, byte[] testBytes)
         throws IOException {
 
-        final ZipEncoding enc = ZipEncodingHelper.getZipEncoding(name);
-        assertThat(enc, IsInstanceOf.instanceOf(NioZipEncoding.class));
+        final Charset enc = CharsetUtils.getCharset(name);
         if (testBytes == null) {
 
             testBytes = new byte[256];
@@ -177,18 +159,18 @@ public class ZipEncodingTest {
             }
         }
 
-        final String decoded = enc.decode(testBytes);
+        final String decoded = CharsetUtils.decode(enc, testBytes);
 
-        assertTrue(enc.canEncode(decoded));
+        assertTrue(CharsetUtils.canEncode(enc, decoded));
 
-        final ByteBuffer encoded = enc.encode(decoded);
+        final ByteBuffer encoded = CharsetUtils.encode(enc, decoded);
 
         assertEquals(testBytes, encoded);
 
-        assertFalse(enc.canEncode(UNENC_STRING));
-        assertEquals("%U2016".getBytes(name), enc.encode(UNENC_STRING));
-        assertFalse(enc.canEncode(BAD_STRING));
-        assertEquals(BAD_STRING_ENC.getBytes(name), enc.encode(BAD_STRING));
+        assertFalse(CharsetUtils.canEncode(enc, UNENC_STRING));
+        assertEquals("%U2016".getBytes(name), CharsetUtils.encode(enc, UNENC_STRING));
+        assertFalse(CharsetUtils.canEncode(enc, BAD_STRING));
+        assertEquals(BAD_STRING_ENC.getBytes(name), CharsetUtils.encode(enc, BAD_STRING));
     }
 
 }

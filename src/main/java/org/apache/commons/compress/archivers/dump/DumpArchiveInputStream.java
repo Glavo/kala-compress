@@ -20,14 +20,14 @@ package org.apache.commons.compress.archivers.dump;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +74,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
     /**
      * The encoding to use for file names and labels.
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     // the provided encoding (for unit tests)
     final String encoding;
@@ -104,7 +104,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
         this.raw = new TapeInputStream(is);
         this.hasHitEOF = false;
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
 
         try {
             // read header, verify it's a dump archive.
@@ -115,7 +115,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
             }
 
             // get summary information
-            summary = new DumpArchiveSummary(headerBytes, this.zipEncoding);
+            summary = new DumpArchiveSummary(headerBytes, this.charset);
 
             // reset buffer with actual block size.
             raw.resetBlockSize(summary.getNTRec(), summary.isCompressed());
@@ -355,7 +355,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
 
                 final byte type = blockBuffer[i + 6];
 
-                final String name = DumpArchiveUtil.decode(zipEncoding, blockBuffer, i + 8, blockBuffer[i + 7]);
+                final String name = DumpArchiveUtil.decode(charset, blockBuffer, i + 8, blockBuffer[i + 7]);
 
                 if (".".equals(name) || "..".equals(name)) {
                     // do nothing...

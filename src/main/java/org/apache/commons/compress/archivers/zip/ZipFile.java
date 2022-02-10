@@ -28,6 +28,8 @@ import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -45,11 +47,7 @@ import java.util.zip.ZipException;
 import org.apache.commons.compress.archivers.EntryStreamOffsets;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.deflate64.Deflate64CompressorInputStream;
-import org.apache.commons.compress.utils.BoundedArchiveInputStream;
-import org.apache.commons.compress.utils.BoundedSeekableByteChannelInputStream;
-import org.apache.commons.compress.utils.CountingInputStream;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.compress.utils.InputStreamStatistics;
+import org.apache.commons.compress.utils.*;
 
 import static org.apache.commons.compress.archivers.zip.ZipConstants.DWORD;
 import static org.apache.commons.compress.archivers.zip.ZipConstants.SHORT;
@@ -123,7 +121,7 @@ public class ZipFile implements Closeable {
     /**
      * The zip encoding to use for file names and the file comment.
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     /**
      * The actual data source.
@@ -161,7 +159,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      */
     public ZipFile(final File f) throws IOException {
-        this(f, ZipEncodingHelper.UTF8);
+        this(f, CharsetNames.UTF_8);
     }
 
     /**
@@ -172,7 +170,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      */
     public ZipFile(final String name) throws IOException {
-        this(new File(name), ZipEncodingHelper.UTF8);
+        this(new File(name), CharsetNames.UTF_8);
     }
 
     /**
@@ -266,7 +264,7 @@ public class ZipFile implements Closeable {
      */
     public ZipFile(final SeekableByteChannel channel)
             throws IOException {
-        this(channel, "unknown archive", ZipEncodingHelper.UTF8, true);
+        this(channel, "unknown archive", CharsetNames.UTF_8, true);
     }
 
     /**
@@ -356,7 +354,7 @@ public class ZipFile implements Closeable {
         isSplitZipArchive = (channel instanceof ZipSplitReadOnlySeekableByteChannel);
 
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         archive = channel;
         boolean success = false;
@@ -383,7 +381,7 @@ public class ZipFile implements Closeable {
      * @return null if using the platform's default character encoding.
      */
     public String getEncoding() {
-        return encoding;
+        return charset.name();
     }
 
     /**
@@ -628,7 +626,7 @@ public class ZipFile implements Closeable {
     public String getUnixSymlink(final ZipArchiveEntry entry) throws IOException {
         if (entry != null && entry.isUnixSymlink()) {
             try (InputStream in = getInputStream(entry)) {
-                return zipEncoding.decode(IOUtils.toByteArray(in));
+                return CharsetUtils.decode(charset, IOUtils.toByteArray(in));
             }
         }
         return null;
@@ -723,8 +721,7 @@ public class ZipFile implements Closeable {
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(cfhBuf, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
-        final ZipEncoding entryEncoding =
-            hasUTF8Flag ? ZipEncodingHelper.UTF8_ZIP_ENCODING : zipEncoding;
+        final Charset entryEncoding = hasUTF8Flag ? StandardCharsets.UTF_8 : charset;
         if (hasUTF8Flag) {
             ze.setNameSource(ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG);
         }
@@ -789,7 +786,7 @@ public class ZipFile implements Closeable {
         if (fileName.length < fileNameLen) {
             throw new EOFException();
         }
-        ze.setName(entryEncoding.decode(fileName), fileName);
+        ze.setName(CharsetUtils.decode(entryEncoding, fileName), fileName);
 
         // LFH offset,
         ze.setLocalHeaderOffset(ZipLong.getValue(cfhBuf, off));
@@ -815,7 +812,7 @@ public class ZipFile implements Closeable {
         if (comment.length < commentLen) {
             throw new EOFException();
         }
-        ze.setComment(entryEncoding.decode(comment));
+        ze.setComment(CharsetUtils.decode(entryEncoding, comment));
 
         if (!hasUTF8Flag && useUnicodeExtraFields) {
             noUTF8Flag.put(ze, new NameAndComment(fileName, comment));

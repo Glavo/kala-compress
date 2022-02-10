@@ -19,6 +19,7 @@
 package org.apache.commons.compress.archivers.zip;
 
 import org.apache.commons.compress.AbstractTestCase;
+import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.IOUtils;
 
 import org.junit.After;
@@ -103,6 +104,6 @@ public class ZipFileIgnoringLocalFileHeaderTest {
     }
 
     private static ZipFile openZipWithoutLFH(final String fileName) throws IOException {
-        return new ZipFile(AbstractTestCase.getFile(fileName), ZipEncodingHelper.UTF8, true, true);
+        return new ZipFile(AbstractTestCase.getFile(fileName), CharsetNames.UTF_8, true, true);
     }
 }

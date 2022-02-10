@@ -34,6 +34,7 @@ import java.util.zip.CRC32;
 
 import org.apache.commons.compress.AbstractTestCase;
 import org.apache.commons.compress.utils.CharsetNames;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.junit.Test;
 
 public class UTF8ZipFilesTest extends AbstractTestCase {
@@ -286,7 +287,7 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
                                        final boolean withExplicitUnicodeExtra)
         throws IOException {
 
-        final ZipEncoding zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        final Charset charset = CharsetUtils.getCharset(encoding);
 
         ZipArchiveOutputStream zos = null;
         try {
@@ -301,9 +302,9 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
 
             ZipArchiveEntry ze = new ZipArchiveEntry(OIL_BARREL_TXT);
             if (withExplicitUnicodeExtra
-                && !zipEncoding.canEncode(ze.getName())) {
+                && !CharsetUtils.canEncode(charset, ze.getName())) {
 
-                final ByteBuffer en = zipEncoding.encode(ze.getName());
+                final ByteBuffer en = CharsetUtils.encode(charset, ze.getName());
 
                 ze.addExtraField(new UnicodePathExtraField(ze.getName(),
                                                            en.array(),
@@ -318,9 +319,9 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
 
             ze = new ZipArchiveEntry(EURO_FOR_DOLLAR_TXT);
             if (withExplicitUnicodeExtra
-                && !zipEncoding.canEncode(ze.getName())) {
+                && !CharsetUtils.canEncode(charset, ze.getName())) {
 
-                final ByteBuffer en = zipEncoding.encode(ze.getName());
+                final ByteBuffer en = CharsetUtils.encode(charset, ze.getName());
 
                 ze.addExtraField(new UnicodePathExtraField(ze.getName(),
                                                            en.array(),
@@ -336,9 +337,9 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
             ze = new ZipArchiveEntry(ASCII_TXT);
 
             if (withExplicitUnicodeExtra
-                && !zipEncoding.canEncode(ze.getName())) {
+                && !CharsetUtils.canEncode(charset, ze.getName())) {
 
-                final ByteBuffer en = zipEncoding.encode(ze.getName());
+                final ByteBuffer en = CharsetUtils.encode(charset, ze.getName());
 
                 ze.addExtraField(new UnicodePathExtraField(ze.getName(),
                                                            en.array(),
@@ -399,8 +400,8 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
             final UnicodePathExtraField ucpf = findUniCodePath(ze);
             assertNotNull(ucpf);
 
-            final ZipEncoding enc = ZipEncodingHelper.getZipEncoding(encoding);
-            final ByteBuffer ne = enc.encode(ze.getName());
+            final Charset enc = CharsetUtils.getCharset(encoding);
+            final ByteBuffer ne = CharsetUtils.encode(enc, ze.getName());
 
             final CRC32 crc = new CRC32();
             crc.update(ne.array(), ne.arrayOffset(),

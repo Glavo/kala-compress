@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -33,8 +35,7 @@ import java.util.Map;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.apache.commons.compress.utils.CountingOutputStream;
 import org.apache.commons.compress.utils.FixedLengthBlockOutputStream;
 
@@ -115,14 +116,13 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
     private final FixedLengthBlockOutputStream out;
     private final CountingOutputStream countingOut;
 
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     // the provided encoding (for unit tests)
     final String encoding;
 
     private boolean addPaxHeadersForNonAsciiNames;
-    private static final ZipEncoding ASCII =
-        ZipEncodingHelper.getZipEncoding("ASCII");
+    private static final CharsetEncoder ASCIIEncoder = StandardCharsets.US_ASCII.newEncoder();
 
     private static final int BLOCK_SIZE_UNSPECIFIED = -511;
 
@@ -221,7 +221,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         out = new FixedLengthBlockOutputStream(countingOut = new CountingOutputStream(os),
                                                RECORD_SIZE);
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
 
         this.recordBuf = new byte[RECORD_SIZE];
         this.recordsPerBlock = realBlockSize / RECORD_SIZE;
@@ -353,7 +353,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         if (entry.isGlobalPaxHeader()) {
             final byte[] data = encodeExtendedPaxHeadersContents(entry.getExtraPaxHeaders());
             entry.setSize(data.length);
-            entry.writeEntryHeader(recordBuf, zipEncoding, bigNumberMode == BIGNUMBER_STAR);
+            entry.writeEntryHeader(recordBuf, charset, bigNumberMode == BIGNUMBER_STAR);
             writeRecord(recordBuf);
             currSize= entry.getSize();
             currBytes = 0;
@@ -378,13 +378,13 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath
-                && !ASCII.canEncode(entryName)) {
+                && !ASCIIEncoder.canEncode(entryName)) {
                 paxHeaders.put("path", entryName);
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsLinkPath
                 && (entry.isLink() || entry.isSymbolicLink())
-                && !ASCII.canEncode(linkName)) {
+                && !ASCIIEncoder.canEncode(linkName)) {
                 paxHeaders.put("linkpath", linkName);
             }
             paxHeaders.putAll(entry.getExtraPaxHeaders());
@@ -393,7 +393,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
                 writePaxHeaders(entry, entryName, paxHeaders);
             }
 
-            entry.writeEntryHeader(recordBuf, zipEncoding, bigNumberMode == BIGNUMBER_STAR);
+            entry.writeEntryHeader(recordBuf, charset, bigNumberMode == BIGNUMBER_STAR);
             writeRecord(recordBuf);
 
             currBytes = 0;
@@ -678,7 +678,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         final Map<String, String> paxHeaders,
         final String paxHeaderName, final byte linkType, final String fieldName)
         throws IOException {
-        final ByteBuffer encodedName = zipEncoding.encode(name);
+        final ByteBuffer encodedName = CharsetUtils.encode(charset, name);
         final int len = encodedName.limit() - encodedName.position();
         if (len >= TarConstants.NAMELEN) {
 

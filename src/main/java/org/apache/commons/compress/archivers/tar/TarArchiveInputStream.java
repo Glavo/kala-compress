@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +35,9 @@ import java.util.Map;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.BoundedInputStream;
+import org.apache.commons.compress.utils.CharsetUtils;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -84,7 +84,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
     private TarArchiveEntry currEntry;
 
     /** The encoding of the file */
-    private final ZipEncoding zipEncoding;
+    private final Charset charset;
 
     // the provided encoding (for unit tests)
     final String encoding;
@@ -188,7 +188,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
         this.inputStream = is;
         this.hasHitEOF = false;
         this.encoding = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.charset = CharsetUtils.getCharset(encoding);
         this.recordSize = recordSize;
         this.recordBuffer = new byte[recordSize];
         this.blockSize = blockSize;
@@ -376,7 +376,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
         }
 
         try {
-            currEntry = new TarArchiveEntry(headerBuf, zipEncoding, lenient);
+            currEntry = new TarArchiveEntry(headerBuf, charset, lenient);
         } catch (final IllegalArgumentException e) {
             throw new IOException("Error detected parsing the header", e);
         }
@@ -392,7 +392,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
                 // entry
                 return null;
             }
-            currEntry.setLinkName(zipEncoding.decode(longLinkData));
+            currEntry.setLinkName(CharsetUtils.decode(charset, longLinkData));
         }
 
         if (currEntry.isGNULongNameEntry()) {
@@ -405,7 +405,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
             }
 
             // COMPRESS-509 : the name of directories should end with '/'
-            final String name = zipEncoding.decode(longNameData);
+            final String name = CharsetUtils.decode(charset, longNameData);
             currEntry.setName(name);
             if (currEntry.isDirectory() && !name.endsWith("/")) {
                 currEntry.setName(name + "/");
