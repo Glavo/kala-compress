@@ -248,7 +248,7 @@ import java.util.zip.ZipException;
 public class X0017_StrongEncryptionHeader extends PKWareExtraHeader {
 
     public X0017_StrongEncryptionHeader() {
-        super(new ZipShort(0x0017));
+        super(ZipShort.valueOf(0x0017));
     }
 
     private int format; // TODO written but not read

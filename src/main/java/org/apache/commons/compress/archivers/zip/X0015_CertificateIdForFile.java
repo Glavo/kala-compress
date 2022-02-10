@@ -46,7 +46,7 @@ import java.util.zip.ZipException;
 public class X0015_CertificateIdForFile extends PKWareExtraHeader {
 
     public X0015_CertificateIdForFile() {
-        super(new ZipShort(0x0015));
+        super(ZipShort.valueOf(0x0015));
     }
 
     private int rcount;

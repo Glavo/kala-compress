@@ -139,7 +139,7 @@ public abstract class AbstractUnicodeExtraField implements ZipExtraField {
         if (data == null) {
             assembleData();
         }
-        return new ZipShort(data != null ? data.length : 0);
+        return ZipShort.valueOf(data != null ? data.length : 0);
     }
 
     @Override

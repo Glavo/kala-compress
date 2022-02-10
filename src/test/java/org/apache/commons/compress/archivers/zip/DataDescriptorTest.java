@@ -77,7 +77,7 @@ public class DataDescriptorTest {
         assertArrayEquals(new byte[] { 8, 8 }, gpbInCDH);
 
         final int ddStart = cdhStart - 16;
-        assertEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));
+        assertEquals(ZipLong.DD_SIG, ZipLong.valueOf(data, ddStart));
         final long crcFromDD = ZipLong.getValue(data, ddStart + 4);
         final long cSizeFromDD = ZipLong.getValue(data, ddStart + 8);
         final long sizeFromDD = ZipLong.getValue(data, ddStart + 12);
@@ -119,7 +119,7 @@ public class DataDescriptorTest {
         assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);
 
         final int ddStart = cdhStart - 16;
-        assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));
+        assertNotEquals(ZipLong.DD_SIG, ZipLong.valueOf(data, ddStart));
         final long crcFromLFH = ZipLong.getValue(data, 14);
         final long cSizeFromLFH = ZipLong.getValue(data, 18);
         final long sizeFromLFH = ZipLong.getValue(data, 22);
@@ -170,7 +170,7 @@ public class DataDescriptorTest {
         assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);
 
         final int ddStart = cdhStart - 16;
-        assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));
+        assertNotEquals(ZipLong.DD_SIG, ZipLong.valueOf(data, ddStart));
         final long crcFromLFH = ZipLong.getValue(data, 14);
         final long cSizeFromLFH = ZipLong.getValue(data, 18);
         final long sizeFromLFH = ZipLong.getValue(data, 22);

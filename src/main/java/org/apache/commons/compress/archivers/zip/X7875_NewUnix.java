@@ -57,8 +57,8 @@ import static org.apache.commons.compress.archivers.zip.ZipUtil.unsignedIntToSig
  * @since 1.5
  */
 public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
-    private static final ZipShort HEADER_ID = new ZipShort(0x7875);
-    private static final ZipShort ZERO = new ZipShort(0);
+    private static final ZipShort HEADER_ID = ZipShort.valueOf(0x7875);
+    private static final ZipShort ZERO = ZipShort.ZERO;
     private static final BigInteger ONE_THOUSAND = BigInteger.valueOf(1000);
     private static final long serialVersionUID = 1L;
 
@@ -141,7 +141,7 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
         final int gidSize = b == null ? 0 : b.length;
 
         // The 3 comes from:  version=1 + uidsize=1 + gidsize=1
-        return new ZipShort(3 + uidSize + gidSize);
+        return ZipShort.valueOf(3 + uidSize + gidSize);
     }
 
     /**

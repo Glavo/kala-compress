@@ -40,7 +40,7 @@ public class ResourceAlignmentExtraField implements ZipExtraField {
     /**
      * Extra field id used for storing alignment and padding.
      */
-    public static final ZipShort ID = new ZipShort(0xa11e);
+    public static final ZipShort ID = ZipShort.valueOf(0xa11e);
 
     public static final int BASE_SIZE = 2;
 
@@ -102,12 +102,12 @@ public class ResourceAlignmentExtraField implements ZipExtraField {
 
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(BASE_SIZE + padding);
+        return ZipShort.valueOf(BASE_SIZE + padding);
     }
 
     @Override
     public ZipShort getCentralDirectoryLength() {
-        return new ZipShort(BASE_SIZE);
+        return ZipShort.valueOf(BASE_SIZE);
     }
 
     @Override

@@ -51,7 +51,7 @@ package org.apache.commons.compress.archivers.zip;
 public class X0019_EncryptionRecipientCertificateList extends PKWareExtraHeader {
 
     public X0019_EncryptionRecipientCertificateList() {
-        super(new ZipShort(0x0019));
+        super(ZipShort.valueOf(0x0019));
     }
 
 }

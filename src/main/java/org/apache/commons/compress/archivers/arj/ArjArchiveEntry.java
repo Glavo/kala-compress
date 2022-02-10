@@ -18,11 +18,11 @@
 package org.apache.commons.compress.archivers.arj;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipUtil;
 
 /**
  * An entry in an ARJ archive.
@@ -94,7 +94,7 @@ public class ArjArchiveEntry implements ArchiveEntry {
     @Override
     public Date getLastModifiedDate() {
         final long ts = isHostOsUnix() ? localFileHeader.dateTimeModified * 1000L
-            : ZipUtil.dosToJavaTime(0xFFFFFFFFL & localFileHeader.dateTimeModified);
+            : dosToJavaTime(0xFFFFFFFFL & localFileHeader.dateTimeModified);
         return new Date(ts);
     }
 
@@ -159,6 +159,20 @@ public class ArjArchiveEntry implements ArchiveEntry {
         }
         final ArjArchiveEntry other = (ArjArchiveEntry) obj;
         return localFileHeader.equals(other.localFileHeader);
+    }
+
+    private static long dosToJavaTime(final long dosTime) {
+        final Calendar cal = Calendar.getInstance();
+        // CheckStyle:MagicNumberCheck OFF - no point
+        cal.set(Calendar.YEAR, (int) ((dosTime >> 25) & 0x7f) + 1980);
+        cal.set(Calendar.MONTH, (int) ((dosTime >> 21) & 0x0f) - 1);
+        cal.set(Calendar.DATE, (int) (dosTime >> 16) & 0x1f);
+        cal.set(Calendar.HOUR_OF_DAY, (int) (dosTime >> 11) & 0x1f);
+        cal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);
+        cal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);
+        cal.set(Calendar.MILLISECOND, 0);
+        // CheckStyle:MagicNumberCheck ON
+        return cal.getTime().getTime();
     }
 
     /**

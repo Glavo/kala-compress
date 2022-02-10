@@ -47,7 +47,7 @@ import java.util.zip.ZipException;
 public class X0016_CertificateIdForCentralDirectory extends PKWareExtraHeader {
 
     public X0016_CertificateIdForCentralDirectory() {
-        super(new ZipShort(0x0016));
+        super(ZipShort.valueOf(0x0016));
     }
 
     private int rcount;

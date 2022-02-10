@@ -286,7 +286,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
             return null;
         }
 
-        final ZipLong sig = new ZipLong(lfhBuf);
+        final ZipLong sig = ZipLong.valueOf(lfhBuf);
         if (!sig.equals(ZipLong.LFH_SIG)) {
             if (sig.equals(ZipLong.CFH_SIG) || sig.equals(ZipLong.AED_SIG) || isApkSigningBlock(lfhBuf)) {
                 hitCentralDirectory = true;
@@ -323,10 +323,10 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
             current.entry.setCrc(ZipLong.getValue(lfhBuf, off));
             off += WORD;
 
-            cSize = new ZipLong(lfhBuf, off);
+            cSize = ZipLong.valueOf(lfhBuf, off);
             off += WORD;
 
-            size = new ZipLong(lfhBuf, off);
+            size = ZipLong.valueOf(lfhBuf, off);
             off += WORD;
         } else {
             off += 3 * WORD;
@@ -410,7 +410,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
      */
     private void readFirstLocalFileHeader() throws IOException {
         readFully(lfhBuf);
-        final ZipLong sig = new ZipLong(lfhBuf);
+        final ZipLong sig = ZipLong.valueOf(lfhBuf);
 
         if (!skipSplitSig && sig.equals(ZipLong.DD_SIG)) {
             throw new UnsupportedZipFeatureException(UnsupportedZipFeatureException.Feature.SPLITTING);
@@ -891,11 +891,11 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
 
     private void readDataDescriptor() throws IOException {
         readFully(wordBuf);
-        ZipLong val = new ZipLong(wordBuf);
+        ZipLong val = ZipLong.valueOf(wordBuf);
         if (ZipLong.DD_SIG.equals(val)) {
             // data descriptor with signature, skip sig
             readFully(wordBuf);
-            val = new ZipLong(wordBuf);
+            val = ZipLong.valueOf(wordBuf);
         }
         current.entry.setCrc(val.getValue());
 
@@ -911,7 +911,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
         // If so, push back eight bytes and assume sizes are four
         // bytes, otherwise sizes are eight bytes each.
         readFully(twoDwordBuf);
-        final ZipLong potentialSig = new ZipLong(twoDwordBuf, DWORD);
+        final ZipLong potentialSig = ZipLong.valueOf(twoDwordBuf, DWORD);
         if (potentialSig.equals(ZipLong.CFH_SIG) || potentialSig.equals(ZipLong.LFH_SIG)) {
             pushback(twoDwordBuf, DWORD, DWORD);
             long size = ZipLong.getValue(twoDwordBuf);

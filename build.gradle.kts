@@ -2,10 +2,18 @@ plugins {
     java
 }
 
-group = "org.apache.commons"
-version = "1.21"
-description = "Apache Commons Compress"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+group = "org.glavo"
+description = "Glavo Compress"
+
+version = "1.21.0.1"
+
+val buildType = project.findProperty("buildType")?.toString()?.toUpperCase() ?: "SNAPSHOT"
+
+when (buildType) {
+    "RELEASE" -> {}
+    "SNAPSHOT" -> version = "$version-SNAPSHOT"
+    "NIGHTLY" -> TODO()
+}
 
 repositories {
     maven(url = "https://repository.apache.org/snapshots")

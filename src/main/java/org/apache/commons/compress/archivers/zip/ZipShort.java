@@ -26,7 +26,7 @@ import org.apache.commons.compress.utils.ByteUtils;
  * rules for the little endian byte order of ZIP files.
  * @Immutable
  */
-public final class ZipShort implements Cloneable, Serializable {
+public final class ZipShort implements Serializable {
     /**
      * ZipShort with a value of 0.
      * @since 1.14
@@ -37,29 +37,39 @@ public final class ZipShort implements Cloneable, Serializable {
 
     private final int value;
 
-    /**
-     * Create instance from a number.
-     * @param value the int to store as a ZipShort
-     */
-    public ZipShort (final int value) {
+    private ZipShort(final int value) {
         this.value = value;
     }
 
     /**
-     * Create instance from bytes.
-     * @param bytes the bytes to store as a ZipShort
+     * Create instance from a number.
+     *
+     * @param value the int to store as a ZipShort
+     * @since 1.21.0.1
      */
-    public ZipShort (final byte[] bytes) {
-        this(bytes, 0);
+    public static ZipShort valueOf(final int value) {
+        return new ZipShort(value);
+    }
+
+    /**
+     * Create instance from bytes.
+     *
+     * @param bytes the bytes to store as a ZipShort
+     * @since 1.21.0.1
+     */
+    public static ZipShort valueOf(final byte[] bytes) {
+        return valueOf(bytes, 0);
     }
 
     /**
      * Create instance from the two bytes starting at offset.
+     *
      * @param bytes the bytes to store as a ZipShort
      * @param offset the offset to start
+     * @since 1.21.0.1
      */
-    public ZipShort (final byte[] bytes, final int offset) {
-        value = ZipShort.getValue(bytes, offset);
+    public static ZipShort valueOf(final byte[] bytes, final int offset) {
+        return new ZipShort(ZipShort.getValue(bytes, offset));
     }
 
     /**
@@ -129,10 +139,7 @@ public final class ZipShort implements Cloneable, Serializable {
      */
     @Override
     public boolean equals(final Object o) {
-        if (!(o instanceof ZipShort)) {
-            return false;
-        }
-        return value == ((ZipShort) o).getValue();
+        return o instanceof ZipShort && value == ((ZipShort) o).getValue();
     }
 
     /**
@@ -142,16 +149,6 @@ public final class ZipShort implements Cloneable, Serializable {
     @Override
     public int hashCode() {
         return value;
-    }
-
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (final CloneNotSupportedException cnfe) {
-            // impossible
-            throw new RuntimeException(cnfe); //NOSONAR
-        }
     }
 
     @Override

@@ -196,8 +196,8 @@ public class ExtraFieldUtils {
         final int dataLength = data.length;
         LOOP:
         while (start <= dataLength - WORD) {
-            final ZipShort headerId = new ZipShort(data, start);
-            final int length = new ZipShort(data, start + 2).getValue();
+            final ZipShort headerId = ZipShort.valueOf(data, start);
+            final int length = ZipShort.valueOf(data, start + 2).getValue();
             if (start + WORD + length > dataLength) {
                 final ZipExtraField field = parsingBehavior.onUnparseableExtraField(data, start, dataLength - start,
                     local, length);

@@ -31,7 +31,7 @@ package org.apache.commons.compress.archivers.zip;
  */
 public class UnicodeCommentExtraField extends AbstractUnicodeExtraField {
 
-    public static final ZipShort UCOM_ID = new ZipShort(0x6375);
+    public static final ZipShort UCOM_ID = ZipShort.valueOf(0x6375);
 
     public UnicodeCommentExtraField () {
     }

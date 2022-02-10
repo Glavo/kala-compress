@@ -44,7 +44,7 @@ public abstract class ZipUtil {
      * @return the date as a <code>ZipLong</code>
      */
     public static ZipLong toDosTime(final Date time) {
-        return new ZipLong(toDosTime(time.getTime()));
+        return ZipLong.valueOf(toDosTime(time.getTime()));
     }
 
     /**

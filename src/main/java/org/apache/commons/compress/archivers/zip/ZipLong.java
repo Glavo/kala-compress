@@ -28,7 +28,7 @@ import static org.apache.commons.compress.archivers.zip.ZipConstants.WORD;
  * rules for the little endian byte order of ZIP files.
  * @Immutable
  */
-public final class ZipLong implements Cloneable, Serializable {
+public final class ZipLong implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final long value;
@@ -64,8 +64,7 @@ public final class ZipLong implements Cloneable, Serializable {
      * <p>This is the "PK00" prefix found in some archives.</p>
      * @since 1.5
      */
-    public static final ZipLong SINGLE_SEGMENT_SPLIT_MARKER =
-        new ZipLong(0X30304B50L);
+    public static final ZipLong SINGLE_SEGMENT_SPLIT_MARKER = new ZipLong(0X30304B50L);
 
     /**
      * Archive extra data record signature.
@@ -73,38 +72,49 @@ public final class ZipLong implements Cloneable, Serializable {
      */
     public static final ZipLong AED_SIG = new ZipLong(0X08064B50L);
 
-    /**
-     * Create instance from a number.
-     * @param value the long to store as a ZipLong
-     */
-    public ZipLong(final long value) {
+    private ZipLong(final long value) {
         this.value = value;
     }
 
     /**
-     * create instance from a java int.
-     * @param value the int to store as a ZipLong
-     * @since 1.15
+     * Create instance from a number.
+     *
+     * @param value the long to store as a ZipLong
+     * @since 1.21.0.1
      */
-    public ZipLong(final int value) {
-        this.value = value;
+    public static ZipLong valueOf(final long value) {
+        return new ZipLong(value);
+    }
+
+    /**
+     * Create instance from a java int.
+     *
+     * @param value the int to store as a ZipLong
+     * @since 1.21.0.1
+     */
+    public static ZipLong valueOf(final int value) {
+        return new ZipLong(value);
     }
 
     /**
      * Create instance from bytes.
+     *
      * @param bytes the bytes to store as a ZipLong
+     * @since 1.21.0.1
      */
-    public ZipLong (final byte[] bytes) {
-        this(bytes, 0);
+    public static ZipLong valueOf(final byte[] bytes) {
+        return valueOf(bytes, 0);
     }
 
     /**
      * Create instance from the four bytes starting at offset.
+     *
      * @param bytes the bytes to store as a ZipLong
      * @param offset the offset to start
+     * @since 1.21.0.1
      */
-    public ZipLong (final byte[] bytes, final int offset) {
-        value = ZipLong.getValue(bytes, offset);
+    public static ZipLong valueOf(final byte[] bytes, final int offset) {
+        return new ZipLong(ZipLong.getValue(bytes, offset));
     }
 
     /**
@@ -184,10 +194,7 @@ public final class ZipLong implements Cloneable, Serializable {
      */
     @Override
     public boolean equals(final Object o) {
-        if (!(o instanceof ZipLong)) {
-            return false;
-        }
-        return value == ((ZipLong) o).getValue();
+        return o instanceof ZipLong && value == ((ZipLong) o).getValue();
     }
 
     /**
@@ -196,17 +203,7 @@ public final class ZipLong implements Cloneable, Serializable {
      */
     @Override
     public int hashCode() {
-        return (int) value;
-    }
-
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (final CloneNotSupportedException cnfe) {
-            // impossible
-            throw new RuntimeException(cnfe); //NOSONAR
-        }
+        return Long.hashCode(value);
     }
 
     @Override

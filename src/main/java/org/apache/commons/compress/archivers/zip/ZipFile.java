@@ -882,7 +882,7 @@ public class ZipFile implements Closeable {
                 }
                 ze.setSize(size);
             } else if (hasCompressedSize) {
-                z64.setSize(new ZipEightByteInteger(ze.getSize()));
+                z64.setSize(ZipEightByteInteger.valueOf(ze.getSize()));
             }
 
             if (hasCompressedSize) {
@@ -892,7 +892,7 @@ public class ZipFile implements Closeable {
                 }
                 ze.setCompressedSize(size);
             } else if (hasUncompressedSize) {
-                z64.setCompressedSize(new ZipEightByteInteger(ze.getCompressedSize()));
+                z64.setCompressedSize(ZipEightByteInteger.valueOf(ze.getCompressedSize()));
             }
 
             if (hasRelativeHeaderOffset) {

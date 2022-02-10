@@ -65,40 +65,53 @@ public final class ZipEightByteInteger implements Serializable {
 
     private final BigInteger value;
 
-    public static final ZipEightByteInteger ZERO = new ZipEightByteInteger(0);
+    public static final ZipEightByteInteger ZERO = new ZipEightByteInteger(BigInteger.ZERO);
 
-    /**
-     * Create instance from a number.
-     * @param value the long to store as a ZipEightByteInteger
-     */
-    public ZipEightByteInteger(final long value) {
-        this(BigInteger.valueOf(value));
-    }
-
-    /**
-     * Create instance from a number.
-     * @param value the BigInteger to store as a ZipEightByteInteger
-     */
-    public ZipEightByteInteger(final BigInteger value) {
+    private ZipEightByteInteger(final BigInteger value) {
         this.value = value;
     }
 
     /**
-     * Create instance from bytes.
-     * @param bytes the bytes to store as a ZipEightByteInteger
+     * Create instance from a number.
+     *
+     * @param value the long to store as a ZipEightByteInteger
+     * @since 1.21.0.1
      */
-    public ZipEightByteInteger (final byte[] bytes) {
-        this(bytes, 0);
+    public static ZipEightByteInteger valueOf(final long value) {
+        return valueOf(BigInteger.valueOf(value));
+    }
+
+    /**
+     * Create instance from a number.
+     *
+     * @param value the BigInteger to store as a ZipEightByteInteger
+     * @since 1.21.0.1
+     */
+    public static ZipEightByteInteger valueOf(final BigInteger value) {
+        return new ZipEightByteInteger(value);
+    }
+
+    /**
+     * Create instance from bytes.
+     *
+     * @param bytes the bytes to store as a ZipEightByteInteger
+     * @since 1.21.0.1
+     */
+    public static ZipEightByteInteger valueOf(final byte[] bytes) {
+        return ZipEightByteInteger.valueOf(bytes, 0);
     }
 
     /**
      * Create instance from the eight bytes starting at offset.
+     *
      * @param bytes the bytes to store as a ZipEightByteInteger
      * @param offset the offset to start
+     * @since 1.21.0.1
      */
-    public ZipEightByteInteger (final byte[] bytes, final int offset) {
-        value = ZipEightByteInteger.getValue(bytes, offset);
+    public static ZipEightByteInteger valueOf(final byte[] bytes, final int offset) {
+        return new ZipEightByteInteger(ZipEightByteInteger.getValue(bytes, offset));
     }
+
 
     /**
      * Get value as eight bytes in big endian byte order.

@@ -54,7 +54,7 @@ import static org.apache.commons.compress.archivers.zip.ZipConstants.WORD;
  */
 public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
 
-    private static final ZipShort HEADER_ID = new ZipShort(0x756E);
+    private static final ZipShort HEADER_ID = ZipShort.valueOf(0x756E);
     private static final int      MIN_SIZE = WORD + SHORT + WORD + SHORT + SHORT;
     /**
      * Standard Unix stat(2) file mode.
@@ -104,7 +104,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
      */
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(WORD         // CRC
+        return ZipShort.valueOf(WORD         // CRC
                           + 2         // Mode
                           + WORD         // SizDev
                           + 2         // UID

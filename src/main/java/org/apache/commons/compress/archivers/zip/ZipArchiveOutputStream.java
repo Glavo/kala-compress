@@ -851,12 +851,12 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
             final ZipEightByteInteger compressedSize;
             if (phased) {
                 // sizes are already known
-                size = new ZipEightByteInteger(entry.entry.getSize());
-                compressedSize = new ZipEightByteInteger(entry.entry.getCompressedSize());
+                size = ZipEightByteInteger.valueOf(entry.entry.getSize());
+                compressedSize = ZipEightByteInteger.valueOf(entry.entry.getCompressedSize());
             } else if (entry.entry.getMethod() == STORED
                     && entry.entry.getSize() != ArchiveEntry.SIZE_UNKNOWN) {
                 // actually, we already know the sizes
-                compressedSize = size = new ZipEightByteInteger(entry.entry.getSize());
+                compressedSize = size = ZipEightByteInteger.valueOf(entry.entry.getSize());
             } else {
                 // just a placeholder, real data will be in data
                 // descriptor or inserted later via SeekableByteChannel
@@ -1479,8 +1479,8 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
                 || ze.getSize() >= ZIP64_MAGIC
                 || zip64Mode == Zip64Mode.Always
                 || zip64Mode == Zip64Mode.AlwaysWithCompatibility) {
-                z64.setCompressedSize(new ZipEightByteInteger(ze.getCompressedSize()));
-                z64.setSize(new ZipEightByteInteger(ze.getSize()));
+                z64.setCompressedSize(ZipEightByteInteger.valueOf(ze.getCompressedSize()));
+                z64.setSize(ZipEightByteInteger.valueOf(ze.getSize()));
             } else {
                 // reset value that may have been set for LFH
                 z64.setCompressedSize(null);
@@ -1493,10 +1493,10 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
                     ze.getDiskNumberStart() >= ZIP64_MAGIC_SHORT || zip64Mode == Zip64Mode.Always;
 
             if (needsToEncodeLfhOffset || needsToEncodeDiskNumberStart) {
-                z64.setRelativeHeaderOffset(new ZipEightByteInteger(lfhOffset));
+                z64.setRelativeHeaderOffset(ZipEightByteInteger.valueOf(lfhOffset));
             }
             if (needsToEncodeDiskNumberStart) {
-                z64.setDiskStartNumber(new ZipLong(ze.getDiskNumberStart()));
+                z64.setDiskStartNumber(ZipLong.valueOf(ze.getDiskNumberStart()));
             }
             ze.setExtra();
         }

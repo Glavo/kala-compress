@@ -29,20 +29,20 @@ import org.junit.Test;
 public class Zip64ExtendedInformationExtraFieldTest {
 
     private static final ZipEightByteInteger SIZE =
-        new ZipEightByteInteger(0x12345678);
+            ZipEightByteInteger.valueOf(0x12345678);
     private static final ZipEightByteInteger CSIZE =
-        new ZipEightByteInteger(0x9ABCDEF);
+            ZipEightByteInteger.valueOf(0x9ABCDEF);
     private static final ZipEightByteInteger OFF =
-        new ZipEightByteInteger(BigInteger.valueOf(0xABCDEF091234567L)
-                                .shiftLeft(4)
-                                .setBit(3));
-    private static final ZipLong DISK = new ZipLong(0x12);
+            ZipEightByteInteger.valueOf(BigInteger.valueOf(0xABCDEF091234567L)
+                                    .shiftLeft(4)
+                                    .setBit(3));
+    private static final ZipLong DISK = ZipLong.valueOf(0x12);
 
     @Test
     public void testWriteCDOnlySizes() {
         final Zip64ExtendedInformationExtraField f =
             new Zip64ExtendedInformationExtraField(SIZE, CSIZE);
-        assertEquals(new ZipShort(16), f.getCentralDirectoryLength());
+        assertEquals(ZipShort.valueOf(16), f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(16, b.length);
         checkSizes(b);
@@ -52,7 +52,7 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testWriteCDSizeAndOffset() {
         final Zip64ExtendedInformationExtraField f =
             new Zip64ExtendedInformationExtraField(SIZE, CSIZE, OFF, null);
-        assertEquals(new ZipShort(24), f.getCentralDirectoryLength());
+        assertEquals(ZipShort.valueOf(24), f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(24, b.length);
         checkSizes(b);
@@ -63,7 +63,7 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testWriteCDSizeOffsetAndDisk() {
         final Zip64ExtendedInformationExtraField f =
             new Zip64ExtendedInformationExtraField(SIZE, CSIZE, OFF, DISK);
-        assertEquals(new ZipShort(28), f.getCentralDirectoryLength());
+        assertEquals(ZipShort.valueOf(28), f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(28, b.length);
         checkSizes(b);
@@ -75,7 +75,7 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testWriteCDSizeAndDisk() {
         final Zip64ExtendedInformationExtraField f =
             new Zip64ExtendedInformationExtraField(SIZE, CSIZE, null, DISK);
-        assertEquals(new ZipShort(20), f.getCentralDirectoryLength());
+        assertEquals(ZipShort.valueOf(20), f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(20, b.length);
         checkSizes(b);

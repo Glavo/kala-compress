@@ -111,7 +111,7 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
      */
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(localData != null ? localData.length : 0);
+        return ZipShort.valueOf(localData != null ? localData.length : 0);
     }
 
     /**
@@ -143,7 +143,7 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
     @Override
     public ZipShort getCentralDirectoryLength() {
         if (centralData != null) {
-            return new ZipShort(centralData.length);
+            return ZipShort.valueOf(centralData.length);
         }
         return getLocalFileDataLength();
     }

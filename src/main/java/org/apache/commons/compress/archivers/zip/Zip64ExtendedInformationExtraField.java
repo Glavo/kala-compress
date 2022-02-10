@@ -44,7 +44,7 @@ import static org.apache.commons.compress.archivers.zip.ZipConstants.WORD;
  */
 public class Zip64ExtendedInformationExtraField implements ZipExtraField {
 
-    static final ZipShort HEADER_ID = new ZipShort(0x0001);
+    static final ZipShort HEADER_ID = ZipShort.valueOf(0x0001);
 
     private static final String LFH_MUST_HAVE_BOTH_SIZES_MSG =
         "Zip64 extended information must contain"
@@ -110,12 +110,12 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
 
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(size != null ? 2 * DWORD : 0);
+        return ZipShort.valueOf(size != null ? 2 * DWORD : 0);
     }
 
     @Override
     public ZipShort getCentralDirectoryLength() {
-        return new ZipShort((size != null ? DWORD : 0)
+        return ZipShort.valueOf((size != null ? DWORD : 0)
                             + (compressedSize != null ? DWORD : 0)
                             + (relativeHeaderOffset != null ? DWORD : 0)
                             + (diskStart != null ? WORD : 0));
@@ -162,18 +162,18 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
         if (length < 2 * DWORD) {
             throw new ZipException(LFH_MUST_HAVE_BOTH_SIZES_MSG);
         }
-        size = new ZipEightByteInteger(buffer, offset);
+        size = ZipEightByteInteger.valueOf(buffer, offset);
         offset += DWORD;
-        compressedSize = new ZipEightByteInteger(buffer, offset);
+        compressedSize = ZipEightByteInteger.valueOf(buffer, offset);
         offset += DWORD;
         int remaining = length - 2 * DWORD;
         if (remaining >= DWORD) {
-            relativeHeaderOffset = new ZipEightByteInteger(buffer, offset);
+            relativeHeaderOffset = ZipEightByteInteger.valueOf(buffer, offset);
             offset += DWORD;
             remaining -= DWORD;
         }
         if (remaining >= WORD) {
-            diskStart = new ZipLong(buffer, offset);
+            diskStart = ZipLong.valueOf(buffer, offset);
             offset += WORD; // NOSONAR - assignment as documentation
             remaining -= WORD; // NOSONAR - assignment as documentation
         }
@@ -196,13 +196,13 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
         if (length >= 3 * DWORD + WORD) {
             parseFromLocalFileData(buffer, offset, length);
         } else if (length == 3 * DWORD) {
-            size = new ZipEightByteInteger(buffer, offset);
+            size = ZipEightByteInteger.valueOf(buffer, offset);
             offset += DWORD;
-            compressedSize = new ZipEightByteInteger(buffer, offset);
+            compressedSize = ZipEightByteInteger.valueOf(buffer, offset);
             offset += DWORD;
-            relativeHeaderOffset = new ZipEightByteInteger(buffer, offset);
+            relativeHeaderOffset = ZipEightByteInteger.valueOf(buffer, offset);
         } else if (length % DWORD == WORD) {
-            diskStart = new ZipLong(buffer, offset + length - WORD);
+            diskStart = ZipLong.valueOf(buffer, offset + length - WORD);
         }
     }
 
@@ -241,21 +241,21 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
             }
             int offset = 0;
             if (hasUncompressedSize) {
-                size = new ZipEightByteInteger(rawCentralDirectoryData, offset);
+                size = ZipEightByteInteger.valueOf(rawCentralDirectoryData, offset);
                 offset += DWORD;
             }
             if (hasCompressedSize) {
-                compressedSize = new ZipEightByteInteger(rawCentralDirectoryData,
+                compressedSize = ZipEightByteInteger.valueOf(rawCentralDirectoryData,
                                                          offset);
                 offset += DWORD;
             }
             if (hasRelativeHeaderOffset) {
                 relativeHeaderOffset =
-                    new ZipEightByteInteger(rawCentralDirectoryData, offset);
+                        ZipEightByteInteger.valueOf(rawCentralDirectoryData, offset);
                 offset += DWORD;
             }
             if (hasDiskStart) {
-                diskStart = new ZipLong(rawCentralDirectoryData, offset);
+                diskStart = ZipLong.valueOf(rawCentralDirectoryData, offset);
                 offset += WORD; // NOSONAR - assignment as documentation
             }
         }

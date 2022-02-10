@@ -48,10 +48,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class X5455_ExtendedTimestampTest {
-    private final static ZipShort X5455 = new ZipShort(0x5455);
+    private final static ZipShort X5455 = ZipShort.valueOf(0x5455);
 
-    private final static ZipLong ZERO_TIME = new ZipLong(0);
-    private final static ZipLong MAX_TIME_SECONDS = new ZipLong(Integer.MAX_VALUE);
+    private final static ZipLong ZERO_TIME = ZipLong.valueOf(0);
+    private final static ZipLong MAX_TIME_SECONDS = ZipLong.valueOf(Integer.MAX_VALUE);
     private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd/HH:mm:ss Z");
 
     static {
@@ -229,7 +229,7 @@ public class X5455_ExtendedTimestampTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         final long timeMillis = cal.getTimeInMillis();
-        final ZipLong time = new ZipLong(timeMillis / 1000);
+        final ZipLong time = ZipLong.valueOf(timeMillis / 1000);
 
         // set too big
         try {

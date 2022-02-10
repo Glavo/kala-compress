@@ -82,7 +82,7 @@ import java.util.zip.ZipException;
  * @since 1.5
  */
 public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serializable {
-    private static final ZipShort HEADER_ID = new ZipShort(0x5455);
+    private static final ZipShort HEADER_ID = ZipShort.valueOf(0x5455);
     private static final long serialVersionUID = 1L;
 
     /**
@@ -140,7 +140,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      */
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(1 +
+        return ZipShort.valueOf(1 +
                 (bit0_modifyTimePresent ? 4 : 0) +
                 (bit1_accessTimePresent && accessTime != null ? 4 : 0) +
                 (bit2_createTimePresent && createTime != null ? 4 : 0)
@@ -159,7 +159,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      */
     @Override
     public ZipShort getCentralDirectoryLength() {
-        return new ZipShort(1 +
+        return ZipShort.valueOf(1 +
                 (bit0_modifyTimePresent ? 4 : 0)
         );
     }
@@ -225,19 +225,19 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         final int len = offset + length;
         setFlags(data[offset++]);
         if (bit0_modifyTimePresent && offset + 4 <= len) {
-            modifyTime = new ZipLong(data, offset);
+            modifyTime = ZipLong.valueOf(data, offset);
             offset += 4;
         } else {
             bit0_modifyTimePresent = false;
         }
         if (bit1_accessTimePresent && offset + 4 <= len) {
-            accessTime = new ZipLong(data, offset);
+            accessTime = ZipLong.valueOf(data, offset);
             offset += 4;
         } else {
             bit1_accessTimePresent = false;
         }
         if (bit2_createTimePresent && offset + 4 <= len) {
-            createTime = new ZipLong(data, offset);
+            createTime = ZipLong.valueOf(data, offset);
             offset += 4; // NOSONAR - assignment as documentation
         } else {
             bit2_createTimePresent = false;
@@ -596,7 +596,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("X5455 timestamps must fit in a signed 32 bit integer: " + l);
         }
-        return new ZipLong(l);
+        return ZipLong.valueOf(l);
     }
 
 }

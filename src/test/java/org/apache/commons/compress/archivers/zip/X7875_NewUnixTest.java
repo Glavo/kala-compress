@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 public class X7875_NewUnixTest {
 
-    private final static ZipShort X7875 = new ZipShort(0x7875);
+    private final static ZipShort X7875 = ZipShort.valueOf(0x7875);
 
     private X7875_NewUnix xf;
 

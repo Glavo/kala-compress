@@ -36,7 +36,7 @@ public class ZipShortTest {
      */
     @Test
     public void testToBytes() {
-        final ZipShort zs = new ZipShort(0x1234);
+        final ZipShort zs = ZipShort.valueOf(0x1234);
         final byte[] result = zs.getBytes();
         assertEquals("length getBytes", 2, result.length);
         assertEquals("first byte getBytes", 0x34, result[0]);
@@ -62,7 +62,7 @@ public class ZipShortTest {
     @Test
     public void testFromBytes() {
         final byte[] val = new byte[] {0x34, 0x12};
-        final ZipShort zs = new ZipShort(val);
+        final ZipShort zs = ZipShort.valueOf(val);
         assertEquals("value from bytes", 0x1234, zs.getValue());
     }
 
@@ -71,9 +71,9 @@ public class ZipShortTest {
      */
     @Test
     public void testEquals() {
-        final ZipShort zs = new ZipShort(0x1234);
-        final ZipShort zs2 = new ZipShort(0x1234);
-        final ZipShort zs3 = new ZipShort(0x5678);
+        final ZipShort zs = ZipShort.valueOf(0x1234);
+        final ZipShort zs2 = ZipShort.valueOf(0x1234);
+        final ZipShort zs3 = ZipShort.valueOf(0x5678);
 
         assertEquals("reflexive", zs, zs);
 
@@ -91,16 +91,7 @@ public class ZipShortTest {
      */
     @Test
     public void testSign() {
-        final ZipShort zs = new ZipShort(new byte[] {(byte)0xFF, (byte)0xFF});
+        final ZipShort zs = ZipShort.valueOf(new byte[] {(byte)0xFF, (byte)0xFF});
         assertEquals(0x0000FFFF, zs.getValue());
-    }
-
-    @Test
-    public void testClone() {
-        final ZipShort s1 = new ZipShort(42);
-        final ZipShort s2 = (ZipShort) s1.clone();
-        assertNotSame(s1, s2);
-        assertEquals(s1, s2);
-        assertEquals(s1.getValue(), s2.getValue());
     }
 }

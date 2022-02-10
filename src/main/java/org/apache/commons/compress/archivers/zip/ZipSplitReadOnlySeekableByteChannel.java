@@ -95,7 +95,7 @@ public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableBy
 
         zipSplitSignatureByteBuffer.rewind();
         channel.read(zipSplitSignatureByteBuffer);
-        final ZipLong signature = new ZipLong(zipSplitSignatureByteBuffer.array());
+        final ZipLong signature = ZipLong.valueOf(zipSplitSignatureByteBuffer.array());
         if (!signature.equals(ZipLong.DD_SIG)) {
             channel.position(0L);
             throw new IOException("The first zip split segment does not begin with split zip file signature");

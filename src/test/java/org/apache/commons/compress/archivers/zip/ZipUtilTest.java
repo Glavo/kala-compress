@@ -55,7 +55,7 @@ public class ZipUtilTest {
         result[1] = (byte) ((value & 0xFF00) >> 8);
         result[2] = (byte) ((value & 0xFF0000) >> 16);
         result[3] = (byte) ((value & 0xFF000000L) >> 24);
-        zl = new ZipLong(result);
+        zl = ZipLong.valueOf(result);
     }
 
     @Test
@@ -230,7 +230,7 @@ public class ZipUtilTest {
 
     @Test
     public void testFromDosTime() {
-        ZipLong testDosTime = new ZipLong(1 << 21);
+        ZipLong testDosTime = ZipLong.valueOf(1 << 21);
         final Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 1980);
         cal.set(Calendar.MONTH, 0);

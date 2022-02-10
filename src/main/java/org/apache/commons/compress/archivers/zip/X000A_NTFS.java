@@ -64,9 +64,9 @@ import java.util.zip.ZipException;
  * @NotThreadSafe
  */
 public class X000A_NTFS implements ZipExtraField {
-    private static final ZipShort HEADER_ID = new ZipShort(0x000a);
-    private static final ZipShort TIME_ATTR_TAG = new ZipShort(0x0001);
-    private static final ZipShort TIME_ATTR_SIZE = new ZipShort(3 * 8);
+    private static final ZipShort HEADER_ID = ZipShort.valueOf(0x000a);
+    private static final ZipShort TIME_ATTR_TAG = ZipShort.valueOf(0x0001);
+    private static final ZipShort TIME_ATTR_SIZE = ZipShort.valueOf(3 * 8);
 
     private ZipEightByteInteger modifyTime = ZipEightByteInteger.ZERO;
     private ZipEightByteInteger accessTime = ZipEightByteInteger.ZERO;
@@ -90,7 +90,7 @@ public class X000A_NTFS implements ZipExtraField {
      */
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(4 /* reserved */
+        return ZipShort.valueOf(4 /* reserved */
                             + 2 /* Tag#1 */
                             + 2 /* Size#1 */
                             + 3 * 8 /* time values */);
@@ -162,13 +162,13 @@ public class X000A_NTFS implements ZipExtraField {
         offset += 4;
 
         while (offset + 4 <= len) {
-            final ZipShort tag = new ZipShort(data, offset);
+            final ZipShort tag = ZipShort.valueOf(data, offset);
             offset += 2;
             if (tag.equals(TIME_ATTR_TAG)) {
                 readTimeAttr(data, offset, len - offset);
                 break;
             }
-            final ZipShort size = new ZipShort(data, offset);
+            final ZipShort size = ZipShort.valueOf(data, offset);
             offset += 2 + size.getValue();
         }
     }
@@ -361,14 +361,14 @@ public class X000A_NTFS implements ZipExtraField {
 
     private void readTimeAttr(final byte[] data, int offset, final int length) {
         if (length >= 2 + 3 * 8) {
-            final ZipShort tagValueLength = new ZipShort(data, offset);
+            final ZipShort tagValueLength = ZipShort.valueOf(data, offset);
             if (TIME_ATTR_SIZE.equals(tagValueLength)) {
                 offset += 2;
-                modifyTime = new ZipEightByteInteger(data, offset);
+                modifyTime = ZipEightByteInteger.valueOf(data, offset);
                 offset += 8;
-                accessTime = new ZipEightByteInteger(data, offset);
+                accessTime = ZipEightByteInteger.valueOf(data, offset);
                 offset += 8;
-                createTime = new ZipEightByteInteger(data, offset);
+                createTime = ZipEightByteInteger.valueOf(data, offset);
             }
         }
     }
@@ -382,7 +382,7 @@ public class X000A_NTFS implements ZipExtraField {
 
     private static ZipEightByteInteger dateToZip(final Date d) {
         if (d == null) { return null; }
-        return new ZipEightByteInteger((d.getTime() * 10000L) - EPOCH_OFFSET);
+        return ZipEightByteInteger.valueOf((d.getTime() * 10000L) - EPOCH_OFFSET);
     }
 
     private static Date zipToDate(final ZipEightByteInteger z) {

@@ -36,7 +36,7 @@ public class ZipLongTest {
      */
     @Test
     public void testToBytes() {
-        final ZipLong zl = new ZipLong(0x12345678);
+        final ZipLong zl = ZipLong.valueOf(0x12345678);
         final byte[] result = zl.getBytes();
         assertEquals("length getBytes", 4, result.length);
         assertEquals("first byte getBytes", 0x78, result[0]);
@@ -64,7 +64,7 @@ public class ZipLongTest {
     @Test
     public void testFromBytes() {
         final byte[] val = new byte[] {0x78, 0x56, 0x34, 0x12};
-        final ZipLong zl = new ZipLong(val);
+        final ZipLong zl = ZipLong.valueOf(val);
         assertEquals("value from bytes", 0x12345678, zl.getValue());
     }
 
@@ -73,9 +73,9 @@ public class ZipLongTest {
      */
     @Test
     public void testEquals() {
-        final ZipLong zl = new ZipLong(0x12345678);
-        final ZipLong zl2 = new ZipLong(0x12345678);
-        final ZipLong zl3 = new ZipLong(0x87654321);
+        final ZipLong zl = ZipLong.valueOf(0x12345678);
+        final ZipLong zl2 = ZipLong.valueOf(0x12345678);
+        final ZipLong zl3 = ZipLong.valueOf(0x87654321);
 
         assertEquals("reflexive", zl, zl);
 
@@ -93,23 +93,14 @@ public class ZipLongTest {
      */
     @Test
     public void testSign() {
-         ZipLong zl = new ZipLong(new byte[] {(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF});
+         ZipLong zl = ZipLong.valueOf(new byte[] {(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF});
         assertEquals(0x00000000FFFFFFFFL, zl.getValue());
         assertEquals(-1,zl.getIntValue());
 
-        zl = new ZipLong(0xFFFF_FFFFL);
+        zl = ZipLong.valueOf(0xFFFF_FFFFL);
         assertEquals(0x00000000FFFFFFFFL, zl.getValue());
-        zl = new ZipLong(0xFFFF_FFFF);
+        zl = ZipLong.valueOf(0xFFFF_FFFF);
         assertEquals(0xFFFF_FFFF_FFFF_FFFFL, zl.getValue());
 
-    }
-
-    @Test
-    public void testClone() {
-        final ZipLong s1 = new ZipLong(42);
-        final ZipLong s2 = (ZipLong) s1.clone();
-        assertNotSame(s1, s2);
-        assertEquals(s1, s2);
-        assertEquals(s1.getValue(), s2.getValue());
     }
 }

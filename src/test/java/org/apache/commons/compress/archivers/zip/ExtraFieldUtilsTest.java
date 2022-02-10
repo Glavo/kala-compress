@@ -39,13 +39,13 @@ public class ExtraFieldUtilsTest implements UnixStat {
      * <p>Used to be ZipShort(1) but this is the ID of the Zip64 extra
      * field.</p>
      */
-    static final ZipShort UNRECOGNIZED_HEADER = new ZipShort(0x5555);
+    static final ZipShort UNRECOGNIZED_HEADER = ZipShort.valueOf(0x5555);
 
     /**
      * Header-ID of a ZipExtraField not supported by Commons Compress
      * used for the ArrayIndexOutOfBoundsTest.
      */
-    static final ZipShort AIOB_HEADER = new ZipShort(0x1000);
+    static final ZipShort AIOB_HEADER = ZipShort.valueOf(0x1000);
 
     private AsiExtraField a;
     private UnrecognizedExtraField dummy;
@@ -255,7 +255,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         }
         @Override
         public ZipShort getLocalFileDataLength() {
-            return new ZipShort(LENGTH);
+            return ZipShort.valueOf(LENGTH);
         }
 
         @Override

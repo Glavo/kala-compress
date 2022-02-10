@@ -77,7 +77,7 @@ public class ZipArchiveEntryTest {
         assertEquals("length second pass", data1.length+1, data2.length);
 
         final UnrecognizedExtraField u3 = new UnrecognizedExtraField();
-        u3.setHeaderId(new ZipShort(2));
+        u3.setHeaderId(ZipShort.valueOf(2));
         u3.setLocalFileDataData(new byte[] {1});
         ze.addExtraField(u3);
         result = ze.getExtraFields();
@@ -123,8 +123,8 @@ public class ZipArchiveEntryTest {
         assertSame(a, result[0]);
         assertEquals(ExtraFieldUtilsTest.UNRECOGNIZED_HEADER,
                      result[1].getHeaderId());
-        assertEquals(new ZipShort(0), result[1].getLocalFileDataLength());
-        assertEquals(new ZipShort(1), result[1].getCentralDirectoryLength());
+        assertEquals(ZipShort.valueOf(0), result[1].getLocalFileDataLength());
+        assertEquals(ZipShort.valueOf(1), result[1].getCentralDirectoryLength());
 
         // add new
         // Header-ID 2 + length 0
@@ -140,9 +140,9 @@ public class ZipArchiveEntryTest {
         result = ze.getExtraFields();
         assertEquals("third pass", 3, result.length);
         assertSame(a, result[0]);
-        assertEquals(new ZipShort(2), result[2].getHeaderId());
-        assertEquals(new ZipShort(1), result[2].getLocalFileDataLength());
-        assertEquals(new ZipShort(0), result[2].getCentralDirectoryLength());
+        assertEquals(ZipShort.valueOf(2), result[2].getHeaderId());
+        assertEquals(ZipShort.valueOf(1), result[2].getLocalFileDataLength());
+        assertEquals(ZipShort.valueOf(0), result[2].getCentralDirectoryLength());
     }
 
     /**
@@ -174,7 +174,7 @@ public class ZipArchiveEntryTest {
         assertEquals("length second pass", data1.length + 1, data2.length);
 
         final UnrecognizedExtraField u3 = new UnrecognizedExtraField();
-        u3.setHeaderId(new ZipShort(2));
+        u3.setHeaderId(ZipShort.valueOf(2));
         u3.setLocalFileDataData(new byte[] {1});
         ze.addAsFirstExtraField(u3);
         result = ze.getExtraFields();

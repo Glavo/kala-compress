@@ -8,7 +8,9 @@ import java.nio.charset.*;
 /**
  * Utility methods for charsets.
  *
- * See org.apache.commons.compress.archivers.zip.ZipEncoding
+ * See {@code org.apache.commons.compress.archivers.zip.ZipEncoding}
+ *
+ * @since 1.21.0.1
  */
 public class CharsetUtils {
     private static final char REPLACEMENT = '?';
