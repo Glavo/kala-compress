@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * ScatterGatherBackingStore that is backed by a file.
@@ -30,14 +31,21 @@ import java.nio.file.Files;
  * @since 1.10
  */
 public class FileBasedScatterGatherBackingStore implements ScatterGatherBackingStore {
-    private final File target;
+    private final Path target;
     private final OutputStream os;
     private boolean closed;
 
     public FileBasedScatterGatherBackingStore(final File target) throws FileNotFoundException {
+        this(target.toPath());
+    }
+
+    /**
+     * @since 1.21.0.1
+     */
+    public FileBasedScatterGatherBackingStore(final Path target) throws FileNotFoundException {
         this.target = target;
         try {
-            os = Files.newOutputStream(target.toPath());
+            os = Files.newOutputStream(target);
         } catch (final FileNotFoundException ex) {
             throw ex;
         } catch (final IOException ex) {
@@ -48,11 +56,10 @@ public class FileBasedScatterGatherBackingStore implements ScatterGatherBackingS
 
     @Override
     public InputStream getInputStream() throws IOException {
-        return Files.newInputStream(target.toPath());
+        return Files.newInputStream(target);
     }
 
     @Override
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void closeForWriting() throws IOException {
         if (!closed) {
             os.close();
@@ -70,8 +77,13 @@ public class FileBasedScatterGatherBackingStore implements ScatterGatherBackingS
         try {
             closeForWriting();
         } finally {
-            if (target.exists() && !target.delete()) {
-                target.deleteOnExit();
+            try {
+                Files.deleteIfExists(target);
+            } catch (Throwable ignored) {
+                try {
+                    target.toFile().deleteOnExit();
+                } catch (Throwable ignored1) { // When target is not on the default file system
+                }
             }
         }
     }
