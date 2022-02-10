@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -101,6 +102,18 @@ public class TarFile implements Closeable {
     /**
      * Constructor for TarFile.
      *
+     * @param content  the content to use
+     * @param charset  the charset to use
+     * @throws IOException when reading the tar archive fails
+     * @since 1.21.0.1
+     */
+    public TarFile(final byte[] content, final Charset charset) throws IOException {
+        this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
+    }
+
+    /**
+     * Constructor for TarFile.
+     *
      * @param content the content to use
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
      *                ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
@@ -108,7 +121,7 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      */
     public TarFile(final byte[] content, final boolean lenient) throws IOException {
-        this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, lenient);
+        this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, lenient);
     }
 
     /**
@@ -135,6 +148,18 @@ public class TarFile implements Closeable {
     /**
      * Constructor for TarFile.
      *
+     * @param archive  the file of the archive to use
+     * @param charset  the charset to use
+     * @throws IOException when reading the tar archive fails
+     * @since 1.21.0.1
+     */
+    public TarFile(final File archive, final Charset charset) throws IOException {
+        this(archive.toPath(), charset);
+    }
+
+    /**
+     * Constructor for TarFile.
+     *
      * @param archive the file of the archive to use
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
      *                ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
@@ -152,7 +177,7 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      */
     public TarFile(final Path archivePath) throws IOException {
-        this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, false);
+        this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, false);
     }
 
     /**
@@ -170,13 +195,25 @@ public class TarFile implements Closeable {
      * Constructor for TarFile.
      *
      * @param archivePath the path of the archive to use
+     * @param charset     the charset to use
+     * @throws IOException when reading the tar archive fails
+     * @since 1.21.0.1
+     */
+    public TarFile(final Path archivePath, final Charset charset) throws IOException {
+        this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
+    }
+
+    /**
+     * Constructor for TarFile.
+     *
+     * @param archivePath the path of the archive to use
      * @param lenient     when set to true illegal values for group/userid, mode, device numbers and timestamp will be
      *                    ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
      *                    exception instead.
      * @throws IOException when reading the tar archive fails
      */
     public TarFile(final Path archivePath, final boolean lenient) throws IOException {
-        this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, lenient);
+        this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, lenient);
     }
 
     /**
@@ -186,7 +223,19 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      */
     public TarFile(final SeekableByteChannel content) throws IOException {
-        this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, false);
+        this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, false);
+    }
+
+    /**
+     * Constructor for TarFile.
+     *
+     * @param content the content to use
+     * @param charset the charset to use
+     * @throws IOException when reading the tar archive fails
+     * @since 1.21.0.1
+     */
+    public TarFile(final SeekableByteChannel content, Charset charset) throws IOException {
+        this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
     }
 
     /**
@@ -202,9 +251,25 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      */
     public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient) throws IOException {
+        this(archive, blockSize, recordSize, Charsets.toCharset(encoding), lenient);
+    }
+
+    /**
+     * Constructor for TarFile.
+     *
+     * @param archive    the seekable byte channel to use
+     * @param blockSize  the blocks size to use
+     * @param recordSize the record size to use
+     * @param charset    the charset to use
+     * @param lenient    when set to true illegal values for group/userid, mode, device numbers and timestamp will be
+     *                   ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
+     *                   exception instead.
+     * @throws IOException when reading the tar archive fails
+     */
+    public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset charset, final boolean lenient) throws IOException {
         this.archive = archive;
         this.hasHitEOF = false;
-        this.charset = Charsets.toCharset(encoding);
+        this.charset = Charsets.toCharset(charset);
         this.recordSize = recordSize;
         this.recordBuffer = ByteBuffer.allocate(this.recordSize);
         this.blockSize = blockSize;

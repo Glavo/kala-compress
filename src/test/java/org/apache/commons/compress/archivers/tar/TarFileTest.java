@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Calendar;
@@ -118,7 +119,7 @@ public class TarFileTest extends AbstractTestCase {
     @Test
     public void archiveWithTrailer() throws IOException {
         try (final SeekableByteChannel channel = Files.newByteChannel(getPath("archive_with_trailer.tar"));
-             final TarFile tarfile = new TarFile(channel, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, false)) {
+             final TarFile tarfile = new TarFile(channel, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, false)) {
             final String tarAppendix = "Hello, world!\n";
             final ByteBuffer buffer = ByteBuffer.allocate(tarAppendix.length());
             channel.read(buffer);

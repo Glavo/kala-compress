@@ -117,9 +117,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
 
     private final Charset charset;
 
-    // the provided encoding (for unit tests)
-    final String encoding;
-
     private boolean addPaxHeadersForNonAsciiNames;
 
     private static final int BLOCK_SIZE_UNSPECIFIED = -511;
@@ -151,11 +148,24 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
     /**
      * Constructor for TarArchiveOutputStream.
      *
+     * <p>Uses a block size of 512 bytes.</p>
+     *
+     * @param os the output stream to use
+     * @param charset name of the charset to use for file names
+     * @since 1.21.0.1
+     */
+    public TarArchiveOutputStream(final OutputStream os, final Charset charset) {
+        this(os, BLOCK_SIZE_UNSPECIFIED, charset);
+    }
+
+    /**
+     * Constructor for TarArchiveOutputStream.
+     *
      * @param os the output stream to use
      * @param blockSize the block size to use. Must be a multiple of 512 bytes.
      */
     public TarArchiveOutputStream(final OutputStream os, final int blockSize) {
-        this(os, blockSize, null);
+        this(os, blockSize, StandardCharsets.UTF_8);
     }
 
     /**
@@ -166,8 +176,19 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
      * @param encoding name of the encoding to use for file names
      * @since 1.4
      */
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize,
-        final String encoding) {
+    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final String encoding) {
+        this(os, blockSize, Charsets.toCharset(encoding));
+    }
+
+    /**
+     * Constructor for TarArchiveOutputStream.
+     *
+     * @param os the output stream to use
+     * @param blockSize the block size to use. Must be a multiple of 512 bytes.
+     * @param charset   name of the encoding to use for file names
+     * @since 1.21.0.1
+     */
+    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final Charset charset) {
         final int realBlockSize;
         if (BLOCK_SIZE_UNSPECIFIED == blockSize) {
             realBlockSize = RECORD_SIZE;
@@ -180,8 +201,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         }
         out = new FixedLengthBlockOutputStream(countingOut = new CountingOutputStream(os),
                                                RECORD_SIZE);
-        this.encoding = encoding;
-        this.charset = Charsets.toCharset(encoding);
+        this.charset = Charsets.toCharset(charset);
 
         this.recordBuf = new byte[RECORD_SIZE];
         this.recordsPerBlock = realBlockSize / RECORD_SIZE;

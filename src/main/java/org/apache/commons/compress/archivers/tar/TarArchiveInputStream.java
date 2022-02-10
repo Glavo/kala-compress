@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,9 +87,6 @@ public class TarArchiveInputStream extends ArchiveInputStream {
     /** The encoding of the file */
     private final Charset charset;
 
-    // the provided encoding (for unit tests)
-    final String encoding;
-
     // the global PAX header
     private Map<String, String> globalPaxHeaders = new HashMap<>();
 
@@ -114,7 +112,7 @@ public class TarArchiveInputStream extends ArchiveInputStream {
      * @since 1.19
      */
     public TarArchiveInputStream(final InputStream is, final boolean lenient) {
-        this(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, lenient);
+        this(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, lenient);
     }
 
     /**
@@ -124,8 +122,17 @@ public class TarArchiveInputStream extends ArchiveInputStream {
      * @since 1.4
      */
     public TarArchiveInputStream(final InputStream is, final String encoding) {
-        this(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE,
-             encoding);
+        this(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding);
+    }
+
+    /**
+     * Constructor for TarInputStream.
+     * @param is the input stream to use
+     * @param charset name of the encoding to use for file names
+     * @since 1.21.0.1
+     */
+    public TarArchiveInputStream(final InputStream is, final Charset charset) {
+        this(is, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset);
     }
 
     /**
@@ -153,10 +160,22 @@ public class TarArchiveInputStream extends ArchiveInputStream {
      * Constructor for TarInputStream.
      * @param is the input stream to use
      * @param blockSize the block size to use
+     * @param charset name of the encoding to use for file names
+     * @since 1.4
+     */
+    public TarArchiveInputStream(final InputStream is, final int blockSize,
+                                 final Charset charset) {
+        this(is, blockSize, TarConstants.DEFAULT_RCDSIZE, charset);
+    }
+
+    /**
+     * Constructor for TarInputStream.
+     * @param is the input stream to use
+     * @param blockSize the block size to use
      * @param recordSize the record size to use
      */
     public TarArchiveInputStream(final InputStream is, final int blockSize, final int recordSize) {
-        this(is, blockSize, recordSize, null);
+        this(is, blockSize, recordSize, StandardCharsets.UTF_8);
     }
 
     /**
@@ -177,6 +196,19 @@ public class TarArchiveInputStream extends ArchiveInputStream {
      * @param is the input stream to use
      * @param blockSize the block size to use
      * @param recordSize the record size to use
+     * @param charset name of the encoding to use for file names
+     * @since 1.21.0.1
+     */
+    public TarArchiveInputStream(final InputStream is, final int blockSize, final int recordSize,
+                                 final Charset charset) {
+        this(is, blockSize, recordSize, charset, false);
+    }
+
+    /**
+     * Constructor for TarInputStream.
+     * @param is the input stream to use
+     * @param blockSize the block size to use
+     * @param recordSize the record size to use
      * @param encoding name of the encoding to use for file names
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
      * ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
@@ -185,10 +217,25 @@ public class TarArchiveInputStream extends ArchiveInputStream {
      */
     public TarArchiveInputStream(final InputStream is, final int blockSize, final int recordSize,
                                  final String encoding, final boolean lenient) {
+        this(is, blockSize, recordSize, Charsets.toCharset(encoding), lenient);
+    }
+
+    /**
+     * Constructor for TarInputStream.
+     * @param is the input stream to use
+     * @param blockSize the block size to use
+     * @param recordSize the record size to use
+     * @param charset name of the charset to use for file names
+     * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
+     * ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
+     * exception instead.
+     * @since 1.21.0.1
+     */
+    public TarArchiveInputStream(final InputStream is, final int blockSize, final int recordSize,
+                                 final Charset charset, final boolean lenient) {
         this.inputStream = is;
         this.hasHitEOF = false;
-        this.encoding = encoding;
-        this.charset = Charsets.toCharset(encoding);
+        this.charset = Charsets.toCharset(charset);
         this.recordSize = recordSize;
         this.recordBuffer = new byte[recordSize];
         this.blockSize = blockSize;
