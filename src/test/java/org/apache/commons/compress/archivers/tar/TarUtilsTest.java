@@ -414,9 +414,7 @@ public class TarUtilsTest {
 
     @Test
     public void readSimplePaxHeader() throws Exception {
-        final Map<String, String> headers = TarUtils.parsePaxHeaders(
-                new ByteArrayInputStream("30 atime=1321711775.972059463\n".getBytes(StandardCharsets.UTF_8)),
-                null, new HashMap<String, String>());
+        final Map<String, String> headers = TarUtils.parsePaxHeaders(new ByteArrayInputStream("30 atime=1321711775.972059463\n".getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>(), -1);
         assertEquals(1, headers.size());
         assertEquals("1321711775.972059463", headers.get("atime"));
     }
@@ -424,24 +422,22 @@ public class TarUtilsTest {
     @Test
     public void secondEntryWinsWhenPaxHeaderContainsDuplicateKey() throws Exception {
         final Map<String, String> headers = TarUtils.parsePaxHeaders(new ByteArrayInputStream("11 foo=bar\n11 foo=baz\n"
-                        .getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>());
+                .getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>(), -1);
         assertEquals(1, headers.size());
         assertEquals("baz", headers.get("foo"));
     }
 
     @Test
     public void paxHeaderEntryWithEmptyValueRemovesKey() throws Exception {
-        final Map<String, String> headers = TarUtils
-                .parsePaxHeaders(new ByteArrayInputStream("11 foo=bar\n7 foo=\n"
-                        .getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>());
+        final Map<String, String> headers = TarUtils.parsePaxHeaders(new ByteArrayInputStream("11 foo=bar\n7 foo=\n"
+                .getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>(), -1);
         assertEquals(0, headers.size());
     }
 
     @Test
     public void readPaxHeaderWithEmbeddedNewline() throws Exception {
-        final Map<String, String> headers = TarUtils
-                .parsePaxHeaders(new ByteArrayInputStream("28 comment=line1\nline2\nand3\n"
-                        .getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>());
+        final Map<String, String> headers = TarUtils.parsePaxHeaders(new ByteArrayInputStream("28 comment=line1\nline2\nand3\n"
+                .getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>(), -1);
         assertEquals(1, headers.size());
         assertEquals("line1\nline2\nand3", headers.get("comment"));
     }
@@ -451,8 +447,7 @@ public class TarUtilsTest {
         final String ae = "\u00e4";
         final String line = "11 path="+ ae + "\n";
         assertEquals(11, line.getBytes(StandardCharsets.UTF_8).length);
-        final Map<String, String> headers = TarUtils
-                .parsePaxHeaders(new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>());
+        final Map<String, String> headers = TarUtils.parsePaxHeaders(new ByteArrayInputStream(line.getBytes(StandardCharsets.UTF_8)), null, new HashMap<String, String>(), -1);
         assertEquals(1, headers.size());
         assertEquals(ae, headers.get("path"));
     }
@@ -471,9 +466,7 @@ public class TarUtilsTest {
     public void readPaxHeaderWithoutTrailingNewline() throws Exception {
         thrown.expect(IOException.class);
         thrown.expectMessage(startsWith("Failed to read Paxheader"));
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream("30 atime=1321711775.9720594634".getBytes(StandardCharsets.UTF_8)),
-            null, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream("30 atime=1321711775.9720594634".getBytes(StandardCharsets.UTF_8)), null, Collections.emptyMap(), -1);
     }
 
     @Test
@@ -481,9 +474,7 @@ public class TarUtilsTest {
         final String header = "23 GNU.sparse.offset=0\n"
             + "26 GNU.sparse.numbytes=10\n";
         final List<TarArchiveStructSparse> sparseHeaders = new ArrayList<>();
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)),
-            sparseHeaders, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), sparseHeaders, Collections.emptyMap(), -1);
         assertEquals(1, sparseHeaders.size());
         assertEquals(0, sparseHeaders.get(0).getOffset());
         assertEquals(10, sparseHeaders.get(0).getNumbytes());
@@ -494,9 +485,7 @@ public class TarUtilsTest {
         final String header = "23 GNU.sparse.offset=0\n"
             + "24 GNU.sparse.offset=10\n";
         final List<TarArchiveStructSparse> sparseHeaders = new ArrayList<>();
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)),
-            sparseHeaders, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), sparseHeaders, Collections.emptyMap(), -1);
         assertEquals(2, sparseHeaders.size());
         assertEquals(0, sparseHeaders.get(0).getOffset());
         assertEquals(0, sparseHeaders.get(0).getNumbytes());
@@ -510,9 +499,7 @@ public class TarUtilsTest {
         thrown.expectMessage(startsWith("Failed to read Paxheader"));
         final String header = "23 GNU.sparse.offset=a\n"
             + "26 GNU.sparse.numbytes=10\n";
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)),
-            null, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), null, Collections.emptyMap(), -1);
     }
 
     @Test
@@ -521,9 +508,7 @@ public class TarUtilsTest {
         thrown.expectMessage(startsWith("Failed to read Paxheader"));
         final String header = "23 GNU.sparse.offset=0\n"
             + "26 GNU.sparse.numbytes=1a\n";
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)),
-            null, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), null, Collections.emptyMap(), -1);
     }
 
     @Test
@@ -532,9 +517,7 @@ public class TarUtilsTest {
         thrown.expectMessage(startsWith("Failed to read Paxheader"));
         final String header = "24 GNU.sparse.offset=-1\n"
             + "26 GNU.sparse.numbytes=10\n";
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)),
-            null, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), null, Collections.emptyMap(), -1);
     }
 
     @Test
@@ -543,9 +526,7 @@ public class TarUtilsTest {
         thrown.expectMessage(startsWith("Failed to read Paxheader"));
         final String header = "23 GNU.sparse.offset=0\n"
             + "26 GNU.sparse.numbytes=-1\n";
-        TarUtils.parsePaxHeaders(
-            new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)),
-            null, Collections.emptyMap());
+        TarUtils.parsePaxHeaders(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), null, Collections.emptyMap(), -1);
     }
 
     @Test

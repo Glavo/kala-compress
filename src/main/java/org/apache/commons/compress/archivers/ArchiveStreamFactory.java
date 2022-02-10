@@ -279,24 +279,6 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     }
 
     /**
-     * Sets the encoding to use for arj, jar, zip, dump, cpio and tar files. Use null for the archiver default.
-     *
-     * @param entryEncoding the entry encoding, null uses the archiver default.
-     * @since 1.5
-     * @deprecated 1.10 use {@link #ArchiveStreamFactory(String)} to specify the encoding
-     * @throws IllegalStateException if the constructor {@link #ArchiveStreamFactory(String)}
-     * was used to specify the factory encoding.
-     */
-    @Deprecated
-    public void setEntryEncoding(final String entryEncoding) {
-        // Note: this does not detect new ArchiveStreamFactory(null) but that does not set the encoding anyway
-        if (encoding != null) {
-            throw new IllegalStateException("Cannot overide encoding set by the constructor");
-        }
-        this.entryEncoding = entryEncoding;
-    }
-
-    /**
      * Creates an archive input stream from an archiver name and an input stream.
      *
      * @param archiverName the archive name,

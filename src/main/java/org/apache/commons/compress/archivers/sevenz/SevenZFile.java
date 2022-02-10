@@ -137,22 +137,6 @@ public class SevenZFile implements Closeable {
     }
 
     /**
-     * Reads a file as 7z archive
-     *
-     * @param fileName the file to read
-     * @param password optional password if the archive is encrypted -
-     * the byte array is supposed to be the UTF16-LE encoded
-     * representation of the password.
-     * @throws IOException if reading the archive fails
-     * @deprecated use the char[]-arg version for the password instead
-     */
-    @Deprecated
-    public SevenZFile(final File fileName, final byte[] password) throws IOException {
-        this(Files.newByteChannel(fileName.toPath(), EnumSet.of(StandardOpenOption.READ)),
-                fileName.getAbsolutePath(), password, true, SevenZFileOptions.DEFAULT);
-    }
-
-    /**
      * Reads a SeekableByteChannel as 7z archive
      *
      * <p>{@link
@@ -288,49 +272,6 @@ public class SevenZFile implements Closeable {
     public SevenZFile(final SeekableByteChannel channel, final String fileName, final SevenZFileOptions options)
             throws IOException {
         this(channel, fileName, null, false, options);
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive
-     *
-     * <p>{@link
-     * org.apache.commons.compress.utils.SeekableInMemoryByteChannel}
-     * allows you to read from an in-memory archive.</p>
-     *
-     * @param channel the channel to read
-     * @param password optional password if the archive is encrypted -
-     * the byte array is supposed to be the UTF16-LE encoded
-     * representation of the password.
-     * @throws IOException if reading the archive fails
-     * @since 1.13
-     * @deprecated use the char[]-arg version for the password instead
-     */
-    @Deprecated
-    public SevenZFile(final SeekableByteChannel channel,
-                      final byte[] password) throws IOException {
-        this(channel, DEFAULT_FILE_NAME, password);
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive
-     *
-     * <p>{@link
-     * org.apache.commons.compress.utils.SeekableInMemoryByteChannel}
-     * allows you to read from an in-memory archive.</p>
-     *
-     * @param channel the channel to read
-     * @param fileName name of the archive - only used for error reporting
-     * @param password optional password if the archive is encrypted -
-     * the byte array is supposed to be the UTF16-LE encoded
-     * representation of the password.
-     * @throws IOException if reading the archive fails
-     * @since 1.13
-     * @deprecated use the char[]-arg version for the password instead
-     */
-    @Deprecated
-    public SevenZFile(final SeekableByteChannel channel, final String fileName,
-                      final byte[] password) throws IOException {
-        this(channel, fileName, password, false, SevenZFileOptions.DEFAULT);
     }
 
     private SevenZFile(final SeekableByteChannel channel, final String filename,

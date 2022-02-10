@@ -158,44 +158,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         this(os, blockSize, null);
     }
 
-
-    /**
-     * Constructor for TarArchiveOutputStream.
-     *
-     * @param os the output stream to use
-     * @param blockSize the block size to use
-     * @param recordSize the record size to use. Must be 512 bytes.
-     * @deprecated recordSize must always be 512 bytes. An IllegalArgumentException will be thrown
-     * if any other value is used
-     */
-    @Deprecated
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize,
-        final int recordSize) {
-        this(os, blockSize, recordSize, null);
-    }
-
-    /**
-     * Constructor for TarArchiveOutputStream.
-     *
-     * @param os the output stream to use
-     * @param blockSize the block size to use . Must be a multiple of 512 bytes.
-     * @param recordSize the record size to use. Must be 512 bytes.
-     * @param encoding name of the encoding to use for file names
-     * @since 1.4
-     * @deprecated recordSize must always be 512 bytes. An IllegalArgumentException will be thrown
-     * if any other value is used.
-     */
-    @Deprecated
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize,
-        final int recordSize, final String encoding) {
-        this(os, blockSize, encoding);
-        if (recordSize != RECORD_SIZE) {
-            throw new IllegalArgumentException(
-                "Tar record size must always be 512 bytes. Attempt to set size of " + recordSize);
-        }
-
-    }
-
     /**
      * Constructor for TarArchiveOutputStream.
      *
@@ -259,12 +221,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         addPaxHeadersForNonAsciiNames = b;
     }
 
-    @Deprecated
-    @Override
-    public int getCount() {
-        return (int) getBytesWritten();
-    }
-
     @Override
     public long getBytesWritten() {
         return countingOut.getBytesWritten();
@@ -312,17 +268,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
                 closed = true;
             }
         }
-    }
-
-    /**
-     * Get the record size being used by this stream's TarBuffer.
-     *
-     * @return The TarBuffer record size.
-     * @deprecated
-     */
-    @Deprecated
-    public int getRecordSize() {
-        return RECORD_SIZE;
     }
 
     /**
@@ -595,12 +540,12 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
         final TarArchiveEntry entry) {
         addPaxHeaderForBigNumber(paxHeaders, "size", entry.getSize(),
             TarConstants.MAXSIZE);
-        addPaxHeaderForBigNumber(paxHeaders, "gid", entry.getLongGroupId(),
+        addPaxHeaderForBigNumber(paxHeaders, "gid", entry.getGroupId(),
             TarConstants.MAXID);
         addPaxHeaderForBigNumber(paxHeaders, "mtime",
             entry.getModTime().getTime() / 1000,
             TarConstants.MAXSIZE);
-        addPaxHeaderForBigNumber(paxHeaders, "uid", entry.getLongUserId(),
+        addPaxHeaderForBigNumber(paxHeaders, "uid", entry.getUserId(),
             TarConstants.MAXID);
         // star extensions by J\u00f6rg Schilling
         addPaxHeaderForBigNumber(paxHeaders, "SCHILY.devmajor",
@@ -621,11 +566,11 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
 
     private void failForBigNumbers(final TarArchiveEntry entry) {
         failForBigNumber("entry size", entry.getSize(), TarConstants.MAXSIZE);
-        failForBigNumberWithPosixMessage("group id", entry.getLongGroupId(), TarConstants.MAXID);
+        failForBigNumberWithPosixMessage("group id", entry.getGroupId(), TarConstants.MAXID);
         failForBigNumber("last modification time",
             entry.getModTime().getTime() / 1000,
             TarConstants.MAXSIZE);
-        failForBigNumber("user id", entry.getLongUserId(), TarConstants.MAXID);
+        failForBigNumber("user id", entry.getUserId(), TarConstants.MAXID);
         failForBigNumber("mode", entry.getMode(), TarConstants.MAXID);
         failForBigNumber("major device number", entry.getDevMajor(),
             TarConstants.MAXID);

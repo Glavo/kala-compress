@@ -676,30 +676,9 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * Get this entry's user id.
      *
      * @return This entry's user id.
-     * @deprecated use #getLongUserId instead as user ids can be
-     * bigger than {@link Integer#MAX_VALUE}
-     */
-    @Deprecated
-    public int getUserId() {
-        return (int) (userId & 0xffffffff);
-    }
-
-    /**
-     * Set this entry's user id.
-     *
-     * @param userId This entry's new user id.
-     */
-    public void setUserId(final int userId) {
-        setUserId((long) userId);
-    }
-
-    /**
-     * Get this entry's user id.
-     *
-     * @return This entry's user id.
      * @since 1.10
      */
-    public long getLongUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -716,31 +695,10 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     /**
      * Get this entry's group id.
      *
-     * @return This entry's group id.
-     * @deprecated use #getLongGroupId instead as group ids can be
-     * bigger than {@link Integer#MAX_VALUE}
-     */
-    @Deprecated
-    public int getGroupId() {
-        return (int) (groupId & 0xffffffff);
-    }
-
-    /**
-     * Set this entry's group id.
-     *
-     * @param groupId This entry's new group id.
-     */
-    public void setGroupId(final int groupId) {
-        setGroupId((long) groupId);
-    }
-
-    /**
-     * Get this entry's group id.
-     *
      * @since 1.10
      * @return This entry's group id.
      */
-    public long getLongGroupId() {
+    public long getGroupId() {
         return groupId;
     }
 

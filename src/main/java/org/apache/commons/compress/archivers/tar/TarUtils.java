@@ -706,36 +706,6 @@ public class TarUtils {
      * @param sparseHeaders used in PAX Format 0.0 &amp; 0.1, as it may appear multiple times,
      *                      the sparse headers need to be stored in an array, not a map
      * @param globalPaxHeaders global PAX headers of the tar archive
-     * @return map of PAX headers values found inside of the current (local or global) PAX headers tar entry.
-     * @throws IOException if an I/O error occurs.
-     * @deprecated use the four-arg version instead
-     */
-    @Deprecated
-    protected static Map<String, String> parsePaxHeaders(final InputStream inputStream, final List<TarArchiveStructSparse> sparseHeaders, final Map<String, String> globalPaxHeaders)
-            throws IOException {
-        return parsePaxHeaders(inputStream, sparseHeaders, globalPaxHeaders, -1);
-    }
-
-    /**
-     * For PAX Format 0.0, the sparse headers(GNU.sparse.offset and GNU.sparse.numbytes)
-     * may appear multi times, and they look like:
-     *
-     * GNU.sparse.size=size
-     * GNU.sparse.numblocks=numblocks
-     * repeat numblocks times
-     *   GNU.sparse.offset=offset
-     *   GNU.sparse.numbytes=numbytes
-     * end repeat
-     *
-     * For PAX Format 0.1, the sparse headers are stored in a single variable : GNU.sparse.map
-     *
-     * GNU.sparse.map
-     *    Map of non-null data chunks. It is a string consisting of comma-separated values "offset,size[,offset-1,size-1...]"
-     *
-     * @param inputStream input stream to read keys and values
-     * @param sparseHeaders used in PAX Format 0.0 &amp; 0.1, as it may appear multiple times,
-     *                      the sparse headers need to be stored in an array, not a map
-     * @param globalPaxHeaders global PAX headers of the tar archive
      * @param headerSize total size of the PAX header, will be ignored if negative
      * @return map of PAX headers values found inside of the current (local or global) PAX headers tar entry.
      * @throws IOException if an I/O error occurs.

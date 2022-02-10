@@ -752,32 +752,4 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         Collections.addAll(set, elements);
         return set;
     }
-
-    /**
-     * Whether to decompress the full input or only the first stream in formats
-     * supporting multiple concatenated input streams.
-     *
-     * <p>
-     * This setting applies to the gzip, bzip2 and xz formats only.
-     * </p>
-     *
-     * @param decompressConcatenated
-     *            if true, decompress until the end of the input; if false, stop
-     *            after the first stream and leave the input position to point
-     *            to the next byte after the stream
-     * @since 1.5
-     * @deprecated 1.10 use the {@link #CompressorStreamFactory(boolean)}
-     *             constructor instead
-     * @throws IllegalStateException
-     *             if the constructor {@link #CompressorStreamFactory(boolean)}
-     *             was used to create the factory
-     */
-    @Deprecated
-    public void setDecompressConcatenated(final boolean decompressConcatenated) {
-        if (this.decompressUntilEOF != null) {
-            throw new IllegalStateException("Cannot override the setting defined by the constructor");
-        }
-        this.decompressConcatenated = decompressConcatenated;
-    }
-
 }

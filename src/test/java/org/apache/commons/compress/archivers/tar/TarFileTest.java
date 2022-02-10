@@ -171,7 +171,7 @@ public class TarFileTest extends AbstractTestCase {
         final byte[] data = bos.toByteArray();
         try (final TarFile tarFile = new TarFile(data)) {
             List<TarArchiveEntry> entries = tarFile.getEntries();
-            assertEquals(4294967294L, entries.get(0).getLongGroupId());
+            assertEquals(4294967294L, entries.get(0).getGroupId());
         }
     }
 

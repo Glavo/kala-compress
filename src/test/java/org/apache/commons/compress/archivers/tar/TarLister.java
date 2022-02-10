@@ -70,14 +70,14 @@ public final class TarLister {
         if (name != null && !name.isEmpty()) {
             sb.append(name);
         } else {
-            sb.append(ae.getLongUserId());
+            sb.append(ae.getUserId());
         }
         sb.append("/");
         name = ae.getGroupName();
         if (name != null && !name.isEmpty()) {
             sb.append(name);
         } else {
-            sb.append(ae.getLongGroupId());
+            sb.append(ae.getGroupId());
         }
         sb.append(" ");
         if (ae.isSparse()) {

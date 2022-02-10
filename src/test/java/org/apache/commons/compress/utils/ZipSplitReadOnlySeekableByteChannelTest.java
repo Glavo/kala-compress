@@ -66,7 +66,7 @@ public class ZipSplitReadOnlySeekableByteChannelTest {
     @Test
     public void forOrderedSeekableByteChannelsThrowsOnNullArg() throws IOException {
         thrown.expect(NullPointerException.class);
-        ZipSplitReadOnlySeekableByteChannel.forOrderedSeekableByteChannels(null);
+        ZipSplitReadOnlySeekableByteChannel.forOrderedSeekableByteChannels((SeekableByteChannel[]) null);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class ZipSplitReadOnlySeekableByteChannelTest {
     @Test
     public void forFilesThrowsOnNullArg() throws IOException {
         thrown.expect(NullPointerException.class);
-        ZipSplitReadOnlySeekableByteChannel.forFiles(null);
+        ZipSplitReadOnlySeekableByteChannel.forFiles((File[]) null);
     }
 
     @Test

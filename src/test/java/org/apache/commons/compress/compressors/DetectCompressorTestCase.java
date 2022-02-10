@@ -20,7 +20,6 @@ package org.apache.commons.compress.compressors;
 
 import static org.apache.commons.compress.AbstractTestCase.getFile;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -42,7 +41,6 @@ import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStre
 import org.apache.commons.compress.utils.ByteUtils;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation") // deliberately tests setDecompressConcatenated
 public final class DetectCompressorTestCase {
 
     final CompressorStreamFactory factory = new CompressorStreamFactory();
@@ -50,15 +48,8 @@ public final class DetectCompressorTestCase {
     private static final CompressorStreamFactory factoryFalse = new CompressorStreamFactory(false);
 
     // Must be static to allow use in the TestData entries
-    private static final CompressorStreamFactory factorySetTrue;
-    private static final CompressorStreamFactory factorySetFalse;
-
-    static {
-        factorySetTrue = new CompressorStreamFactory();
-        factorySetTrue.setDecompressConcatenated(true);
-        factorySetFalse = new CompressorStreamFactory();
-        factorySetFalse.setDecompressConcatenated(false);
-    }
+    private static final CompressorStreamFactory factorySetTrue = new CompressorStreamFactory(true);
+    private static final CompressorStreamFactory factorySetFalse = new CompressorStreamFactory(false);
 
     static class TestData {
         final String fileName; // The multiple file name
@@ -223,33 +214,6 @@ public final class DetectCompressorTestCase {
             throw e;
         }
 
-    }
-
-
-    @Test
-    public void testOverride() {
-        CompressorStreamFactory fac = new CompressorStreamFactory();
-        assertFalse(fac.getDecompressConcatenated());
-        fac.setDecompressConcatenated(true);
-        assertTrue(fac.getDecompressConcatenated());
-
-        fac = new CompressorStreamFactory(false);
-        assertFalse(fac.getDecompressConcatenated());
-        try {
-            fac.setDecompressConcatenated(true);
-            fail("Expected IllegalStateException");
-        } catch (final IllegalStateException ise) {
-            // expected
-        }
-
-        fac = new CompressorStreamFactory(true);
-        assertTrue(fac.getDecompressConcatenated());
-        try {
-            fac.setDecompressConcatenated(true);
-            fail("Expected IllegalStateException");
-        } catch (final IllegalStateException ise) {
-            // expected
-        }
     }
 
     @Test

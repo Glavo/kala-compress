@@ -18,6 +18,7 @@
 
 package org.apache.commons.compress.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -52,13 +53,13 @@ public class MultiReadOnlySeekableByteChannelTest {
     @Test
     public void forSeekableByteChannelsThrowsOnNullArg() throws IOException {
         thrown.expect(NullPointerException.class);
-        MultiReadOnlySeekableByteChannel.forSeekableByteChannels(null);
+        MultiReadOnlySeekableByteChannel.forSeekableByteChannels((SeekableByteChannel[]) null);
     }
 
     @Test
     public void forFilesThrowsOnNullArg() throws IOException {
         thrown.expect(NullPointerException.class);
-        MultiReadOnlySeekableByteChannel.forFiles(null);
+        MultiReadOnlySeekableByteChannel.forFiles((File[]) null);
     }
 
     @Test

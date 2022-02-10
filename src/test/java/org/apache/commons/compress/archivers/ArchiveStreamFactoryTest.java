@@ -145,25 +145,6 @@ public class ArchiveStreamFactoryTest {
         assertEquals("UTF-8", fac.getEntryEncoding());
     }
 
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testEncodingDeprecated() {
-        ArchiveStreamFactory fac = new ArchiveStreamFactory();
-        assertNull(fac.getEntryEncoding());
-        fac.setEntryEncoding("UTF-8");
-        assertEquals("UTF-8", fac.getEntryEncoding());
-        fac.setEntryEncoding("US_ASCII");
-        assertEquals("US_ASCII", fac.getEntryEncoding());
-        fac = new ArchiveStreamFactory("UTF-8");
-        assertEquals("UTF-8", fac.getEntryEncoding());
-        try {
-            fac.setEntryEncoding("US_ASCII");
-            fail("Expected IllegalStateException");
-        } catch (final IllegalStateException ise) {
-            // expected
-        }
-    }
-
     static class TestData {
         final String testFile;
         final String expectedEncoding;
@@ -188,18 +169,10 @@ public class ArchiveStreamFactoryTest {
         }
     }
 
-    @SuppressWarnings("deprecation") // test of deprecated method
-    static ArchiveStreamFactory getFactory(final String entryEncoding) {
-        final ArchiveStreamFactory fac = new ArchiveStreamFactory();
-        fac.setEntryEncoding(entryEncoding);
-        return fac;
-    }
     // The different factory types
     private static final ArchiveStreamFactory FACTORY = ArchiveStreamFactory.DEFAULT;
     private static final ArchiveStreamFactory FACTORY_UTF8 = new ArchiveStreamFactory("UTF-8");
     private static final ArchiveStreamFactory FACTORY_ASCII = new ArchiveStreamFactory("ASCII");
-    private static final ArchiveStreamFactory FACTORY_SET_UTF8 = getFactory("UTF-8");
-    private static final ArchiveStreamFactory FACTORY_SET_ASCII = getFactory("ASCII");
 
     // Default encoding if none is provided (not even null)
     // The test currently assumes that the output default is the same as the input default
@@ -277,38 +250,26 @@ public class ArchiveStreamFactoryTest {
         new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, ARJ_DEFAULT, FACTORY, "charsetName"),
         new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, "UTF-8", FACTORY_UTF8, "charsetName"),
         new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, "ASCII", FACTORY_ASCII, "charsetName"),
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, "UTF-8", FACTORY_SET_UTF8, "charsetName"),
-        new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, "ASCII", FACTORY_SET_ASCII, "charsetName"),
 
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "encoding"),
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, "UTF-8", FACTORY_UTF8, "encoding"),
         new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, "ASCII", FACTORY_ASCII, "encoding"),
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, "UTF-8", FACTORY_SET_UTF8, "encoding"),
-        new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, "ASCII", FACTORY_SET_ASCII, "encoding"),
 
         new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, DUMP_DEFAULT, FACTORY, "encoding"),
         new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, "UTF-8", FACTORY_UTF8, "encoding"),
         new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, "ASCII", FACTORY_ASCII, "encoding"),
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, "UTF-8", FACTORY_SET_UTF8, "encoding"),
-        new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, "ASCII", FACTORY_SET_ASCII, "encoding"),
 
         new TestData("bla.tar", ArchiveStreamFactory.TAR, true, TAR_DEFAULT, FACTORY, "encoding"),
         new TestData("bla.tar", ArchiveStreamFactory.TAR, true, "UTF-8", FACTORY_UTF8, "encoding"),
         new TestData("bla.tar", ArchiveStreamFactory.TAR, true, "ASCII", FACTORY_ASCII, "encoding"),
-        new TestData("bla.tar", ArchiveStreamFactory.TAR, true, "UTF-8", FACTORY_SET_UTF8, "encoding"),
-        new TestData("bla.tar", ArchiveStreamFactory.TAR, true, "ASCII", FACTORY_SET_ASCII, "encoding"),
 
         new TestData("bla.jar", ArchiveStreamFactory.JAR, true, JAR_DEFAULT, FACTORY, "encoding"),
         new TestData("bla.jar", ArchiveStreamFactory.JAR, true, "UTF-8", FACTORY_UTF8, "encoding"),
         new TestData("bla.jar", ArchiveStreamFactory.JAR, true, "ASCII", FACTORY_ASCII, "encoding"),
-        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, "UTF-8", FACTORY_SET_UTF8, "encoding"),
-        new TestData("bla.jar", ArchiveStreamFactory.JAR, true, "ASCII", FACTORY_SET_ASCII, "encoding"),
 
         new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, ZIP_DEFAULT, FACTORY, "encoding"),
         new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, "UTF-8", FACTORY_UTF8, "encoding"),
         new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, "ASCII", FACTORY_ASCII, "encoding"),
-        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, "UTF-8", FACTORY_SET_UTF8, "encoding"),
-        new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, "ASCII", FACTORY_SET_ASCII, "encoding"),
     };
 
     @Test

@@ -157,14 +157,6 @@ public class SevenZFileTest extends AbstractTestCase {
     }
 
     @Test
-    public void test7zDecryptUnarchive() throws Exception {
-        if (isStrongCryptoAvailable()) {
-            test7zUnarchive(getFile("bla.encrypted.7z"), SevenZMethod.LZMA, // stack LZMA + AES
-                            "foo".getBytes(StandardCharsets.UTF_16LE));
-        }
-    }
-
-    @Test
     public void test7zDecryptUnarchiveUsingCharArrayPassword() throws Exception {
         if (isStrongCryptoAvailable()) {
             test7zUnarchive(getFile("bla.encrypted.7z"), SevenZMethod.LZMA, // stack LZMA + AES
@@ -753,12 +745,6 @@ public class SevenZFileTest extends AbstractTestCase {
             for (final SevenZArchiveEntry entry : entries) {
                 IOUtils.toByteArray(sevenZFile.getInputStream(entry));
             }
-        }
-    }
-
-    private void test7zUnarchive(final File f, final SevenZMethod m, final byte[] password) throws Exception {
-        try (SevenZFile sevenZFile = new SevenZFile(f, password)) {
-            test7zUnarchive(sevenZFile, m);
         }
     }
 

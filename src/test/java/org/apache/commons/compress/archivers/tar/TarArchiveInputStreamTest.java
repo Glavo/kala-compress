@@ -203,7 +203,7 @@ public class TarArchiveInputStreamTest extends AbstractTestCase {
         final TarArchiveInputStream tis =
             new TarArchiveInputStream(bis);
         t = tis.getNextTarEntry();
-        assertEquals(4294967294L, t.getLongGroupId());
+        assertEquals(4294967294L, t.getGroupId());
         tis.close();
     }
 
