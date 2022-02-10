@@ -147,7 +147,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
         // CheckStyle:MagicNumber ON
 
         crc.reset();
-        crc.update(data);
+        crc.update(data, 0, data.length);
         final long checksum = crc.getValue();
 
         final byte[] result = new byte[data.length + WORD];
@@ -278,7 +278,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
         final byte[] tmp = new byte[length - WORD];
         System.arraycopy(data, offset + WORD, tmp, 0, length - WORD);
         crc.reset();
-        crc.update(tmp);
+        crc.update(tmp, 0, tmp.length);
         final long realChecksum = crc.getValue();
         if (givenChecksum != realChecksum) {
             throw new ZipException("Bad CRC checksum, expected "
