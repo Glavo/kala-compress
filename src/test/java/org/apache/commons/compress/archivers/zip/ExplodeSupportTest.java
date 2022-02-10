@@ -57,17 +57,17 @@ public class ExplodeSupportTest {
 
     @Test
     public void testArchiveWithImplodeCompression4K2Trees() throws IOException {
-        testArchiveWithImplodeCompression("target/test-classes/imploding-4Kdict-2trees.zip", "HEADER.TXT");
+        testArchiveWithImplodeCompression("build/resources/test/imploding-4Kdict-2trees.zip", "HEADER.TXT");
     }
 
     @Test
     public void testArchiveWithImplodeCompression8K3Trees() throws IOException {
-        testArchiveWithImplodeCompression("target/test-classes/imploding-8Kdict-3trees.zip", "LICENSE.TXT");
+        testArchiveWithImplodeCompression("build/resources/test/imploding-8Kdict-3trees.zip", "LICENSE.TXT");
     }
 
     @Test
     public void testTikaTestArchive() throws IOException {
-        testArchiveWithImplodeCompression("target/test-classes/moby-imploded.zip", "README");
+        testArchiveWithImplodeCompression("build/resources/test/moby-imploded.zip", "README");
     }
 
     private void testZipStreamWithImplodeCompression(final String filename, final String entryName) throws IOException {
@@ -90,17 +90,17 @@ public class ExplodeSupportTest {
 
     @Test
     public void testZipStreamWithImplodeCompression4K2Trees() throws IOException {
-        testZipStreamWithImplodeCompression("target/test-classes/imploding-4Kdict-2trees.zip", "HEADER.TXT");
+        testZipStreamWithImplodeCompression("build/resources/test/imploding-4Kdict-2trees.zip", "HEADER.TXT");
     }
 
     @Test
     public void testZipStreamWithImplodeCompression8K3Trees() throws IOException {
-        testZipStreamWithImplodeCompression("target/test-classes/imploding-8Kdict-3trees.zip", "LICENSE.TXT");
+        testZipStreamWithImplodeCompression("build/resources/test/imploding-8Kdict-3trees.zip", "LICENSE.TXT");
     }
 
     @Test
     public void testTikaTestStream() throws IOException {
-        testZipStreamWithImplodeCompression("target/test-classes/moby-imploded.zip", "README");
+        testZipStreamWithImplodeCompression("build/resources/test/moby-imploded.zip", "README");
     }
 
     @Test
