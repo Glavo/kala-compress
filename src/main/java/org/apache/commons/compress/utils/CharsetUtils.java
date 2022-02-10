@@ -22,7 +22,7 @@ public class CharsetUtils {
 
     /**
      * Returns a charset object for the named charset.
-     * If the requested character set cannot be found, the platform default will be used instead.
+     * If the requested character set cannot be found, UTF-8 will be used instead.
      *
      * Use this method instead of {@code org.apache.commons.compress.archivers.zip.ZipEncodingHelper#getZipEncoding(String)}
      *
@@ -31,13 +31,13 @@ public class CharsetUtils {
      */
     public static Charset getCharset(String name) {
         if (name == null) {
-            return Charset.defaultCharset();
+            return StandardCharsets.UTF_8;
         }
         try {
             return Charset.forName(name);
         } catch (Throwable ignored) {
         }
-        return Charset.defaultCharset();
+        return StandardCharsets.UTF_8;
     }
 
     /**

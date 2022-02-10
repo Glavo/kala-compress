@@ -51,7 +51,7 @@ public class TarUtils {
 
     private static final int BYTE_MASK = 255;
 
-    static final Charset DEFAULT_ENCODING = Charset.defaultCharset();
+    static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
 
     /*
      * See org.apache.commons.compress.archivers.tar.TarUtils#FALLBACK_ENCODING
