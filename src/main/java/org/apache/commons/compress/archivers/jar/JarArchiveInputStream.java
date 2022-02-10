@@ -20,6 +20,7 @@ package org.apache.commons.compress.archivers.jar;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -50,6 +51,17 @@ public class JarArchiveInputStream extends ZipArchiveInputStream {
      */
     public JarArchiveInputStream(final InputStream inputStream, final String encoding) {
         super(inputStream, encoding);
+    }
+
+    /**
+     * Creates an instance from the input stream using the specified encoding.
+     *
+     * @param inputStream the input stream to wrap
+     * @param charset the encoding to use
+     * @since 1.21.0.1
+     */
+    public JarArchiveInputStream(final InputStream inputStream, final Charset charset) {
+        super(inputStream, charset);
     }
 
     public JarArchiveEntry getNextJarEntry() throws IOException {

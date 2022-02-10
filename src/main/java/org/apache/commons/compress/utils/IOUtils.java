@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 
 /**
  * Utility functions
@@ -45,6 +46,13 @@ public final class IOUtils {
      * @since 1.21
      */
     public static final LinkOption[] EMPTY_LINK_OPTIONS = {};
+
+    /**
+     * Empty array of of type {@link OpenOption}.
+     *
+     * @since 1.21.0.1
+     */
+    public static final OpenOption[] EMPTY_OPEN_OPTIONS = {};
 
     // This buffer does not need to be synchronized because it is write only; the contents are ignored
     // Does not affect Immutability

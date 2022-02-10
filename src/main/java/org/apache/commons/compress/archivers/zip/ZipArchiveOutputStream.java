@@ -38,17 +38,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Calendar;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.*;
+import java.util.*;
 import java.util.zip.Deflater;
 import java.util.zip.ZipException;
 
@@ -57,6 +48,7 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.utils.ByteUtils;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
+import sun.nio.cs.UTF_8;
 
 /**
  * Reimplementation of {@link java.util.zip.ZipOutputStream
@@ -274,18 +266,6 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     private final Map<Integer, Integer> numberOfCDInDiskData = new HashMap<>();
 
     /**
-     * Creates a new ZIP OutputStream filtering the underlying stream.
-     * @param out the outputstream to zip
-     */
-    public ZipArchiveOutputStream(final OutputStream out) {
-        this.out = out;
-        this.channel = null;
-        def = new Deflater(level, true);
-        streamCompressor = StreamCompressor.create(out, def);
-        isSplitZip = false;
-    }
-
-    /**
      * Creates a new ZIP OutputStream writing to a File.  Will use
      * random access if possible.
      * @param file the file to zip to
@@ -296,23 +276,104 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     }
 
     /**
+     * Creates a new ZIP OutputStream writing to a File.  Will use
+     * random access if possible.
+     *
+     * @param file the file to zip to
+     * @param charset the charset to use
+     * @throws IOException on error
+     * @since 1.21.0.1
+     */
+    public ZipArchiveOutputStream(final File file, Charset charset) throws IOException {
+        this(file.toPath(), charset);
+    }
+
+    /**
+     * Creates a split ZIP Archive.
+     *
+     * <p>The files making up the archive will use Z01, Z02,
+     * ... extensions and the last part of it will be the given {@code
+     * file}.</p>
+     *
+     * <p>Even though the stream writes to a file this stream will
+     * behave as if no random access was possible. This means the
+     * sizes of stored entries need to be known before the actual
+     * entry data is written.</p>
+     *
+     * @param file the file that will become the last part of the split archive
+     * @param zipSplitSize maximum size of a single part of the split
+     * archive created by this stream. Must be between 64kB and about
+     * 4GB.
+     *
+     * @throws IOException on error
+     * @throws IllegalArgumentException if zipSplitSize is not in the required range
+     * @since 1.20
+     */
+    public ZipArchiveOutputStream(final File file, final long zipSplitSize) throws IOException {
+        this(file.toPath(), zipSplitSize);
+    }
+
+    /**
+     * Creates a split ZIP Archive.
+     *
+     * <p>The files making up the archive will use Z01, Z02,
+     * ... extensions and the last part of it will be the given {@code
+     * file}.</p>
+     *
+     * <p>Even though the stream writes to a file this stream will
+     * behave as if no random access was possible. This means the
+     * sizes of stored entries need to be known before the actual
+     * entry data is written.</p>
+     *
+     * @param file the file that will become the last part of the split archive
+     * @param zipSplitSize maximum size of a single part of the split
+     * archive created by this stream. Must be between 64kB and about
+     * 4GB.
+     * @param charset the charset to use
+     * @throws IOException on error
+     * @throws IllegalArgumentException if zipSplitSize is not in the required range
+     * @since 1.21.0.1
+     */
+    public ZipArchiveOutputStream(final File file, final long zipSplitSize, Charset charset) throws IOException {
+        this(file.toPath(), zipSplitSize, charset);
+    }
+
+    /**
      * Creates a new ZIP OutputStream writing to a Path.  Will use
      * random access if possible.
+     *
      * @param file the file to zip to
      * @param options options specifying how the file is opened.
      * @throws IOException on error
      * @since 1.21
      */
     public ZipArchiveOutputStream(final Path file, final OpenOption... options) throws IOException {
+        this(file, StandardCharsets.UTF_8, options);
+    }
+
+    /**
+     * Creates a new ZIP OutputStream writing to a Path.  Will use
+     * random access if possible.
+     *
+     * @param file the file to zip to
+     * @param charset the charset to use
+     * @param options options specifying how the file is opened.
+     * @throws IOException on error
+     * @since 1.21.0.1
+     */
+    public ZipArchiveOutputStream(final Path file, Charset charset, OpenOption... options) throws IOException {
+        this.charset = Charsets.toCharset(charset);
+        this.useUTF8Flag = this.charset == StandardCharsets.UTF_8;
+
         def = new Deflater(level, true);
         OutputStream o = null;
         SeekableByteChannel _channel = null;
         StreamCompressor _streamCompressor = null;
         try {
             _channel = Files.newByteChannel(file,
-                EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-                           StandardOpenOption.READ,
-                           StandardOpenOption.TRUNCATE_EXISTING));
+                    EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+                            StandardOpenOption.READ,
+                            StandardOpenOption.TRUNCATE_EXISTING));
             // will never get opened properly when an exception is thrown so doesn't need to get closed
             _streamCompressor = StreamCompressor.create(_channel, def); //NOSONAR
         } catch (final IOException e) { // NOSONAR
@@ -346,14 +407,67 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      *
      * @throws IOException on error
      * @throws IllegalArgumentException if zipSplitSize is not in the required range
-     * @since 1.20
+     * @since 1.21.0.1
      */
-    public ZipArchiveOutputStream(final File file, final long zipSplitSize) throws IOException {
+    public ZipArchiveOutputStream(final Path file, final long zipSplitSize) throws IOException {
+        this(file, zipSplitSize, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Creates a split ZIP Archive.
+     *
+     * <p>The files making up the archive will use Z01, Z02,
+     * ... extensions and the last part of it will be the given {@code
+     * file}.</p>
+     *
+     * <p>Even though the stream writes to a file this stream will
+     * behave as if no random access was possible. This means the
+     * sizes of stored entries need to be known before the actual
+     * entry data is written.</p>
+     *
+     * @param file the file that will become the last part of the split archive
+     * @param zipSplitSize maximum size of a single part of the split
+     * archive created by this stream. Must be between 64kB and about
+     * 4GB.
+     * @param charset the charset to use
+     *
+     * @throws IOException on error
+     * @throws IllegalArgumentException if zipSplitSize is not in the required range
+     * @since 1.21.0.1
+     */
+    public ZipArchiveOutputStream(final Path file, final long zipSplitSize, Charset charset) throws IOException {
+        this.charset = Charsets.toCharset(charset);
+        this.useUTF8Flag = this.charset == StandardCharsets.UTF_8;
         def = new Deflater(level, true);
         this.out = new ZipSplitOutputStream(file, zipSplitSize);
         streamCompressor = StreamCompressor.create(this.out, def);
         channel = null;
         isSplitZip = true;
+    }
+
+    /**
+     * Creates a new ZIP OutputStream filtering the underlying stream.
+     * @param out the outputstream to zip
+     */
+    public ZipArchiveOutputStream(final OutputStream out) {
+        this(out, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Creates a new ZIP OutputStream filtering the underlying stream.
+     *
+     * @param out the outputstream to zip
+     * @param charset the charset to use
+     * @since 2.21.0.1
+     */
+    public ZipArchiveOutputStream(final OutputStream out, Charset charset) {
+        this.out = out;
+        this.channel = null;
+        this.charset = Charsets.toCharset(charset);
+        this.useUTF8Flag = this.charset == StandardCharsets.UTF_8;
+        def = new Deflater(level, true);
+        streamCompressor = StreamCompressor.create(out, def);
+        isSplitZip = false;
     }
 
     /**
@@ -369,7 +483,26 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      * @since 1.13
      */
     public ZipArchiveOutputStream(final SeekableByteChannel channel) throws IOException {
+        this(channel, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Creates a new ZIP OutputStream writing to a SeekableByteChannel.
+     *
+     * <p>{@link
+     * org.apache.commons.compress.utils.SeekableInMemoryByteChannel}
+     * allows you to write to an in-memory archive using random
+     * access.</p>
+     *
+     * @param channel the channel to zip to
+     * @param charset the charset to use
+     * @throws IOException on error
+     * @since 1.21.0.1
+     */
+    public ZipArchiveOutputStream(final SeekableByteChannel channel, Charset charset) throws IOException {
         this.channel = channel;
+        this.charset = Charsets.toCharset(charset);
+        this.useUTF8Flag = this.charset == StandardCharsets.UTF_8;
         def = new Deflater(level, true);
         streamCompressor = StreamCompressor.create(channel, def);
         out = null;
@@ -421,7 +554,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
      */
     public void setCharset(Charset charset) {
         this.charset = Charsets.toCharset(charset);
-        if (useUTF8Flag && charset != StandardCharsets.UTF_8) {
+        if (useUTF8Flag && this.charset != StandardCharsets.UTF_8) {
             useUTF8Flag = false;
         }
     }

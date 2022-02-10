@@ -20,11 +20,14 @@ package org.apache.commons.compress.archivers.jar;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.JarMarker;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.utils.Charsets;
 
 /**
  * Subclass that adds a special extra field to the very first entry
@@ -45,12 +48,22 @@ public class JarArchiveOutputStream extends ZipArchiveOutputStream {
      * Create and instance that wraps the output stream using the provided encoding.
      *
      * @param out the output stream to wrap
-     * @param encoding the encoding to use. Use null for the platform default.
+     * @param encoding the encoding to use. Use null for the UTF-8
      * @since 1.10
      */
     public JarArchiveOutputStream(final OutputStream out, final String encoding) {
-        super(out);
-        setEncoding(encoding);
+        super(out, Charsets.toCharset(encoding));
+    }
+
+    /**
+     * Create and instance that wraps the output stream using the provided encoding.
+     *
+     * @param out the output stream to wrap
+     * @param charset the charset to use. Use null for the UTF-8.
+     * @since 1.21.0.1
+     */
+    public JarArchiveOutputStream(final OutputStream out, final Charset charset) {
+        super(out, charset);
     }
 
     // @throws ClassCastException if entry is not an instance of ZipArchiveEntry
