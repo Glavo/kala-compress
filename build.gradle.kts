@@ -5,7 +5,7 @@ plugins {
 group = "org.glavo"
 description = "Glavo Compress"
 
-version = "1.21.0.1"
+version = "1.21.0.1-alpha1"
 
 val buildType = project.findProperty("buildType")?.toString()?.toUpperCase() ?: "SNAPSHOT"
 
