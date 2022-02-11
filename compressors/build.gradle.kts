@@ -5,7 +5,7 @@ tasks.jar {
 subprojects {
     project(":compressors").dependencies.api(this)
     dependencies {
-        implementation(project(":base"))
+        api(project(":base"))
     }
 
     tasks.jar {
