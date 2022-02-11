@@ -1,5 +1,8 @@
 package org.apache.commons.compress.compressors.pack200;
 
+/**
+ * @since 1.21.0.1
+ */
 public final class Pack200Constants {
     public interface Packer {
         /**
