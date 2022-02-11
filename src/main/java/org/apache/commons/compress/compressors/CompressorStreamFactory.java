@@ -41,6 +41,7 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.commons.compress.compressors.lzma.LZMAUtils;
 import org.apache.commons.compress.compressors.pack200.Pack200CompressorInputStream;
 import org.apache.commons.compress.compressors.pack200.Pack200CompressorOutputStream;
+import org.apache.commons.compress.compressors.pack200.Pack200Utils;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
 import org.apache.commons.compress.compressors.snappy.SnappyCompressorInputStream;
@@ -202,6 +203,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     private static final String YOU_NEED_BROTLI_DEC = youNeed("Google Brotli Dec", "https://github.com/google/brotli/");
     private static final String YOU_NEED_XZ_JAVA = youNeed("XZ for Java", "https://tukaani.org/xz/java.html");
     private static final String YOU_NEED_ZSTD_JNI = youNeed("Zstd JNI", "https://github.com/luben/zstd-jni");
+    private static final String YOU_NEED_PACK200 = youNeed("Pack200", "https://github.com/Glavo/pack200");
 
     private static String youNeed(final String name, final String url) {
         return " In addition to Apache Commons Compress you need the " + name + " library - see " + url;
@@ -557,7 +559,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         }
 
         try {
-
             if (GZIP.equalsIgnoreCase(name)) {
                 return new GzipCompressorInputStream(in, actualDecompressConcatenated);
             }
@@ -595,6 +596,9 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
             }
 
             if (PACK200.equalsIgnoreCase(name)) {
+                if (!Pack200Utils.isPack200Available()) {
+                    throw new CompressorException("Pack200 compression is not available" + YOU_NEED_PACK200);
+                }
                 return new Pack200CompressorInputStream(in);
             }
 

@@ -22,9 +22,10 @@ package org.apache.commons.compress.compressors.pack200;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.jar.JarOutputStream;
-import org.glavo.pack200.Pack200;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.CloseShieldFilterInputStream;
@@ -41,6 +42,8 @@ import org.apache.commons.compress.utils.IOUtils;
  * @since 1.3
  */
 public class Pack200CompressorInputStream extends CompressorInputStream {
+
+    private final Pack200Impl pack200 = Pack200Utils.getPack200ImplChecked();
     private final InputStream originalInput;
     private final StreamBridge streamBridge;
 
@@ -120,6 +123,18 @@ public class Pack200CompressorInputStream extends CompressorInputStream {
      * @throws IOException if reading fails
      */
     public Pack200CompressorInputStream(final File f) throws IOException {
+        this(f.toPath());
+    }
+
+    /**
+     * Decompresses the given file, caching the decompressed data in
+     * memory.
+     *
+     * @param f the file to decompress
+     * @throws IOException if reading fails
+     * @since 1.21.0.1
+     */
+    public Pack200CompressorInputStream(final Path f) throws IOException {
         this(f, Pack200Strategy.IN_MEMORY);
     }
 
@@ -133,6 +148,20 @@ public class Pack200CompressorInputStream extends CompressorInputStream {
      */
     public Pack200CompressorInputStream(final File f, final Pack200Strategy mode)
         throws IOException {
+        this(f.toPath(), mode);
+    }
+
+    /**
+     * Decompresses the given file using the given strategy to cache
+     * the results.
+     *
+     * @param f the file to decompress
+     * @param mode the strategy to use
+     * @throws IOException if reading fails
+     * @since 1.21.0.1
+     */
+    public Pack200CompressorInputStream(final Path f, final Pack200Strategy mode)
+            throws IOException {
         this(null, f, mode, null);
     }
 
@@ -151,6 +180,21 @@ public class Pack200CompressorInputStream extends CompressorInputStream {
     }
 
     /**
+     * Decompresses the given file, caching the decompressed data in
+     * memory and using the given properties.
+     *
+     * @param f the file to decompress
+     * @param props Pack200 properties to use
+     * @throws IOException if reading fails
+     * @since 1.21.0.1
+     */
+    public Pack200CompressorInputStream(final Path f,
+                                        final Map<String, String> props)
+            throws IOException {
+        this(f, Pack200Strategy.IN_MEMORY, props);
+    }
+
+    /**
      * Decompresses the given file using the given strategy to cache
      * the results and the given properties.
      *
@@ -162,26 +206,44 @@ public class Pack200CompressorInputStream extends CompressorInputStream {
     public Pack200CompressorInputStream(final File f, final Pack200Strategy mode,
                                         final Map<String, String> props)
         throws IOException {
+        this(null, f.toPath(), mode, props);
+    }
+
+    /**
+     * Decompresses the given file using the given strategy to cache
+     * the results and the given properties.
+     *
+     * @param f the file to decompress
+     * @param mode the strategy to use
+     * @param props Pack200 properties to use
+     * @throws IOException if reading fails
+     * @since 1.21.0.1
+     */
+    public Pack200CompressorInputStream(final Path f, final Pack200Strategy mode,
+                                        final Map<String, String> props)
+            throws IOException {
         this(null, f, mode, props);
     }
 
-    private Pack200CompressorInputStream(final InputStream in, final File f,
+    private Pack200CompressorInputStream(final InputStream in, final Path f,
                                          final Pack200Strategy mode,
                                          final Map<String, String> props)
             throws IOException {
         originalInput = in;
         streamBridge = mode.newStreamBridge();
         try (final JarOutputStream jarOut = new JarOutputStream(streamBridge)) {
-            final Pack200.Unpacker u = Pack200.newUnpacker();
+            final Object u = pack200.newUnpacker();
             if (props != null) {
-                u.properties().putAll(props);
+                pack200.getUnpackerProperties(u).putAll(props);
             }
             if (f == null) {
                 // unpack would close this stream but we
                 // want to give the user code more control
-                u.unpack(new CloseShieldFilterInputStream(in), jarOut);
+                pack200.unpack(u, new CloseShieldFilterInputStream(in), jarOut);
             } else {
-                u.unpack(f, jarOut);
+                try (InputStream input = Files.newInputStream(f)) {
+                    pack200.unpack(u, input, jarOut);
+                }
             }
         }
     }

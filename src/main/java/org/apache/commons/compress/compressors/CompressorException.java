@@ -21,7 +21,7 @@ package org.apache.commons.compress.compressors;
 /**
  * Compressor related exception
  */
-public class CompressorException extends Exception {
+public class CompressorException extends RuntimeException {
 
     /** Serial */
     private static final long serialVersionUID = -2932901310255908814L;

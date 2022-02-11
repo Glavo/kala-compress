@@ -24,7 +24,6 @@ dependencies {
     implementation("com.github.luben:zstd-jni:1.5.0-2")
     implementation("org.brotli:dec:0.1.2")
     implementation("org.tukaani:xz:1.9")
-    implementation("org.glavo:pack200:0.3.0")
 
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("junit:junit:4.13.2")
@@ -37,6 +36,7 @@ dependencies {
     testImplementation("org.apache.felix:org.apache.felix.framework:7.0.0")
     testImplementation("javax.inject:javax.inject:1")
     testImplementation("org.slf4j:slf4j-api:1.7.30")
+    testImplementation("org.glavo:pack200:0.3.0")
 }
 
 

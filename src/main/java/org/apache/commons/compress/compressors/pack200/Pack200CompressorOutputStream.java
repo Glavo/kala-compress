@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.jar.JarInputStream;
-import org.glavo.pack200.Pack200;
 
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 
@@ -34,6 +33,7 @@ import org.apache.commons.compress.compressors.CompressorOutputStream;
  * @since 1.3
  */
 public class Pack200CompressorOutputStream extends CompressorOutputStream {
+    private final Pack200Impl pack200 = Pack200Utils.getPack200ImplChecked();
     private boolean finished;
     private final OutputStream originalOutput;
     private final StreamBridge streamBridge;
@@ -128,12 +128,12 @@ public class Pack200CompressorOutputStream extends CompressorOutputStream {
     public void finish() throws IOException {
         if (!finished) {
             finished = true;
-            final Pack200.Packer p = Pack200.newPacker();
+            final Object p = pack200.newPacker();
             if (properties != null) {
-                p.properties().putAll(properties);
+                pack200.getPackerProperties(p).putAll(properties);
             }
             try (JarInputStream ji = new JarInputStream(streamBridge.getInput())) {
-                p.pack(ji, originalOutput);
+                pack200.pack(p, ji, originalOutput);
             }
         }
     }
