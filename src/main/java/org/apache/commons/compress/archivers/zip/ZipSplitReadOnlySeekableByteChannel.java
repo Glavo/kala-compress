@@ -173,7 +173,7 @@ public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableBy
     public static SeekableByteChannel buildFromLastSplitSegment(final Path lastSegmentFile) throws IOException {
         Path realPath = lastSegmentFile.toRealPath();
         final String extension = FileNameUtils.getExtension(realPath);
-        if (!extension.equalsIgnoreCase(ArchiveStreamFactory.ZIP)) {
+        if (!extension.equalsIgnoreCase("zip")) {
             throw new IllegalArgumentException("The extension of last zip split segment should be .zip");
         }
 

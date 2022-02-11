@@ -53,6 +53,8 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
     private LocalFileHeader currentLocalFileHeader;
     private InputStream currentInputStream;
 
+    private static final Charset DEFAULT_CHARSET = Charsets.toCharset("CP437");
+
     /**
      * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in,
      * and using the CP437 character encoding.
@@ -61,7 +63,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
      */
     public ArjArchiveInputStream(final InputStream inputStream)
             throws ArchiveException {
-        this(inputStream, "CP437");
+        this(inputStream, DEFAULT_CHARSET);
     }
 
     /**
