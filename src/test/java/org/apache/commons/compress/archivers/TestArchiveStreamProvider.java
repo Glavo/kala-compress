@@ -21,6 +21,7 @@ package org.apache.commons.compress.archivers;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,12 +38,12 @@ public class TestArchiveStreamProvider implements ArchiveStreamProvider {
     }
 
     @Override
-    public ArchiveInputStream createArchiveInputStream(final String name, final InputStream in, final String encoding) throws ArchiveException {
+    public ArchiveInputStream createArchiveInputStream(final String name, final InputStream in, final Charset encoding) throws ArchiveException {
         throw new ArchiveInvocationConfirmationException(name);
     }
 
     @Override
-    public ArchiveOutputStream createArchiveOutputStream(final String name, final OutputStream out, final String encoding) throws ArchiveException {
+    public ArchiveOutputStream createArchiveOutputStream(final String name, final OutputStream out, final Charset encoding) throws ArchiveException {
         throw new ArchiveInvocationConfirmationException(name);
     }
 

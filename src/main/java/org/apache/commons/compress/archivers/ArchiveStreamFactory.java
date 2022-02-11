@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import org.apache.commons.compress.archivers.ar.ArArchiveInputStream;
@@ -37,6 +38,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.ServiceLoaderIterator;
 
@@ -140,15 +142,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      */
     public static final String SEVEN_Z = "7z";
 
-    /**
-     * Entry encoding, null for the platform default.
-     */
-    private final String encoding;
-
-    /**
-     * Entry encoding, null for the default.
-     */
-    private volatile String entryEncoding;
+    private final Charset entryCharset;
 
     private SortedMap<String, ArchiveStreamProvider> archiveInputStreamProviders;
 
@@ -239,7 +233,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * Create an instance using the platform default encoding.
      */
     public ArchiveStreamFactory() {
-        this(null);
+        this((Charset) null);
     }
 
     /**
@@ -250,9 +244,18 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * @since 1.10
      */
     public ArchiveStreamFactory(final String encoding) {
-        this.encoding = encoding;
-        // Also set the original field so can continue to use it.
-        this.entryEncoding = encoding;
+        this.entryCharset = encoding == null ? null : Charsets.toCharset(encoding);
+    }
+
+    /**
+     * Create an instance using the specified charset.
+     *
+     * @param charset the charset to be used.
+     *
+     * @since 1.21.0.1
+     */
+    public ArchiveStreamFactory(final Charset charset) {
+        this.entryCharset = charset;
     }
 
     /**
@@ -263,7 +266,18 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * @since 1.5
      */
     public String getEntryEncoding() {
-        return entryEncoding;
+        return entryCharset == null ? null : entryCharset.name();
+    }
+
+    /**
+     * Returns the encoding to use for arj, jar, zip, dump, cpio and tar
+     * files, or null for the archiver default.
+     *
+     * @return the entry charset, or null for the archiver default
+     * @since 1.21.0.1
+     */
+    public Charset getEntryCharset() {
+        return entryCharset;
     }
 
     /**
@@ -280,12 +294,12 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      */
     public ArchiveInputStream createArchiveInputStream(final String archiverName, final InputStream in)
             throws ArchiveException {
-        return createArchiveInputStream(archiverName, in, entryEncoding);
+        return createArchiveInputStream(archiverName, in, entryCharset);
     }
 
     @Override
     public ArchiveInputStream createArchiveInputStream(final String archiverName, final InputStream in,
-            final String actualEncoding) throws ArchiveException {
+            final Charset actualCharset) throws ArchiveException {
 
         if (archiverName == null) {
             throw new IllegalArgumentException("Archivername must not be null.");
@@ -299,38 +313,38 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
             return new ArArchiveInputStream(in);
         }
         if (ARJ.equalsIgnoreCase(archiverName)) {
-            if (actualEncoding != null) {
-                return new ArjArchiveInputStream(in, actualEncoding);
+            if (actualCharset != null) {
+                return new ArjArchiveInputStream(in, actualCharset);
             }
             return new ArjArchiveInputStream(in);
         }
         if (ZIP.equalsIgnoreCase(archiverName)) {
-            if (actualEncoding != null) {
-                return new ZipArchiveInputStream(in, actualEncoding);
+            if (actualCharset != null) {
+                return new ZipArchiveInputStream(in, actualCharset);
             }
             return new ZipArchiveInputStream(in);
         }
         if (TAR.equalsIgnoreCase(archiverName)) {
-            if (actualEncoding != null) {
-                return new TarArchiveInputStream(in, actualEncoding);
+            if (actualCharset != null) {
+                return new TarArchiveInputStream(in, actualCharset);
             }
             return new TarArchiveInputStream(in);
         }
         if (JAR.equalsIgnoreCase(archiverName)) {
-            if (actualEncoding != null) {
-                return new JarArchiveInputStream(in, actualEncoding);
+            if (actualCharset != null) {
+                return new JarArchiveInputStream(in, actualCharset);
             }
             return new JarArchiveInputStream(in);
         }
         if (CPIO.equalsIgnoreCase(archiverName)) {
-            if (actualEncoding != null) {
-                return new CpioArchiveInputStream(in, actualEncoding);
+            if (actualCharset != null) {
+                return new CpioArchiveInputStream(in, actualCharset);
             }
             return new CpioArchiveInputStream(in);
         }
         if (DUMP.equalsIgnoreCase(archiverName)) {
-            if (actualEncoding != null) {
-                return new DumpArchiveInputStream(in, actualEncoding);
+            if (actualCharset != null) {
+                return new DumpArchiveInputStream(in, actualCharset);
             }
             return new DumpArchiveInputStream(in);
         }
@@ -340,7 +354,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
 
         final ArchiveStreamProvider archiveStreamProvider = getArchiveInputStreamProviders().get(toKey(archiverName));
         if (archiveStreamProvider != null) {
-            return archiveStreamProvider.createArchiveInputStream(archiverName, in, actualEncoding);
+            return archiveStreamProvider.createArchiveInputStream(archiverName, in, actualCharset);
         }
 
         throw new ArchiveException("Archiver: " + archiverName + " not found.");
@@ -360,12 +374,12 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      */
     public ArchiveOutputStream createArchiveOutputStream(final String archiverName, final OutputStream out)
             throws ArchiveException {
-        return createArchiveOutputStream(archiverName, out, entryEncoding);
+        return createArchiveOutputStream(archiverName, out, entryCharset);
     }
 
     @Override
     public ArchiveOutputStream createArchiveOutputStream(
-            final String archiverName, final OutputStream out, final String actualEncoding)
+            final String archiverName, final OutputStream out, final Charset actualEncoding)
             throws ArchiveException {
         if (archiverName == null) {
             throw new IllegalArgumentException("Archivername must not be null.");
@@ -380,7 +394,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
         if (ZIP.equalsIgnoreCase(archiverName)) {
             final ZipArchiveOutputStream zip = new ZipArchiveOutputStream(out);
             if (actualEncoding != null) {
-                zip.setEncoding(actualEncoding);
+                zip.setCharset(actualEncoding);
             }
             return zip;
         }

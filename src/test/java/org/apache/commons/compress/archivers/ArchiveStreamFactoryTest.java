@@ -141,11 +141,13 @@ public class ArchiveStreamFactoryTest {
     @Test
     public void testEncodingCtor() {
         ArchiveStreamFactory fac = new ArchiveStreamFactory();
-        assertNull(fac.getEntryEncoding());
-        fac = new ArchiveStreamFactory(null);
-        assertNull(fac.getEntryEncoding());
+        assertNull(fac.getEntryCharset());
+        fac = new ArchiveStreamFactory((Charset) null);
+        assertNull(fac.getEntryCharset());
         fac = new ArchiveStreamFactory("UTF-8");
-        assertEquals("UTF-8", fac.getEntryEncoding());
+        assertEquals(StandardCharsets.UTF_8, fac.getEntryCharset());
+        fac = new ArchiveStreamFactory(StandardCharsets.UTF_8);
+        assertEquals(StandardCharsets.UTF_8, fac.getEntryCharset());
     }
 
     static class TestData {

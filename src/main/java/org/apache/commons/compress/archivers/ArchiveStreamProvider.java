@@ -19,8 +19,11 @@
 
 package org.apache.commons.compress.archivers;
 
+import org.apache.commons.compress.utils.Charsets;
+
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 /**
@@ -57,7 +60,40 @@ public interface ArchiveStreamProvider {
      * @throws IllegalArgumentException
      *             if the archiver name or stream is null
      */
-    ArchiveInputStream createArchiveInputStream(final String name, final InputStream in, final String encoding)
+    default ArchiveInputStream createArchiveInputStream(final String name, final InputStream in, final String encoding)
+            throws ArchiveException {
+        return createArchiveInputStream(name, in, encoding == null ? null : Charsets.toCharset(encoding));
+    }
+
+    /**
+     * Creates an archive input stream from an archiver name and an input
+     * stream.
+     *
+     * @param name
+     *            the archive name, i.e.
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#AR},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#ARJ},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#ZIP},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#TAR},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#JAR},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#CPIO},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#DUMP}
+     *            or
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#SEVEN_Z}
+     * @param in
+     *            the input stream
+     * @param charset
+     *            charset or null for the default
+     * @return the archive input stream
+     * @throws ArchiveException
+     *             if the archiver name is not known
+     * @throws StreamingNotSupportedException
+     *             if the format cannot be read from a stream
+     * @throws IllegalArgumentException
+     *             if the archiver name or stream is null
+     * @since 1.21.0.1
+     */
+    ArchiveInputStream createArchiveInputStream(final String name, final InputStream in, final Charset charset)
             throws ArchiveException;
 
     /**
@@ -84,7 +120,36 @@ public interface ArchiveStreamProvider {
      * @throws IllegalArgumentException
      *             if the archiver name or stream is null
      */
-    ArchiveOutputStream createArchiveOutputStream(final String name, final OutputStream out, final String encoding)
+    default ArchiveOutputStream createArchiveOutputStream(final String name, final OutputStream out, final String encoding)
+            throws ArchiveException {
+        return createArchiveOutputStream(name, out, encoding == null ? null : Charsets.toCharset(encoding));
+    }
+
+    /**
+     * Creates an archive output stream from an archiver name and an output
+     * stream.
+     *
+     * @param name
+     *            the archive name, i.e.
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#AR},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#ZIP},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#TAR},
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#JAR}
+     *            or
+     *            {@value org.apache.commons.compress.archivers.ArchiveStreamFactory#CPIO}
+     * @param out
+     *            the output stream
+     * @param charset
+     *             charset or null for the default
+     * @return the archive output stream
+     * @throws ArchiveException
+     *             if the archiver name is not known
+     * @throws StreamingNotSupportedException
+     *             if the format cannot be written to a stream
+     * @throws IllegalArgumentException
+     *             if the archiver name or stream is null
+     */
+    ArchiveOutputStream createArchiveOutputStream(final String name, final OutputStream out, final Charset charset)
             throws ArchiveException;
 
     /**
