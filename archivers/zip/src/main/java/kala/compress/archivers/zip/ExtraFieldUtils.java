@@ -29,6 +29,7 @@ import java.util.zip.ZipException;
  * @NotThreadSafe because the HashMap is not synch.
  */
 // CheckStyle:HideUtilityClassConstructorCheck OFF (bc)
+@SuppressWarnings("deprecation")
 public class ExtraFieldUtils {
 
     private static final int WORD = 4;
