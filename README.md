@@ -21,6 +21,7 @@ Task list:
 - [x] Use UTF-8 by default;
 - [x] Clean up all deprecated features;
 - [x] In preparation for [Valhalla](https://openjdk.java.net/projects/valhalla/), replace the constructor of a class that can become a [value class](https://openjdk.java.net/jeps/8277163) with a factory method;
+- [x] Flexible choice of pack200 implementation (when the JDK has built-in pack200 support, external dependencies are no longer required);
 - [x] Enhanced NIO2 Path API support, migration from `File` to `Path`;
 - [ ] Provide `FileSystem` for each archiver;
 - [ ] Split compressors and archivers into separate modules;
