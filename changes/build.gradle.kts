@@ -3,6 +3,6 @@ dependencies {
     implementation(project(":archivers:zip"))
 }
 
-tasks.jar {
+tasks.withType<Jar> {
     archiveBaseName.set("kala-compress-changes")
 }

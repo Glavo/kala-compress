@@ -1,4 +1,4 @@
-tasks.jar {
+tasks.withType<Jar> {
     archiveBaseName.set("kala-compress-compressors")
 }
 
@@ -8,7 +8,7 @@ subprojects {
         api(project(":base"))
     }
 
-    tasks.jar {
+    tasks.withType<Jar> {
         archiveBaseName.set("kala-compress-compressors-${project.name}")
     }
 }

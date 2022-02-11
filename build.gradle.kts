@@ -29,6 +29,7 @@ allprojects {
 
     java {
         withSourcesJar()
+        withJavadocJar()
     }
 
     tasks.compileJava {
@@ -53,6 +54,15 @@ allprojects {
         options.encoding = "UTF-8"
     }
 
+    tasks.withType<Javadoc> {
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType<Jar> {
+        metaInf {
+            from(rootProject.file("LICENSE.txt"))
+        }
+    }
 }
 
 subprojects {
@@ -75,9 +85,6 @@ dependencies {
     testImplementation(Dependencies.XZ)
     testImplementation(Dependencies.ZSTD_JNI)
 }
-
-
-
 
 tasks.test {
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
