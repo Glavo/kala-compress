@@ -24,7 +24,7 @@ dependencies {
     implementation("com.github.luben:zstd-jni:1.5.0-2")
     implementation("org.brotli:dec:0.1.2")
     implementation("org.tukaani:xz:1.9")
-    implementation("asm:asm:3.2")
+    implementation("org.glavo:pack200:0.3.0")
 
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("junit:junit:4.13.2")

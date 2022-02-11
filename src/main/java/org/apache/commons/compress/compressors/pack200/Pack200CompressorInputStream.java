@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.jar.JarOutputStream;
-import org.apache.commons.compress.java.util.jar.Pack200;
+import org.glavo.pack200.Pack200;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.CloseShieldFilterInputStream;
@@ -34,8 +34,7 @@ import org.apache.commons.compress.utils.IOUtils;
  * An input stream that decompresses from the Pack200 format to be read
  * as any other stream.
  *
- * <p>The {@link CompressorInputStream#getCount getCount} and {@link
- * CompressorInputStream#getBytesRead getBytesRead} methods always
+ * <p>The {@link CompressorInputStream#getBytesRead getBytesRead} methods always
  * return 0.</p>
  *
  * @NotThreadSafe
