@@ -1,6 +1,6 @@
 [![Gradle Check](https://github.com/Glavo/compress/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/compress/actions/workflows/check.yml)
 
-Glavo Compress
+Kala Compress
 ---
 
 This project is based on [Apache Commons Compress](https://github.com/apache/commons-compress).
@@ -25,7 +25,7 @@ Task list:
 - [x] Enhanced NIO2 Path API support, migration from `File` to `Path`;
 - [ ] Provide `FileSystem` for each archiver;
 - [x] Dynamic loading compressors in `CompressorStreamFactory`
-- [ ] Dynamic loading archivers in `ArchiveStreamFactory`
+- [x] Dynamic loading archivers in `ArchiveStreamFactory`
 - [ ] Split compressors and archivers into separate modules;
 - [ ] Full support for JPMS;
 - [ ] Rename the package;
