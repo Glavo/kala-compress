@@ -58,36 +58,6 @@ public class BrotliCompressorInputStreamTest extends AbstractTestCase {
     }
 
     @Test
-    public void testCachingIsEnabledByDefaultAndBrotliIsPresent() {
-        assertEquals(BrotliUtils.CachedAvailability.CACHED_AVAILABLE, BrotliUtils.getCachedBrotliAvailability());
-        assertTrue(BrotliUtils.isBrotliCompressionAvailable());
-    }
-
-    @Test
-    public void testCanTurnOffCaching() {
-        try {
-            BrotliUtils.setCacheBrotliAvailablity(false);
-            assertEquals(BrotliUtils.CachedAvailability.DONT_CACHE, BrotliUtils.getCachedBrotliAvailability());
-            assertTrue(BrotliUtils.isBrotliCompressionAvailable());
-        } finally {
-            BrotliUtils.setCacheBrotliAvailablity(true);
-        }
-    }
-
-    @Test
-    public void testTurningOnCachingReEvaluatesAvailability() {
-        try {
-            BrotliUtils.setCacheBrotliAvailablity(false);
-            assertEquals(BrotliUtils.CachedAvailability.DONT_CACHE, BrotliUtils.getCachedBrotliAvailability());
-            BrotliUtils.setCacheBrotliAvailablity(true);
-            assertEquals(BrotliUtils.CachedAvailability.CACHED_AVAILABLE, BrotliUtils.getCachedBrotliAvailability());
-        } finally {
-            BrotliUtils.setCacheBrotliAvailablity(true);
-        }
-    }
-
-
-    @Test
     public void availableShouldReturnZero() throws IOException {
         final File input = getFile("brotli.testdata.compressed");
         try (InputStream is = Files.newInputStream(input.toPath())) {

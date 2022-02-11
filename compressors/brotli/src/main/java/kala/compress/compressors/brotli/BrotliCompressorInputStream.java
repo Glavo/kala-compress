@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import kala.compress.compressors.CompressorInputStream;
+import kala.compress.compressors.brotli.dec.BrotliInputStream;
 import kala.compress.utils.CountingInputStream;
 import kala.compress.utils.IOUtils;
 import kala.compress.utils.InputStreamStatistics;
-import org.brotli.dec.BrotliInputStream;
 
 /**
  * {@link CompressorInputStream} implementation to decode Brotli encoded stream.

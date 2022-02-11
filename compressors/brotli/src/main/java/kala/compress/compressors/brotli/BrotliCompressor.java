@@ -14,11 +14,6 @@ public class BrotliCompressor extends BuiltinCompressor {
     }
 
     @Override
-    public boolean isCompressionAvailable() {
-        return BrotliUtils.isBrotliCompressionAvailable();
-    }
-
-    @Override
     protected CompressorInputStream internalCreateCompressorInputStream(InputStream in, boolean decompressUntilEOF, int memoryLimitInKb) throws IOException, CompressorException {
         return new BrotliCompressorInputStream(in);
     }
