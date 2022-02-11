@@ -55,7 +55,11 @@ allprojects {
     }
 
     tasks.withType<Javadoc> {
-        options.encoding = "UTF-8"
+        (options as StandardJavadocDocletOptions).apply {
+            encoding = "UTF-8"
+            addBooleanOption("html5", true)
+            addStringOption("Xdoclint:none", "-quiet")
+        }
     }
 
     tasks.withType<Jar> {

@@ -141,8 +141,7 @@ public final class Parameters {
          *
          * <p>It is recommended to not use this method directly but
          * rather tune a pre-configured builder created by a format
-         * specific factory like {@link
-         * kala.compress.compressors.snappy.SnappyCompressorOutputStream#createParameterBuilder}.</p>
+         * specific factory like {@code kala.compress.compressors.snappy.SnappyCompressorOutputStream#createParameterBuilder}.</p>
          *
          * @param maxLiteralLength maximal length of a literal
          * block. Negative numbers and 0 as well as values bigger than
