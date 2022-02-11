@@ -42,7 +42,7 @@ import java.util.Locale;
 
 public class SparseFilesTest extends AbstractTestCase {
 
-    private final boolean isOnWindows = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("windows");
+    private final boolean isOnWindows = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows");
 
     @Test
     public void testOldGNU() throws Throwable {

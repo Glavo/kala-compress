@@ -45,7 +45,7 @@ import org.junit.Test;
 public class TarArchiveEntryTest implements TarConstants {
 
     private static final String OS =
-        System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+        System.getProperty("os.name").toLowerCase(Locale.ROOT);
     private static final String ROOT =
         OS.startsWith("windows") || OS.startsWith("netware") ? "C:\\" : "/";
 

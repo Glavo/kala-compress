@@ -131,7 +131,7 @@ public class FileNameUtil {
      *         {@code false} otherwise
      */
     public boolean isCompressedFilename(final String fileName) {
-        final String lower = fileName.toLowerCase(Locale.ENGLISH);
+        final String lower = fileName.toLowerCase(Locale.ROOT);
         final int n = lower.length();
         for (int i = shortestCompressedSuffix;
              i <= longestCompressedSuffix && i < n; i++) {
@@ -156,7 +156,7 @@ public class FileNameUtil {
      * @return name of the corresponding uncompressed file
      */
     public String getUncompressedFilename(final String fileName) {
-        final String lower = fileName.toLowerCase(Locale.ENGLISH);
+        final String lower = fileName.toLowerCase(Locale.ROOT);
         final int n = lower.length();
         for (int i = shortestCompressedSuffix;
              i <= longestCompressedSuffix && i < n; i++) {
@@ -180,7 +180,7 @@ public class FileNameUtil {
      * @return name of the corresponding compressed file
      */
     public String getCompressedFilename(final String fileName) {
-        final String lower = fileName.toLowerCase(Locale.ENGLISH);
+        final String lower = fileName.toLowerCase(Locale.ROOT);
         final int n = lower.length();
         for (int i = shortestUncompressedSuffix;
              i <= longestUncompressedSuffix && i < n; i++) {

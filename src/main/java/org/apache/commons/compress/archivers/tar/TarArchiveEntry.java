@@ -1697,7 +1697,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     private static String normalizeFileName(String fileName,
                                             final boolean preserveAbsolutePath) {
         if (!preserveAbsolutePath) {
-            final String osname = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+            final String osname = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
             // Strip off drive letters!
             // REVIEW Would a better check be "(File.separator == '\')"?
