@@ -50,8 +50,6 @@ public class TarUtils {
 
     private static final int BYTE_MASK = 255;
 
-    static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
-
     /*
      * See org.apache.commons.compress.archivers.tar.TarUtils#FALLBACK_ENCODING
      */
@@ -264,7 +262,7 @@ public class TarUtils {
      */
     public static String parseName(final byte[] buffer, final int offset, final int length) {
         try {
-            return parseName(buffer, offset, length, DEFAULT_ENCODING);
+            return parseName(buffer, offset, length, StandardCharsets.UTF_8);
         } catch (final IOException ex) { // NOSONAR
             try {
                 return parseNameFallback(buffer, offset, length);
@@ -376,7 +374,7 @@ public class TarUtils {
      */
     public static int formatNameBytes(final String name, final byte[] buf, final int offset, final int length) {
         try {
-            return formatNameBytes(name, buf, offset, length, DEFAULT_ENCODING);
+            return formatNameBytes(name, buf, offset, length, StandardCharsets.UTF_8);
         } catch (final IOException ex) { // NOSONAR
             try {
                 return formatNameBytesFallback(name, buf, offset, length);

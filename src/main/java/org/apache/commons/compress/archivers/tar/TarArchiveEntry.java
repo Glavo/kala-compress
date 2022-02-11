@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -1434,7 +1435,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      */
     public void writeEntryHeader(final byte[] outbuf) {
         try {
-            writeEntryHeader(outbuf, TarUtils.DEFAULT_ENCODING, false);
+            writeEntryHeader(outbuf, StandardCharsets.UTF_8, false);
         } catch (final IOException ex) { // NOSONAR
             try {
                 writeEntryHeaderFallback(outbuf, false);
@@ -1553,10 +1554,10 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      */
     public void parseTarHeader(final byte[] header) {
         try {
-            parseTarHeader(header, TarUtils.DEFAULT_ENCODING);
+            parseTarHeader(header, StandardCharsets.UTF_8);
         } catch (final IOException ex) { // NOSONAR
             try {
-                parseTarHeader(header, TarUtils.DEFAULT_ENCODING, true, false);
+                parseTarHeader(header, StandardCharsets.UTF_8, true, false);
             } catch (final IOException ex2) {
                 // not really possible
                 throw new RuntimeException(ex2); //NOSONAR
@@ -1698,27 +1699,24 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         if (!preserveAbsolutePath) {
             final String osname = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
 
-            if (osname != null) {
+            // Strip off drive letters!
+            // REVIEW Would a better check be "(File.separator == '\')"?
 
-                // Strip off drive letters!
-                // REVIEW Would a better check be "(File.separator == '\')"?
+            if (osname.startsWith("windows")) {
+                if (fileName.length() > 2) {
+                    final char ch1 = fileName.charAt(0);
+                    final char ch2 = fileName.charAt(1);
 
-                if (osname.startsWith("windows")) {
-                    if (fileName.length() > 2) {
-                        final char ch1 = fileName.charAt(0);
-                        final char ch2 = fileName.charAt(1);
-
-                        if (ch2 == ':'
-                            && (ch1 >= 'a' && ch1 <= 'z'
-                                || ch1 >= 'A' && ch1 <= 'Z')) {
-                            fileName = fileName.substring(2);
-                        }
+                    if (ch2 == ':'
+                        && (ch1 >= 'a' && ch1 <= 'z'
+                            || ch1 >= 'A' && ch1 <= 'Z')) {
+                        fileName = fileName.substring(2);
                     }
-                } else if (osname.contains("netware")) {
-                    final int colon = fileName.indexOf(':');
-                    if (colon != -1) {
-                        fileName = fileName.substring(colon + 1);
-                    }
+                }
+            } else if (osname.contains("netware")) {
+                final int colon = fileName.indexOf(':');
+                if (colon != -1) {
+                    fileName = fileName.substring(colon + 1);
                 }
             }
         }
