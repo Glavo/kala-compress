@@ -60,7 +60,13 @@ import org.apache.commons.compress.utils.ServiceLoaderIterator;
 public class CompressorStreamFactory implements CompressorStreamProvider {
 
     private static final CompressorStreamFactory SINGLETON = new CompressorStreamFactory();
-    private static final BuiltinCompressor[] BUILTIN_COMPRESSORS = findProviders(BuiltinCompressor.class).toArray(new BuiltinCompressor[0]);
+    private static final BuiltinCompressor[] BUILTIN_COMPRESSORS;
+
+    static {
+        ArrayList<BuiltinCompressor> builtinCompressors = new ArrayList<>();
+        new ServiceLoaderIterator<>(BuiltinCompressor.class, BuiltinCompressor.class.getClassLoader()).forEachRemaining(builtinCompressors::add);
+        BUILTIN_COMPRESSORS = builtinCompressors.toArray(new BuiltinCompressor[0]);
+    }
 
     /**
      * Constant (value {@value}) used to identify the BROTLI compression
@@ -170,12 +176,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      */
     public static final String ZSTANDARD = "zstd";
 
-    private static final String YOU_NEED_BROTLI_DEC = youNeed("Google Brotli Dec", "https://github.com/google/brotli/");
-
-    private static String youNeed(final String name, final String url) {
-        return " In addition to Glavo Compress you need the " + name + " library - see " + url;
-    }
-
     /**
      * Constructs a new sorted map from input stream provider names to provider
      * objects.
@@ -206,9 +206,8 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     public static SortedMap<String, CompressorStreamProvider> findAvailableCompressorInputStreamProviders() {
         final TreeMap<String, CompressorStreamProvider> map = new TreeMap<>();
         putAll(SINGLETON.getInputStreamCompressorNames(), SINGLETON, map);
-        for (final CompressorStreamProvider provider : findProviders(CompressorStreamProvider.class)) {
-            putAll(provider.getInputStreamCompressorNames(), provider, map);
-        }
+        new ServiceLoaderIterator<>(CompressorStreamProvider.class)
+                .forEachRemaining(provider -> putAll(provider.getInputStreamCompressorNames(), provider, map));
         return map;
     }
 
@@ -242,15 +241,10 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     public static SortedMap<String, CompressorStreamProvider> findAvailableCompressorOutputStreamProviders() {
         final TreeMap<String, CompressorStreamProvider> map = new TreeMap<>();
         putAll(SINGLETON.getOutputStreamCompressorNames(), SINGLETON, map);
-        for (final CompressorStreamProvider provider : findProviders(CompressorStreamProvider.class)) {
-            putAll(provider.getOutputStreamCompressorNames(), provider, map);
-        }
+
+        new ServiceLoaderIterator<>(CompressorStreamProvider.class)
+                .forEachRemaining(provider -> putAll(provider.getOutputStreamCompressorNames(), provider, map));
         return map;
-    }
-    private static <T> ArrayList<T> findProviders(Class<T> cls) {
-        ArrayList<T> res = new ArrayList<>();
-        new ServiceLoaderIterator<>(cls).forEachRemaining(res::add);
-        return res;
     }
 
     public static CompressorStreamFactory getSingleton() {

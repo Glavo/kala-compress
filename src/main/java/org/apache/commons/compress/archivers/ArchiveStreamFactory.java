@@ -154,21 +154,11 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
 
     private SortedMap<String, ArchiveStreamProvider> archiveOutputStreamProviders;
 
-    private static ArrayList<ArchiveStreamProvider> findArchiveStreamProviders() {
-        ArrayList<ArchiveStreamProvider> res = new ArrayList<>();
-        serviceLoaderIterator().forEachRemaining(res::add);
-        return res;
-    }
-
     static void putAll(final Set<String> names, final ArchiveStreamProvider provider,
             final TreeMap<String, ArchiveStreamProvider> map) {
         for (final String name : names) {
             map.put(toKey(name), provider);
         }
-    }
-
-    private static Iterator<ArchiveStreamProvider> serviceLoaderIterator() {
-        return new ServiceLoaderIterator<>(ArchiveStreamProvider.class);
     }
 
     private static String toKey(final String name) {
@@ -205,9 +195,8 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     public static SortedMap<String, ArchiveStreamProvider> findAvailableArchiveInputStreamProviders() {
         final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
         putAll(DEFAULT.getInputStreamArchiveNames(), DEFAULT, map);
-        for (final ArchiveStreamProvider provider : findArchiveStreamProviders()) {
-            putAll(provider.getInputStreamArchiveNames(), provider, map);
-        }
+        new ServiceLoaderIterator<>(ArchiveStreamProvider.class)
+                .forEachRemaining(provider -> putAll(provider.getInputStreamArchiveNames(), provider, map));
         return map;
     }
 
@@ -241,9 +230,8 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     public static SortedMap<String, ArchiveStreamProvider> findAvailableArchiveOutputStreamProviders() {
         final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
         putAll(DEFAULT.getOutputStreamArchiveNames(), DEFAULT, map);
-        for (final ArchiveStreamProvider provider : findArchiveStreamProviders()) {
-            putAll(provider.getOutputStreamArchiveNames(), provider, map);
-        }
+        new ServiceLoaderIterator<>(ArchiveStreamProvider.class)
+                .forEachRemaining(provider -> putAll(provider.getOutputStreamArchiveNames(), provider, map));
         return map;
     }
 

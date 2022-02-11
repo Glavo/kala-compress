@@ -19,10 +19,7 @@
 
 package org.apache.commons.compress.utils;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * Iterates all services for a given class through the standard
