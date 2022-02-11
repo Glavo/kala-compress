@@ -24,6 +24,8 @@ Task list:
 - [x] Flexible choice of pack200 implementation (when the JDK has built-in pack200 support, external dependencies are no longer required);
 - [x] Enhanced NIO2 Path API support, migration from `File` to `Path`;
 - [ ] Provide `FileSystem` for each archiver;
+- [x] Dynamic loading compressors in `CompressorStreamFactory`
+- [ ] Dynamic loading archivers in `ArchiveStreamFactory`
 - [ ] Split compressors and archivers into separate modules;
 - [ ] Full support for JPMS;
 - [ ] Rename the package;
