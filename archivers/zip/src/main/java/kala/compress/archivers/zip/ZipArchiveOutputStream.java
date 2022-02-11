@@ -48,7 +48,6 @@ import kala.compress.archivers.ArchiveOutputStream;
 import kala.compress.utils.ByteUtils;
 import kala.compress.utils.Charsets;
 import kala.compress.utils.IOUtils;
-import sun.nio.cs.UTF_8;
 
 /**
  * Reimplementation of {@link java.util.zip.ZipOutputStream
