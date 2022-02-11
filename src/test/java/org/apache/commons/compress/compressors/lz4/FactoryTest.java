@@ -33,12 +33,12 @@ public class FactoryTest extends AbstractTestCase {
 
     @Test
     public void frameRoundtripViaFactory() throws Exception {
-        roundtripViaFactory(CompressorStreamFactory.getLZ4Framed());
+        roundtripViaFactory(CompressorStreamFactory.LZ4_FRAMED);
     }
 
     @Test
     public void blockRoundtripViaFactory() throws Exception {
-        roundtripViaFactory(CompressorStreamFactory.getLZ4Block());
+        roundtripViaFactory(CompressorStreamFactory.LZ4_BLOCK);
     }
 
     private void roundtripViaFactory(final String format) throws Exception {
