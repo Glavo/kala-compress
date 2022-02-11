@@ -27,6 +27,6 @@ Task list:
 - [x] Dynamic loading compressors in `CompressorStreamFactory`
 - [x] Dynamic loading archivers in `ArchiveStreamFactory`
 - [x] Split compressors and archivers into separate modules;
-- [ ] Full support for JPMS;
+- [x] Full support for JPMS;
 - [x] Rename the package;
 - [ ] Publish it to Maven Central
