@@ -2,6 +2,7 @@ import java.io.RandomAccessFile
 
 plugins {
     `java-library`
+    `maven-publish`
 }
 
 val buildType = project.findProperty("buildType")?.toString()?.toUpperCase() ?: "SNAPSHOT"
@@ -10,6 +11,7 @@ val baseVersion = "1.21.0.1-alpha1"
 allprojects {
     apply {
         plugin("java-library")
+        plugin("maven-publish")
     }
 
     group = "org.glavo.kala"
