@@ -1,6 +1,6 @@
 @file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 
-rootProject.name = "compress"
+rootProject.name = "kala-compress"
 
 include("base", "changes")
 
