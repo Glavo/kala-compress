@@ -1,30 +1,50 @@
 plugins {
-    java
+    `java-library`
 }
-
-group = "org.glavo"
-description = "Glavo Compress"
-
-version = "1.21.0.1-alpha1"
 
 val buildType = project.findProperty("buildType")?.toString()?.toUpperCase() ?: "SNAPSHOT"
+val baseVersion = "1.21.0.1-alpha1"
 
-when (buildType) {
-    "RELEASE" -> {}
-    "SNAPSHOT" -> version = "$version-SNAPSHOT"
-    "NIGHTLY" -> TODO()
+allprojects {
+    apply {
+        plugin("java-library")
+    }
+
+    group = "org.glavo.kala"
+    description = "Kala Compress"
+
+    version = when (buildType) {
+        "RELEASE" -> baseVersion
+        "SNAPSHOT" -> "$baseVersion-SNAPSHOT"
+        "NIGHTLY" -> TODO()
+        else -> throw UnsupportedOperationException()
+    }
+
+    repositories {
+        maven(url = "https://repository.apache.org/snapshots")
+        mavenCentral()
+    }
+
+    java {
+        withSourcesJar()
+    }
+
+    tasks.compileJava {
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+    }
+
+    tasks.withType<JavaCompile> {
+        options.encoding = "UTF-8"
+    }
+
 }
 
-repositories {
-    maven(url = "https://repository.apache.org/snapshots")
-    mavenCentral()
+subprojects {
+    rootProject.dependencies.api(this)
 }
 
 dependencies {
-    implementation("com.github.luben:zstd-jni:1.5.0-2")
-    implementation("org.brotli:dec:0.1.2")
-    implementation("org.tukaani:xz:1.9")
-
     testImplementation("org.hamcrest:hamcrest:2.2")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:3.11.1")
@@ -37,21 +57,12 @@ dependencies {
     testImplementation("javax.inject:javax.inject:1")
     testImplementation("org.slf4j:slf4j-api:1.7.30")
     testImplementation("org.glavo:pack200:0.3.0")
+    testImplementation(Dependencies.XZ)
+    testImplementation(Dependencies.ZSTD_JNI)
 }
 
 
-java {
-    withSourcesJar()
-}
 
-tasks.compileJava {
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
-}
-
-tasks.withType<JavaCompile>() {
-    options.encoding = "UTF-8"
-}
 
 tasks.test {
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
