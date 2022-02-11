@@ -3,8 +3,15 @@
 Glavo Compress
 ---
 
-This is a fork of [Apache Commons Compress](https://github.com/apache/commons-compress),
-In order to adapt jpms, I fork it out for maintenance, And I'll remove some legacy code that is reserved for compatibility.
+This project is based on [Apache Commons Compress](https://github.com/apache/commons-compress).
+
+
+In order to make it more modern, especially to better support NIO2 API and JPMS (Java Platform Module System),
+I fork it out for maintenance. 
+
+Most APIs in this project are compatible with Apache Commons Compress, but I gave up full compatibility for better modernization.
+Therefore, I will modify its package name to ensure that it can coexist with Apache Commons Compress.
+
 After I finish modularizing it, I will publish it to Maven Central. Please look forward to it.
 
 Task list:
