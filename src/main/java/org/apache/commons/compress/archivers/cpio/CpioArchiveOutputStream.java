@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -31,7 +32,6 @@ import java.util.HashMap;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.utils.ArchiveUtils;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.Charsets;
 
 /**
@@ -108,7 +108,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      *            The format of the stream
      */
     public CpioArchiveOutputStream(final OutputStream out, final short format) {
-        this(out, format, BLOCK_SIZE, CharsetNames.US_ASCII);
+        this(out, format, BLOCK_SIZE, StandardCharsets.US_ASCII);
     }
 
     /**
@@ -126,7 +126,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      */
     public CpioArchiveOutputStream(final OutputStream out, final short format,
                                    final int blockSize) {
-        this(out, format, blockSize, CharsetNames.US_ASCII);
+        this(out, format, blockSize, StandardCharsets.US_ASCII);
     }
 
     /**

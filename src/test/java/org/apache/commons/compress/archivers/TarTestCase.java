@@ -35,7 +35,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarFile;
 import org.apache.commons.compress.utils.ByteUtils;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
 
@@ -148,7 +147,7 @@ public final class TarTestCase extends AbstractTestCase {
     public void testCOMPRESS114() throws Exception {
         final File input = getFile("COMPRESS-114.tar");
         try (final InputStream is = Files.newInputStream(input.toPath());
-             final ArchiveInputStream in = new TarArchiveInputStream(is, CharsetNames.ISO_8859_1)) {
+             final ArchiveInputStream in = new TarArchiveInputStream(is, StandardCharsets.ISO_8859_1)) {
             TarArchiveEntry entry = (TarArchiveEntry) in.getNextEntry();
             assertEquals("3\u00b1\u00b1\u00b1F06\u00b1W2345\u00b1ZB\u00b1la\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1BLA", entry.getName());
             entry = (TarArchiveEntry) in.getNextEntry();
@@ -159,7 +158,7 @@ public final class TarTestCase extends AbstractTestCase {
     @Test
     public void testTarFileCOMPRESS114() throws Exception {
         final File input = getFile("COMPRESS-114.tar");
-        try (final TarFile tarFile = new TarFile(input, CharsetNames.ISO_8859_1)) {
+        try (final TarFile tarFile = new TarFile(input, StandardCharsets.ISO_8859_1)) {
             final List<TarArchiveEntry> entries = tarFile.getEntries();
             TarArchiveEntry entry = entries.get(0);
             assertEquals("3\u00b1\u00b1\u00b1F06\u00b1W2345\u00b1ZB\u00b1la\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1BLA", entry.getName());

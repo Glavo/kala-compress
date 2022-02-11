@@ -19,7 +19,6 @@
 package org.apache.commons.compress.archivers.zip;
 
 import org.apache.commons.compress.AbstractTestCase;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.IOUtils;
 
 import org.junit.After;

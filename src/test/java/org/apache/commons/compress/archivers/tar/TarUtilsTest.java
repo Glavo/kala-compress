@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.compress.utils.ByteUtils;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Rule;
@@ -233,7 +232,7 @@ public class TarUtilsTest {
     @Test
     public void testRoundEncoding() throws Exception {
         // COMPRESS-114
-        final Charset enc = Charsets.toCharset(CharsetNames.ISO_8859_1);
+        final Charset enc = Charsets.toCharset(StandardCharsets.ISO_8859_1);
         final String s = "0302-0601-3\u00b1\u00b1\u00b1F06\u00b1W220\u00b1ZB\u00b1LALALA\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1CAN\u00b1\u00b1DC\u00b1\u00b1\u00b104\u00b1060302\u00b1MOE.model";
         final byte[] buff = new byte[100];
         final int len = TarUtils.formatNameBytes(s, buff, 0, buff.length, enc);

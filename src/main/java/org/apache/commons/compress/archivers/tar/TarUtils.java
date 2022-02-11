@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
@@ -738,7 +737,7 @@ public class TarUtils {
                             break;
                         }
                         if (ch == '='){ // end of keyword
-                            final String keyword = coll.toString(CharsetNames.UTF_8);
+                            final String keyword = coll.toString(StandardCharsets.UTF_8.name());
                             // Get rest of entry
                             final int restLen = len - read;
                             if (restLen <= 1) { // only NL

@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +37,6 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.AbstractTestCase;
 import org.apache.commons.compress.archivers.ArchiveException;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
 
@@ -93,7 +93,7 @@ public class TarFileTest extends AbstractTestCase {
     public void shouldUseSpecifiedEncodingWhenReadingGNULongNames()
             throws Exception {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final String encoding = CharsetNames.UTF_16;
+        final Charset encoding = StandardCharsets.UTF_16;
         final String name = "1234567890123456789012345678901234567890123456789"
                 + "01234567890123456789012345678901234567890123456789"
                 + "01234567890\u00e4";
