@@ -1264,7 +1264,7 @@ in.close();
         <pre>org.apache.commons.compress.compressors.TestCompressorStreamProvider</pre>
         <p>
           This class MUST implement the Commons Compress interface 
-          <a href="apidocs/org/apache/commons/compress/compressors/CompressorStreamProvider.html">org.apache.commons.compress.compressors.CompressorStreamProvider</a>.
+          <a href="apidocs/kala/compress/compressors/CompressorStreamProvider.html">org.apache.commons.compress.compressors.CompressorStreamProvider</a>.
         </p>
     </subsection>
 
@@ -1283,7 +1283,7 @@ in.close();
         <pre>org.apache.commons.compress.archivers.TestArchiveStreamProvider</pre>
         <p>
           This class MUST implement the Commons Compress interface 
-          <a href="apidocs/org/apache/commons/compress/archivers/ArchiveStreamProvider.html">org.apache.commons.compress.archivers.ArchiveStreamProvider</a>.
+          <a href="apidocs/kala/compress/archivers/ArchiveStreamProvider.html">org.apache.commons.compress.archivers.ArchiveStreamProvider</a>.
         </p>
     </subsection>
 

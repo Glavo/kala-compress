@@ -1,0 +1,8 @@
+kala.compress.archivers.ar.ArArchiver
+kala.compress.archivers.arj.ArjArchiver
+kala.compress.archivers.cpio.CpioArchiver
+kala.compress.archivers.dump.DumpArchiver
+kala.compress.archivers.sevenz.SevenZArchiver
+kala.compress.archivers.tar.TarArchiver
+kala.compress.archivers.jar.JarArchiver
+kala.compress.archivers.zip.ZipArchiver

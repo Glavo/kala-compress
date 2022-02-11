@@ -1,8 +1,0 @@
-org.apache.commons.compress.archivers.ar.ArArchiver
-org.apache.commons.compress.archivers.arj.ArjArchiver
-org.apache.commons.compress.archivers.cpio.CpioArchiver
-org.apache.commons.compress.archivers.dump.DumpArchiver
-org.apache.commons.compress.archivers.sevenz.SevenZArchiver
-org.apache.commons.compress.archivers.tar.TarArchiver
-org.apache.commons.compress.archivers.jar.JarArchiver
-org.apache.commons.compress.archivers.zip.ZipArchiver
