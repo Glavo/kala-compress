@@ -1,3 +1,6 @@
+/**
+ *
+ */
 module kala.compress.archivers {
     requires transitive kala.compress.archivers.ar;
     requires transitive kala.compress.archivers.arj;

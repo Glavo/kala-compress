@@ -1,3 +1,6 @@
+/**
+ *
+ */
 module kala.compress.compressors {
     requires transitive kala.compress.compressors.brotli;
     requires transitive kala.compress.compressors.bzip2;

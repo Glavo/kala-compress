@@ -14,6 +14,8 @@ val baseVersion = "1.21.0.1-beta1"
 loadMavenPublishProperties()
 
 allprojects {
+    if (project.name == "buildSrc") return@allprojects
+
     apply {
         plugin("java-library")
         plugin("maven-publish")
@@ -37,7 +39,6 @@ allprojects {
 
     java {
         withSourcesJar()
-        withJavadocJar()
     }
 
     tasks.compileJava {
@@ -62,12 +63,18 @@ allprojects {
         options.encoding = "UTF-8"
     }
 
-    tasks.withType<Javadoc> {
+    tasks.javadoc {
+        isEnabled = false
         (options as StandardJavadocDocletOptions).apply {
             encoding = "UTF-8"
             addBooleanOption("html5", true)
             addStringOption("Xdoclint:none", "-quiet")
         }
+    }
+
+    val javadocJar = tasks.create<Jar>("javadocJar") {
+        group = "build"
+        archiveClassifier.set("javadoc")
     }
 
     tasks.withType<Jar> {
@@ -87,6 +94,7 @@ allprojects {
                 version = project.version.toString()
                 artifactId = project.name
                 from(components["java"])
+                artifact(javadocJar)
 
                 pom {
                     name.set(project.name)
@@ -123,9 +131,11 @@ allprojects {
             sign(publishing.publications["maven"])
         }
     }
+
 }
 
 subprojects {
+    if (project.name == "buildSrc") return@subprojects
     rootProject.dependencies.api(this)
 }
 
@@ -134,10 +144,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:3.11.1")
     testImplementation("com.github.marschall:memoryfilesystem:2.1.0")
-    testImplementation("org.ops4j.pax.exam:pax-exam-container-native:4.13.1")
-    testImplementation("org.ops4j.pax.exam:pax-exam-junit4:4.13.1")
-    testImplementation("org.ops4j.pax.exam:pax-exam-cm:4.13.1")
-    testImplementation("org.ops4j.pax.exam:pax-exam-link-mvn:4.13.1")
     testImplementation("org.apache.felix:org.apache.felix.framework:7.0.0")
     testImplementation("javax.inject:javax.inject:1")
     testImplementation("org.slf4j:slf4j-api:1.7.30")
