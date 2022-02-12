@@ -144,8 +144,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:3.11.1")
     testImplementation("com.github.marschall:memoryfilesystem:2.1.0")
-    testImplementation("javax.inject:javax.inject:1")
-    testImplementation("org.slf4j:slf4j-api:1.7.30")
     testImplementation("org.glavo:pack200:0.3.0")
     testImplementation(Dependencies.XZ)
     testImplementation(Dependencies.ZSTD_JNI)

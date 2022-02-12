@@ -30,6 +30,8 @@ The appearance of `ArchiveStreamFactory` and `CompressorStreamFactory` has not c
 but the inside has been remodeled to find the optional component through `ServiceLoader` at runtime,
 so they are no longer dependent on them at compile time.
 
+Each module provides its `module-info.class`, so it can work well with `jlink`.
+
 For more information about the Kala Compress modules, see [Modules](#Modules).
 
 ### Charset
