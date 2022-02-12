@@ -29,4 +29,4 @@ Task list:
 - [x] Split compressors and archivers into separate modules;
 - [x] Full support for JPMS;
 - [x] Rename the package;
-- [ ] Publish it to Maven Central
+- [x] Publish it to Maven Central
