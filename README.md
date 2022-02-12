@@ -88,7 +88,7 @@ Please use `Path` and `Charset` instead.
 
 ## Modules
 
-**Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable. Before the release of the official version, the API was not stable.**
+**Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable. I may need to make some adjustments to the API before releasing to production.**
 
 The latest Kala Compress version is `1.21.0.1-beta1`.
 
