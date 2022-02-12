@@ -136,12 +136,14 @@ dependencies {
 All Kala Compress modules are listed below.
 
 ### `kala.compress`
+[![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress?label=Maven%20Central)](https://search.maven.org/artifact/org.glavo.kala/kala-compress)
 
 This is an empty module, which declares the transitivity dependency on all modules of Kala Compress.
 You can use all the contents of Kala Compress only by adding dependencies on it.
 
 
 ### `kala.compress.base`
+[![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress-base?label=Maven%20Central)](https://search.maven.org/artifact/org.glavo.kala/kala-compress-base)
 
 It is the basic module of Kala Compress, and all other modules depend on it.
 
@@ -156,6 +158,7 @@ It contains the following packages:
 * (package) `kala.compress.compressors.utils`
 
 ### `kala.compress.compressors`
+[![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress-compressors?label=Maven%20Central)](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors)
 
 It is an empty module that contains transitive dependencies on all compressor modules.
 You can include all compressors by adding a dependency on it.
@@ -185,6 +188,7 @@ Here are some notes:
 * The `zstandard` compressor needs [Zstd JNI](https://github.com/luben/zstd-jni) to work.
 
 ### `kala.compress.archivers`
+[![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress-archivers?label=Maven%20Central)](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers)
 
 It is an empty module that contains transitive dependencies on all archiver modules.
 You can include all archivers by adding a dependency on it.
@@ -208,6 +212,8 @@ Here are some notes:
 * Support for `jar` (in package `kala.compress.archivers.jar`) is in the module `kala.compress.archivers.zip`.
 
 ### `kala.compress.changes`
+[![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress-changes?label=Maven%20Central)](https://search.maven.org/artifact/org.glavo.kala/kala-compress-changes)
+
 
 It contains the package `kala.compress.changes`.
 
