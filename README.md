@@ -42,8 +42,11 @@ All methods that accept an encoding represented by String provide overloads that
 `CharsetNames` has been removed, please switch to `StandardCharsets`.
 
 Kala Compress no longer uses `Charset.defaultCharset()`, but uses UTF-8 as an alternative.
-Note that `file.encoding` defaults to UTF-8 since Java 18. (TODO: When you want to use platform native encoding,
-use the `kala.compress.utils.Charsets.nativeCharset()` explicitly as an alternative.)
+Note that `file.encoding` defaults to UTF-8 since Java 18. When you want to use platform native encoding,
+use the `kala.compress.utils.Charsets.nativeCharset()` explicitly as an alternative.
+
+In addition, APIs that accept encoding represented by `String` now no longer fall back to the default character set when the encoding is not supported or invalid.
+Now they throw exceptions just like `Charset.forName`. (The behavior when `null` is passed in is not affected, it will still fall back to the UTF-8)
 
 ### NIO2 Support (`java.nio.file.Path` and `java.nio.file.FileSystem`)
 
@@ -90,7 +93,7 @@ Please use `Path` and `Charset` instead.
 
 **Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable. I may need to make some adjustments to the API before releasing to production.**
 
-The latest Kala Compress version is `1.21.0.1-beta1`.
+The latest Kala Compress version is `1.21.0.1-beta2`.
 
 You can add dependencies on Kala Compress modules as follows:
 
@@ -120,14 +123,14 @@ Maven:
 <dependency>
   <groupId>org.glavo.kala</groupId>
   <artifactId>kala-compress</artifactId>
-  <version>1.21.0.1-beta1</version>
+  <version>1.21.0.1-beta2</version>
 </dependency>
 ```
 
 Gradle:
 ```kotlin
 dependencies {
-  implementation("org.glavo.kala:kala-compress:1.21.0.1-beta1")
+  implementation("org.glavo.kala:kala-compress:1.21.0.1-beta2")
 }
 ```
 
