@@ -45,7 +45,7 @@ public class Pack200Utils {
 
     public static final String JDK_PACK200 = "java.util.jar.Pack200";
     public static final String GLAVO_PACK200 = "org.glavo.pack200.Pack200";
-    public static final String COMMONS_COMPRESS_PACK200 = "kala.compress.java.util.jar.Pack200";
+    public static final String COMMONS_COMPRESS_PACK200 = "org.apache.commons.compress.java.util.jar.Pack200";
     public static final String IO_PACK200 = "io.pack200.Pack200";
 
     private static final String[] BUILTIN_PROVIDERS = {
