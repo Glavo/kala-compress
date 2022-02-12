@@ -86,11 +86,9 @@ The implementation of pack200 was removed, `kala.compress.compressors.pack200` n
 A small number of methods that accept the `File` and accept encoding represented by `String` have been removed. 
 Please use `Path` and `Charset` instead.
 
-
-
 ## Modules
 
-**Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable.**
+**Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable. Before the release of the official version, the API was not stable.**
 
 The latest Kala Compress version is `1.21.0.1-beta1`.
 
