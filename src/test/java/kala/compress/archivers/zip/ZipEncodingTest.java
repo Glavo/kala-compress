@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import kala.compress.utils.Charsets;
 import org.junit.Assert;
@@ -49,7 +50,7 @@ public class ZipEncodingTest {
     public void testGetNonexistentEncoding() throws IOException {
         final Charset charset = Charsets.toCharset("I-am-a-banana");
         assertNotNull(charset);
-        Assert.assertEquals(Charset.defaultCharset(), charset);
+        Assert.assertEquals(StandardCharsets.UTF_8, charset);
     }
 
     @Test
