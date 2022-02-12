@@ -210,7 +210,7 @@ Here are some notes:
   They can work without these compressors, but errors will occur when they are required.
 * Support for `jar` (in package `kala.compress.archivers.jar`) is in the module `kala.compress.archivers.zip`.
 
-### [![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress-changes?label=module)](https://search.maven.org/artifact/org.glavo.kala/kala-compress-changes) `kala.compress.changes`
+### [`kala.compress.changes`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-changes)
 
 
 It contains the package `kala.compress.changes`.
