@@ -42,7 +42,7 @@ All methods that accept an encoding represented by String provide overloads that
 `CharsetNames` has been removed, please switch to `StandardCharsets`.
 
 Kala Compress no longer uses `Charset.defaultCharset()`, but uses UTF-8 as an alternative.
-Note that `file.encoding` defaults to UTF-8 since Java 18, when you want to use platform native encoding,
+Note that `file.encoding` defaults to UTF-8 since Java 18, (TODO) when you want to use platform native encoding,
 use the `kala.compress.utils.Charsets.nativeCharset()` explicitly as an alternative.
 
 ### NIO2 Support (`java.nio.file.Path` and `java.nio.file.FileSystem`)
