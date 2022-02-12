@@ -3,7 +3,7 @@ Kala Compress
 
 [![Gradle Check](https://github.com/Glavo/compress/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/compress/actions/workflows/check.yml)
 
-
+[![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress)](https://search.maven.org/artifact/org.glavo.kala/kala-compress)
 
 This project is based on [Apache Commons Compress](https://github.com/apache/commons-compress).
 Kala Compress has made some improvements on its basis: Modularization (JPMS Support), NIO2 Path API support, etc.
@@ -14,6 +14,8 @@ Therefore, it can coexist with Apache Commons Compress without conflict.
 
 We assume that you already know about [Commons Compress](https://github.com/apache/commons-compress). 
 If not, please refer to the [User Guide](https://commons.apache.org/proper/commons-compress/examples.html) first.
+
+To add Kala Compress as a dependency, see section [Modules](#Modules).
 
 ## Different from Apache Commons Compress
 
@@ -30,8 +32,6 @@ but the inside has been remodeled to find the optional component through `Servic
 so they are no longer dependent on them at compile time.
 
 For more information about the Kala Compress modules, see [Modules](#Modules).
-
-To add foo dependency, see [Modules](#Modules).
 
 ### Charset
 
@@ -161,7 +161,7 @@ It contains the following packages:
 It is an empty module that contains transitive dependencies on all compressor modules.
 You can include all compressors by adding a dependency on it.
 
-In addition, each compressor in foo has a separate module, and you can add dependencies on one or all of them separately.
+In addition, each compressor in Kala Compress has a separate module, and you can add dependencies on one or all of them separately.
 Here is a list of compressors:
 
 * (module) `kala.compress.compressors.brotli`
@@ -190,7 +190,7 @@ Here are some notes:
 It is an empty module that contains transitive dependencies on all archiver modules.
 You can include all archivers by adding a dependency on it.
 
-In addition, each archiver in foo has a separate module, and you can add dependencies on one or all of them separately.
+In addition, each archiver in Kala Compress has a separate module, and you can add dependencies on one or all of them separately.
 Here is a list of archivers:
 
 * (module) `kala.compress.archivers.ar`
