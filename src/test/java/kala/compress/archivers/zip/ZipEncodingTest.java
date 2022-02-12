@@ -19,18 +19,17 @@
 
 package kala.compress.archivers.zip;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 
 import kala.compress.utils.Charsets;
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test zip encodings.
@@ -46,11 +45,12 @@ public class ZipEncodingTest {
     private static final String BAD_STRING_ENC =
         "%U2016%U2015%U2016%U2015%U2016%U2015%U2016%U2015%U2016%U2015%U2016";
 
-    @Test
+    @Test(expected = UnsupportedCharsetException.class)
     public void testGetNonexistentEncoding() throws IOException {
-        final Charset charset = Charsets.toCharset("I-am-a-banana");
-        assertNotNull(charset);
-        Assert.assertEquals(StandardCharsets.UTF_8, charset);
+        Charset charset = Charsets.toCharset("I-am-a-banana", StandardCharsets.UTF_8);
+        assertSame(StandardCharsets.UTF_8, charset);
+
+        charset = Charsets.toCharset("I-am-a-banana");
     }
 
     @Test

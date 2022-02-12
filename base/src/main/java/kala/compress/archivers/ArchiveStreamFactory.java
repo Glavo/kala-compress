@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import kala.compress.utils.Charsets;
@@ -74,7 +75,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     private static final int SIGNATURE_SIZE = 12;
 
     /**
-     * The singleton instance using the platform default encoding.
+     * The singleton instance using the UTF-8.
      * @since 1.21
      */
     public static final ArchiveStreamFactory DEFAULT = new ArchiveStreamFactory();
@@ -243,7 +244,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     }
 
     /**
-     * Create an instance using the platform default encoding.
+     * Create an instance using the archiver default encoding.
      */
     public ArchiveStreamFactory() {
         this((Charset) null);

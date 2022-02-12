@@ -72,8 +72,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
         /**
          * The name has been read from the archive using the encoding
          * of the archive specified when creating the {@link
-         * ZipArchiveInputStream} or {@link ZipFile} (defaults to the
-         * platform's default encoding).
+         * ZipArchiveInputStream} or {@link ZipFile} (defaults to the UTF-8).
          */
         NAME,
         /**
@@ -97,8 +96,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
         /**
          * The comment has been read from the archive using the encoding
          * of the archive specified when creating the {@link
-         * ZipArchiveInputStream} or {@link ZipFile} (defaults to the
-         * platform's default encoding).
+         * ZipArchiveInputStream} or {@link ZipFile} (defaults to the UTF-8).
          */
         COMMENT,
         /**

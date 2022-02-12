@@ -78,7 +78,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
     private final Charset charset;
 
     /**
-     * Constructor using the platform's default encoding for file
+     * Constructor using the UTF-8 for file
      * names.
      *
      * @param is stream to read from
@@ -92,8 +92,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      * Constructor.
      *
      * @param is stream to read from
-     * @param encoding the encoding to use for file names, use null
-     * for the platform's default encoding
+     * @param encoding the encoding to use for file names, use null for the UTF-8
      * @since 1.6
      * @throws ArchiveException on error
      */
@@ -105,8 +104,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      * Constructor.
      *
      * @param is stream to read from
-     * @param encoding the encoding to use for file names, use null
-     * for the platform's default encoding
+     * @param encoding the encoding to use for file names, use null for the UTF-8
      * @throws ArchiveException on error
      * @since 1.21.0.1
      */

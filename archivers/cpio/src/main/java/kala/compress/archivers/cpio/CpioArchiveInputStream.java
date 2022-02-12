@@ -112,8 +112,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
      * @param in
      *            The cpio stream
      * @param encoding
-     *            The encoding of file names to expect - use null for
-     *            the platform's default.
+     *            The encoding of file names to expect - use null for the UTF-8.
      * @since 1.6
      */
     public CpioArchiveInputStream(final InputStream in, final String encoding) {
@@ -127,8 +126,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
      * @param in
      *            The cpio stream
      * @param charset
-     *            The encoding of file names to expect - use null for
-     *            the platform's default.
+     *            The encoding of file names to expect - use null for the UTF-8.
      * @since 1.21.0.1
      */
     public CpioArchiveInputStream(final InputStream in, final Charset charset) {

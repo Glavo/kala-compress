@@ -200,8 +200,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      * @param out
      *            The cpio stream
      * @param encoding
-     *            The encoding of file names to write - use null for
-     *            the platform's default.
+     *            The encoding of file names to write - use null for the UTF-8.
      * @since 1.6
      */
     public CpioArchiveOutputStream(final OutputStream out, final String encoding) {

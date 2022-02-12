@@ -52,22 +52,38 @@ public class Charsets {
 
     /**
      * Returns a charset object for the named charset.
-     * If the requested character set cannot be found, UTF-8 will be used instead.
      *
      * Use this method instead of {@code kala.compress.archivers.zip.ZipEncodingHelper#getZipEncoding(String)}
      *
-     * @param name The name of the encoding. Specify null for the platform's default encoding.
+     * @param name The name of the encoding. Specify null for the UTF-8.
+     * @throws  IllegalCharsetNameException
+     *          If the given charset name is illegal
+     * @throws  UnsupportedCharsetException
+     *          If no support for the named charset is available
+     *          in this instance of the Java virtual machine
      * @return A charset object for the named encoding
      */
     public static Charset toCharset(String name) {
+        return name == null ? StandardCharsets.UTF_8 : Charset.forName(name);
+    }
+
+    /**
+     * Returns a charset object for the named charset.
+     * If the requested character set cannot be found, {@code defaultCharset} will be used instead.
+     *
+     * @param name The name of the encoding. Specify null for the UTF-8.
+     * @return A charset object for the named encoding
+     */
+    public static Charset toCharset(String name, Charset defaultCharset) {
         if (name == null) {
-            return StandardCharsets.UTF_8;
+            return defaultCharset;
         }
+
         try {
             return Charset.forName(name);
         } catch (Throwable ignored) {
+            return defaultCharset;
         }
-        return StandardCharsets.UTF_8;
     }
 
     /**

@@ -453,11 +453,19 @@ public class ZipFile implements Closeable {
 
     /**
      * The encoding to use for file names and the file comment.
-     *
-     * @return null if using the platform's default character encoding.
      */
     public String getEncoding() {
         return charset.name();
+    }
+
+
+    /**
+     * The charset to use for file names and the file comment.
+     *
+     * @since 1.21.0.1
+     */
+    public Charset getCharset() {
+        return charset;
     }
 
     /**
