@@ -226,3 +226,9 @@ It contains the package `kala.compress.changes`.
 - [x] Full support for JPMS;
 - [x] Rename the package;
 - [x] Publish it to Maven Central
+
+## Bug Report
+
+If you encounter problems using it, please [open an issue](https://github.com/Glavo/kala-compress/issues/new).
+
+If it's an issue upstream of Apache Commons Compress, it's best to give feedback [here](https://commons.apache.org/proper/commons-compress/issue-tracking.html) and I'll port the upstream fix here.
