@@ -1,4 +1,4 @@
 dependencies {
-    implementation(project(":compressors:bzip2"))
-    implementation(project(":compressors:deflate64"))
+    compileOnly(project(":compressors:bzip2"))
+    compileOnly(project(":compressors:deflate64"))
 }

@@ -1,3 +1,3 @@
 dependencies {
-    implementation(Dependencies.XZ)
+    compileOnly(Dependencies.XZ)
 }
