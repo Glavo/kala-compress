@@ -18,7 +18,6 @@
 
 package kala.compress.archivers.zip;
 
-import kala.compress.archivers.ArchiveStreamFactory;
 import kala.compress.utils.FileNameUtils;
 import kala.compress.utils.MultiReadOnlySeekableByteChannel;
 

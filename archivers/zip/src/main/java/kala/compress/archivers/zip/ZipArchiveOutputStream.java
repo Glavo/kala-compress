@@ -129,11 +129,6 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     public static final int STORED = java.util.zip.ZipEntry.STORED;
 
     /**
-     * default encoding for file names and comment.
-     */
-    static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.name();
-
-    /**
      * Current entry.
      */
     private CurrentEntry entry;
