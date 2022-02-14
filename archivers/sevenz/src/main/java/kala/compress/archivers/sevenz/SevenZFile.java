@@ -195,7 +195,7 @@ public class SevenZFile implements Closeable {
      */
     public SevenZFile(final Path fileName, final char[] password, final SevenZFileOptions options) throws IOException {
         this(Files.newByteChannel(fileName, Collections.singleton(StandardOpenOption.READ)), // NOSONAR
-                fileName.toAbsolutePath().toString(), utf16Decode(password), true, options);
+                fileName.toAbsolutePath().toString(), utf16Encode(password), true, options);
     }
 
     /**
@@ -298,7 +298,7 @@ public class SevenZFile implements Closeable {
      */
     public SevenZFile(final SeekableByteChannel channel, final String fileName, final char[] password,
             final SevenZFileOptions options) throws IOException {
-        this(channel, fileName, utf16Decode(password), false, options);
+        this(channel, fileName, utf16Encode(password), false, options);
     }
 
     /**
@@ -2037,17 +2037,17 @@ public class SevenZFile implements Closeable {
         return lastSegment + "~";
     }
 
-    private static byte[] utf16Decode(final char[] chars) throws IOException {
+    private static byte[] utf16Encode(final char[] chars) throws IOException {
         if (chars == null) {
             return null;
         }
-        final ByteBuffer encoded = StandardCharsets.UTF_16LE.encode(CharBuffer.wrap(chars));
-        if (encoded.hasArray()) {
-            return encoded.array();
+        byte[] output = new byte[chars.length * 2];
+        for (int i = 0; i < chars.length; i++) {
+            char ch = chars[i];
+            output[i * 2] = (byte) ch;
+            output[i * 2 + 1] = (byte) (ch >>> 8);
         }
-        final byte[] e = new byte[encoded.remaining()];
-        encoded.get(e);
-        return e;
+        return output;
     }
 
     private static int assertFitsIntoNonNegativeInt(final String what, final long value) throws IOException {
