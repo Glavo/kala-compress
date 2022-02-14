@@ -107,6 +107,16 @@ public class Charsets {
      * @see CharsetEncoder#canEncode(CharSequence)
      */
     public static boolean canEncode(Charset charset, String name) {
+        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
+            final int maxChar = charset == StandardCharsets.US_ASCII ? 127 : 255;
+            final int length = name.length();
+            for (int i = 0; i < length; i++) {
+                char ch = name.charAt(i);
+                if (ch > maxChar)
+                    return false;
+            }
+            return true;
+        }
         return encoderFor(charset).canEncode(name);
     }
 
@@ -231,10 +241,11 @@ public class Charsets {
         return cb;
     }
 
-    private static final int CODER_CACHE_LENGTH = 2;
+    private static final int CODER_CACHE_LENGTH = 4;
 
     private static final int UTF_8_CODER_CACHE_INDEX = 0;
     private static final int NATIVE_CODER_CACHE_INDEX = 1;
+    private static final int ISO_8859_1_CODER_CACHE_INDEX = 2;
 
     private static final ThreadLocal<CharsetEncoder[]> encoderCache = ThreadLocal.withInitial(() -> new CharsetEncoder[CODER_CACHE_LENGTH]);
     private static final ThreadLocal<CharsetDecoder[]> decoderCache = ThreadLocal.withInitial(() -> new CharsetDecoder[CODER_CACHE_LENGTH]);
@@ -242,7 +253,9 @@ public class Charsets {
     private static int coderCacheIndexFor(Charset charset) {
         if (charset == StandardCharsets.UTF_8) {
             return UTF_8_CODER_CACHE_INDEX;
-        } else if (charset == NATIVE_CHARSET) {
+        } else if (charset == StandardCharsets.ISO_8859_1) {
+            return ISO_8859_1_CODER_CACHE_INDEX;
+        } else if (charset.equals(NATIVE_CHARSET)) {
             return NATIVE_CODER_CACHE_INDEX;
         } else {
             return -1;

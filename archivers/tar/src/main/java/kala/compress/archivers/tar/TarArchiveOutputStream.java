@@ -341,13 +341,13 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath
-                && !StandardCharsets.US_ASCII.newEncoder().canEncode(entryName)) {
+                && !Charsets.canEncode(StandardCharsets.US_ASCII, entryName)) {
                 paxHeaders.put("path", entryName);
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsLinkPath
                 && (entry.isLink() || entry.isSymbolicLink())
-                && !StandardCharsets.US_ASCII.newEncoder().canEncode(linkName)) {
+                && !Charsets.canEncode(StandardCharsets.US_ASCII, linkName)) {
                 paxHeaders.put("linkpath", linkName);
             }
             paxHeaders.putAll(entry.getExtraPaxHeaders());
