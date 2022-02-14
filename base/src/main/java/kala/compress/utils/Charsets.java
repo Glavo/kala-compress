@@ -107,6 +107,24 @@ public class Charsets {
      * @see CharsetEncoder#canEncode(CharSequence)
      */
     public static boolean canEncode(Charset charset, String name) {
+        if (charset == StandardCharsets.UTF_8 || charset.name().startsWith("UTF-")) {
+            final int length = name.length();
+            for (int i = 0; i < length; i++) {
+                char ch = name.charAt(i);
+                if (Character.isLowSurrogate(ch)) {
+                    return false;
+                }
+
+                if (Character.isHighSurrogate(ch)) {
+                    i++;
+                    if (i >= length || !Character.isLowSurrogate(name.charAt(i))) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
             final int maxChar = charset == StandardCharsets.US_ASCII ? 127 : 255;
             final int length = name.length();
@@ -117,6 +135,7 @@ public class Charsets {
             }
             return true;
         }
+
         return encoderFor(charset).canEncode(name);
     }
 
