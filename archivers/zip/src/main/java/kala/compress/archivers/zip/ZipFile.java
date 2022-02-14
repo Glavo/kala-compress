@@ -32,8 +32,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
@@ -590,6 +590,33 @@ public class ZipFile implements Closeable {
         }
         return Arrays.asList(entriesOfThatName);
     }
+
+
+    /**
+     * Performs the given action for each entry.
+     *
+     * @param action The action to be performed for each element
+     * @since 1.21.0.1
+     */
+    public void forEachEntry(Consumer<? super ZipArchiveEntry> action) {
+        entries.forEach(action);
+    }
+
+    /**
+     * Performs the given action for each entry in physical order.
+     *
+     * @see #getEntriesInPhysicalOrder()
+     * @param action
+     * @since 1.21.0.1
+     */
+    public void forEachEntryInPhysicalOrder(Consumer<? super ZipArchiveEntry> action) {
+        final ZipArchiveEntry[] allEntries = entries.toArray(ZipArchiveEntry.EMPTY_ZIP_ARCHIVE_ENTRY_ARRAY);
+        Arrays.sort(allEntries, offsetComparator);
+        for (ZipArchiveEntry entry : allEntries) {
+            action.accept(entry);
+        }
+    }
+
 
     /**
      * Whether this class is able to read the given entry.

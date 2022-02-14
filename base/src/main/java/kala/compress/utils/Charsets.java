@@ -107,7 +107,7 @@ public class Charsets {
      * @see CharsetEncoder#canEncode(CharSequence)
      */
     public static boolean canEncode(Charset charset, String name) {
-        return newEncoder(charset).canEncode(name);
+        return encoderFor(charset).canEncode(name);
     }
 
     /**
@@ -135,7 +135,7 @@ public class Charsets {
      * @throws IOException on error
      */
     public static ByteBuffer encode(Charset charset, String name) throws IOException {
-        final CharsetEncoder enc = newEncoder(charset);
+        final CharsetEncoder enc = encoderFor(charset);
 
         final CharBuffer cb = CharBuffer.wrap(name);
         CharBuffer tmp = null;
@@ -193,7 +193,7 @@ public class Charsets {
      * @throws IOException on error
      */
     public static String decode(Charset charset, final byte[] data) throws IOException {
-        return newDecoder(charset).decode(ByteBuffer.wrap(data)).toString();
+        return decoderFor(charset).decode(ByteBuffer.wrap(data)).toString();
     }
 
     private static ByteBuffer growBufferBy(final ByteBuffer buffer, final int increment) {
@@ -231,30 +231,84 @@ public class Charsets {
         return cb;
     }
 
-    private static CharsetEncoder newEncoder(Charset charset) {
+    private static final int CODER_CACHE_LENGTH = 2;
+
+    private static final int UTF_8_CODER_CACHE_INDEX = 0;
+    private static final int NATIVE_CODER_CACHE_INDEX = 1;
+
+    private static final ThreadLocal<CharsetEncoder[]> encoderCache = ThreadLocal.withInitial(() -> new CharsetEncoder[CODER_CACHE_LENGTH]);
+    private static final ThreadLocal<CharsetDecoder[]> decoderCache = ThreadLocal.withInitial(() -> new CharsetDecoder[CODER_CACHE_LENGTH]);
+
+    private static int coderCacheIndexFor(Charset charset) {
         if (charset == StandardCharsets.UTF_8) {
-            return charset.newEncoder()
+            return UTF_8_CODER_CACHE_INDEX;
+        } else if (charset == NATIVE_CHARSET) {
+            return NATIVE_CODER_CACHE_INDEX;
+        } else {
+            return -1;
+        }
+    }
+
+    private static CharsetEncoder encoderFor(Charset charset) {
+        CharsetEncoder[] cacheArray = null;
+        CharsetEncoder encoder;
+
+        int idx = coderCacheIndexFor(charset);
+        if (idx >= 0) {
+            cacheArray = encoderCache.get();
+            encoder = cacheArray[idx];
+            if (encoder != null) {
+                encoder.reset();
+                return encoder;
+            }
+        }
+
+        if (charset == StandardCharsets.UTF_8) {
+            encoder = charset.newEncoder()
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith(REPLACEMENT_BYTES);
         } else {
-            return charset.newEncoder()
+            encoder = charset.newEncoder()
                     .onMalformedInput(CodingErrorAction.REPORT)
                     .onUnmappableCharacter(CodingErrorAction.REPORT);
         }
+
+        if (cacheArray != null) {
+            cacheArray[idx] = encoder;
+        }
+        return encoder;
     }
 
-    private static CharsetDecoder newDecoder(Charset charset) {
+    private static CharsetDecoder decoderFor(Charset charset) {
+        CharsetDecoder[] cacheArray = null;
+        CharsetDecoder decoder;
+
+        int idx = coderCacheIndexFor(charset);
+        if (idx >= 0) {
+            cacheArray = decoderCache.get();
+            decoder = cacheArray[idx];
+            if (decoder != null) {
+                decoder.reset();
+                return decoder;
+            }
+        }
+
         if (charset == StandardCharsets.UTF_8) {
-            return charset.newDecoder()
+            decoder = charset.newDecoder()
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith(REPLACEMENT_STRING);
         } else {
-            return charset.newDecoder()
+            decoder = charset.newDecoder()
                     .onMalformedInput(CodingErrorAction.REPORT)
                     .onUnmappableCharacter(CodingErrorAction.REPORT);
         }
+
+        if (cacheArray != null) {
+            cacheArray[idx] = decoder;
+        }
+        return decoder;
     }
 
     /**
