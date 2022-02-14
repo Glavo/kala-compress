@@ -35,6 +35,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -165,19 +166,14 @@ public class SevenZOutputFile implements Closeable {
      *
      * @throws IOException on error
      */
-    public SevenZArchiveEntry createArchiveEntry(final File inputFile,
-            final String entryName) throws IOException {
-        final SevenZArchiveEntry entry = new SevenZArchiveEntry();
-        entry.setDirectory(inputFile.isDirectory());
-        entry.setName(entryName);
-        entry.setLastModifiedDate(new Date(inputFile.lastModified()));
-        return entry;
+    public SevenZArchiveEntry createArchiveEntry(final File inputFile, final String entryName) throws IOException {
+        return createArchiveEntry(inputFile.toPath(), entryName);
     }
 
     /**
      * Create an archive entry using the inputPath and entryName provided.
      *
-     * @param inputPath path to create an entry from
+     * @param inputFile path to create an entry from
      * @param entryName the name to use
      * @param options options indicating how symbolic links are handled.
      * @return the ArchiveEntry set up with details from the file
@@ -185,12 +181,13 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException on error
      * @since 1.21
      */
-    public SevenZArchiveEntry createArchiveEntry(final Path inputPath,
-        final String entryName, final LinkOption... options) throws IOException {
+    public SevenZArchiveEntry createArchiveEntry(final Path inputFile, final String entryName, final LinkOption... options) throws IOException {
+        BasicFileAttributes inputFileAttributes = Files.readAttributes(inputFile, BasicFileAttributes.class, options);
+
         final SevenZArchiveEntry entry = new SevenZArchiveEntry();
-        entry.setDirectory(Files.isDirectory(inputPath, options));
+        entry.setDirectory(inputFileAttributes.isDirectory());
         entry.setName(entryName);
-        entry.setLastModifiedDate(new Date(Files.getLastModifiedTime(inputPath, options).toMillis()));
+        entry.setLastModifiedDate(new Date(inputFileAttributes.lastModifiedTime().toMillis()));
         return entry;
     }
 
