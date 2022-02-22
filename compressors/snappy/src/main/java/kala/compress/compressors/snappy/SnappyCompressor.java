@@ -8,7 +8,7 @@ import kala.compress.compressors.CompressorStreamFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class SnappyCompressor extends BuiltinCompressor {
+final class SnappyCompressor extends BuiltinCompressor {
     public SnappyCompressor() {
         super(CompressorStreamFactory.SNAPPY_RAW, false);
     }

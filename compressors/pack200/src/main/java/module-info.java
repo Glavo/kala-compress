@@ -4,6 +4,5 @@ module kala.compress.compressors.pack200 {
 
     exports kala.compress.compressors.pack200;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.pack200.Pack200Compressor;
+    opens kala.compress.compressors.pack200 to kala.compress.base;
 }

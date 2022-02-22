@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class GzipCompressor extends BuiltinCompressor {
+final class GzipCompressor extends BuiltinCompressor {
     public GzipCompressor() {
         super(CompressorStreamFactory.GZIP);
     }

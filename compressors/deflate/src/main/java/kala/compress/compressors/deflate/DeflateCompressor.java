@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class DeflateCompressor extends BuiltinCompressor {
+final class DeflateCompressor extends BuiltinCompressor {
     public DeflateCompressor() {
         super(CompressorStreamFactory.DEFLATE);
     }

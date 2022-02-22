@@ -3,6 +3,5 @@ module kala.compress.compressors.gzip {
 
     exports kala.compress.compressors.gzip;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.gzip.GzipCompressor;
+    opens kala.compress.compressors.gzip to kala.compress.base;
 }

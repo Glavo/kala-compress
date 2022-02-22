@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class FramedSnappyCompressor extends BuiltinCompressor {
+final class FramedSnappyCompressor extends BuiltinCompressor {
     public FramedSnappyCompressor() {
         super(CompressorStreamFactory.SNAPPY_FRAMED);
     }

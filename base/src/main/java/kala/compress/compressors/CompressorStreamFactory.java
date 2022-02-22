@@ -21,6 +21,7 @@ package kala.compress.compressors;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 import kala.compress.utils.IOUtils;
@@ -60,13 +61,6 @@ import kala.compress.utils.ServiceLoaderIterator;
 public class CompressorStreamFactory implements CompressorStreamProvider {
 
     private static final CompressorStreamFactory SINGLETON = new CompressorStreamFactory();
-    private static final BuiltinCompressor[] BUILTIN_COMPRESSORS;
-
-    static {
-        ArrayList<BuiltinCompressor> builtinCompressors = new ArrayList<>();
-        new ServiceLoaderIterator<>(BuiltinCompressor.class, BuiltinCompressor.class.getClassLoader()).forEachRemaining(builtinCompressors::add);
-        BUILTIN_COMPRESSORS = builtinCompressors.toArray(new BuiltinCompressor[0]);
-    }
 
     /**
      * Constant (value {@value}) used to identify the BROTLI compression
@@ -175,6 +169,50 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * @since 1.16
      */
     public static final String ZSTANDARD = "zstd";
+
+    private static final BuiltinCompressor[] BUILTIN_COMPRESSORS;
+
+    static {
+        final String[] builtinCompressorClasses = {
+                "kala.compress.compressors.brotli.BrotliCompressor",
+                "kala.compress.compressors.bzip2.BZip2Compressor",
+                "kala.compress.compressors.deflate.DeflateCompressor",
+                "kala.compress.compressors.deflate64.Deflate64Compressor",
+                "kala.compress.compressors.gzip.GzipCompressor",
+                "kala.compress.compressors.lz4.BlockLZ4Compressor",
+                "kala.compress.compressors.lz4.FramedLZ4Compressor",
+                "kala.compress.compressors.lzma.LZMACompressor",
+                "kala.compress.compressors.pack200.Pack200Compressor",
+                "kala.compress.compressors.snappy.FramedSnappyCompressor",
+                "kala.compress.compressors.snappy.SnappyCompressor",
+                "kala.compress.compressors.xz.XZCompressor",
+                "kala.compress.compressors.z.ZCompressor",
+                "kala.compress.compressors.zstandard.ZstdCompressor"
+        };
+
+        ArrayList<BuiltinCompressor> builtinCompressors = new ArrayList<>();
+        for (String cls : builtinCompressorClasses) {
+            try {
+                Class<?> clazz = Class.forName(cls);
+
+                if (!BuiltinCompressor.class.isAssignableFrom(clazz)) {
+                    throw new LinkageError(clazz + " is not a subclass of BuiltinCompressor");
+                }
+
+                Constructor<?> constructor = clazz.getConstructor();
+                constructor.setAccessible(true);
+
+                BuiltinCompressor archiver = (BuiltinCompressor) constructor.newInstance();
+                builtinCompressors.add(archiver);
+
+            } catch (ClassNotFoundException ignored) {
+            } catch (ReflectiveOperationException e) {
+                throw (LinkageError) new LinkageError().initCause(e);
+            }
+        }
+
+        BUILTIN_COMPRESSORS = builtinCompressors.toArray(new BuiltinCompressor[0]);
+    }
 
     /**
      * Constructs a new sorted map from input stream provider names to provider

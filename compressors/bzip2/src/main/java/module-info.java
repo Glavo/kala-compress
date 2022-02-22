@@ -4,6 +4,5 @@ module kala.compress.compressors.bzip2 {
 
     exports kala.compress.compressors.bzip2;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.bzip2.BZip2Compressor;
+    opens kala.compress.compressors.bzip2 to kala.compress.base;
 }

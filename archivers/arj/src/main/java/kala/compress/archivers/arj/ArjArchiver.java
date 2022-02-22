@@ -8,7 +8,7 @@ import kala.compress.archivers.BuiltinArchiver;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-public class ArjArchiver extends BuiltinArchiver {
+final class ArjArchiver extends BuiltinArchiver {
     public ArjArchiver() {
         super(ArchiveStreamFactory.ARJ, false);
     }

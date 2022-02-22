@@ -3,6 +3,5 @@ module kala.compress.archivers.dump {
 
     exports kala.compress.archivers.dump;
 
-    provides kala.compress.archivers.BuiltinArchiver
-            with kala.compress.archivers.dump.DumpArchiver;
+    opens kala.compress.archivers.dump to kala.compress.base;
 }

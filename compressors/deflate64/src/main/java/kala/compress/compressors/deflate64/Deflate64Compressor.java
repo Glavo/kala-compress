@@ -8,7 +8,7 @@ import kala.compress.compressors.CompressorStreamFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Deflate64Compressor extends BuiltinCompressor {
+final class Deflate64Compressor extends BuiltinCompressor {
     public Deflate64Compressor() {
         super(CompressorStreamFactory.DEFLATE64, false);
     }

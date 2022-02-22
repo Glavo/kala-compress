@@ -22,8 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import kala.compress.utils.Charsets;
@@ -135,19 +135,51 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     private static final BuiltinArchiver TAR_ARCHIVER;
 
     static {
+        final String builtinTarArchiverClass = "kala.compress.archivers.tar.TarArchiver";
+        final String builtinDumpArchiverClass = "kala.compress.archivers.dump.DumpArchiver";
+
+        final String[] builtinArchiverClasses = {
+                "kala.compress.archivers.ar.ArArchiver",
+                "kala.compress.archivers.arj.ArjArchiver",
+                "kala.compress.archivers.cpio.CpioArchiver",
+                "kala.compress.archivers.sevenz.SevenZArchiver",
+                "kala.compress.archivers.jar.JarArchiver",
+                "kala.compress.archivers.zip.ZipArchiver",
+                builtinTarArchiverClass,
+                builtinDumpArchiverClass
+        };
+
         ArrayList<BuiltinArchiver> archivers = new ArrayList<>();
         BuiltinArchiver dumpArchiver = null;
         BuiltinArchiver tarArchiver = null;
 
-        ServiceLoaderIterator<BuiltinArchiver> it = new ServiceLoaderIterator<>(BuiltinArchiver.class, BuiltinArchiver.class.getClassLoader());
-        while (it.hasNext()) {
-            BuiltinArchiver archiver = it.next();
-            archivers.add(archiver);
+        for (String cls : builtinArchiverClasses) {
+            try {
+                Class<?> clazz = Class.forName(cls);
 
-            if (DUMP.equals(archiver.getName())) {
-                dumpArchiver = archiver;
-            } else if (TAR.equals(archiver.getName())) {
-                tarArchiver = archiver;
+                if (!BuiltinArchiver.class.isAssignableFrom(clazz)) {
+                    throw new LinkageError(clazz + " is not a subclass of BuiltinArchiver");
+                }
+
+                Constructor<?> constructor = clazz.getConstructor();
+                constructor.setAccessible(true);
+
+                BuiltinArchiver archiver = (BuiltinArchiver) constructor.newInstance();
+                archivers.add(archiver);
+
+                //noinspection StringEquality
+                if (cls == builtinTarArchiverClass) {
+                    tarArchiver = archiver;
+                }
+
+                //noinspection StringEquality
+                if (cls == builtinDumpArchiverClass) {
+                    dumpArchiver = archiver;
+                }
+
+            } catch (ClassNotFoundException ignored) {
+            } catch (ReflectiveOperationException e) {
+                throw (LinkageError) new LinkageError().initCause(e);
             }
         }
 

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class FramedLZ4Compressor extends BuiltinCompressor {
+final class FramedLZ4Compressor extends BuiltinCompressor {
     public FramedLZ4Compressor() {
         super(CompressorStreamFactory.LZ4_FRAMED);
     }

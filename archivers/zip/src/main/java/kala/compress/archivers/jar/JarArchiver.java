@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class JarArchiver extends BuiltinArchiver {
+final class JarArchiver extends BuiltinArchiver {
     public JarArchiver() {
         super(ArchiveStreamFactory.JAR);
     }

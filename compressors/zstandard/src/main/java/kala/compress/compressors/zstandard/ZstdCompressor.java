@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class ZstdCompressor extends BuiltinCompressor {
+final class ZstdCompressor extends BuiltinCompressor {
 
     public ZstdCompressor() {
         super(CompressorStreamFactory.ZSTANDARD, "Zstd JNI", "https://github.com/luben/zstd-jni");

@@ -3,6 +3,5 @@ module kala.compress.archivers.arj {
 
     exports kala.compress.archivers.arj;
 
-    provides kala.compress.archivers.BuiltinArchiver
-            with kala.compress.archivers.arj.ArjArchiver;
+    opens kala.compress.archivers.arj to kala.compress.base;
 }

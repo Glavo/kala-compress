@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class BZip2Compressor extends BuiltinCompressor {
+final class BZip2Compressor extends BuiltinCompressor {
     public BZip2Compressor() {
         super(CompressorStreamFactory.BZIP2);
     }

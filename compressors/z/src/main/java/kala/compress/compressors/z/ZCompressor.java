@@ -5,7 +5,7 @@ import kala.compress.compressors.*;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ZCompressor extends BuiltinCompressor {
+final class ZCompressor extends BuiltinCompressor {
     public ZCompressor() {
         super(CompressorStreamFactory.Z, false);
     }

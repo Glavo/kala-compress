@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class LZMACompressor extends BuiltinCompressor {
+final class LZMACompressor extends BuiltinCompressor {
     public LZMACompressor() {
         super(CompressorStreamFactory.LZMA);
     }

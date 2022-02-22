@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class ArArchiver extends BuiltinArchiver {
+final class ArArchiver extends BuiltinArchiver {
     public ArArchiver() {
         super(ArchiveStreamFactory.AR);
     }

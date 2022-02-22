@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class TarArchiver extends BuiltinArchiver {
+final class TarArchiver extends BuiltinArchiver {
     public TarArchiver() {
         super(ArchiveStreamFactory.TAR);
     }

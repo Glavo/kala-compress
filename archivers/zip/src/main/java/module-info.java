@@ -6,7 +6,6 @@ module kala.compress.archivers.zip {
     exports kala.compress.archivers.jar;
     exports kala.compress.archivers.zip;
 
-    provides kala.compress.archivers.BuiltinArchiver
-            with kala.compress.archivers.jar.JarArchiver,
-                    kala.compress.archivers.zip.ZipArchiver;
+    opens kala.compress.archivers.jar to kala.compress.base;
+    opens kala.compress.archivers.zip to kala.compress.base;
 }

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class BlockLZ4Compressor extends BuiltinCompressor {
+final class BlockLZ4Compressor extends BuiltinCompressor {
     public BlockLZ4Compressor() {
         super(CompressorStreamFactory.LZ4_BLOCK);
     }

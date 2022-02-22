@@ -5,7 +5,7 @@ import kala.compress.archivers.*;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-public class DumpArchiver extends BuiltinArchiver {
+final class DumpArchiver extends BuiltinArchiver {
     public DumpArchiver() {
         super(ArchiveStreamFactory.DUMP, false);
     }

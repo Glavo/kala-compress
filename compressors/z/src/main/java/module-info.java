@@ -3,6 +3,5 @@ module kala.compress.compressors.z {
 
     exports kala.compress.compressors.z;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.z.ZCompressor;
+    opens kala.compress.compressors.z to kala.compress.base;
 }

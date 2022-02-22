@@ -3,7 +3,5 @@ module kala.compress.compressors.snappy {
 
     exports kala.compress.compressors.snappy;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.snappy.SnappyCompressor,
-                    kala.compress.compressors.snappy.FramedSnappyCompressor;
+    opens kala.compress.compressors.snappy to kala.compress.base;
 }

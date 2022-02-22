@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class CpioArchiver extends BuiltinArchiver {
+final class CpioArchiver extends BuiltinArchiver {
     public CpioArchiver() {
         super(ArchiveStreamFactory.CPIO);
     }

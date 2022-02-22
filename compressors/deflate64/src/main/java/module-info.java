@@ -4,6 +4,5 @@ module kala.compress.compressors.deflate64 {
 
     exports kala.compress.compressors.deflate64;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.deflate64.Deflate64Compressor;
+    opens kala.compress.compressors.deflate64 to kala.compress.base;
 }

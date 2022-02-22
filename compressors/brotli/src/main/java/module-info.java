@@ -4,6 +4,5 @@ module kala.compress.compressors.brotli {
     exports kala.compress.compressors.brotli;
     exports kala.compress.compressors.brotli.dec;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.brotli.BrotliCompressor;
+    opens kala.compress.compressors.brotli to kala.compress.base;
 }

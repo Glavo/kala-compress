@@ -4,6 +4,5 @@ module kala.compress.compressors.lzma {
 
     exports kala.compress.compressors.lzma;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.lzma.LZMACompressor;
+    opens kala.compress.compressors.lzma to kala.compress.base;
 }

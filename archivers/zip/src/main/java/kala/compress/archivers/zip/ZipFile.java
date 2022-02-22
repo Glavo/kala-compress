@@ -841,8 +841,7 @@ public class ZipFile implements Closeable {
      * from the local file header later.  The current entry may be
      * added to this map.
      */
-    private void
-        readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag)
+    private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag)
         throws IOException {
         cfhBbuf.rewind();
         IOUtils.readFully(archive, cfhBbuf);

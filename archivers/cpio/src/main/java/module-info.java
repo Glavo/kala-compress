@@ -3,6 +3,5 @@ module kala.compress.archivers.cpio {
 
     exports kala.compress.archivers.cpio;
 
-    provides kala.compress.archivers.BuiltinArchiver
-            with kala.compress.archivers.cpio.CpioArchiver;
+    opens kala.compress.archivers.cpio to kala.compress.base;
 }

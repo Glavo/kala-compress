@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class Pack200Compressor extends BuiltinCompressor {
+final class Pack200Compressor extends BuiltinCompressor {
     public Pack200Compressor() {
         super(CompressorStreamFactory.PACK200, "Pack200", "https://github.com/Glavo/pack200");
     }

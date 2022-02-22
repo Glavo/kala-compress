@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class XZCompressor extends BuiltinCompressor {
+final class XZCompressor extends BuiltinCompressor {
     public XZCompressor() {
         super(CompressorStreamFactory.XZ, "XZ for Java", "https://tukaani.org/xz/java.html");
     }

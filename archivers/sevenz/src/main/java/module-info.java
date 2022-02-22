@@ -6,6 +6,5 @@ module kala.compress.archivers.sevenz {
 
     exports kala.compress.archivers.sevenz;
 
-    provides kala.compress.archivers.BuiltinArchiver
-            with kala.compress.archivers.sevenz.SevenZArchiver;
+    opens kala.compress.archivers.sevenz to kala.compress.base;
 }

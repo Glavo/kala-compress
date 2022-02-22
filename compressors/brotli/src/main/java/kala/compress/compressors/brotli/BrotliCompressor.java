@@ -8,7 +8,7 @@ import kala.compress.compressors.CompressorStreamFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BrotliCompressor extends BuiltinCompressor {
+final class BrotliCompressor extends BuiltinCompressor {
     public BrotliCompressor() {
         super(CompressorStreamFactory.BROTLI);
     }

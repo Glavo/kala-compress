@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-public class ZipArchiver extends BuiltinArchiver {
+final class ZipArchiver extends BuiltinArchiver {
     public ZipArchiver() {
         super(ArchiveStreamFactory.ZIP);
     }

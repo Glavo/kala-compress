@@ -4,6 +4,5 @@ module kala.compress.compressors.zstandard {
 
     exports kala.compress.compressors.zstandard;
 
-    provides kala.compress.compressors.BuiltinCompressor
-            with kala.compress.compressors.zstandard.ZstdCompressor;
+    opens kala.compress.compressors.zstandard to kala.compress.base;
 }

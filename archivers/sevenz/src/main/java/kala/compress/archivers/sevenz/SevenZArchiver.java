@@ -2,7 +2,7 @@ package kala.compress.archivers.sevenz;
 
 import kala.compress.archivers.*;
 
-public class SevenZArchiver extends BuiltinArchiver {
+final class SevenZArchiver extends BuiltinArchiver {
     public SevenZArchiver() {
         super(ArchiveStreamFactory.SEVEN_Z);
     }
