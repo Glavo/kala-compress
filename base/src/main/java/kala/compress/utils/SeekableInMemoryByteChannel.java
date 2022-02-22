@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SeekableByteChannel;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A {@link SeekableByteChannel} implementation that wraps a byte[].
@@ -41,7 +40,7 @@ public class SeekableInMemoryByteChannel implements SeekableByteChannel {
     private static final int NAIVE_RESIZE_LIMIT = Integer.MAX_VALUE >> 1;
 
     private byte[] data;
-    private final AtomicBoolean closed = new AtomicBoolean();
+    private boolean closed = false;
     private int position, size;
 
     /**
@@ -148,12 +147,12 @@ public class SeekableInMemoryByteChannel implements SeekableByteChannel {
 
     @Override
     public void close() {
-        closed.set(true);
+        closed = true;
     }
 
     @Override
     public boolean isOpen() {
-        return !closed.get();
+        return !closed;
     }
 
     @Override

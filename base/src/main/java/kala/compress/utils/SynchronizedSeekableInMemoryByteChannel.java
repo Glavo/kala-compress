@@ -1,0 +1,292 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package kala.compress.utils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.NonWritableChannelException;
+import java.nio.channels.SeekableByteChannel;
+import java.util.Arrays;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/**
+ * A thread safe {@link SeekableByteChannel} implementation that wraps a byte[].
+ *
+ * Unlink {@link SeekableInMemoryByteChannel}, this class is not only thread safe,
+ * it satisfies all of {@link SeekableByteChannel}'s contracts.
+ *
+ * @ThreadSafe
+ * @since 1.21.0.1
+ */
+public class SynchronizedSeekableInMemoryByteChannel implements SeekableByteChannel {
+
+    private static final int NAIVE_RESIZE_LIMIT = Integer.MAX_VALUE >> 1;
+
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    private byte[] data;
+    private volatile boolean closed = false;
+    private int position, size;
+
+    private final boolean isReadonly;
+
+    /**
+     * Constructor taking a byte array.
+     *
+     * <p>This constructor is intended to be used with pre-allocated buffer or when
+     * reading from a given byte array.</p>
+     *
+     * @param data input data or pre-allocated array.
+     */
+    public SynchronizedSeekableInMemoryByteChannel(final byte[] data) {
+        this(data, false);
+    }
+
+    public SynchronizedSeekableInMemoryByteChannel(final byte[] data, boolean isReadonly) {
+        this.data = data;
+        size = data.length;
+        this.isReadonly = isReadonly;
+    }
+
+
+    /**
+     * Parameterless constructor - allocates internal buffer by itself.
+     */
+    public SynchronizedSeekableInMemoryByteChannel() {
+        this(ByteUtils.EMPTY_BYTE_ARRAY);
+    }
+
+    /**
+     * Constructor taking a size of storage to be allocated.
+     *
+     * <p>Creates a channel and allocates internal storage of a given size.</p>
+     *
+     * @param size size of internal buffer to allocate, in bytes.
+     */
+    public SynchronizedSeekableInMemoryByteChannel(final int size) {
+        this(new byte[size]);
+    }
+
+    /**
+     * Returns this channel's position.
+     */
+    @Override
+    public long position() throws IOException {
+        beginRead();
+        try {
+            ensureOpen();
+            return position;
+        } finally {
+            endRead();
+        }
+    }
+
+    @Override
+    public SeekableByteChannel position(final long newPosition) throws IOException {
+        if (newPosition < 0L || newPosition > Integer.MAX_VALUE) {
+            throw new IOException("Position has to be in range 0.. " + Integer.MAX_VALUE);
+        }
+
+        beginWrite();
+        try {
+            ensureOpen();
+            position = (int) newPosition;
+            return this;
+        } finally {
+            endWrite();
+        }
+    }
+
+    /**
+     * Returns the current size of entity to which this channel is connected.
+     */
+    @Override
+    public long size() throws IOException {
+        beginRead();
+        try {
+            ensureOpen();
+            return size;
+        } finally {
+            endRead();
+        }
+    }
+
+    /**
+     * Truncates the entity, to which this channel is connected, to the given size.
+     *
+     * @throws IllegalArgumentException if size is negative or bigger than the maximum of a Java integer
+     */
+    @Override
+    public SeekableByteChannel truncate(final long newSize) throws IOException {
+        checkForWrite();
+
+        if (newSize < 0L || newSize > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Size has to be in range 0.. " + Integer.MAX_VALUE);
+        }
+        beginWrite();
+        try {
+            ensureOpen();
+            if (size > newSize) {
+                size = (int) newSize;
+            }
+            if (position > newSize) {
+                position = (int) newSize;
+            }
+            return this;
+        } finally {
+            endWrite();
+        }
+    }
+
+    @Override
+    public int read(final ByteBuffer buf) throws IOException {
+        beginWrite();
+        try {
+            ensureOpen();
+            int wanted = buf.remaining();
+            final int possible = size - position;
+            if (possible <= 0) {
+                return -1;
+            }
+            if (wanted > possible) {
+                wanted = possible;
+            }
+            buf.put(data, position, wanted);
+            position += wanted;
+            return wanted;
+        } finally {
+            endWrite();
+        }
+    }
+
+    @Override
+    public void close() {
+        if (closed) {
+            return;
+        }
+        beginWrite();
+        try {
+            closed = true;
+            data = null;
+        } finally {
+            endWrite();
+        }
+    }
+
+    @Override
+    public boolean isOpen() {
+        return !closed;
+    }
+
+    @Override
+    public int write(final ByteBuffer b) throws IOException {
+        checkForWrite();
+        beginWrite();
+        try {
+            ensureOpen();
+            int wanted = b.remaining();
+            final int possibleWithoutResize = size - position;
+            if (wanted > possibleWithoutResize) {
+                final int newSize = position + wanted;
+                if (newSize < 0) { // overflow
+                    resize(Integer.MAX_VALUE);
+                    wanted = Integer.MAX_VALUE - position;
+                } else {
+                    resize(newSize);
+                }
+            }
+            b.get(data, position, wanted);
+            position += wanted;
+            if (size < position) {
+                size = position;
+            }
+            return wanted;
+        } finally {
+            endWrite();
+        }
+    }
+
+    public byte[] toByteArray() {
+        beginRead();
+        try {
+            return Arrays.copyOf(data, size);
+        } finally {
+            endRead();
+        }
+    }
+
+    public byte[] toByteArrayAndClose() {
+        beginWrite();
+        try {
+            byte[] res = size == data.length ? data : Arrays.copyOf(data, size);
+            closed = true;
+            data = null;
+            return res;
+        } finally {
+            endWrite();
+        }
+    }
+
+    private void resize(final int newLength) {
+        int len = data.length;
+        if (len <= 0) {
+            len = 1;
+        }
+        if (newLength < NAIVE_RESIZE_LIMIT) {
+            while (len < newLength) {
+                len <<= 1;
+            }
+        } else { // avoid overflow
+            len = newLength;
+        }
+        data = Arrays.copyOf(data, len);
+    }
+
+    protected void ensureOpen() throws ClosedChannelException {
+        if (!isOpen()) {
+            throw new ClosedChannelException();
+        }
+    }
+
+    protected void checkForWrite() {
+        if (isReadonly) {
+            throw new NonWritableChannelException();
+        }
+    }
+
+    protected void beginRead() {
+        lock.readLock().lock();
+    }
+
+    protected void endRead() {
+        lock.readLock().unlock();
+    }
+
+    protected void beginWrite() {
+        lock.writeLock().lock();
+    }
+
+    protected void endWrite() {
+        lock.writeLock().unlock();
+    }
+
+
+}
