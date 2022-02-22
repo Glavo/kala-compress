@@ -4,14 +4,18 @@ rootProject.name = "kala-compress"
 
 include("base", "changes")
 
-for (archiver in file("archivers").listFiles()) {
-    if (archiver.isDirectory && archiver.name != "build"&& archiver.name != "src") {
-        include(":archivers:${archiver.name}")
-    }
+val archivers = listOf(
+    "ar", "arj", "cpio", "dump", "sevenz", "tar", "zip"
+)
+val compressors = listOf(
+    "brotli", "bzip2", "deflate", "deflate64", "gzip", "lz4", "lzma", "pack200", "snappy", "xz", "z", "zstandard"
+)
+
+
+for (archiver in archivers) {
+    include(":archivers:$archiver")
 }
 
-for (compressor in file("compressors").listFiles()) {
-    if (compressor.isDirectory && compressor.name != "build" && compressor.name != "src") {
-        include(":compressors:${compressor.name}")
-    }
+for (compressor in compressors) {
+    include(":compressors:$compressor")
 }
