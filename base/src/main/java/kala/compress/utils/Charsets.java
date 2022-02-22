@@ -153,7 +153,7 @@ public class Charsets {
      *  encode("\u00D6lf\u00E4sser.txt") = "\231lf\204sser.txt"
      * </pre>
      *
-     * Use this method instead of {@code kala.compress.archivers.zip.ZipEncoding#encode(String)}
+     * Use this method instead of {@code org.apache.commons.compress.archivers.zip.ZipEncoding#encode(String)}
      *
      * @param name A file name or ZIP comment.
      * @return A byte buffer with a backing array containing the
@@ -218,7 +218,7 @@ public class Charsets {
     }
 
     /**
-     * Use this method instead of {@code kala.compress.archivers.zip.ZipEncoding#decode(byte[])}
+     * Use this method instead of {@code org.apache.commons.compress.archivers.zip.ZipEncoding#decode(byte[])}
      *
      * @param data The byte values to decode.
      * @return The decoded string.

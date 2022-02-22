@@ -29,7 +29,7 @@ import kala.compress.utils.ByteUtils;
 public final class JarMarker implements ZipExtraField {
 
     private static final ZipShort ID = ZipShort.valueOf(0xCAFE);
-    private static final ZipShort NULL = ZipShort.valueOf(0);
+    private static final ZipShort NULL = ZipShort.ZERO;
     private static final JarMarker DEFAULT = new JarMarker();
 
     /** No-arg constructor */

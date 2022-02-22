@@ -204,7 +204,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
 
                 BuiltinCompressor archiver = (BuiltinCompressor) constructor.newInstance();
                 builtinCompressors.add(archiver);
-
             } catch (ClassNotFoundException ignored) {
             } catch (ReflectiveOperationException e) {
                 throw (LinkageError) new LinkageError().initCause(e);
