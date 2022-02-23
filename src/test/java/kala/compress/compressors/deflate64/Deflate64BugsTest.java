@@ -23,14 +23,14 @@ import java.io.InputStream;
 import java.util.Enumeration;
 
 import kala.compress.archivers.zip.ZipArchiveEntry;
-import kala.compress.archivers.zip.ZipFile;
+import kala.compress.archivers.zip.ZipArchiveReader;
 import org.junit.Test;
 
 public class Deflate64BugsTest {
 
     @Test
     public void readBeyondMemoryException() throws Exception {
-        try (ZipFile zfile = new ZipFile(getFile("COMPRESS-380/COMPRESS-380-readbeyondmemory.zip"))) {
+        try (ZipArchiveReader zfile = new ZipArchiveReader(getFile("COMPRESS-380/COMPRESS-380-readbeyondmemory.zip"))) {
             final Enumeration<ZipArchiveEntry> entries = zfile.getEntries();
             while (entries.hasMoreElements()) {
                 final ZipArchiveEntry e = entries.nextElement();

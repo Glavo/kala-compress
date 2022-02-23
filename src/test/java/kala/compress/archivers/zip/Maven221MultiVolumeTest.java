@@ -119,7 +119,7 @@ public class Maven221MultiVolumeTest {
     @Test(expected=IOException.class)
     public void testRead7ZipMultiVolumeArchiveForFile() throws IOException {
         final File file = getFile("apache-maven-2.2.1.zip.001");
-        try (final ZipFile zf = new ZipFile(file)) {
+        try (final ZipArchiveReader zf = new ZipArchiveReader(file)) {
             // empty
         }
     }

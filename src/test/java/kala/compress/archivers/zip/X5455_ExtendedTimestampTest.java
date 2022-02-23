@@ -116,7 +116,7 @@ public class X5455_ExtendedTimestampTest {
 
         final File archive = getFile("COMPRESS-210_unix_time_zip_test.zip");
 
-        try (ZipFile zf = new ZipFile(archive)) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(archive)) {
             final Enumeration<ZipArchiveEntry> en = zf.getEntries();
 
             // We expect EVERY entry of this zip file
@@ -428,7 +428,7 @@ public class X5455_ExtendedTimestampTest {
             os.closeArchiveEntry();
         }
 
-        try (final ZipFile zf = new ZipFile(output)) {
+        try (final ZipArchiveReader zf = new ZipArchiveReader(output)) {
             final ZipArchiveEntry ze = zf.getEntry("foo");
             final X5455_ExtendedTimestamp ext = (X5455_ExtendedTimestamp) ze.getExtraField(X5455);
             assertNotNull(ext);

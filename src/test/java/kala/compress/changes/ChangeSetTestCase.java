@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import kala.compress.AbstractTestCase;
@@ -39,7 +38,7 @@ import kala.compress.archivers.cpio.CpioArchiveEntry;
 import kala.compress.archivers.jar.JarArchiveEntry;
 import kala.compress.archivers.tar.TarArchiveEntry;
 import kala.compress.archivers.zip.ZipArchiveEntry;
-import kala.compress.archivers.zip.ZipFile;
+import kala.compress.archivers.zip.ZipArchiveReader;
 import org.junit.Test;
 
 /**
@@ -585,12 +584,12 @@ public final class ChangeSetTestCase extends AbstractTestCase {
         final File input = this.createArchive(archivename);
 
         ArchiveOutputStream out = null;
-        ZipFile ais = null;
+        ZipArchiveReader ais = null;
         final File result = File.createTempFile("test", "."+archivename);
         result.deleteOnExit();
         try {
 
-            ais = new ZipFile(input);
+            ais = new ZipArchiveReader(input);
             out = factory.createArchiveOutputStream(archivename,
                     Files.newOutputStream(result.toPath()));
 

@@ -36,7 +36,7 @@ import kala.compress.utils.IOUtils;
  * <p>The name of the archive must be given as a command line argument.</p>
  *
  * <p>Optional command line arguments specify the encoding to assume
- * and whether to use ZipFile or ZipArchiveInputStream.</p>
+ * and whether to use ZipArchiveReader or ZipArchiveInputStream.</p>
  */
 public final class Lister {
     private static class CommandLine {
@@ -70,7 +70,7 @@ public final class Lister {
                 }
             }
         } else {
-            try (ZipFile zf = new ZipFile(f, cl.encoding)) {
+            try (ZipArchiveReader zf = new ZipArchiveReader(f, cl.encoding)) {
                 for (final Enumeration<ZipArchiveEntry> entries = zf.getEntries();
                      entries.hasMoreElements(); ) {
                     final ZipArchiveEntry ze = entries.nextElement();

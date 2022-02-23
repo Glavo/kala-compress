@@ -49,7 +49,7 @@ public class X7875_NewUnixTest {
     public void testSampleFile() throws Exception {
         final File archive = getFile("COMPRESS-211_uid_gid_zip_test.zip");
 
-        try (ZipFile zf = new ZipFile(archive)) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(archive)) {
             final Enumeration<ZipArchiveEntry> en = zf.getEntries();
 
             // We expect EVERY entry of this zip file (dir & file) to

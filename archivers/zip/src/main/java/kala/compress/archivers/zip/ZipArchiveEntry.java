@@ -72,7 +72,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
         /**
          * The name has been read from the archive using the encoding
          * of the archive specified when creating the {@link
-         * ZipArchiveInputStream} or {@link ZipFile} (defaults to the UTF-8).
+         * ZipArchiveInputStream} or {@link ZipArchiveReader} (defaults to the UTF-8).
          */
         NAME,
         /**
@@ -96,7 +96,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
         /**
          * The comment has been read from the archive using the encoding
          * of the archive specified when creating the {@link
-         * ZipArchiveInputStream} or {@link ZipFile} (defaults to the UTF-8).
+         * ZipArchiveInputStream} or {@link ZipArchiveReader} (defaults to the UTF-8).
          */
         COMMENT,
         /**
@@ -311,7 +311,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
      * Retrieves the internal file attributes.
      *
      * <p><b>Note</b>: {@link ZipArchiveInputStream} is unable to fill
-     * this field, you must use {@link ZipFile} if you want to read
+     * this field, you must use {@link ZipArchiveReader} if you want to read
      * entries using this attribute.</p>
      *
      * @return the internal file attributes
@@ -332,7 +332,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
      * Retrieves the external file attributes.
      *
      * <p><b>Note</b>: {@link ZipArchiveInputStream} is unable to fill
-     * this field, you must use {@link ZipFile} if you want to read
+     * this field, you must use {@link ZipArchiveReader} if you want to read
      * entries using this attribute.</p>
      *
      * @return the external file attributes

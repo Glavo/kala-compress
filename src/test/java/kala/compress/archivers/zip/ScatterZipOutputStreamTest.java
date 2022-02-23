@@ -65,7 +65,7 @@ public class ScatterZipOutputStreamTest {
         outputStream.close();
         scatterZipOutputStream.close();
 
-        final ZipFile zf = new ZipFile(target);
+        final ZipArchiveReader zf = new ZipArchiveReader(target);
         final ZipArchiveEntry b_entry = zf.getEntries("b.txt").iterator().next();
         assertEquals(8, b_entry.getSize());
         assertArrayEquals(B_PAYLOAD, IOUtils.toByteArray(zf.getInputStream(b_entry)));

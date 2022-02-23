@@ -149,7 +149,7 @@ public class DataDescriptorTest {
 
         final ByteArrayOutputStream o = new ByteArrayOutputStream();
         final ZipArchiveEntry zae;
-        try (ZipFile zf = new ZipFile(f);
+        try (ZipArchiveReader zf = new ZipArchiveReader(f);
              ZipArchiveOutputStream zos = new ZipArchiveOutputStream(o)) {
             zae = zf.getEntry("test1.txt");
             zos.addRawArchiveEntry(zae, zf.getRawInputStream(zae));

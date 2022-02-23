@@ -100,14 +100,14 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
     @Test
     public void testRead7ZipArchive() throws IOException {
         final File archive = getFile("utf8-7zip-test.zip");
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = new ZipFile(archive, Charsets.toCharset(CP437), false);
+            zf = new ZipArchiveReader(archive, Charsets.toCharset(CP437), false);
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry(EURO_FOR_DOLLAR_TXT));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));
         } finally {
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
         }
     }
 
@@ -129,18 +129,18 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
     @Test
     public void testReadWinZipArchive() throws IOException {
         final File archive = getFile("utf8-winzip-test.zip");
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = new ZipFile(archive, StandardCharsets.UTF_8, true);
+            zf = new ZipArchiveReader(archive, StandardCharsets.UTF_8, true);
             assertCanRead(zf, ASCII_TXT);
             assertCanRead(zf, EURO_FOR_DOLLAR_TXT);
             assertCanRead(zf, OIL_BARREL_TXT);
         } finally {
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
         }
     }
 
-    private void assertCanRead(final ZipFile zf, final String fileName) throws IOException {
+    private void assertCanRead(final ZipArchiveReader zf, final String fileName) throws IOException {
         final ZipArchiveEntry entry = zf.getEntry(fileName);
         assertNotNull("Entry doesn't exist", entry);
         final InputStream is = zf.getInputStream(entry);
@@ -194,15 +194,15 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
         throws IOException {
         final File file = File.createTempFile("unicode-test", ".zip");
         file.deleteOnExit();
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
             createTestFile(file, StandardCharsets.US_ASCII, false, true);
-            zf = new ZipFile(file, StandardCharsets.US_ASCII, true);
+            zf = new ZipArchiveReader(file, StandardCharsets.US_ASCII, true);
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry(EURO_FOR_DOLLAR_TXT));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));
         } finally {
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
             tryHardToDelete(file);
         }
     }
@@ -211,12 +211,12 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
     public void testRawNameReadFromZipFile()
         throws IOException {
         final File archive = getFile("utf8-7zip-test.zip");
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = new ZipFile(archive, Charsets.toCharset(CP437), false);
+            zf = new ZipArchiveReader(archive, Charsets.toCharset(CP437), false);
             assertRawNameOfAcsiiTxt(zf.getEntry(ASCII_TXT));
         } finally {
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
         }
     }
 
@@ -248,7 +248,7 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
      */
     @Test
     public void zipFileSkipsOverUnicodeExtraFieldWithUnsupportedVersion() throws IOException {
-        try (ZipFile zf = new ZipFile(getFile("COMPRESS-479.zip"))) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(getFile("COMPRESS-479.zip"))) {
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry("%U20AC_for_Dollar.txt"));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));
@@ -349,9 +349,9 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
 
     private static void testFile(final File file, final Charset charset)
         throws IOException {
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = new ZipFile(file, charset, false);
+            zf = new ZipArchiveReader(file, charset, false);
 
             final Enumeration<ZipArchiveEntry> e = zf.getEntries();
             while (e.hasMoreElements()) {
@@ -368,7 +368,7 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
                 }
             }
         } finally {
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
         }
     }
 

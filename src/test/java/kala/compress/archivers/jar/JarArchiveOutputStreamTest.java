@@ -26,12 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import kala.compress.archivers.zip.ZipArchiveReader;
 import org.junit.Test;
 import kala.compress.AbstractTestCase;
 import kala.compress.archivers.zip.JarMarker;
 import kala.compress.archivers.zip.ZipArchiveEntry;
 import kala.compress.archivers.zip.ZipExtraField;
-import kala.compress.archivers.zip.ZipFile;
 
 public class JarArchiveOutputStreamTest {
 
@@ -40,7 +40,7 @@ public class JarArchiveOutputStreamTest {
         final File testArchive = File.createTempFile("jar-aostest", ".jar");
         testArchive.deleteOnExit();
         JarArchiveOutputStream out = null;
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
 
             out = new JarArchiveOutputStream(Files.newOutputStream(testArchive.toPath()));
@@ -52,7 +52,7 @@ public class JarArchiveOutputStreamTest {
             out.close();
             out = null;
 
-            zf = new ZipFile(testArchive);
+            zf = new ZipArchiveReader(testArchive);
             ZipArchiveEntry ze = zf.getEntry("foo/");
             assertNotNull(ze);
             ZipExtraField[] fes = ze.getExtraFields();
@@ -69,7 +69,7 @@ public class JarArchiveOutputStreamTest {
                     out.close();
                 } catch (final IOException e) { /* swallow */ }
             }
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
             AbstractTestCase.tryHardToDelete(testArchive);
         }
     }

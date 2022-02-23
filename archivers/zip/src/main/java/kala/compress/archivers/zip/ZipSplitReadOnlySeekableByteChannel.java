@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 /**
  * {@link MultiReadOnlySeekableByteChannel} that knows what a split ZIP archive should look like.
  *
- * <p>If you want to read a split archive using {@link ZipFile} then create an instance of this class from the parts of
+ * <p>If you want to read a split archive using {@link ZipArchiveReader} then create an instance of this class from the parts of
  * the archive.</p>
  *
  * @since 1.20

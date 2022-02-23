@@ -54,7 +54,7 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
 
     /**
      * Stored in {@link #parseFromCentralDirectoryData
-     * parseFromCentralDirectoryData} so it can be reused when ZipFile
+     * parseFromCentralDirectoryData} so it can be reused when ZipArchiveReader
      * calls {@link #reparseCentralDirectoryData
      * reparseCentralDirectoryData}.
      *

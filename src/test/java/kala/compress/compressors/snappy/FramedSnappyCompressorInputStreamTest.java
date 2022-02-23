@@ -33,7 +33,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 
 import kala.compress.AbstractTestCase;
-import kala.compress.archivers.zip.ZipFile;
+import kala.compress.archivers.zip.ZipArchiveReader;
 import kala.compress.compressors.gzip.GzipCompressorInputStream;
 import kala.compress.utils.IOUtils;
 import org.junit.Test;
@@ -153,7 +153,7 @@ public final class FramedSnappyCompressorInputStreamTest
 
     @Test
     public void readIWAFile() throws Exception {
-        try (ZipFile zip = new ZipFile(getFile("testNumbersNew.numbers"))) {
+        try (ZipArchiveReader zip = new ZipArchiveReader(getFile("testNumbersNew.numbers"))) {
             try (InputStream is = zip.getInputStream(zip.getEntry("Index/Document.iwa"))) {
                 try (FramedSnappyCompressorInputStream in =
                         new FramedSnappyCompressorInputStream(is, FramedSnappyDialect.IWORK_ARCHIVE);

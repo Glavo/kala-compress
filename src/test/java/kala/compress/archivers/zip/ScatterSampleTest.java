@@ -53,7 +53,7 @@ public class ScatterSampleTest {
     }
 
     private void checkFile(final File result) throws IOException {
-        try (final ZipFile zipFile = new ZipFile(result)) {
+        try (final ZipArchiveReader zipFile = new ZipArchiveReader(result)) {
             final ZipArchiveEntry archiveEntry1 = zipFile.getEntries().nextElement();
             assertEquals("test1.xml", archiveEntry1.getName());
             try (final InputStream inputStream = zipFile.getInputStream(archiveEntry1)) {

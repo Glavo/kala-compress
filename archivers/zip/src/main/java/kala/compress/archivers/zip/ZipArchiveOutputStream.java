@@ -1240,7 +1240,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream {
     }
 
     /*
-     * Various ZIP constants shared between this class, ZipArchiveInputStream and ZipFile
+     * Various ZIP constants shared between this class, ZipArchiveInputStream and ZipArchiveReader
      */
     /**
      * local file header signature

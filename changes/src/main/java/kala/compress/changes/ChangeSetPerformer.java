@@ -29,7 +29,7 @@ import kala.compress.archivers.ArchiveEntry;
 import kala.compress.archivers.ArchiveInputStream;
 import kala.compress.archivers.ArchiveOutputStream;
 import kala.compress.archivers.zip.ZipArchiveEntry;
-import kala.compress.archivers.zip.ZipFile;
+import kala.compress.archivers.zip.ZipArchiveReader;
 import kala.compress.utils.IOUtils;
 
 /**
@@ -73,14 +73,14 @@ public class ChangeSetPerformer {
     }
 
     /**
-     * Performs all changes collected in this ChangeSet on the ZipFile and
+     * Performs all changes collected in this ChangeSet on the ZipArchiveReader and
      * streams the result to the output stream. Perform may be called more than once.
      *
      * This method finishes the stream, no other entries should be added
      * after that.
      *
      * @param in
-     *            the ZipFile to perform the changes on
+     *            the ZipArchiveReader to perform the changes on
      * @param out
      *            the resulting OutputStream with all modifications
      * @throws IOException
@@ -88,7 +88,7 @@ public class ChangeSetPerformer {
      * @return the results of this operation
      * @since 1.5
      */
-    public ChangeSetResults perform(final ZipFile in, final ArchiveOutputStream out)
+    public ChangeSetResults perform(final ZipArchiveReader in, final ArchiveOutputStream out)
             throws IOException {
         return perform(new ZipFileIterator(in), out);
     }
@@ -260,10 +260,10 @@ public class ChangeSetPerformer {
 
     private static class ZipFileIterator
         implements ArchiveEntryIterator {
-        private final ZipFile in;
+        private final ZipArchiveReader in;
         private final Enumeration<ZipArchiveEntry> nestedEnum;
         private ZipArchiveEntry current;
-        ZipFileIterator(final ZipFile in) {
+        ZipFileIterator(final ZipArchiveReader in) {
             this.in = in;
             nestedEnum = in.getEntriesInPhysicalOrder();
         }

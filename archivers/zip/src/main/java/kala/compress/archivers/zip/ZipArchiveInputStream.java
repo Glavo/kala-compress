@@ -53,7 +53,7 @@ import static kala.compress.archivers.zip.ZipConstants.ZIP64_MAGIC;
  * extensions and thus individual entries and archives larger than 4
  * GB or with more than 65536 entries.</p>
  *
- * <p>The {@link ZipFile} class is preferred when reading from files
+ * <p>The {@link ZipArchiveReader} class is preferred when reading from files
  * as {@link ZipArchiveInputStream} is limited by not being able to
  * read the central directory header before returning entries.  In
  * particular {@link ZipArchiveInputStream}</p>
@@ -75,7 +75,7 @@ import static kala.compress.archivers.zip.ZipConstants.ZIP64_MAGIC;
  *
  * </ul>
  *
- * @see ZipFile
+ * @see ZipArchiveReader
  * @NotThreadSafe
  */
 public class ZipArchiveInputStream extends ArchiveInputStream implements InputStreamStatistics {
@@ -309,7 +309,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
 
         final int versionMadeBy = ZipShort.getValue(lfhBuf, off);
         off += SHORT;
-        current.entry.setPlatform((versionMadeBy >> ZipFile.BYTE_SHIFT) & ZipFile.NIBLET_MASK);
+        current.entry.setPlatform((versionMadeBy >> ZipArchiveReader.BYTE_SHIFT) & ZipArchiveReader.NIBLET_MASK);
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(lfhBuf, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
@@ -976,7 +976,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
 
     private static final String USE_ZIPFILE_INSTEAD_OF_STREAM_DISCLAIMER =
         " while reading a stored entry using data descriptor. Either the archive is broken"
-        + " or it can not be read using ZipArchiveInputStream and you must use ZipFile."
+        + " or it can not be read using ZipArchiveInputStream and you must use ZipArchiveReader."
         + " A common cause for this is a ZIP archive containing a ZIP archive."
         + " See http://commons.apache.org/proper/commons-compress/zip.html#ZipArchiveInputStream_vs_ZipFile";
 
@@ -1134,7 +1134,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
             realSkip((long) entriesRead * CFH_LEN - LFH_LEN);
             final boolean foundEocd = findEocdRecord();
             if (foundEocd) {
-                realSkip((long) ZipFile.MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
+                realSkip((long) ZipArchiveReader.MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
                 readFully(shortBuf);
                 // file comment
                 final int commentLen = ZipShort.getValue(shortBuf);

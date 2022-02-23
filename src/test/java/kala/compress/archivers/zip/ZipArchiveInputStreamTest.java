@@ -75,10 +75,10 @@ public class ZipArchiveInputStreamTest {
      */
     @Test
     public void properUseOfInflater() throws Exception {
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         ZipArchiveInputStream in = null;
         try {
-            zf = new ZipFile(getFile("COMPRESS-189.zip"));
+            zf = new ZipArchiveReader(getFile("COMPRESS-189.zip"));
             final ZipArchiveEntry zae = zf.getEntry("USD0558682-20080101.ZIP");
             in = new ZipArchiveInputStream(new BufferedInputStream(zf.getInputStream(zae)));
             ZipArchiveEntry innerEntry;

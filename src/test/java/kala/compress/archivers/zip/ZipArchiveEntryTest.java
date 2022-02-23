@@ -287,7 +287,7 @@ public class ZipArchiveEntryTest {
      */
     @Test
     public void isUnixSymlinkIsFalseIfMoreThanOneFlagIsSet() throws Exception {
-        try (ZipFile zf = new ZipFile(getFile("COMPRESS-379.jar"))) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(getFile("COMPRESS-379.jar"))) {
             final ZipArchiveEntry ze = zf.getEntry("META-INF/maven/");
             assertFalse(ze.isUnixSymlink());
         }
@@ -305,7 +305,7 @@ public class ZipArchiveEntryTest {
     @Test
     public void reparsingUnicodeExtraWithUnsupportedversionThrowsInStrictMode()
         throws Exception {
-        try (ZipFile zf = new ZipFile(getFile("COMPRESS-479.zip"))) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(getFile("COMPRESS-479.zip"))) {
             final ZipArchiveEntry ze = zf.getEntry("%U20AC_for_Dollar.txt");
             thrown.expect(ZipException.class);
             thrown.expectMessage("Unsupported version [116] for UniCode path extra data.");
@@ -376,7 +376,7 @@ public class ZipArchiveEntryTest {
 
     @Test
     public void testZipArchiveClone() throws Exception {
-        try (ZipFile zf = new ZipFile(getFile("COMPRESS-479.zip"))) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(getFile("COMPRESS-479.zip"))) {
             final ZipArchiveEntry ze = zf.getEntry("%U20AC_for_Dollar.txt");
             final ZipArchiveEntry clonedZe = (ZipArchiveEntry) ze.clone();
             assertEquals(ze, clonedZe);

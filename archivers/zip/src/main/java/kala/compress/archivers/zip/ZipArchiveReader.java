@@ -55,7 +55,7 @@ import static kala.compress.archivers.zip.ZipConstants.ZIP64_MAGIC;
 import static kala.compress.archivers.zip.ZipConstants.ZIP64_MAGIC_SHORT;
 
 /**
- * Replacement for <code>java.util.ZipFile</code>.
+ * Replacement for <code>java.util.ZipArchiveReader</code>.
  *
  * <p>This class adds support for file name encodings other than UTF-8
  * (which is required to work on ZIP files created by native zip tools
@@ -64,16 +64,16 @@ import static kala.compress.archivers.zip.ZipConstants.ZIP64_MAGIC_SHORT;
  * <code>kala.compress.archivers.zip.ZipArchiveEntry</code>
  * instead of <code>java.util.zip.ZipEntry</code>.</p>
  *
- * <p>It doesn't extend <code>java.util.zip.ZipFile</code> as it would
+ * <p>It doesn't extend <code>java.util.zip.ZipArchiveReader</code> as it would
  * have to reimplement all methods anyway.  Like
- * <code>java.util.ZipFile</code>, it uses SeekableByteChannel under the
+ * <code>java.util.ZipArchiveReader</code>, it uses SeekableByteChannel under the
  * covers and supports compressed and uncompressed entries.  As of
  * Apache Commons Compress 1.3 it also transparently supports Zip64
  * extensions and thus individual entries and archives larger than 4
  * GB or with more than 65536 entries.</p>
  *
  * <p>The method signatures mimic the ones of
- * <code>java.util.zip.ZipFile</code>, with a couple of exceptions:
+ * <code>java.util.zip.ZipArchiveReader</code>, with a couple of exceptions:
  *
  * <ul>
  *   <li>There is no getName method.</li>
@@ -85,7 +85,7 @@ import static kala.compress.archivers.zip.ZipConstants.ZIP64_MAGIC_SHORT;
  * </ul>
  *
  */
-public class ZipFile implements Closeable {
+public class ZipArchiveReader implements Closeable {
     private static final int HASH_SIZE = 509;
     static final int NIBLET_MASK = 0x0f;
     static final int BYTE_SHIFT = 8;
@@ -148,7 +148,7 @@ public class ZipFile implements Closeable {
      *
      * @throws IOException if an error occurs while reading the file.
      */
-    public ZipFile(final File f) throws IOException {
+    public ZipArchiveReader(final File f) throws IOException {
         this(f.toPath());
     }
 
@@ -161,7 +161,7 @@ public class ZipFile implements Closeable {
      *
      * @throws IOException if an error occurs while reading the file.
      */
-    public ZipFile(final File f, final String encoding) throws IOException {
+    public ZipArchiveReader(final File f, final String encoding) throws IOException {
         this(f.toPath(), encoding);
     }
 
@@ -175,7 +175,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final File f, final Charset charset) throws IOException {
+    public ZipArchiveReader(final File f, final Charset charset) throws IOException {
         this(f.toPath(), charset);
     }
 
@@ -191,7 +191,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final File f, final Charset charset, final boolean useUnicodeExtraFields)
+    public ZipArchiveReader(final File f, final Charset charset, final boolean useUnicodeExtraFields)
         throws IOException {
         this(f.toPath(), charset, useUnicodeExtraFields);
     }
@@ -220,8 +220,8 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final File f, final Charset charset, final boolean useUnicodeExtraFields,
-                   final boolean ignoreLocalFileHeader)
+    public ZipArchiveReader(final File f, final Charset charset, final boolean useUnicodeExtraFields,
+                            final boolean ignoreLocalFileHeader)
         throws IOException {
         this(f.toPath(), charset, useUnicodeExtraFields, ignoreLocalFileHeader);
     }
@@ -234,7 +234,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final Path p) throws IOException {
+    public ZipArchiveReader(final Path p) throws IOException {
         this(p, StandardCharsets.UTF_8);
     }
 
@@ -248,7 +248,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final Path p, final String encoding) throws IOException {
+    public ZipArchiveReader(final Path p, final String encoding) throws IOException {
         this(p, Charsets.toCharset(encoding), true);
     }
 
@@ -262,7 +262,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final Path p, final Charset charset) throws IOException {
+    public ZipArchiveReader(final Path p, final Charset charset) throws IOException {
         this(p, charset, true);
     }
 
@@ -278,7 +278,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final Path p, final Charset charset, final boolean useUnicodeExtraFields)
+    public ZipArchiveReader(final Path p, final Charset charset, final boolean useUnicodeExtraFields)
             throws IOException {
         this(p, charset, useUnicodeExtraFields, false);
     }
@@ -307,8 +307,8 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final Path p, final Charset charset, final boolean useUnicodeExtraFields,
-                   final boolean ignoreLocalFileHeader)
+    public ZipArchiveReader(final Path p, final Charset charset, final boolean useUnicodeExtraFields,
+                            final boolean ignoreLocalFileHeader)
             throws IOException {
         this(Files.newByteChannel(p, Collections.emptySet()),
                 charset, useUnicodeExtraFields, true, ignoreLocalFileHeader);
@@ -326,7 +326,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.13
      */
-    public ZipFile(final SeekableByteChannel channel)
+    public ZipArchiveReader(final SeekableByteChannel channel)
             throws IOException {
         this(channel, StandardCharsets.UTF_8, true);
     }
@@ -345,7 +345,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.13
      */
-    public ZipFile(final SeekableByteChannel channel, final String encoding)
+    public ZipArchiveReader(final SeekableByteChannel channel, final String encoding)
             throws IOException {
         this(channel, Charsets.toCharset(encoding), true);
     }
@@ -364,7 +364,7 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final SeekableByteChannel channel, final Charset charset)
+    public ZipArchiveReader(final SeekableByteChannel channel, final Charset charset)
         throws IOException {
         this(channel, charset, true);
     }
@@ -385,8 +385,8 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final SeekableByteChannel channel,
-                   final Charset charset, final boolean useUnicodeExtraFields)
+    public ZipArchiveReader(final SeekableByteChannel channel,
+                            final Charset charset, final boolean useUnicodeExtraFields)
         throws IOException {
         this(channel, charset, useUnicodeExtraFields, false, false);
     }
@@ -418,16 +418,16 @@ public class ZipFile implements Closeable {
      * @throws IOException if an error occurs while reading the file.
      * @since 1.21.0.1
      */
-    public ZipFile(final SeekableByteChannel channel,
-                   final Charset charset, final boolean useUnicodeExtraFields,
-                   final boolean ignoreLocalFileHeader)
+    public ZipArchiveReader(final SeekableByteChannel channel,
+                            final Charset charset, final boolean useUnicodeExtraFields,
+                            final boolean ignoreLocalFileHeader)
         throws IOException {
         this(channel, charset, useUnicodeExtraFields, false, ignoreLocalFileHeader);
     }
 
-    private ZipFile(final SeekableByteChannel channel,
-                    final Charset charset, final boolean useUnicodeExtraFields,
-                    final boolean closeOnError, final boolean ignoreLocalFileHeader)
+    private ZipArchiveReader(final SeekableByteChannel channel,
+                             final Charset charset, final boolean useUnicodeExtraFields,
+                             final boolean closeOnError, final boolean ignoreLocalFileHeader)
         throws IOException {
         isSplitZipArchive = (channel instanceof ZipSplitReadOnlySeekableByteChannel);
 
@@ -444,7 +444,7 @@ public class ZipFile implements Closeable {
             fillNameMap();
             success = true;
         } catch (final IOException e) {
-            throw new IOException("Error on ZipFile", e);
+            throw new IOException("Error on ZipArchiveReader", e);
         } finally {
             if (!success && closeOnError) {
                 IOUtils.closeQuietly(archive);
@@ -483,7 +483,7 @@ public class ZipFile implements Closeable {
      * on a null parameter
      * @param zipfile file to close, can be null
      */
-    public static void closeQuietly(final ZipFile zipfile) {
+    public static void closeQuietly(final ZipArchiveReader zipfile) {
         IOUtils.closeQuietly(zipfile);
     }
 
@@ -668,7 +668,7 @@ public class ZipFile implements Closeable {
         final Enumeration<ZipArchiveEntry> src = getEntriesInPhysicalOrder();
         while (src.hasMoreElements()) {
             final ZipArchiveEntry entry = src.nextElement();
-            if (predicate.test( entry)) {
+            if (predicate.test(entry)) {
                 target.addRawArchiveEntry(entry, getRawInputStream(entry));
             }
         }
@@ -755,7 +755,7 @@ public class ZipFile implements Closeable {
      * </p>
      *
      * <p>This method assumes the symbolic link's file name uses the
-     * same encoding that as been specified for this ZipFile.</p>
+     * same encoding that as been specified for this ZipArchiveReader.</p>
      *
      * @param entry ZipArchiveEntry object that represents the symbolic link
      * @return entry's content as a String
@@ -1512,7 +1512,7 @@ public class ZipFile implements Closeable {
 
         BoundedFileChannelInputStream(final long start, final long remaining) {
             super(start, remaining);
-            archive = (FileChannel) ZipFile.this.archive;
+            archive = (FileChannel) ZipArchiveReader.this.archive;
         }
 
         @Override

@@ -37,9 +37,9 @@ public class EncryptedArchiveTest {
     public void testReadPasswordEncryptedEntryViaZipFile()
         throws IOException {
         final File file = getFile("password-encrypted.zip");
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = new ZipFile(file);
+            zf = new ZipArchiveReader(file);
             final ZipArchiveEntry zae = zf.getEntry("LICENSE.txt");
             assertTrue(zae.getGeneralPurposeBit().usesEncryption());
             assertFalse(zae.getGeneralPurposeBit().usesStrongEncryption());
@@ -52,7 +52,7 @@ public class EncryptedArchiveTest {
                            ex.getFeature());
             }
         } finally {
-            ZipFile.closeQuietly(zf);
+            ZipArchiveReader.closeQuietly(zf);
         }
     }
 

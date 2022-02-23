@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Enumeration;
 
-public class ZipFileIgnoringLocalFileHeaderTest {
+public class ZipFileIgnoringLocalArchiveReaderHeaderTest {
 
     private File dir;
 
@@ -53,7 +53,7 @@ public class ZipFileIgnoringLocalFileHeaderTest {
      */
     @Test
     public void testZipUnarchive() throws Exception {
-        try (final ZipFile zf = openZipWithoutLFH("bla.zip")) {
+        try (final ZipArchiveReader zf = openZipWithoutLFH("bla.zip")) {
             for (final Enumeration<ZipArchiveEntry> e = zf.getEntries(); e.hasMoreElements(); ) {
                 final ZipArchiveEntry entry = e.nextElement();
                 try (final OutputStream out = Files.newOutputStream(new File(dir, entry.getName()).toPath())) {
@@ -65,7 +65,7 @@ public class ZipFileIgnoringLocalFileHeaderTest {
 
     @Test
     public void getEntryWorks() throws IOException {
-        try (final ZipFile zf = openZipWithoutLFH("bla.zip")) {
+        try (final ZipArchiveReader zf = openZipWithoutLFH("bla.zip")) {
             final ZipArchiveEntry ze = zf.getEntry("test1.xml");
             Assert.assertEquals(610, ze.getSize());
         }
@@ -73,7 +73,7 @@ public class ZipFileIgnoringLocalFileHeaderTest {
 
     @Test
     public void testDuplicateEntry() throws Exception {
-        try (final ZipFile zf = openZipWithoutLFH("COMPRESS-227.zip")) {
+        try (final ZipArchiveReader zf = openZipWithoutLFH("COMPRESS-227.zip")) {
             int numberOfEntries = 0;
             for (final ZipArchiveEntry entry : zf.getEntries("test1.txt")) {
                 numberOfEntries++;
@@ -85,7 +85,7 @@ public class ZipFileIgnoringLocalFileHeaderTest {
 
     @Test
     public void getRawInputStreamReturnsNull() throws IOException {
-        try (final ZipFile zf = openZipWithoutLFH("bla.zip")) {
+        try (final ZipArchiveReader zf = openZipWithoutLFH("bla.zip")) {
             final ZipArchiveEntry ze = zf.getEntry("test1.xml");
             Assert.assertNull(zf.getRawInputStream(ze));
         }
@@ -93,7 +93,7 @@ public class ZipFileIgnoringLocalFileHeaderTest {
 
     @Test
     public void testPhysicalOrder() throws IOException {
-        try (final ZipFile zf = openZipWithoutLFH("ordertest.zip")) {
+        try (final ZipArchiveReader zf = openZipWithoutLFH("ordertest.zip")) {
             final Enumeration<ZipArchiveEntry> e = zf.getEntriesInPhysicalOrder();
             ZipArchiveEntry ze = null;
             do {
@@ -103,7 +103,7 @@ public class ZipFileIgnoringLocalFileHeaderTest {
         }
     }
 
-    private static ZipFile openZipWithoutLFH(final String fileName) throws IOException {
-        return new ZipFile(AbstractTestCase.getFile(fileName), StandardCharsets.UTF_8, true, true);
+    private static ZipArchiveReader openZipWithoutLFH(final String fileName) throws IOException {
+        return new ZipArchiveReader(AbstractTestCase.getFile(fileName), StandardCharsets.UTF_8, true, true);
     }
 }
