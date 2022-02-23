@@ -3,6 +3,8 @@ package kala.compress.filesystems.utils.glob;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class GlobEngineTest {
 
     private TestUtils testUtils;
@@ -71,7 +73,7 @@ public class GlobEngineTest {
         MatchingEngine m = GlobPattern.compile("a*b*c");
 
         String s = m.toString();
-        assert (s.startsWith("GlobEngine"));
+        assertTrue(s.startsWith("GlobEngine"));
     }
 
     /**
@@ -82,6 +84,6 @@ public class GlobEngineTest {
         GlobPattern globPattern = new GlobPattern();
 
         // Check there are no public constructors ....
-        assert (globPattern.getClass().getConstructors().length == 0);
+        assertEquals(0, globPattern.getClass().getConstructors().length);
     }
 }

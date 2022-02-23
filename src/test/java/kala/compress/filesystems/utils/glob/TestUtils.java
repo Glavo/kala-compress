@@ -1,6 +1,7 @@
 package kala.compress.filesystems.utils.glob;
 
 import static kala.compress.filesystems.utils.glob.GlobEngine.STARTING_STACK_SIZE;
+import static org.junit.Assert.*;
 
 /**
  * Simple util class with some test helper methods.
@@ -30,9 +31,9 @@ public class TestUtils {
         // Run it directly
         {
             MatchingEngine m = GlobPattern.compile(pattern, glob, blank, flags);
-            assert (m.getClass() == clazz);
+            assertSame(m.getClass(), clazz);
 
-            assert (m.matches(string) == result);
+            assertEquals(m.matches(string), result);
         }
 
         // If not case sensitive then run it again scrambled
@@ -41,9 +42,9 @@ public class TestUtils {
             string = scrambleCase(string, true);
 
             MatchingEngine m = GlobPattern.compile(pattern, glob, blank, flags);
-            assert (m.getClass() == clazz);
+            assertSame(m.getClass(), clazz);
 
-            assert (m.matches(string) == result);
+            assertEquals(m.matches(string), result);
         }
     }
 
@@ -64,49 +65,49 @@ public class TestUtils {
                            int globMask, int blankMask) {
 
         MatchingEngine matchingEngine = GlobPattern.compile(pattern, glob, blank, flags);
-        assert (matchingEngine.getClass() == clazz);
+        assertSame(matchingEngine.getClass(), clazz);
 
         int staticSize = matchingEngine.staticSizeInBytes();
         int matchingSize = matchingEngine.matchingSizeInBytes();
 
         // The matching size must be equal to or greater than the static size.
-        assert (matchingSize >= staticSize);
+        assertTrue(matchingSize >= staticSize);
 
         if (matchingEngine instanceof GlobEngine) {
             GlobEngine globEngine = (GlobEngine) matchingEngine;
 
-            assert (strcmp(globEngine.upperCase, upperCase.toCharArray(), globEngine.length));
-            assert (strcmp(globEngine.lowerCase, lowerCase.toCharArray(), globEngine.length));
+            assertTrue(strcmp(globEngine.upperCase, upperCase.toCharArray(), globEngine.length));
+            assertTrue(strcmp(globEngine.lowerCase, lowerCase.toCharArray(), globEngine.length));
 
-            assert (cmp(globEngine.wildcard, globMask, globEngine.length));
-            assert (cmp(globEngine.matchOne, blankMask, globEngine.length));
+            assertTrue(cmp(globEngine.wildcard, globMask, globEngine.length));
+            assertTrue(cmp(globEngine.matchOne, blankMask, globEngine.length));
 
-            assert (staticSize == globEngine.lowerCase.length * (Character.BYTES * 2 + 2) + Integer.BYTES);
-            assert (matchingSize == staticSize + Integer.BYTES * 3 + Integer.BYTES * STARTING_STACK_SIZE);
+            assertEquals(staticSize, globEngine.lowerCase.length * (Character.BYTES * 2 + 2) + Integer.BYTES);
+            assertEquals(matchingSize, staticSize + Integer.BYTES * 3 + Integer.BYTES * STARTING_STACK_SIZE);
         } else if (matchingEngine instanceof ContainsEngine) {
             ContainsEngine containsEngine = (ContainsEngine) matchingEngine;
 
-            assert (staticSize == containsEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
-            assert (matchingSize == staticSize + Integer.BYTES * 3);
+            assertEquals(staticSize, containsEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
+            assertEquals(matchingSize, staticSize + Integer.BYTES * 3);
         } else if (matchingEngine instanceof EndsWithEngine) {
             EndsWithEngine endsWithEngine = (EndsWithEngine) matchingEngine;
 
-            assert (staticSize == endsWithEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
-            assert (matchingSize == staticSize + Integer.BYTES * 2);
+            assertEquals(staticSize, endsWithEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
+            assertEquals(matchingSize, staticSize + Integer.BYTES * 2);
         } else if (matchingEngine instanceof StartsWithEngine) {
             StartsWithEngine startsWithEngine = (StartsWithEngine) matchingEngine;
 
-            assert (staticSize == startsWithEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
-            assert (matchingSize == staticSize + Integer.BYTES);
+            assertEquals(staticSize, startsWithEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
+            assertEquals(matchingSize, staticSize + Integer.BYTES);
         } else if (matchingEngine instanceof EqualToEngine) {
             EqualToEngine equalToEngine = (EqualToEngine) matchingEngine;
             // Verify zero size
-            assert (matchingEngine.staticSizeInBytes() == equalToEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
-            assert (matchingEngine.matchingSizeInBytes() == staticSize + Integer.BYTES);
+            assertEquals(matchingEngine.staticSizeInBytes(), equalToEngine.lowerCase.length * (Character.BYTES * 2 + 1) + Integer.BYTES);
+            assertEquals(matchingEngine.matchingSizeInBytes(), staticSize + Integer.BYTES);
         } else if (matchingEngine instanceof EmptyOnlyEngine || matchingEngine instanceof EverythingEngine) {
             // Verify zero size
-            assert (matchingEngine.staticSizeInBytes() == 0);
-            assert (matchingEngine.matchingSizeInBytes() == 0);
+            assertEquals(0, matchingEngine.staticSizeInBytes());
+            assertEquals(0, matchingEngine.matchingSizeInBytes());
         }
     }
 
@@ -117,8 +118,8 @@ public class TestUtils {
         }
         char[] chars = inString.toCharArray();
 
-        for (int i=0; i<chars.length; ++i) {
-            chars[i] = i%2 == (offset ? 1 : 0) ? Character.toLowerCase(chars[i]) : Character.toUpperCase(chars[i]);
+        for (int i = 0; i < chars.length; ++i) {
+            chars[i] = i % 2 == (offset ? 1 : 0) ? Character.toLowerCase(chars[i]) : Character.toUpperCase(chars[i]);
         }
 
         return new String(chars);
