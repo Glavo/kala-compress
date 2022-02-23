@@ -28,9 +28,9 @@ import javax.crypto.Cipher;
 
 import kala.compress.AbstractTestCase;
 import kala.compress.archivers.sevenz.SevenZArchiveEntry;
-import kala.compress.archivers.sevenz.SevenZFile;
+import kala.compress.archivers.sevenz.SevenZArchiveReader;
+import kala.compress.archivers.sevenz.SevenZArchiveWriter;
 import kala.compress.archivers.sevenz.SevenZMethod;
-import kala.compress.archivers.sevenz.SevenZOutputFile;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +79,7 @@ public class SevenZTestCase extends AbstractTestCase {
 
     private void testSevenZArchiveCreation(final SevenZMethod method) throws Exception {
         createArchive(method);
-        try (SevenZFile archive = new SevenZFile(output)) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(output)) {
             SevenZArchiveEntry entry;
 
             entry = archive.getNextEntry();
@@ -95,7 +95,7 @@ public class SevenZTestCase extends AbstractTestCase {
     }
 
     private void createArchive(final SevenZMethod method) throws Exception {
-        final SevenZOutputFile outArchive = new SevenZOutputFile(output);
+        final SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output);
         outArchive.setContentCompression(method);
         try {
             SevenZArchiveEntry entry;
@@ -142,19 +142,19 @@ public class SevenZTestCase extends AbstractTestCase {
     @Test
     public void singleByteReadConsistentlyReturnsMinusOneAtEofUsingAES() throws Exception {
         assumeStrongCryptoIsAvailable();
-        try (SevenZFile archive = new SevenZFile(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
             singleByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
 
     private void singleByteReadConsistentlyReturnsMinusOneAtEof(final SevenZMethod method) throws Exception {
         createArchive(method);
-        try (SevenZFile archive = new SevenZFile(output)) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(output)) {
             singleByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
 
-    private void singleByteReadConsistentlyReturnsMinusOneAtEof(final SevenZFile archive) throws Exception {
+    private void singleByteReadConsistentlyReturnsMinusOneAtEof(final SevenZArchiveReader archive) throws Exception {
         SevenZArchiveEntry entry = archive.getNextEntry();
         entry = archive.getNextEntry();
         readFully(archive);
@@ -185,19 +185,19 @@ public class SevenZTestCase extends AbstractTestCase {
     @Test
     public void multiByteReadConsistentlyReturnsMinusOneAtEofUsingAES() throws Exception {
         assumeStrongCryptoIsAvailable();
-        try (SevenZFile archive = new SevenZFile(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
             multiByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
 
     private void multiByteReadConsistentlyReturnsMinusOneAtEof(final SevenZMethod method) throws Exception {
         createArchive(method);
-        try (SevenZFile archive = new SevenZFile(output)) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(output)) {
             multiByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
 
-    private void multiByteReadConsistentlyReturnsMinusOneAtEof(final SevenZFile archive) throws Exception {
+    private void multiByteReadConsistentlyReturnsMinusOneAtEof(final SevenZArchiveReader archive) throws Exception {
         final byte[] buf = new byte[2];
         SevenZArchiveEntry entry = archive.getNextEntry();
         entry = archive.getNextEntry();
@@ -206,7 +206,7 @@ public class SevenZTestCase extends AbstractTestCase {
         assertEquals(-1, archive.read(buf));
     }
 
-    private void copy(final File src, final SevenZOutputFile dst) throws IOException {
+    private void copy(final File src, final SevenZArchiveWriter dst) throws IOException {
         try (InputStream fis = Files.newInputStream(src.toPath())) {
             final byte[] buffer = new byte[8*1024];
             int bytesRead;
@@ -216,7 +216,7 @@ public class SevenZTestCase extends AbstractTestCase {
         }
     }
 
-    private void readFully(final SevenZFile archive) throws IOException {
+    private void readFully(final SevenZArchiveReader archive) throws IOException {
         final byte[] buf = new byte[1024];
         int x = 0;
         while (0 <= (x = archive.read(buf))) {

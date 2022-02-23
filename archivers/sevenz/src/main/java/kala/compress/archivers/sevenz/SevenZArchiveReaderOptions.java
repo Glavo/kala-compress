@@ -23,7 +23,7 @@ package kala.compress.archivers.sevenz;
  * @since 1.19
  * @Immutable
  */
-public class SevenZFileOptions {
+public class SevenZArchiveReaderOptions {
     private static final int DEFAUL_MEMORY_LIMIT_IN_KB = Integer.MAX_VALUE;
     private static final boolean DEFAULT_USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES= false;
     private static final boolean DEFAULT_TRY_TO_RECOVER_BROKEN_ARCHIVES = false;
@@ -32,8 +32,8 @@ public class SevenZFileOptions {
     private final boolean useDefaultNameForUnnamedEntries;
     private final boolean tryToRecoverBrokenArchives;
 
-    private SevenZFileOptions(final int maxMemoryLimitInKb, final boolean useDefaultNameForUnnamedEntries,
-        final boolean tryToRecoverBrokenArchives) {
+    private SevenZArchiveReaderOptions(final int maxMemoryLimitInKb, final boolean useDefaultNameForUnnamedEntries,
+                                       final boolean tryToRecoverBrokenArchives) {
         this.maxMemoryLimitInKb = maxMemoryLimitInKb;
         this.useDefaultNameForUnnamedEntries = useDefaultNameForUnnamedEntries;
         this.tryToRecoverBrokenArchives = tryToRecoverBrokenArchives;
@@ -47,13 +47,13 @@ public class SevenZFileOptions {
      *   <li>don't modify the name of unnamed entries</li>
      * </ul>
      */
-    public static final SevenZFileOptions DEFAULT = new SevenZFileOptions(DEFAUL_MEMORY_LIMIT_IN_KB,
+    public static final SevenZArchiveReaderOptions DEFAULT = new SevenZArchiveReaderOptions(DEFAUL_MEMORY_LIMIT_IN_KB,
         DEFAULT_USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
         DEFAULT_TRY_TO_RECOVER_BROKEN_ARCHIVES);
 
     /**
-     * Obtains a builder for SevenZFileOptions.
-     * @return a builder for SevenZFileOptions.
+     * Obtains a builder for SevenZArchiveReaderOptions.
+     * @return a builder for SevenZArchiveReaderOptions.
      */
     public static Builder builder() {
         return new Builder();
@@ -83,8 +83,8 @@ public class SevenZFileOptions {
     }
 
     /**
-     * Whether {@link SevenZFile} shall try to recover from a certain type of broken archive.
-     * @return whether SevenZFile shall try to recover from a certain type of broken archive.
+     * Whether {@link SevenZArchiveReader} shall try to recover from a certain type of broken archive.
+     * @return whether SevenZArchiveReader shall try to recover from a certain type of broken archive.
      * @since 1.21
      */
     public boolean getTryToRecoverBrokenArchives() {
@@ -92,7 +92,7 @@ public class SevenZFileOptions {
     }
 
     /**
-     * Mutable builder for the immutable {@link SevenZFileOptions}.
+     * Mutable builder for the immutable {@link SevenZArchiveReaderOptions}.
      *
      * @since 1.19
      */
@@ -130,15 +130,15 @@ public class SevenZFileOptions {
         }
 
         /**
-         * Sets whether {@link SevenZFile} will try to revover broken archives where the CRC of the file's metadata is
+         * Sets whether {@link SevenZArchiveReader} will try to revover broken archives where the CRC of the file's metadata is
          * 0.
          *
          * <p>This special kind of broken archive is encountered when mutli volume archives are closed prematurely. If
-         * you enable this option SevenZFile will trust data that looks as if it could contain metadata of an archive
+         * you enable this option SevenZArchiveReader will trust data that looks as if it could contain metadata of an archive
          * and allocate big amounts of memory. It is strongly recommended to not enable this option without setting
          * {@link #withMaxMemoryLimitInKb} at the same time.
          *
-         * @param tryToRecoverBrokenArchives if true SevenZFile will try to recover archives that are broken in the
+         * @param tryToRecoverBrokenArchives if true SevenZArchiveReader will try to recover archives that are broken in the
          * specific way
          * @return the reconfigured builder
          * @since 1.21
@@ -149,12 +149,12 @@ public class SevenZFileOptions {
         }
 
         /**
-         * Create the {@link SevenZFileOptions}.
+         * Create the {@link SevenZArchiveReaderOptions}.
          *
-         * @return configured {@link SevenZFileOptions}.
+         * @return configured {@link SevenZArchiveReaderOptions}.
          */
-        public SevenZFileOptions build() {
-            return new SevenZFileOptions(maxMemoryLimitInKb, useDefaultNameForUnnamedEntries,
+        public SevenZArchiveReaderOptions build() {
+            return new SevenZArchiveReaderOptions(maxMemoryLimitInKb, useDefaultNameForUnnamedEntries,
                 tryToRecoverBrokenArchives);
         }
     }

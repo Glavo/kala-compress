@@ -9,6 +9,6 @@ final class SevenZArchiver extends BuiltinArchiver {
 
     @Override
     public boolean matches(byte[] signature, int length) {
-        return SevenZFile.matches(signature, length);
+        return SevenZArchiveReader.matches(signature, length);
     }
 }

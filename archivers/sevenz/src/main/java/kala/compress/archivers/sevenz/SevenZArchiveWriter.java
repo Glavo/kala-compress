@@ -54,7 +54,7 @@ import kala.compress.utils.CountingOutputStream;
  * Writes a 7z file.
  * @since 1.6
  */
-public class SevenZOutputFile implements Closeable {
+public class SevenZArchiveWriter implements Closeable {
     private final SeekableByteChannel channel;
     private final List<SevenZArchiveEntry> files = new ArrayList<>();
     private int numNonEmptyStreams;
@@ -74,7 +74,7 @@ public class SevenZOutputFile implements Closeable {
      * @param fileName the file to write to
      * @throws IOException if opening the file fails
      */
-    public SevenZOutputFile(final File fileName) throws IOException {
+    public SevenZArchiveWriter(final File fileName) throws IOException {
         this(fileName.toPath());
     }
 
@@ -85,7 +85,7 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if opening the file fails
      * @since 1.21.0.1
      */
-    public SevenZOutputFile(final Path fileName) throws IOException {
+    public SevenZArchiveWriter(final Path fileName) throws IOException {
         this(Files.newByteChannel(fileName,
                 EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE,
                         StandardOpenOption.TRUNCATE_EXISTING)));
@@ -102,9 +102,9 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if the channel cannot be positioned properly
      * @since 1.13
      */
-    public SevenZOutputFile(final SeekableByteChannel channel) throws IOException {
+    public SevenZArchiveWriter(final SeekableByteChannel channel) throws IOException {
         this.channel = channel;
-        channel.position(SevenZFile.SIGNATURE_HEADER_SIZE);
+        channel.position(SevenZArchiveReader.SIGNATURE_HEADER_SIZE);
     }
 
     /**
@@ -326,7 +326,7 @@ public class SevenZOutputFile implements Closeable {
         final CRC32 crc32 = new CRC32();
         crc32.update(headerBytes, 0, headerBytes.length);
 
-        final ByteBuffer bb = ByteBuffer.allocate(SevenZFile.sevenZSignature.length
+        final ByteBuffer bb = ByteBuffer.allocate(SevenZArchiveReader.sevenZSignature.length
                                             + 2 /* version */
                                             + 4 /* start header CRC */
                                             + 8 /* next header position */
@@ -335,7 +335,7 @@ public class SevenZOutputFile implements Closeable {
             .order(ByteOrder.LITTLE_ENDIAN);
         // signature header
         channel.position(0);
-        bb.put(SevenZFile.sevenZSignature);
+        bb.put(SevenZArchiveReader.sevenZSignature);
         // version
         bb.put((byte) 0).put((byte) 2);
 
@@ -343,12 +343,12 @@ public class SevenZOutputFile implements Closeable {
         bb.putInt(0);
 
         // start header
-        bb.putLong(headerPosition - SevenZFile.SIGNATURE_HEADER_SIZE)
+        bb.putLong(headerPosition - SevenZArchiveReader.SIGNATURE_HEADER_SIZE)
             .putLong(0xffffFFFFL & headerBytes.length)
             .putInt((int) crc32.getValue());
         crc32.reset();
-        crc32.update(bb.array(), SevenZFile.sevenZSignature.length + 6, 20);
-        bb.putInt(SevenZFile.sevenZSignature.length + 2, (int) crc32.getValue());
+        crc32.update(bb.array(), SevenZArchiveReader.sevenZSignature.length + 6, 20);
+        bb.putInt(SevenZArchiveReader.sevenZSignature.length + 2, (int) crc32.getValue());
         bb.flip();
         channel.write(bb);
     }

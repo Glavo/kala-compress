@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.CharBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -79,7 +78,7 @@ import kala.compress.utils.InputStreamStatistics;
  * @NotThreadSafe
  * @since 1.6
  */
-public class SevenZFile implements Closeable {
+public class SevenZArchiveReader implements Closeable {
     static final int SIGNATURE_HEADER_SIZE = 32;
 
     private static final String DEFAULT_FILE_NAME = "unknown archive";
@@ -91,14 +90,14 @@ public class SevenZFile implements Closeable {
     private int currentFolderIndex = -1;
     private InputStream currentFolderInputStream;
     private byte[] password;
-    private final SevenZFileOptions options;
+    private final SevenZArchiveReaderOptions options;
 
     private long compressedBytesReadFromCurrentEntry;
     private long uncompressedBytesReadFromCurrentEntry;
 
     private final ArrayList<InputStream> deferredBlockStreams = new ArrayList<>();
 
-    // shared with SevenZOutputFile and tests, neither mutates it
+    // shared with SevenZArchiveWriter and tests, neither mutates it
     static final byte[] sevenZSignature = { //NOSONAR
         (byte)'7', (byte)'z', (byte)0xBC, (byte)0xAF, (byte)0x27, (byte)0x1C
     };
@@ -109,8 +108,8 @@ public class SevenZFile implements Closeable {
      * @param fileName the file to read
      * @throws IOException if reading the archive fails
      */
-    public SevenZFile(final File fileName) throws IOException {
-        this(fileName, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final File fileName) throws IOException {
+        this(fileName, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -121,7 +120,7 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.19
      */
-    public SevenZFile(final File fileName, final SevenZFileOptions options) throws IOException {
+    public SevenZArchiveReader(final File fileName, final SevenZArchiveReaderOptions options) throws IOException {
         this(fileName, null, options);
     }
 
@@ -133,8 +132,8 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails
      * @since 1.17
      */
-    public SevenZFile(final File fileName, final char[] password) throws IOException {
-        this(fileName, password, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final File fileName, final char[] password) throws IOException {
+        this(fileName, password, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -146,7 +145,7 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.19
      */
-    public SevenZFile(final File fileName, final char[] password, final SevenZFileOptions options) throws IOException {
+    public SevenZArchiveReader(final File fileName, final char[] password, final SevenZArchiveReaderOptions options) throws IOException {
         this(fileName.toPath(), password, options);
     }
 
@@ -156,8 +155,8 @@ public class SevenZFile implements Closeable {
      * @param fileName the file to read
      * @throws IOException if reading the archive fails
      */
-    public SevenZFile(final Path fileName) throws IOException {
-        this(fileName, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final Path fileName) throws IOException {
+        this(fileName, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -168,7 +167,7 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.21.0.1
      */
-    public SevenZFile(final Path fileName, final SevenZFileOptions options) throws IOException {
+    public SevenZArchiveReader(final Path fileName, final SevenZArchiveReaderOptions options) throws IOException {
         this(fileName, null, options);
     }
 
@@ -180,8 +179,8 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails
      * @since 1.21.0.1
      */
-    public SevenZFile(final Path fileName, final char[] password) throws IOException {
-        this(fileName, password, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final Path fileName, final char[] password) throws IOException {
+        this(fileName, password, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -193,7 +192,7 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.21.0.1
      */
-    public SevenZFile(final Path fileName, final char[] password, final SevenZFileOptions options) throws IOException {
+    public SevenZArchiveReader(final Path fileName, final char[] password, final SevenZArchiveReaderOptions options) throws IOException {
         this(Files.newByteChannel(fileName, Collections.singleton(StandardOpenOption.READ)), // NOSONAR
                 fileName.toAbsolutePath().toString(), utf16Encode(password), true, options);
     }
@@ -209,8 +208,8 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails
      * @since 1.13
      */
-    public SevenZFile(final SeekableByteChannel channel) throws IOException {
-        this(channel, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final SeekableByteChannel channel) throws IOException {
+        this(channel, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -225,7 +224,7 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.19
      */
-    public SevenZFile(final SeekableByteChannel channel, final SevenZFileOptions options) throws IOException {
+    public SevenZArchiveReader(final SeekableByteChannel channel, final SevenZArchiveReaderOptions options) throws IOException {
         this(channel, DEFAULT_FILE_NAME, null, options);
     }
 
@@ -241,9 +240,9 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails
      * @since 1.17
      */
-    public SevenZFile(final SeekableByteChannel channel,
-                      final char[] password) throws IOException {
-        this(channel, password, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final SeekableByteChannel channel,
+                               final char[] password) throws IOException {
+        this(channel, password, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -259,7 +258,7 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.19
      */
-    public SevenZFile(final SeekableByteChannel channel, final char[] password, final SevenZFileOptions options)
+    public SevenZArchiveReader(final SeekableByteChannel channel, final char[] password, final SevenZArchiveReaderOptions options)
             throws IOException {
         this(channel, DEFAULT_FILE_NAME, password, options);
     }
@@ -277,9 +276,9 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails
      * @since 1.17
      */
-    public SevenZFile(final SeekableByteChannel channel, final String fileName,
-                      final char[] password) throws IOException {
-        this(channel, fileName, password, SevenZFileOptions.DEFAULT);
+    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName,
+                               final char[] password) throws IOException {
+        this(channel, fileName, password, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -296,8 +295,8 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.19
      */
-    public SevenZFile(final SeekableByteChannel channel, final String fileName, final char[] password,
-            final SevenZFileOptions options) throws IOException {
+    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final char[] password,
+                               final SevenZArchiveReaderOptions options) throws IOException {
         this(channel, fileName, utf16Encode(password), false, options);
     }
 
@@ -313,9 +312,9 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails
      * @since 1.17
      */
-    public SevenZFile(final SeekableByteChannel channel, final String fileName)
+    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName)
         throws IOException {
-        this(channel, fileName, SevenZFileOptions.DEFAULT);
+        this(channel, fileName, SevenZArchiveReaderOptions.DEFAULT);
     }
 
     /**
@@ -331,13 +330,13 @@ public class SevenZFile implements Closeable {
      * @throws IOException if reading the archive fails or the memory limit (if set) is too small
      * @since 1.19
      */
-    public SevenZFile(final SeekableByteChannel channel, final String fileName, final SevenZFileOptions options)
+    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final SevenZArchiveReaderOptions options)
             throws IOException {
         this(channel, fileName, null, false, options);
     }
 
-    private SevenZFile(final SeekableByteChannel channel, final String filename,
-                       final byte[] password, final boolean closeOnError, final SevenZFileOptions options) throws IOException {
+    private SevenZArchiveReader(final SeekableByteChannel channel, final String filename,
+                                final byte[] password, final boolean closeOnError, final SevenZArchiveReaderOptions options) throws IOException {
         boolean succeeded = false;
         this.channel = channel;
         this.fileName = filename;

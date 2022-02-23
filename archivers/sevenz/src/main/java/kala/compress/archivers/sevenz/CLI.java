@@ -26,7 +26,7 @@ public class CLI {
     private enum Mode {
         LIST("Analysing") {
             @Override
-            public void takeAction(final SevenZFile archive, final SevenZArchiveEntry entry) {
+            public void takeAction(final SevenZArchiveReader archive, final SevenZArchiveEntry entry) {
                 System.out.print(entry.getName());
                 if (entry.isDirectory()) {
                     System.out.print(" dir");
@@ -70,7 +70,7 @@ public class CLI {
         public String getMessage() {
             return message;
         }
-        public abstract void takeAction(SevenZFile archive, SevenZArchiveEntry entry)
+        public abstract void takeAction(SevenZArchiveReader archive, SevenZArchiveEntry entry)
             throws IOException;
     }
 
@@ -85,7 +85,7 @@ public class CLI {
         if (!f.isFile()) {
             System.err.println(f + " doesn't exist or is a directory");
         }
-        try (final SevenZFile archive = new SevenZFile(f)) {
+        try (final SevenZArchiveReader archive = new SevenZArchiveReader(f)) {
             SevenZArchiveEntry ae;
             while((ae=archive.getNextEntry()) != null) {
                 mode.takeAction(archive, ae);
