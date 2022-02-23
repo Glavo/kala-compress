@@ -9,7 +9,7 @@ plugins {
 }
 
 val buildType = project.findProperty("buildType")?.toString()?.toUpperCase() ?: "SNAPSHOT"
-val baseVersion = "1.21.0.1-beta3"
+val baseVersion = "1.21.0.1-beta4"
 
 loadMavenPublishProperties()
 
