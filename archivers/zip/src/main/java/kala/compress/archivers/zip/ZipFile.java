@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
@@ -662,7 +663,7 @@ public class ZipFile implements Closeable {
      * @param predicate A predicate that selects which entries to write
      * @throws IOException on error
      */
-    public void copyRawEntries(final ZipArchiveOutputStream target, final ZipArchiveEntryPredicate predicate)
+    public void copyRawEntries(final ZipArchiveOutputStream target, final Predicate<ZipArchiveEntry> predicate)
             throws IOException {
         final Enumeration<ZipArchiveEntry> src = getEntriesInPhysicalOrder();
         while (src.hasMoreElements()) {

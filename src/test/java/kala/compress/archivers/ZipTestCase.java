@@ -42,13 +42,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
 import kala.compress.AbstractTestCase;
 import kala.compress.archivers.zip.Zip64Mode;
 import kala.compress.archivers.zip.ZipArchiveEntry;
-import kala.compress.archivers.zip.ZipArchiveEntryPredicate;
 import kala.compress.archivers.zip.ZipArchiveInputStream;
 import kala.compress.archivers.zip.ZipArchiveOutputStream;
 import kala.compress.archivers.zip.ZipFile;
@@ -345,7 +345,7 @@ public final class ZipTestCase extends AbstractTestCase {
     }
     final String first_payload = "ABBA";
     final String second_payload = "AAAAAAAAAAAA";
-    final ZipArchiveEntryPredicate allFilesPredicate = zipArchiveEntry -> true;
+    final Predicate<ZipArchiveEntry> allFilesPredicate = zipArchiveEntry -> true;
 
     @Test
     public void testCopyRawEntriesFromFile()
