@@ -37,7 +37,8 @@ For more information about the Kala Compress modules, see [Modules](#Modules).
 ### Charset
 
 Kala Compress has been completely refactored internally to use `java.nio.charset.Charset` to represent encoding.
-All methods that accept an encoding represented by String provide overloads that accept `Charset`, please use `Charset` first.
+All methods that accept an encoding represented `String` then accept `Charset`.
+If you are using String to represent the encoding, use `kala.compress.utils.Charsets.toCharset(String)` to convert it to `Charset`.
 
 `ZipEncoding` has been removed, please switch to `Charset`.
 
@@ -45,7 +46,7 @@ All methods that accept an encoding represented by String provide overloads that
 
 Kala Compress no longer uses `Charset.defaultCharset()`, but uses UTF-8 as an alternative.
 Note that `file.encoding` defaults to UTF-8 since Java 18. When you want to use platform native encoding,
-use the `kala.compress.utils.Charsets.nativeCharset()` explicitly as an alternative.
+use the `kala.compress.utils.Charsets.nativeCharset()` explicitly as the alternative.
 
 In addition, APIs that accept encoding represented by `String` now no longer fall back to the default character set when the encoding is not supported or invalid.
 Now they throw exceptions just like `Charset.forName`. (The behavior when `null` is passed in is not affected, it will still fall back to the UTF-8)
@@ -71,6 +72,8 @@ If the problem is caused by caching of dependency checks, use the corresponding 
 
 `ZipEncoding` and `CharsetNames` has been removed, please switch to `Charset` and `StandardCharsets`.
 
+All methods that accept encoding represented by `String` have been removed, please use the `Charset` instead.
+
 Since Security Manager will be removed from JDK in the future, Kala Compress no longer use it.
 For more details, see [JEP 411: Deprecate the Security Manager for Removal](https://openjdk.java.net/jeps/411).
 
@@ -88,14 +91,13 @@ The implementation of pack200 was removed, `kala.compress.compressors.pack200` n
   * [`io.pack200.Pack200`](https://github.com/pack200/pack200)
 * You can use `Pack200Utils.setPack200Provider(String provider)` to specify specific implementations to use, including those not in the list above.
 
-A small number of methods that accept the `File` and accept encoding represented by `String` have been removed. 
-Please use `Path` and `Charset` instead.
+A small number of methods that accept the `File` have been removed, please use the `Path` instead.
 
 ## Modules
 
 **Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable. I may need to make some adjustments to the API before releasing to production.**
 
-The latest Kala Compress version is `1.21.0.1-beta2`.
+The latest Kala Compress version is `1.21.0.1-beta3`.
 
 You can add dependencies on Kala Compress modules as follows:
 
@@ -125,14 +127,14 @@ Maven:
 <dependency>
   <groupId>org.glavo.kala</groupId>
   <artifactId>kala-compress</artifactId>
-  <version>1.21.0.1-beta2</version>
+  <version>1.21.0.1-beta3</version>
 </dependency>
 ```
 
 Gradle:
 ```kotlin
 dependencies {
-  implementation("org.glavo.kala:kala-compress:1.21.0.1-beta2")
+  implementation("org.glavo.kala:kala-compress:1.21.0.1-beta3")
 }
 ```
 
