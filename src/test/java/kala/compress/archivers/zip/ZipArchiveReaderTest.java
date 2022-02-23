@@ -91,7 +91,7 @@ public class ZipArchiveReaderTest {
         assertEntryName(l, 19, "ZipUtil");
         assertEntryName(l, 20, "ZipLong");
         assertEntryName(l, 21, "ZipShort");
-        assertEntryName(l, 22, "ZipArchiveReader");
+        assertEntryName(l, 22, "ZipFile");
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ZipArchiveReaderTest {
         assertEntryName(l, 19, "ZipUtil");
         assertEntryName(l, 20, "ZipLong");
         assertEntryName(l, 21, "ZipShort");
-        assertEntryName(l, 22, "ZipArchiveReader");
+        assertEntryName(l, 22, "ZipFile");
     }
 
     @Test
@@ -151,7 +151,7 @@ public class ZipArchiveReaderTest {
         assertEntryName(l, 16, "ZipEncoding");
         assertEntryName(l, 17, "ZipEncodingHelper");
         assertEntryName(l, 18, "ZipExtraField");
-        assertEntryName(l, 19, "ZipArchiveReader");
+        assertEntryName(l, 19, "ZipFile");
         assertEntryName(l, 20, "ZipLong");
         assertEntryName(l, 21, "ZipShort");
         assertEntryName(l, 22, "ZipUtil");
@@ -311,7 +311,7 @@ public class ZipArchiveReaderTest {
         zf = new ZipArchiveReader(archive);
         // actually, if we get here, the test already has passed
 
-        final ZipArchiveEntry ze = zf.getEntry("src/main/java/org/apache/commons/compress/archivers/zip/ZipArchiveReader.java");
+        final ZipArchiveEntry ze = zf.getEntry("src/main/java/org/apache/commons/compress/archivers/zip/ZipFile.java");
         assertEquals(26101, ze.getSize());
     }
 
