@@ -144,7 +144,7 @@ public class ArchiveStreamFactoryTest {
         assertNull(fac.getEntryCharset());
         fac = new ArchiveStreamFactory((Charset) null);
         assertNull(fac.getEntryCharset());
-        fac = new ArchiveStreamFactory("UTF-8");
+        fac = new ArchiveStreamFactory(StandardCharsets.UTF_8);
         assertEquals(StandardCharsets.UTF_8, fac.getEntryCharset());
         fac = new ArchiveStreamFactory(StandardCharsets.UTF_8);
         assertEquals(StandardCharsets.UTF_8, fac.getEntryCharset());
@@ -176,8 +176,8 @@ public class ArchiveStreamFactoryTest {
 
     // The different factory types
     private static final ArchiveStreamFactory FACTORY = ArchiveStreamFactory.DEFAULT;
-    private static final ArchiveStreamFactory FACTORY_UTF8 = new ArchiveStreamFactory("UTF-8");
-    private static final ArchiveStreamFactory FACTORY_ASCII = new ArchiveStreamFactory("ASCII");
+    private static final ArchiveStreamFactory FACTORY_UTF8 = new ArchiveStreamFactory(StandardCharsets.UTF_8);
+    private static final ArchiveStreamFactory FACTORY_ASCII = new ArchiveStreamFactory(StandardCharsets.US_ASCII);
 
     // Default encoding if none is provided (not even null)
     // The test currently assumes that the output default is the same as the input default

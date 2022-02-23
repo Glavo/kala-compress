@@ -111,20 +111,6 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
      *
      * @param in
      *            The cpio stream
-     * @param encoding
-     *            The encoding of file names to expect - use null for the UTF-8.
-     * @since 1.6
-     */
-    public CpioArchiveInputStream(final InputStream in, final String encoding) {
-        this(in, BLOCK_SIZE, encoding);
-    }
-
-    /**
-     * Construct the cpio input stream with a blocksize of {@link
-     * CpioConstants#BLOCK_SIZE BLOCK_SIZE}.
-     *
-     * @param in
-     *            The cpio stream
      * @param charset
      *            The encoding of file names to expect - use null for the UTF-8.
      * @since 1.21.0.1
@@ -155,22 +141,6 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
      *            The cpio stream
      * @param blockSize
      *            The block size of the archive.
-     * @param encoding
-     *            The encoding of file names to expect - use null for the UTF-8.
-     * @throws IllegalArgumentException if <code>blockSize</code> is not bigger than 0
-     * @since 1.6
-     */
-    public CpioArchiveInputStream(final InputStream in, final int blockSize, final String encoding) {
-        this(in, blockSize, Charsets.toCharset(encoding));
-    }
-
-    /**
-     * Construct the cpio input stream with a blocksize of {@link CpioConstants#BLOCK_SIZE BLOCK_SIZE}.
-     *
-     * @param in
-     *            The cpio stream
-     * @param blockSize
-     *            The block size of the archive.
      * @param charset
      *            The charset of file names to expect - use null for UTF-8.
      * @throws IllegalArgumentException if <code>blockSize</code> is not bigger than 0
@@ -182,7 +152,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream implements
             throw new IllegalArgumentException("blockSize must be bigger than 0");
         }
         this.blockSize = blockSize;
-        this.charset = Charsets.toCharset(charset);
+        this.charset = charset != null ? charset : StandardCharsets.US_ASCII;
     }
 
     /**

@@ -157,19 +157,6 @@ public class ZipArchiveReader implements Closeable {
      * encoding for file names and scanning for unicode extra fields.
      *
      * @param f the archive.
-     * @param encoding the encoding to use for file names, use null for the UTF-8
-     *
-     * @throws IOException if an error occurs while reading the file.
-     */
-    public ZipArchiveReader(final File f, final String encoding) throws IOException {
-        this(f.toPath(), encoding);
-    }
-
-    /**
-     * Opens the given file for reading, assuming the specified
-     * encoding for file names and scanning for unicode extra fields.
-     *
-     * @param f the archive.
      * @param charset the charset to use for file names, use null for the UTF-8
      *
      * @throws IOException if an error occurs while reading the file.
@@ -236,20 +223,6 @@ public class ZipArchiveReader implements Closeable {
      */
     public ZipArchiveReader(final Path p) throws IOException {
         this(p, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Opens the given file for reading, assuming the specified
-     * encoding for file names and scanning for unicode extra fields.
-     *
-     * @param p the archive.
-     * @param encoding the encoding to use for file names, use null for the UTF-8
-     *
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.21.0.1
-     */
-    public ZipArchiveReader(final Path p, final String encoding) throws IOException {
-        this(p, Charsets.toCharset(encoding), true);
     }
 
     /**
@@ -329,25 +302,6 @@ public class ZipArchiveReader implements Closeable {
     public ZipArchiveReader(final SeekableByteChannel channel)
             throws IOException {
         this(channel, StandardCharsets.UTF_8, true);
-    }
-
-    /**
-     * Opens the given channel for reading, assuming the specified
-     * encoding for file names.
-     *
-     * <p>{@link
-     * kala.compress.utils.SeekableInMemoryByteChannel}
-     * allows you to read from an in-memory archive.</p>
-     *
-     * @param channel the archive.
-     * @param encoding the encoding to use for file names, use null for the UTF-8
-     *
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.13
-     */
-    public ZipArchiveReader(final SeekableByteChannel channel, final String encoding)
-            throws IOException {
-        this(channel, Charsets.toCharset(encoding), true);
     }
 
     /**
@@ -451,14 +405,6 @@ public class ZipArchiveReader implements Closeable {
             }
         }
     }
-
-    /**
-     * The encoding to use for file names and the file comment.
-     */
-    public String getEncoding() {
-        return charset.name();
-    }
-
 
     /**
      * The charset to use for file names and the file comment.

@@ -70,7 +70,7 @@ public final class Lister {
                 }
             }
         } else {
-            try (ZipArchiveReader zf = new ZipArchiveReader(f, cl.encoding)) {
+            try (ZipArchiveReader zf = new ZipArchiveReader(f, Charsets.toCharset(cl.encoding))) {
                 for (final Enumeration<ZipArchiveEntry> entries = zf.getEntries();
                      entries.hasMoreElements(); ) {
                     final ZipArchiveEntry ze = entries.nextElement();

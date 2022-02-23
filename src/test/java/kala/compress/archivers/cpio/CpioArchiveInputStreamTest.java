@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import kala.compress.AbstractTestCase;
@@ -73,7 +74,7 @@ public class CpioArchiveInputStreamTest extends AbstractTestCase {
     public void testCpioUnarchiveMultibyteCharName() throws Exception {
         int count = 0;
         try (final CpioArchiveInputStream in = new CpioArchiveInputStream(
-            Files.newInputStream(getFile("COMPRESS-459.cpio").toPath()), "UTF-8")) {
+            Files.newInputStream(getFile("COMPRESS-459.cpio").toPath()), StandardCharsets.UTF_8)) {
             CpioArchiveEntry entry = null;
 
             while ((entry = (CpioArchiveEntry) in.getNextEntry()) != null) {

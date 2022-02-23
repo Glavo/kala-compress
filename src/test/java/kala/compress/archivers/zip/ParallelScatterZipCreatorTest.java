@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public class ParallelScatterZipCreatorTest {
             throws Exception {
         result = File.createTempFile("parallelScatterGather1", "");
         final ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result);
-        zos.setEncoding("UTF-8");
+        zos.setCharset(StandardCharsets.UTF_8);
         final ParallelScatterZipCreator zipCreator = new ParallelScatterZipCreator();
 
         final Map<String, byte[]> entries = writeEntries(zipCreator);
@@ -124,7 +125,7 @@ public class ParallelScatterZipCreatorTest {
 
     private void callableApi(final CallableConsumerSupplier consumerSupplier, final int compressionLevel) throws Exception {
         final ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result);
-        zos.setEncoding("UTF-8");
+        zos.setCharset(StandardCharsets.UTF_8);
         final ExecutorService es = Executors.newFixedThreadPool(1);
 
         final ScatterGatherBackingStoreSupplier supp = () -> new FileBasedScatterGatherBackingStore(tmp = File.createTempFile("parallelscatter", "n1"));
@@ -142,7 +143,7 @@ public class ParallelScatterZipCreatorTest {
 
     private void callableApiWithTestFiles(final CallableConsumerSupplier consumerSupplier, final int compressionLevel) throws Exception {
         final ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result);
-        zos.setEncoding("UTF-8");
+        zos.setCharset(StandardCharsets.UTF_8);
         final ExecutorService es = Executors.newFixedThreadPool(1);
 
         final ScatterGatherBackingStoreSupplier supp = () -> new FileBasedScatterGatherBackingStore(tmp = File.createTempFile("parallelscatter", "n1"));

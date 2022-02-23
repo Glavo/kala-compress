@@ -48,17 +48,6 @@ public class JarArchiveOutputStream extends ZipArchiveOutputStream {
      * Create and instance that wraps the output stream using the provided encoding.
      *
      * @param out the output stream to wrap
-     * @param encoding the encoding to use. Use null for the UTF-8
-     * @since 1.10
-     */
-    public JarArchiveOutputStream(final OutputStream out, final String encoding) {
-        super(out, Charsets.toCharset(encoding));
-    }
-
-    /**
-     * Create and instance that wraps the output stream using the provided encoding.
-     *
-     * @param out the output stream to wrap
      * @param charset the charset to use. Use null for the UTF-8.
      * @since 1.21.0.1
      */

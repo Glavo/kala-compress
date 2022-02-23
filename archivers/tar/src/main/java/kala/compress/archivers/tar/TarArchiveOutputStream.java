@@ -138,19 +138,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
      * <p>Uses a block size of 512 bytes.</p>
      *
      * @param os the output stream to use
-     * @param encoding name of the encoding to use for file names
-     * @since 1.4
-     */
-    public TarArchiveOutputStream(final OutputStream os, final String encoding) {
-        this(os, BLOCK_SIZE_UNSPECIFIED, encoding);
-    }
-
-    /**
-     * Constructor for TarArchiveOutputStream.
-     *
-     * <p>Uses a block size of 512 bytes.</p>
-     *
-     * @param os the output stream to use
      * @param charset name of the charset to use for file names
      * @since 1.21.0.1
      */
@@ -166,18 +153,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream {
      */
     public TarArchiveOutputStream(final OutputStream os, final int blockSize) {
         this(os, blockSize, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Constructor for TarArchiveOutputStream.
-     *
-     * @param os the output stream to use
-     * @param blockSize the block size to use. Must be a multiple of 512 bytes.
-     * @param encoding name of the encoding to use for file names
-     * @since 1.4
-     */
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final String encoding) {
-        this(os, blockSize, Charsets.toCharset(encoding));
     }
 
     /**

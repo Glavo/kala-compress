@@ -277,7 +277,7 @@ public class UTF8ZipFilesTest extends AbstractTestCase {
         ZipArchiveOutputStream zos = null;
         try {
             zos = new ZipArchiveOutputStream(file);
-            zos.setEncoding(charset.name());
+            zos.setCharset(charset);
             zos.setUseLanguageEncodingFlag(withEFS);
             zos.setCreateUnicodeExtraFields(withExplicitUnicodeExtra ?
                                             ZipArchiveOutputStream

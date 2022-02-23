@@ -69,17 +69,6 @@ public class ArjArchiveInputStream extends ArchiveInputStream {
     /**
      * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in.
      * @param inputStream the underlying stream, whose ownership is taken
-     * @param charsetName the charset used for file names and comments
-     *   in the archive. May be {@code null} to use the UTF-8.
-     * @throws ArchiveException if an exception occurs while reading
-     */
-    public ArjArchiveInputStream(final InputStream inputStream, final String charsetName) throws ArchiveException {
-        this(inputStream, Charsets.toCharset(charsetName));
-    }
-
-    /**
-     * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in.
-     * @param inputStream the underlying stream, whose ownership is taken
      * @param charset the charset used for file names and comments
      *   in the archive. May be {@code null} to use the UTF-8.
      * @throws ArchiveException if an exception occurs while reading

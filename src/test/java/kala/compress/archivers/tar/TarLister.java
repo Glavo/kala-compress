@@ -18,6 +18,8 @@
 
 package kala.compress.archivers.tar;
 
+import kala.compress.utils.Charsets;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -46,7 +48,7 @@ public final class TarLister {
         final InputStream fis = new BufferedInputStream(Files.newInputStream(f.toPath()));
         final TarArchiveInputStream ais;
         if (args.length > 1) {
-            ais = new TarArchiveInputStream(fis, args[1]);
+            ais = new TarArchiveInputStream(fis, Charsets.toCharset(args[1]));
         } else {
             ais = new TarArchiveInputStream(fis);
         }

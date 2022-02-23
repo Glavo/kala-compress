@@ -46,17 +46,6 @@ public class JarArchiveInputStream extends ZipArchiveInputStream {
      * Creates an instance from the input stream using the specified encoding.
      *
      * @param inputStream the input stream to wrap
-     * @param encoding the encoding to use
-     * @since 1.10
-     */
-    public JarArchiveInputStream(final InputStream inputStream, final String encoding) {
-        super(inputStream, encoding);
-    }
-
-    /**
-     * Creates an instance from the input stream using the specified encoding.
-     *
-     * @param inputStream the input stream to wrap
      * @param charset the encoding to use
      * @since 1.21.0.1
      */

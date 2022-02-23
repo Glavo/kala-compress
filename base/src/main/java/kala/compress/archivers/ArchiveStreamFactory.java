@@ -279,18 +279,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * Create an instance using the archiver default encoding.
      */
     public ArchiveStreamFactory() {
-        this((Charset) null);
-    }
-
-    /**
-     * Create an instance using the specified encoding.
-     *
-     * @param encoding the encoding to be used.
-     *
-     * @since 1.10
-     */
-    public ArchiveStreamFactory(final String encoding) {
-        this.entryCharset = encoding == null ? null : Charsets.toCharset(encoding);
+        this(null);
     }
 
     /**

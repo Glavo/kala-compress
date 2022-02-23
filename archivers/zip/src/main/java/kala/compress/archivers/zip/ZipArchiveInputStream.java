@@ -83,9 +83,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
     /** The charset to use for file names and the file comment. */
     private final Charset charset;
 
-    // the provided encoding (for unit tests)
-    final String encoding;
-
     /** Whether to look for and use Unicode extra fields. */
     private final boolean useUnicodeExtraFields;
 
@@ -191,16 +188,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
     /**
      * Create an instance using the specified encoding
      * @param inputStream the stream to wrap
-     * @param encoding the encoding to use for file names, use null for UTF-8
-     * @since 1.5
-     */
-    public ZipArchiveInputStream(final InputStream inputStream, final String encoding) {
-        this(inputStream, Charsets.toCharset(encoding), true);
-    }
-
-    /**
-     * Create an instance using the specified encoding
-     * @param inputStream the stream to wrap
      * @param charset the charset to use for file names, use null for UTF-8
      * @since 1.21.0.1
      */
@@ -256,8 +243,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream implements InputSt
                                  final boolean useUnicodeExtraFields,
                                  final boolean allowStoredEntriesWithDataDescriptor,
                                  final boolean skipSplitSig) {
-        this.encoding = charset.toString();
-        this.charset = Charsets.toCharset(encoding);
+        this.charset = Charsets.toCharset(charset);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         in = new PushbackInputStream(inputStream, buf.capacity());
         this.allowStoredEntriesWithDataDescriptor =

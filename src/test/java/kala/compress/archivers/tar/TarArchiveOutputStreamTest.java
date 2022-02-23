@@ -212,7 +212,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
 
     private byte[] writePaxHeader(final Map<String, String> m) throws Exception {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.writePaxHeaders(new TarArchiveEntry("x"), "foo", m);
 
         // add a dummy entry so data gets written
@@ -235,7 +235,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
             new TarArchiveEntry(n);
         t.setSize(10 * 1024);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
         tos.putArchiveEntry(t);
         tos.write(new byte[10 * 1024]);
@@ -398,7 +398,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
         final TarArchiveEntry t = new TarArchiveEntry(n);
         t.setSize(10 * 1024);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.setLongFileMode(mode);
         tos.putArchiveEntry(t);
         tos.write(new byte[10 * 1024]);
@@ -421,7 +421,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
         try {
             final TarArchiveEntry t = new TarArchiveEntry(n);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+            final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
             tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_ERROR);
             tos.putArchiveEntry(t);
             tos.closeArchiveEntry();
@@ -440,7 +440,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
             + "01234567890123456789012345678901234567890123456789/";
         final TarArchiveEntry t = new TarArchiveEntry(n);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_TRUNCATE);
         tos.putArchiveEntry(t);
         tos.closeArchiveEntry();
@@ -476,7 +476,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
             + "01234567890123456789012345678901234567890123456789/";
         final TarArchiveEntry t = new TarArchiveEntry(n);
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.setLongFileMode(mode);
         tos.putArchiveEntry(t);
         tos.closeArchiveEntry();
@@ -547,7 +547,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
 
         try {
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+            final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
             tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_ERROR);
             tos.putArchiveEntry(entry);
             tos.closeArchiveEntry();
@@ -568,7 +568,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
         entry.setLinkName(linkname);
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_TRUNCATE);
         tos.putArchiveEntry(entry);
         tos.closeArchiveEntry();
@@ -608,7 +608,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
         entry.setLinkName(linkname);
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, StandardCharsets.US_ASCII);
         tos.setLongFileMode(mode);
         tos.putArchiveEntry(entry);
         tos.closeArchiveEntry();
@@ -766,7 +766,7 @@ public class TarArchiveOutputStreamTest extends AbstractTestCase {
                 + "01234567890123456789012345678901234567890123456789"
                 + "01234567890123456789012345678901234567890123456789";
         final TarArchiveEntry t = new TarArchiveEntry(n);
-        final TarArchiveOutputStream tos = new TarArchiveOutputStream(new ByteArrayOutputStream(), "ASCII");
+        final TarArchiveOutputStream tos = new TarArchiveOutputStream(new ByteArrayOutputStream(), StandardCharsets.US_ASCII);
         tos.putArchiveEntry(t);
     }
 

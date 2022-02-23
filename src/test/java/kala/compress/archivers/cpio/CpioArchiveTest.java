@@ -20,6 +20,7 @@ package kala.compress.archivers.cpio;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import kala.compress.utils.IOUtils;
@@ -49,8 +50,7 @@ public class CpioArchiveTest {
     @Test
     public void utf18RoundtripTest() throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (CpioArchiveOutputStream os = new CpioArchiveOutputStream(baos, format, CpioConstants.BLOCK_SIZE,
-                "UTF-16LE")) {
+            try (CpioArchiveOutputStream os = new CpioArchiveOutputStream(baos, format, CpioConstants.BLOCK_SIZE, StandardCharsets.UTF_16LE)) {
                 final CpioArchiveEntry entry = new CpioArchiveEntry(format, "T\u00e4st.txt", 4);
                 if (format == CpioConstants.FORMAT_NEW_CRC) {
                     entry.setChksum(10);
@@ -61,7 +61,7 @@ public class CpioArchiveTest {
             }
             baos.close();
             try (ByteArrayInputStream bin = new ByteArrayInputStream(baos.toByteArray());
-                 CpioArchiveInputStream in = new CpioArchiveInputStream(bin, "UTF-16LE")) {
+                 CpioArchiveInputStream in = new CpioArchiveInputStream(bin, StandardCharsets.UTF_16LE)) {
                 final CpioArchiveEntry entry = (CpioArchiveEntry) in.getNextEntry();
                 Assert.assertNotNull(entry);
                 Assert.assertEquals("T\u00e4st.txt", entry.getName());

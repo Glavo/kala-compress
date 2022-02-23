@@ -92,17 +92,6 @@ public class TarArchiveReader implements Closeable {
      * Constructor for TarArchiveReader.
      *
      * @param content  the content to use
-     * @param encoding the encoding to use
-     * @throws IOException when reading the tar archive fails
-     */
-    public TarArchiveReader(final byte[] content, final String encoding) throws IOException {
-        this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
-    }
-
-    /**
-     * Constructor for TarArchiveReader.
-     *
-     * @param content  the content to use
      * @param charset  the charset to use
      * @throws IOException when reading the tar archive fails
      * @since 1.21.0.1
@@ -138,17 +127,6 @@ public class TarArchiveReader implements Closeable {
      * Constructor for TarArchiveReader.
      *
      * @param archive  the file of the archive to use
-     * @param encoding the encoding to use
-     * @throws IOException when reading the tar archive fails
-     */
-    public TarArchiveReader(final File archive, final String encoding) throws IOException {
-        this(archive.toPath(), encoding);
-    }
-
-    /**
-     * Constructor for TarArchiveReader.
-     *
-     * @param archive  the file of the archive to use
      * @param charset  the charset to use
      * @throws IOException when reading the tar archive fails
      * @since 1.21.0.1
@@ -178,17 +156,6 @@ public class TarArchiveReader implements Closeable {
      */
     public TarArchiveReader(final Path archivePath) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, false);
-    }
-
-    /**
-     * Constructor for TarArchiveReader.
-     *
-     * @param archivePath the path of the archive to use
-     * @param encoding    the encoding to use
-     * @throws IOException when reading the tar archive fails
-     */
-    public TarArchiveReader(final Path archivePath, final String encoding) throws IOException {
-        this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
     /**
@@ -236,22 +203,6 @@ public class TarArchiveReader implements Closeable {
      */
     public TarArchiveReader(final SeekableByteChannel content, Charset charset) throws IOException {
         this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
-    }
-
-    /**
-     * Constructor for TarArchiveReader.
-     *
-     * @param archive    the seekable byte channel to use
-     * @param blockSize  the blocks size to use
-     * @param recordSize the record size to use
-     * @param encoding   the encoding to use
-     * @param lenient    when set to true illegal values for group/userid, mode, device numbers and timestamp will be
-     *                   ignored and the fields set to {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an
-     *                   exception instead.
-     * @throws IOException when reading the tar archive fails
-     */
-    public TarArchiveReader(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient) throws IOException {
-        this(archive, blockSize, recordSize, Charsets.toCharset(encoding), lenient);
     }
 
     /**

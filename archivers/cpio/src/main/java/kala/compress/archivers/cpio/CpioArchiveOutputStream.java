@@ -139,26 +139,6 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      *            The format of the stream
      * @param blockSize
      *            The block size of the archive.
-     * @param encoding
-     *            The encoding of file names to write - use null for the UTF-8.
-     *
-     * @since 1.6
-     */
-    public CpioArchiveOutputStream(final OutputStream out, final short format,
-                                   final int blockSize, final String encoding) {
-        this(out, format, blockSize, Charsets.toCharset(encoding));
-    }
-
-    /**
-     * Construct the cpio output stream with a specified format using
-     * ASCII as the file name encoding.
-     *
-     * @param out
-     *            The cpio stream
-     * @param format
-     *            The format of the stream
-     * @param blockSize
-     *            The block size of the archive.
      * @param charset
      *            The charset of file names to write - use null for the UTF-8.
      *
@@ -191,20 +171,6 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream implements
      */
     public CpioArchiveOutputStream(final OutputStream out) {
         this(out, FORMAT_NEW);
-    }
-
-    /**
-     * Construct the cpio output stream. The format for this CPIO stream is the
-     * "new" format.
-     *
-     * @param out
-     *            The cpio stream
-     * @param encoding
-     *            The encoding of file names to write - use null for the UTF-8.
-     * @since 1.6
-     */
-    public CpioArchiveOutputStream(final OutputStream out, final String encoding) {
-        this(out, FORMAT_NEW, BLOCK_SIZE, encoding);
     }
 
     /**

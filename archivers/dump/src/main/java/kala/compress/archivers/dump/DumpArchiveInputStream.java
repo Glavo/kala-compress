@@ -93,18 +93,6 @@ public class DumpArchiveInputStream extends ArchiveInputStream {
      *
      * @param is stream to read from
      * @param encoding the encoding to use for file names, use null for the UTF-8
-     * @since 1.6
-     * @throws ArchiveException on error
-     */
-    public DumpArchiveInputStream(final InputStream is, final String encoding) throws ArchiveException {
-        this(is, Charsets.toCharset(encoding));
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param is stream to read from
-     * @param encoding the encoding to use for file names, use null for the UTF-8
      * @throws ArchiveException on error
      * @since 1.21.0.1
      */
