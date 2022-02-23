@@ -6,4 +6,5 @@ module kala.compress {
     requires transitive kala.compress.changes;
     requires transitive kala.compress.archivers;
     requires transitive kala.compress.compressors;
+    requires transitive kala.compress.filesystems;
 }

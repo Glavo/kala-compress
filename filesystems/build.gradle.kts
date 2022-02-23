@@ -1,12 +1,7 @@
 subprojects {
-    project(":filesystems").dependencies.api(this)
+    project(":kala-compress-filesystems").dependencies.api(this)
 
     dependencies {
-        api(project(":base"))
-
-        if (name != "base") {
-            api(project(":filesystems:base"))
-        }
+        api(project(":kala-compress-base"))
     }
-
 }

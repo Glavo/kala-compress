@@ -1,9 +1,4 @@
 dependencies {
-    implementation(project(":base"))
-    implementation(project(":archivers:zip"))
-}
-
-(publishing.publications["maven"] as MavenPublication).artifactId = "kala-compress-changes"
-tasks.withType<Jar> {
-    archiveBaseName.set("kala-compress-changes")
+    implementation(project(":kala-compress-base"))
+    implementation(project(":kala-compress-archivers:kala-compress-archivers-zip"))
 }

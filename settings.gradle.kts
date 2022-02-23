@@ -2,24 +2,38 @@
 
 rootProject.name = "kala-compress"
 
-include("base", "changes")
+include("base")
+project(":base").name = "kala-compress-base"
+
+include("changes")
+project(":changes").name = "kala-compress-changes"
+
+include("archivers")
+project(":archivers").name = "kala-compress-archivers"
 
 val archivers = listOf(
     "ar", "arj", "cpio", "dump", "sevenz", "tar", "zip"
 )
 for (archiver in archivers) {
-    include(":archivers:$archiver")
+    include(":kala-compress-archivers:$archiver")
+    project(":kala-compress-archivers:$archiver").name = "kala-compress-archivers-$archiver"
 }
 
+include("compressors")
+project(":compressors").name = "kala-compress-compressors"
 
 val compressors = listOf(
     "brotli", "bzip2", "deflate", "deflate64", "gzip", "lz4", "lzma", "pack200", "snappy", "xz", "z", "zstandard"
 )
 
 for (compressor in compressors) {
-    include(":compressors:$compressor")
+    include(":kala-compress-compressors:$compressor")
+    project(":kala-compress-compressors:$compressor").name = "kala-compress-compressors-$compressor"
 }
 
 
 include("filesystems")
-include(":filesystems:base")
+project(":filesystems").name = "kala-compress-filesystems"
+
+include(":kala-compress-filesystems:base")
+project(":kala-compress-filesystems:base").name = "kala-compress-filesystems-base"
