@@ -28,7 +28,6 @@ import java.util.Random;
 
 import kala.compress.AbstractTestCase;
 import kala.compress.compressors.gzip.GzipCompressorInputStream;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -67,7 +66,7 @@ public class BigFilesIT extends AbstractTestCase {
             Files.copy(gzin, output, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        try (final TarFile tarFile = new TarFile(output)) {
+        try (final TarArchiveReader tarFile = new TarArchiveReader(output)) {
             List<TarArchiveEntry> entries = tarFile.getEntries();
             assertEquals(1, entries.size());
             assertNotNull(entries.get(0));

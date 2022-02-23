@@ -37,10 +37,10 @@ import java.util.Map;
 import kala.compress.utils.*;
 
 /**
- * The TarFile provides random access to UNIX archives.
+ * The TarArchiveReader provides random access to UNIX archives.
  * @since 1.21
  */
-public class TarFile implements Closeable {
+public class TarArchiveReader implements Closeable {
 
     private static final int SMALL_BUFFER_SIZE = 256;
 
@@ -79,40 +79,40 @@ public class TarFile implements Closeable {
     private final Map<String, List<InputStream>> sparseInputStreams = new HashMap<>();
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param content the content to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final byte[] content) throws IOException {
+    public TarArchiveReader(final byte[] content) throws IOException {
         this(new SeekableInMemoryByteChannel(content));
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param content  the content to use
      * @param encoding the encoding to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final byte[] content, final String encoding) throws IOException {
+    public TarArchiveReader(final byte[] content, final String encoding) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param content  the content to use
      * @param charset  the charset to use
      * @throws IOException when reading the tar archive fails
      * @since 1.21.0.1
      */
-    public TarFile(final byte[] content, final Charset charset) throws IOException {
+    public TarArchiveReader(final byte[] content, final Charset charset) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param content the content to use
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
@@ -120,45 +120,45 @@ public class TarFile implements Closeable {
      *                exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final byte[] content, final boolean lenient) throws IOException {
+    public TarArchiveReader(final byte[] content, final boolean lenient) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, lenient);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archive the file of the archive to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final File archive) throws IOException {
+    public TarArchiveReader(final File archive) throws IOException {
         this(archive.toPath());
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archive  the file of the archive to use
      * @param encoding the encoding to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final File archive, final String encoding) throws IOException {
+    public TarArchiveReader(final File archive, final String encoding) throws IOException {
         this(archive.toPath(), encoding);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archive  the file of the archive to use
      * @param charset  the charset to use
      * @throws IOException when reading the tar archive fails
      * @since 1.21.0.1
      */
-    public TarFile(final File archive, final Charset charset) throws IOException {
+    public TarArchiveReader(final File archive, final Charset charset) throws IOException {
         this(archive.toPath(), charset);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archive the file of the archive to use
      * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be
@@ -166,45 +166,45 @@ public class TarFile implements Closeable {
      *                exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final File archive, final boolean lenient) throws IOException {
+    public TarArchiveReader(final File archive, final boolean lenient) throws IOException {
         this(archive.toPath(), lenient);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archivePath the path of the archive to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final Path archivePath) throws IOException {
+    public TarArchiveReader(final Path archivePath) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archivePath the path of the archive to use
      * @param encoding    the encoding to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final Path archivePath, final String encoding) throws IOException {
+    public TarArchiveReader(final Path archivePath, final String encoding) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archivePath the path of the archive to use
      * @param charset     the charset to use
      * @throws IOException when reading the tar archive fails
      * @since 1.21.0.1
      */
-    public TarFile(final Path archivePath, final Charset charset) throws IOException {
+    public TarArchiveReader(final Path archivePath, final Charset charset) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archivePath the path of the archive to use
      * @param lenient     when set to true illegal values for group/userid, mode, device numbers and timestamp will be
@@ -212,34 +212,34 @@ public class TarFile implements Closeable {
      *                    exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final Path archivePath, final boolean lenient) throws IOException {
+    public TarArchiveReader(final Path archivePath, final boolean lenient) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, lenient);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param content the content to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final SeekableByteChannel content) throws IOException {
+    public TarArchiveReader(final SeekableByteChannel content) throws IOException {
         this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, StandardCharsets.UTF_8, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param content the content to use
      * @param charset the charset to use
      * @throws IOException when reading the tar archive fails
      * @since 1.21.0.1
      */
-    public TarFile(final SeekableByteChannel content, Charset charset) throws IOException {
+    public TarArchiveReader(final SeekableByteChannel content, Charset charset) throws IOException {
         this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, charset, false);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archive    the seekable byte channel to use
      * @param blockSize  the blocks size to use
@@ -250,12 +250,12 @@ public class TarFile implements Closeable {
      *                   exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient) throws IOException {
+    public TarArchiveReader(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient) throws IOException {
         this(archive, blockSize, recordSize, Charsets.toCharset(encoding), lenient);
     }
 
     /**
-     * Constructor for TarFile.
+     * Constructor for TarArchiveReader.
      *
      * @param archive    the seekable byte channel to use
      * @param blockSize  the blocks size to use
@@ -266,7 +266,7 @@ public class TarFile implements Closeable {
      *                   exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset charset, final boolean lenient) throws IOException {
+    public TarArchiveReader(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset charset, final boolean lenient) throws IOException {
         this.archive = archive;
         this.hasHitEOF = false;
         this.charset = Charsets.toCharset(charset);
@@ -674,7 +674,7 @@ public class TarFile implements Closeable {
     }
 
     /**
-     * Get all TAR Archive Entries from the TarFile
+     * Get all TAR Archive Entries from the TarArchiveReader
      *
      * @return All entries from the tar file
      */
