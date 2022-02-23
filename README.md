@@ -63,6 +63,17 @@ Since `File` is no longer used internally, Kala Compress fully supports `Path`s 
 
 (TODO: Provide `FileSystem` implementations for each archivers)
 
+### Rename
+
+`ZipFile` has been renamed to `ZipArchiveReader`.
+
+`TarFile` has been renamed to `TarArchiveReader`.
+
+`SevenZFile` and `SevenZOutputFile` has been renamed to `SevenZArchiveReader` and `SevenZArchiveWriter`.
+
+The reason for this is that I want to reserve names like `[Archive]File` for a more full-featured support class in the future.
+It should be able to support both reading and writing archives, adding or deleting entries, etc.
+
 ### Deprecation and removal
 
 The deprecated features in Apache Commons Compress 1.21 have all been removed.
