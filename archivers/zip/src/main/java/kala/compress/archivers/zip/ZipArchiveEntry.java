@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -221,14 +222,8 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
      * @param inputFile file to create the entry from
      * @param entryName name of the entry
      */
-    public ZipArchiveEntry(final File inputFile, final String entryName) {
-        this(inputFile.isDirectory() && !entryName.endsWith("/") ?
-             entryName + "/" : entryName);
-        if (inputFile.isFile()){
-            setSize(inputFile.length());
-        }
-        setTime(inputFile.lastModified());
-        // TODO are there any other fields we can set here?
+    public ZipArchiveEntry(final File inputFile, final String entryName) throws IOException {
+        this(inputFile.toPath(), entryName);
     }
 
     /**
@@ -246,12 +241,14 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
      * @since 1.21
      */
     public ZipArchiveEntry(final Path inputPath, final String entryName, final LinkOption... options) throws IOException {
-        this(Files.isDirectory(inputPath, options) && !entryName.endsWith("/") ?
-             entryName + "/" : entryName);
-        if (Files.isRegularFile(inputPath, options)){
+        this();
+        BasicFileAttributes attributes = Files.readAttributes(inputPath, BasicFileAttributes.class, options);
+
+        setName(attributes.isDirectory() && !entryName.endsWith("/") ? entryName + "/" : entryName);
+        if (attributes.isRegularFile()){
             setSize(Files.size(inputPath));
         }
-        setTime(Files.getLastModifiedTime(inputPath, options));
+        setTime(attributes.lastModifiedTime());
         // TODO are there any other fields we can set here?
     }
 
@@ -534,7 +531,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
 
     private ZipExtraField[] getParseableExtraFields() {
         final ZipExtraField[] parseableExtraFields = getParseableExtraFieldsNoCopy();
-        return (parseableExtraFields == extraFields) ? copyOf(parseableExtraFields, parseableExtraFields.length)
+        return (parseableExtraFields == extraFields) ? Arrays.copyOf(parseableExtraFields, parseableExtraFields.length)
             : parseableExtraFields;
     }
 
@@ -550,7 +547,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
     }
 
     private ZipExtraField[] getMergedFields() {
-        final ZipExtraField[] zipExtraFields = copyOf(extraFields, extraFields.length + 1);
+        final ZipExtraField[] zipExtraFields = Arrays.copyOf(extraFields, extraFields.length + 1);
         zipExtraFields[extraFields.length] = unparseableExtra;
         return zipExtraFields;
     }
@@ -561,7 +558,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
 
     private ZipExtraField[] getAllExtraFields() {
         final ZipExtraField[] allExtraFieldsNoCopy = getAllExtraFieldsNoCopy();
-        return (allExtraFieldsNoCopy == extraFields) ? copyOf(allExtraFieldsNoCopy, allExtraFieldsNoCopy.length)
+        return (allExtraFieldsNoCopy == extraFields) ? Arrays.copyOf(allExtraFieldsNoCopy, allExtraFieldsNoCopy.length)
             : allExtraFieldsNoCopy;
     }
 
@@ -601,7 +598,7 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
                 if (getExtraField(ze.getHeaderId()) != null) {
                     removeExtraField(ze.getHeaderId());
                 }
-                final ZipExtraField[] zipExtraFields = copyOf(extraFields, extraFields.length + 1);
+                final ZipExtraField[] zipExtraFields = Arrays.copyOf(extraFields, extraFields.length + 1);
                 zipExtraFields[zipExtraFields.length - 1] = ze;
                 extraFields = zipExtraFields;
             }
@@ -1130,12 +1127,6 @@ public class ZipArchiveEntry extends java.util.zip.ZipEntry
      */
     public void setDiskNumberStart(final long diskNumberStart) {
         this.diskNumberStart = diskNumberStart;
-    }
-
-    private ZipExtraField[] copyOf(final ZipExtraField[] src, final int length) {
-        final ZipExtraField[] cpy = new ZipExtraField[length];
-        System.arraycopy(src, 0, cpy, 0, Math.min(src.length, length));
-        return cpy;
     }
 
     /**
