@@ -1,5 +1,6 @@
 package kala.compress.filesystems;
 
+import kala.compress.filesystems.utils.StringArrayUtils;
 import kala.compress.filesystems.utils.glob.GlobPattern;
 import kala.compress.filesystems.utils.glob.MatchingEngine;
 
@@ -8,12 +9,18 @@ import java.nio.file.*;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 public abstract class ArchiveFileSystem extends FileSystem {
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
     protected final Path archiveFilePath;
 
     protected final ArchiveFileSystemPath root = createPath(true, new String[0]);
+
+
 
     protected ArchiveFileSystem(Path archiveFilePath) {
         this.archiveFilePath = archiveFilePath;
@@ -29,6 +36,22 @@ public abstract class ArchiveFileSystem extends FileSystem {
 
     protected void verifyPathElement(String name) throws InvalidPathException {
         // do nothing
+    }
+
+    protected void beginRead() {
+        lock.readLock().lock();
+    }
+
+    protected void endRead() {
+        lock.readLock().unlock();
+    }
+
+    protected void beginWrite() {
+        lock.writeLock().lock();
+    }
+
+    protected void endWrite() {
+        lock.writeLock().unlock();
     }
 
     @Override
@@ -49,6 +72,45 @@ public abstract class ArchiveFileSystem extends FileSystem {
     @Override
     public Iterable<Path> getRootDirectories() {
         return Collections.singletonList(root);
+    }
+
+    @Override
+    public Iterable<FileStore> getFileStores() {
+        throw new AssertionError(); // TODO
+    }
+
+    @Override
+    public Path getPath(String first, String... more) {
+        String fullPath;
+
+        if (more.length == 0) {
+            fullPath = first;
+        } else {
+            StringBuilder builder = new StringBuilder();
+            builder.append(first);
+            for (String path : more) {
+                if (path.length() > 0) {
+                    if (builder.length() > 0) {
+                        builder.append('/');
+                    }
+                    builder.append(path);
+                }
+            }
+            fullPath = builder.toString();
+        }
+
+
+        if (fullPath.isEmpty()) {
+            return createPath(false, StringArrayUtils.single(""));
+        }
+
+        boolean isAbsolute = fullPath.charAt(0) == '/';
+        String[] elements = fullPath.split("/");
+        for (String element : elements) {
+            verifyPathElement(element);
+        }
+
+        return createPath(isAbsolute, elements);
     }
 
     @Override

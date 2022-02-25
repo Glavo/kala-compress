@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
 
 public abstract class ArchiveFileSystemPath implements Path {
     protected final boolean isAbsolute;
@@ -37,6 +38,10 @@ public abstract class ArchiveFileSystemPath implements Path {
         } catch (UnsupportedEncodingException e) {
             throw new InternalError(e);
         }
+    }
+
+    protected boolean isEmpty() {
+        return !isAbsolute && elements.length == 1 && elements[0].isEmpty();
     }
 
     protected abstract ArchiveFileSystem getArchiveFileSystem();
@@ -188,6 +193,12 @@ public abstract class ArchiveFileSystemPath implements Path {
             return otherPath;
         }
 
+        if (this.isEmpty()) {
+            return otherPath;
+        } else if (otherPath.isEmpty()) {
+            return this;
+        }
+
         return getArchiveFileSystem().createPath(isAbsolute, StringArrayUtils.concat(this.elements, otherPath.elements));
     }
 
@@ -198,8 +209,7 @@ public abstract class ArchiveFileSystemPath implements Path {
 
     @Override
     public Path resolveSibling(Path other) {
-        if (other == null)
-            throw new NullPointerException();
+        Objects.requireNonNull(other);
         Path parent = getParent();
         return (parent == null) ? other : parent.resolve(other);
     }
@@ -217,6 +227,10 @@ public abstract class ArchiveFileSystemPath implements Path {
             throw new IllegalArgumentException("'other' is different type of Path");
         }
 
+        if (this.isEmpty()) {
+            return otherPath;
+        }
+
         if (!otherPath.startsWith(this)) {
             throw new IllegalArgumentException(); // '..' is not supported, so it cannot be implemented
         }
@@ -232,7 +246,7 @@ public abstract class ArchiveFileSystemPath implements Path {
     public URI toUri() {
         String scheme = getFileSystem().provider().getScheme();
         String archiveFile = getArchiveFileSystem().archiveFilePath.toUri().toString();
-        String path = encodePath(this.toString());
+        String path = encodePath(this.toAbsolutePath().toString());
 
         return URI.create(scheme + ":" + archiveFile + "!" + path);
     }
