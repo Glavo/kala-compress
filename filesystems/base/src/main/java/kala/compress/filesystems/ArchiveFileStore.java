@@ -34,8 +34,6 @@ public abstract class ArchiveFileStore extends FileStore {
         return isReadOnly() ? 0 : Files.getFileStore(getArchiveFileSystem().archiveFilePath).getUnallocatedSpace();
     }
 
-
-
     @Override
     public <V extends FileStoreAttributeView> V getFileStoreAttributeView(Class<V> type) {
         Objects.requireNonNull(type);

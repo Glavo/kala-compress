@@ -37,3 +37,12 @@ project(":filesystems").name = "kala-compress-filesystems"
 
 include(":kala-compress-filesystems:base")
 project(":kala-compress-filesystems:base").name = "kala-compress-filesystems-base"
+
+val filesystems = listOf(
+    "zip"
+)
+
+for (filesystem in filesystems) {
+    include(":kala-compress-filesystems:$filesystem")
+    project(":kala-compress-filesystems:$filesystem").name = "kala-compress-filesystems-$filesystem"
+}

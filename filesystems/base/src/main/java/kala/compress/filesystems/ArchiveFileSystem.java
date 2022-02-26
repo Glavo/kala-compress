@@ -20,8 +20,6 @@ public abstract class ArchiveFileSystem extends FileSystem {
 
     protected final ArchiveFileSystemPath root = createPath(true, new String[0]);
 
-
-
     protected ArchiveFileSystem(Path archiveFilePath) {
         this.archiveFilePath = archiveFilePath;
     }
