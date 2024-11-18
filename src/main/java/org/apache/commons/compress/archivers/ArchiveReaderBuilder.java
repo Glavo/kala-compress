@@ -53,24 +53,25 @@ public abstract class ArchiveReaderBuilder<R, B extends ArchiveReaderBuilder<R, 
         return path;
     }
 
+    /**
+     * Sets the Charset.
+     *
+     * @param charset the Charset, null resets to the default.
+     * @return {@code this} instance.
+     */
     public final B setCharset(final Charset charset) {
         this.charset = charset != null ? charset : DEFAULT_CHARSET;
         return asThis();
     }
 
-    public final B setCharset(final String charset) {
-        return setCharset(Charsets.toCharset(charset, DEFAULT_CHARSET));
-    }
-
     /**
-     * The actual channel, overrides any other input aspects like a File, Path, and so on.
+     * Sets the Charset.
      *
-     * @param seekableByteChannel The actual channel.
+     * @param charset the Charset, null resets to the default.
      * @return {@code this} instance.
      */
-    public final B setSeekableByteChannel(final SeekableByteChannel seekableByteChannel) {
-        this.seekableByteChannel = seekableByteChannel;
-        return asThis();
+    public final B setCharset(final String charset) {
+        return setCharset(Charsets.toCharset(charset, DEFAULT_CHARSET));
     }
 
     /**
@@ -84,37 +85,96 @@ public abstract class ArchiveReaderBuilder<R, B extends ArchiveReaderBuilder<R, 
         return asThis();
     }
 
+    /**
+     * Set the origin description.
+     *
+     * @param description the origin description, null resets to the default..
+     * @return {@code this} instance.
+     */
     public final B setOriginDescription(final String description) {
         this.originDescription = description;
         return asThis();
     }
 
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
+    public final B setSeekableByteChannel(final SeekableByteChannel origin) {
+        this.seekableByteChannel = origin;
+        return asThis();
+    }
+
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
     public final B setByteArray(final byte[] origin) {
         return setSeekableByteChannel(new SeekableInMemoryByteChannel(origin));
     }
 
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
     public final B setFile(final File origin) {
         this.path = origin.toPath();
         return asThis();
     }
 
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
     public final B setFile(final String origin) {
         return setFile(new File(origin));
     }
 
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
     public final B setPath(final Path origin) {
         this.path = origin;
         return asThis();
     }
 
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
     public final B setPath(final String origin) {
         return setPath(Paths.get(origin));
     }
 
+    /**
+     * Sets a new origin.
+     *
+     * @param origin the new origin.
+     * @return {@code this} instance.
+     */
     public final B setURI(final URI origin) {
         return setPath(Paths.get(origin));
     }
 
+    /**
+     * Gets the archive reader.
+     *
+     * @return a result.
+     * @throws IOException if an I/O error occurs.
+     */
     public abstract R get() throws IOException;
 
     /**
