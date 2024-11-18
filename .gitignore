@@ -1,0 +1,16 @@
+target
+.project
+.classpath
+.settings
+.idea
+.vscode
+*.iml
+*~
+/.externalToolBuilders/
+/maven-eclipse.xml
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
