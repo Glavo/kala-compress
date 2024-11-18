@@ -61,26 +61,6 @@ public final class ByteUtils {
     }
 
     /**
-     * {@link ByteSupplier} based on {@link InputStream}.
-     *
-     * @since 1.14
-     * @deprecated Unused
-     */
-    @Deprecated
-    public static class InputStreamByteSupplier implements ByteSupplier {
-        private final InputStream is;
-
-        public InputStreamByteSupplier(final InputStream is) {
-            this.is = is;
-        }
-
-        @Override
-        public int getAsByte() throws IOException {
-            return is.read();
-        }
-    }
-
-    /**
      * {@link ByteConsumer} based on {@link OutputStream}.
      *
      * @since 1.14
