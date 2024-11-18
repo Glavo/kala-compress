@@ -196,9 +196,8 @@ public class SevenZFile implements Closeable {
          *
          * @param defaultName the default name.
          * @return {@code this} instance.
-         * @deprecated Use {@link #setOriginDescription(String)}
+         * @see #setOriginDescription(String)
          */
-        @Deprecated
         public Builder setDefaultName(final String defaultName) {
             return setOriginDescription(defaultName);
         }

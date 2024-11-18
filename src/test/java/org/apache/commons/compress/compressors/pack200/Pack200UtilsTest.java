@@ -37,6 +37,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.utils.CloseShieldFilterInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
@@ -99,7 +100,7 @@ public final class Pack200UtilsTest extends AbstractTest {
             while (entry != null) {
                 if (in.canReadEntryData(entry)) {
                     @SuppressWarnings("resource")
-                    final CloseShieldInputStream wrap = CloseShieldInputStream.wrap(in);
+                    final CloseShieldFilterInputStream wrap = new CloseShieldFilterInputStream(in);
                     count += parseEntry(wrap);
                     entries++;
                 }

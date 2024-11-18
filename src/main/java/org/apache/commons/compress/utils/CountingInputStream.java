@@ -27,9 +27,7 @@ import java.io.InputStream;
  *
  * @since 1.3
  * @NotThreadSafe
- * @deprecated Use {@link org.apache.commons.io.input.CountingInputStream}.
  */
-@Deprecated
 public class CountingInputStream extends FilterInputStream {
     private long bytesRead;
 
