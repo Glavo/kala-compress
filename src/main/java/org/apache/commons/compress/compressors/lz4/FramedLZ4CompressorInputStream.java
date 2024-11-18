@@ -369,7 +369,7 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
             if (len < 0) {
                 throw new IOException("Found illegal skippable frame with negative size");
             }
-            final long skipped = org.apache.commons.io.IOUtils.skip(inputStream, len);
+            final long skipped = IOUtils.skip(inputStream, len);
             count(skipped);
             if (len != skipped) {
                 throw new IOException("Premature end of stream while skipping frame");

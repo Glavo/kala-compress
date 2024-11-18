@@ -24,6 +24,7 @@ import java.io.InputStream;
 import org.apache.commons.compress.MemoryLimitException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.InputStreamStatistics;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.tukaani.xz.SingleXZInputStream;
 import org.tukaani.xz.XZ;
@@ -157,7 +158,7 @@ public class XZCompressorInputStream extends CompressorInputStream implements In
     @Override
     public long skip(final long n) throws IOException {
         try {
-            return org.apache.commons.io.IOUtils.skip(in, n);
+            return IOUtils.skip(in, n);
         } catch (final org.tukaani.xz.MemoryLimitException e) {
             // convert to commons-compress MemoryLimtException
             throw new MemoryLimitException(e.getMemoryNeeded(), e.getMemoryLimit(), e);

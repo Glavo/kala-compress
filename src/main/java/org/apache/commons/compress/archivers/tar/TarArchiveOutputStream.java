@@ -18,8 +18,6 @@
  */
 package org.apache.commons.compress.archivers.tar;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,6 +42,8 @@ import org.apache.commons.compress.utils.TimeUtils;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.file.attribute.FileTimes;
 import org.apache.commons.io.output.CountingOutputStream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * The TarOutputStream writes a UNIX tar archive as an OutputStream. Methods are provided to put entries, and then write their contents by writing to this

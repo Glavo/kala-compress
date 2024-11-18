@@ -481,15 +481,6 @@ public class ZipFile implements Closeable {
     }
 
     /**
-     * Closes a ZIP file quietly; throwing no IOException, does nothing on null input.
-     *
-     * @param zipFile file to close, can be null
-     */
-    public static void closeQuietly(final ZipFile zipFile) {
-        org.apache.commons.io.IOUtils.closeQuietly(zipFile);
-    }
-
-    /**
      * Creates a new SeekableByteChannel for reading.
      *
      * @param path the path to the file to open or create
@@ -548,8 +539,8 @@ public class ZipFile implements Closeable {
                 return lowercase;
             }).collect(Collectors.toList()), openOptions);
         } catch (final Throwable ex) {
-            org.apache.commons.io.IOUtils.closeQuietly(channel);
-            channels.forEach(org.apache.commons.io.IOUtils::closeQuietly);
+            IOUtils.closeQuietly(channel);
+            channels.forEach(IOUtils::closeQuietly);
             throw ex;
         }
     }
@@ -876,7 +867,7 @@ public class ZipFile implements Closeable {
         } finally {
             this.closed = !success;
             if (!success && closeOnError) {
-                org.apache.commons.io.IOUtils.closeQuietly(archive);
+                IOUtils.closeQuietly(archive);
             }
         }
     }
@@ -1240,7 +1231,7 @@ public class ZipFile implements Closeable {
     public String getUnixSymlink(final ZipArchiveEntry entry) throws IOException {
         if (entry != null && entry.isUnixSymlink()) {
             try (InputStream in = getInputStream(entry)) {
-                return zipEncoding.decode(org.apache.commons.io.IOUtils.toByteArray(in));
+                return zipEncoding.decode(IOUtils.toByteArray(in));
             }
         }
         return null;

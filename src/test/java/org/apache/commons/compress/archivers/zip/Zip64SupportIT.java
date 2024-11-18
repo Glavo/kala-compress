@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.compress.AbstractTest;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.RandomAccessFileMode;
 import org.junit.jupiter.api.Test;
 
@@ -172,7 +173,7 @@ public class Zip64SupportIT {
             }
             assertEquals(ONE_HUNDRED_THOUSAND, files);
         } finally {
-            ZipFile.closeQuietly(zf);
+            IOUtils.closeQuietly(zf);
         }
     }
 
@@ -233,7 +234,7 @@ public class Zip64SupportIT {
             assertEquals(FIVE_BILLION, read);
             assertFalse(e.hasMoreElements());
         } finally {
-            ZipFile.closeQuietly(zf);
+            IOUtils.closeQuietly(zf);
         }
     }
 
@@ -1908,7 +1909,7 @@ public class Zip64SupportIT {
                     }
                 }
             } finally {
-                ZipFile.closeQuietly(zf);
+                IOUtils.closeQuietly(zf);
             }
         }, true);
     }

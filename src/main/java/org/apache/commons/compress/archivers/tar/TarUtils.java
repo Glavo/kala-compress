@@ -579,7 +579,7 @@ public class TarUtils {
         }
         // skip the rest of this record data
         final long bytesToSkip = recordSize - bytesRead % recordSize;
-        org.apache.commons.io.IOUtils.skip(inputStream, bytesToSkip);
+        IOUtils.skip(inputStream, bytesToSkip);
         return sparseHeaders;
     }
 

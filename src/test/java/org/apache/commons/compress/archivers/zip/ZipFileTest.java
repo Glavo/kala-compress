@@ -199,7 +199,7 @@ public class ZipFileTest extends AbstractTest {
 
     @AfterEach
     public void tearDownClose() {
-        ZipFile.closeQuietly(zf);
+        org.apache.commons.compress.utils.IOUtils.closeQuietly(zf);
     }
 
     @Test

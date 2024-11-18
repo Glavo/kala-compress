@@ -33,6 +33,7 @@ import java.util.zip.Inflater;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BoundedInputStream;
 
 /**
@@ -333,7 +334,7 @@ public class GzipCompressorInputStream extends CompressorInputStream implements 
                 in.reset();
 
                 final int skipAmount = bufUsed - inf.getRemaining();
-                if (org.apache.commons.io.IOUtils.skip(in, skipAmount) != skipAmount) {
+                if (IOUtils.skip(in, skipAmount) != skipAmount) {
                     throw new IOException();
                 }
 

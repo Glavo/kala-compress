@@ -130,7 +130,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
         if (currentInputStream != null) {
             // return value ignored as IOUtils.skip ensures the stream is drained completely
             final InputStream input = currentInputStream;
-            org.apache.commons.io.IOUtils.skip(input, Long.MAX_VALUE);
+            IOUtils.skip(input, Long.MAX_VALUE);
             currentInputStream.close();
             currentLocalFileHeader = null;
             currentInputStream = null;

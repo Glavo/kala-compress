@@ -250,7 +250,7 @@ public class ArArchiveInputStream extends ArchiveInputStream<ArArchiveEntry> {
     public ArArchiveEntry getNextEntry() throws IOException {
         if (currentEntry != null) {
             final long entryEnd = entryOffset + currentEntry.getLength();
-            final long skipped = org.apache.commons.io.IOUtils.skip(in, entryEnd - offset);
+            final long skipped = IOUtils.skip(in, entryEnd - offset);
             trackReadBytes(skipped);
             currentEntry = null;
         }

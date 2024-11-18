@@ -30,8 +30,6 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 
-import org.apache.commons.io.FileUtils;
-
 /**
  * Utility functions.
  *
@@ -49,13 +47,16 @@ public final class IOUtils {
     /**
      * Closes the given Closeable and swallows any IOException that may occur.
      *
-     * @param c Closeable to close, can be null
+     * @param closeable Closeable to close, can be null
      * @since 1.7
-     * @deprecated Use {@link org.apache.commons.io.IOUtils#closeQuietly(Closeable)}.
      */
-    @Deprecated
-    public static void closeQuietly(final Closeable c) {
-        org.apache.commons.io.IOUtils.closeQuietly(c);
+    public static void closeQuietly(final Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (final IOException ignored) {
+            }
+        }
     }
 
     /**
@@ -65,11 +66,9 @@ public final class IOUtils {
      * @param outputStream The output stream to write.
      * @throws IOException if an I/O error occurs when reading or writing.
      * @since 1.21
-     * @deprecated Use {@link FileUtils#copyFile(File, OutputStream)}.
      */
-    @Deprecated
     public static void copy(final File sourceFile, final OutputStream outputStream) throws IOException {
-        FileUtils.copyFile(sourceFile, outputStream);
+        Files.copy(sourceFile.toPath(), outputStream);
     }
 
     /**
@@ -79,9 +78,7 @@ public final class IOUtils {
      * @param output the target, may be null to simulate output to dev/null on Linux and NUL on Windows
      * @return the number of bytes copied
      * @throws IOException if an error occurs
-     * @deprecated Use {@link org.apache.commons.io.IOUtils#copy(InputStream, OutputStream)}.
      */
-    @Deprecated
     public static long copy(final InputStream input, final OutputStream output) throws IOException {
         return org.apache.commons.io.IOUtils.copy(input, output);
     }
@@ -95,9 +92,7 @@ public final class IOUtils {
      * @return the number of bytes copied
      * @throws IOException              if an error occurs
      * @throws IllegalArgumentException if bufferSize is smaller than or equal to 0
-     * @deprecated Use {@link org.apache.commons.io.IOUtils#copy(InputStream, OutputStream, int)}.
      */
-    @Deprecated
     public static long copy(final InputStream input, final OutputStream output, final int bufferSize) throws IOException {
         return org.apache.commons.io.IOUtils.copy(input, output, bufferSize);
     }
@@ -111,9 +106,7 @@ public final class IOUtils {
      * @return the number of bytes copied
      * @throws IOException if an error occurs
      * @since 1.21
-     * @deprecated Use {@link org.apache.commons.io.IOUtils#copyLarge(InputStream, OutputStream, long, long)}.
      */
-    @Deprecated
     public static long copyRange(final InputStream input, final long len, final OutputStream output) throws IOException {
         return org.apache.commons.io.IOUtils.copyLarge(input, output, 0, len);
     }
@@ -146,26 +139,6 @@ public final class IOUtils {
             count += n;
         }
         return count;
-    }
-
-    /**
-     * Reads as much from the file as possible to fill the given array.
-     * <p>
-     * This method may invoke read repeatedly to fill the array and only read less bytes than the length of the array if the end of the stream has been reached.
-     * </p>
-     *
-     * @param file  file to read
-     * @param array buffer to fill
-     * @return the number of bytes actually read
-     * @throws IOException on error
-     * @since 1.20
-     * @deprecated Use {@link Files#readAllBytes(java.nio.file.Path)}.
-     */
-    @Deprecated
-    public static int read(final File file, final byte[] array) throws IOException {
-        try (InputStream inputStream = Files.newInputStream(file.toPath())) {
-            return readFully(inputStream, array, 0, array.length);
-        }
     }
 
     /**
@@ -279,7 +252,25 @@ public final class IOUtils {
      * @throws IOException on error
      */
     public static long skip(final InputStream input, final long toSkip) throws IOException {
-        return org.apache.commons.io.IOUtils.skip(input, toSkip, org.apache.commons.io.IOUtils::byteArray);
+        if (toSkip < 0) {
+            throw new IllegalArgumentException("Skip count must be non-negative, actual: " + toSkip);
+        }
+        //
+        // No need to synchronize access to SCRATCH_BYTE_BUFFER_WO: We don't care if the buffer is written multiple
+        // times or in parallel since the data is ignored. We reuse the same buffer, if the buffer size were variable or read-write,
+        // we would need to synch or use a thread local to ensure some other thread safety.
+        //
+        long remain = toSkip;
+        while (remain > 0) {
+            final byte[] skipBuffer = new byte[8192];
+            // See https://issues.apache.org/jira/browse/IO-203 for why we use read() rather than delegating to skip()
+            final long n = input.read(skipBuffer, 0, (int) Math.min(remain, skipBuffer.length));
+            if (n < 0) { // EOF
+                break;
+            }
+            remain -= n;
+        }
+        return toSkip - remain;
     }
 
     /**
@@ -293,9 +284,7 @@ public final class IOUtils {
      * @throws NullPointerException if the input is null
      * @throws IOException          if an I/O error occurs
      * @since 1.5
-     * @deprecated Use {@link org.apache.commons.io.IOUtils#toByteArray(InputStream)}.
      */
-    @Deprecated
     public static byte[] toByteArray(final InputStream input) throws IOException {
         return org.apache.commons.io.IOUtils.toByteArray(input);
     }
