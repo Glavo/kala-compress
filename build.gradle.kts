@@ -32,7 +32,26 @@ dependencies {
     testImplementation("javax.inject:javax.inject:1")
 }
 
+tasks.compileJava {
+    options.release.set(8)
+    options.encoding = "UTF-8"
+}
+
+tasks.processTestResources {
+    from(tarTree(file("src/test/resources/zstd-tests.tar")))
+    from(tarTree(resources.bzip2("src/test/resources/zip64support.tar.bz2")))
+}
+
 tasks.test {
+    if (javaLauncher.get().metadata.languageVersion.asInt() > 8) {
+        jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
+    }
+
     useJUnitPlatform()
     testLogging.showStandardStreams = true
+
+    exclude("org/apache/commons/compress/osgi/**")
+    if ((project.properties["run-it"] ?: "false") != "true") {
+        exclude("**/**IT.class")
+    }
 }
