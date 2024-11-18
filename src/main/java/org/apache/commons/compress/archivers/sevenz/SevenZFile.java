@@ -833,7 +833,7 @@ public class SevenZFile implements Closeable {
             fileStream = ChecksumInputStream.builder()
                     .setChecksum(new CRC32())
                     .setInputStream(fileStream)
-                    .setExpectedChecksumValue(file.getCrcValue())
+                    .setExpectedChecksumValue(file.getCrc())
                     .get();
             // @formatter:on
         }
@@ -1360,7 +1360,7 @@ public class SevenZFile implements Closeable {
                 entryAtIndex.setDirectory(false);
                 entryAtIndex.setAntiItem(false);
                 entryAtIndex.setHasCrc(archive.subStreamsInfo.hasCrc.get(nonEmptyFileCounter));
-                entryAtIndex.setCrcValue(archive.subStreamsInfo.crcs[nonEmptyFileCounter]);
+                entryAtIndex.setCrc(archive.subStreamsInfo.crcs[nonEmptyFileCounter]);
                 entryAtIndex.setSize(archive.subStreamsInfo.unpackSizes[nonEmptyFileCounter]);
                 if (entryAtIndex.getSize() < 0) {
                     throw new IOException("broken archive, entry with negative size");
@@ -2204,7 +2204,7 @@ public class SevenZFile implements Closeable {
                         .setChecksum(new CRC32())
                         .setInputStream(fileStreamToSkip)
                         .setCountThreshold(fileToSkip.getSize())
-                        .setExpectedChecksumValue(fileToSkip.getCrcValue())
+                        .setExpectedChecksumValue(fileToSkip.getCrc())
                         .get();
                 // @formatter:on
             }

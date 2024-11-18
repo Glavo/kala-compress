@@ -199,21 +199,10 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Gets the CRC.
      *
-     * @deprecated use getCrcValue instead.
-     * @return the CRC
-     */
-    @Deprecated
-    public int getCrc() {
-        return (int) crc;
-    }
-
-    /**
-     * Gets the CRC.
-     *
      * @since 1.7
      * @return the CRC
      */
-    public long getCrcValue() {
+    public long getCrc() {
         return crc;
     }
 
@@ -428,21 +417,10 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Sets the compressed CRC.
      *
-     * @deprecated use setCompressedCrcValue instead.
-     * @param crc the CRC
-     */
-    @Deprecated
-    void setCompressedCrc(final int crc) {
-        this.compressedCrc = crc;
-    }
-
-    /**
-     * Sets the compressed CRC.
-     *
      * @since 1.7
      * @param crc the CRC
      */
-    void setCompressedCrcValue(final long crc) {
+    void setCompressedCrc(final long crc) {
         this.compressedCrc = crc;
     }
 
@@ -502,21 +480,10 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Sets the CRC.
      *
-     * @deprecated use setCrcValue instead.
-     * @param crc the CRC
-     */
-    @Deprecated
-    public void setCrc(final int crc) {
-        this.crc = crc;
-    }
-
-    /**
-     * Sets the CRC.
-     *
      * @since 1.7
      * @param crc the CRC
      */
-    public void setCrcValue(final long crc) {
+    public void setCrc(final long crc) {
         this.crc = crc;
     }
 

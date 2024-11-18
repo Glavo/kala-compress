@@ -93,16 +93,6 @@ public final class Lister {
 
     private final String[] args;
 
-    /**
-     * Constructs a new instance.
-     *
-     * @deprecated No replacement.
-     */
-    @Deprecated
-    public Lister() {
-        this(false, "");
-    }
-
     Lister(final boolean quiet, final String... args) {
         this.quiet = quiet;
         this.args = args.clone();

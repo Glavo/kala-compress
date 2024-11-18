@@ -116,7 +116,7 @@ public final class CpioTest extends AbstractTest {
         }
         final CpioArchiveEntry entryOut;
         try (CpioArchiveInputStream tis = new CpioArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            entryOut = tis.getNextCPIOEntry();
+            entryOut = tis.getNextEntry();
         }
         assertNotNull(entryOut);
         assertEquals("foo", entryOut.getName());
@@ -140,7 +140,7 @@ public final class CpioTest extends AbstractTest {
         }
         final CpioArchiveEntry out;
         try (CpioArchiveInputStream tis = new CpioArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = tis.getNextCPIOEntry();
+            out = tis.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo/", out.getName());
@@ -169,7 +169,7 @@ public final class CpioTest extends AbstractTest {
         }
         final CpioArchiveEntry out;
         try (CpioArchiveInputStream tis = new CpioArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = tis.getNextCPIOEntry();
+            out = tis.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo", out.getName());
@@ -195,7 +195,7 @@ public final class CpioTest extends AbstractTest {
         }
         final CpioArchiveEntry out;
         try (CpioArchiveInputStream tis = new CpioArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = tis.getNextCPIOEntry();
+            out = tis.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo", out.getName());

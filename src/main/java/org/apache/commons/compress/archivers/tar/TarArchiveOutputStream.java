@@ -264,7 +264,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
 
     private void addPaxHeadersForBigNumbers(final Map<String, String> paxHeaders, final TarArchiveEntry entry) {
         addPaxHeaderForBigNumber(paxHeaders, "size", entry.getSize(), TarConstants.MAXSIZE);
-        addPaxHeaderForBigNumber(paxHeaders, "gid", entry.getLongGroupId(), TarConstants.MAXID);
+        addPaxHeaderForBigNumber(paxHeaders, "gid", entry.getGroupId(), TarConstants.MAXID);
         addFileTimePaxHeaderForBigNumber(paxHeaders, "mtime", entry.getLastModifiedTime(), TarConstants.MAXSIZE);
         addFileTimePaxHeader(paxHeaders, "atime", entry.getLastAccessTime());
         if (entry.getStatusChangeTime() != null) {
@@ -273,7 +273,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
             // ctime is usually set from creation time on platforms where the real ctime is not available
             addFileTimePaxHeader(paxHeaders, "ctime", entry.getCreationTime());
         }
-        addPaxHeaderForBigNumber(paxHeaders, "uid", entry.getLongUserId(), TarConstants.MAXID);
+        addPaxHeaderForBigNumber(paxHeaders, "uid", entry.getUserId(), TarConstants.MAXID);
         // libarchive extensions
         addFileTimePaxHeader(paxHeaders, "LIBARCHIVE.creationtime", entry.getCreationTime());
         // star extensions by J�rg Schilling
@@ -374,9 +374,9 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
 
     private void failForBigNumbers(final TarArchiveEntry entry) {
         failForBigNumber("entry size", entry.getSize(), TarConstants.MAXSIZE);
-        failForBigNumberWithPosixMessage("group id", entry.getLongGroupId(), TarConstants.MAXID);
+        failForBigNumberWithPosixMessage("group id", entry.getGroupId(), TarConstants.MAXID);
         failForBigNumber("last modification time", TimeUtils.toUnixTime(entry.getLastModifiedTime()), TarConstants.MAXSIZE);
-        failForBigNumber("user id", entry.getLongUserId(), TarConstants.MAXID);
+        failForBigNumber("user id", entry.getUserId(), TarConstants.MAXID);
         failForBigNumber("mode", entry.getMode(), TarConstants.MAXID);
         failForBigNumber("major device number", entry.getDevMajor(), TarConstants.MAXID);
         failForBigNumber("minor device number", entry.getDevMinor(), TarConstants.MAXID);
@@ -410,12 +410,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
     @Override
     public long getBytesWritten() {
         return countingOut.getByteCount();
-    }
-
-    @Deprecated
-    @Override
-    public int getCount() {
-        return (int) getBytesWritten();
     }
 
     /**

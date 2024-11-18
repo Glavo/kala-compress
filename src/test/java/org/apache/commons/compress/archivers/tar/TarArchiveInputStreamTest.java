@@ -371,7 +371,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
         final ByteArrayInputStream bis = new ByteArrayInputStream(data);
         try (TarArchiveInputStream tis = new TarArchiveInputStream(bis)) {
             final TarArchiveEntry t = tis.getNextTarEntry();
-            assertEquals(4294967294L, t.getLongGroupId());
+            assertEquals(4294967294L, t.getGroupId());
         }
     }
 

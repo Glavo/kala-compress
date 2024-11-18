@@ -144,10 +144,10 @@ public final class GZipTest extends AbstractTest {
         final GzipParameters parameters = new GzipParameters();
         parameters.setCompressionLevel(Deflater.BEST_COMPRESSION);
         parameters.setOperatingSystem(3);
-        parameters.setFilename("test3.xml");
-        assertEquals(parameters.getFilename(), parameters.getFileName());
         parameters.setFileName("test3.xml");
-        assertEquals(parameters.getFilename(), parameters.getFileName());
+        assertEquals(parameters.getFileName(), parameters.getFileName());
+        parameters.setFileName("test3.xml");
+        assertEquals(parameters.getFileName(), parameters.getFileName());
         parameters.setComment("Test file");
         parameters.setModificationTime(System.currentTimeMillis());
         try (GzipCompressorOutputStream out = new GzipCompressorOutputStream(bout, parameters)) {
@@ -167,10 +167,10 @@ public final class GZipTest extends AbstractTest {
         final GzipParameters parameters = new GzipParameters();
         parameters.setCompressionLevel(Deflater.BEST_COMPRESSION);
         parameters.setOperatingSystem(3);
-        parameters.setFilename("test3.xml");
-        assertEquals(parameters.getFilename(), parameters.getFileName());
         parameters.setFileName("test3.xml");
-        assertEquals(parameters.getFilename(), parameters.getFileName());
+        assertEquals(parameters.getFileName(), parameters.getFileName());
+        parameters.setFileName("test3.xml");
+        assertEquals(parameters.getFileName(), parameters.getFileName());
         parameters.setComment("Test file");
         parameters.setModificationTime(System.currentTimeMillis());
         try (GzipCompressorOutputStream out = new GzipCompressorOutputStream(bout, parameters)) {
@@ -214,10 +214,10 @@ public final class GZipTest extends AbstractTest {
         assertEquals(GzipParameters.OS.UNKNOWN, parameters.getOS());
         parameters.setOperatingSystem(13);
         assertEquals(GzipParameters.OS.ACORN_RISCOS, parameters.getOS());
-        parameters.setFilename("test3.xml");
-        assertEquals(parameters.getFilename(), parameters.getFileName());
         parameters.setFileName("test3.xml");
-        assertEquals(parameters.getFilename(), parameters.getFileName());
+        assertEquals(parameters.getFileName(), parameters.getFileName());
+        parameters.setFileName("test3.xml");
+        assertEquals(parameters.getFileName(), parameters.getFileName());
         parameters.setComment("Umlaute möglich?");
         try (GzipCompressorOutputStream out = new GzipCompressorOutputStream(bout, parameters)) {
             Files.copy(getFile("test3" + ".xml").toPath(), out);
@@ -231,7 +231,7 @@ public final class GZipTest extends AbstractTest {
         assertEquals(13, readParams.getOperatingSystem());
         assertEquals(GzipParameters.OS.ACORN_RISCOS, readParams.getOS());
         assertEquals("test3.xml", readParams.getFileName());
-        assertEquals("test3.xml", readParams.getFilename());
+        assertEquals("test3.xml", readParams.getFileName());
         assertEquals("Umlaute möglich?", readParams.getComment());
     }
 

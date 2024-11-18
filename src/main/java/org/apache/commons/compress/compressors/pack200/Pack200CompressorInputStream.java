@@ -33,7 +33,7 @@ import org.apache.commons.compress.java.util.jar.Pack200;
  * An input stream that decompresses from the Pack200 format to be read as any other stream.
  *
  * <p>
- * The {@link CompressorInputStream#getCount getCount} and {@link CompressorInputStream#getBytesRead getBytesRead} methods always return 0.
+ * The {@link CompressorInputStream#getBytesRead getBytesRead} methods always return 0.
  * </p>
  *
  * @NotThreadSafe

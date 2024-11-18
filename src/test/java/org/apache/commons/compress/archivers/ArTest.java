@@ -184,7 +184,7 @@ public final class ArTest extends AbstractTest {
         //
         final ArArchiveEntry out;
         try (ArArchiveInputStream ais = new ArArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = ais.getNextArEntry();
+            out = ais.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo", out.getName());
@@ -210,7 +210,7 @@ public final class ArTest extends AbstractTest {
         }
         final ArArchiveEntry out;
         try (ArArchiveInputStream ais = new ArArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = ais.getNextArEntry();
+            out = ais.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo", out.getName());
@@ -237,7 +237,7 @@ public final class ArTest extends AbstractTest {
         }
         final ArArchiveEntry out;
         try (ArArchiveInputStream ais = new ArArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = ais.getNextArEntry();
+            out = ais.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo", out.getName());
@@ -262,7 +262,7 @@ public final class ArTest extends AbstractTest {
         }
         final ArArchiveEntry out;
         try (ArArchiveInputStream ais = new ArArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = ais.getNextArEntry();
+            out = ais.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo/", out.getName());
@@ -287,7 +287,7 @@ public final class ArTest extends AbstractTest {
         }
         final ArArchiveEntry out;
         try (ArArchiveInputStream ais = new ArArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = ais.getNextArEntry();
+            out = ais.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo/", out.getName());

@@ -180,24 +180,6 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
         return raw.getBytesRead();
     }
 
-    @Deprecated
-    @Override
-    public int getCount() {
-        return (int) getBytesRead();
-    }
-
-    /**
-     * Reads the next entry.
-     *
-     * @return the next entry
-     * @throws IOException on error
-     * @deprecated Use {@link #getNextEntry()}.
-     */
-    @Deprecated
-    public DumpArchiveEntry getNextDumpEntry() throws IOException {
-        return getNextEntry();
-    }
-
     @Override
     public DumpArchiveEntry getNextEntry() throws IOException {
         DumpArchiveEntry entry = null;

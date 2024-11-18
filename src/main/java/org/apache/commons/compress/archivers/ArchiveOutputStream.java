@@ -219,17 +219,6 @@ public abstract class ArchiveOutputStream<E extends ArchiveEntry> extends Filter
     }
 
     /**
-     * Gets the current number of bytes written to this stream.
-     *
-     * @return the number of written bytes
-     * @deprecated this method may yield wrong results for large archives, use #getBytesWritten instead
-     */
-    @Deprecated
-    public int getCount() {
-        return (int) bytesWritten;
-    }
-
-    /**
      * Tests whether this instance was successfully closed.
      *
      * @return whether this instance was successfully closed.

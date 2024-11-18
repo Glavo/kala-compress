@@ -254,15 +254,8 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
         }
     }
 
-    /**
-     * Reads the next CPIO file entry and positions stream at the beginning of the entry data.
-     *
-     * @return the CpioArchiveEntry just read
-     * @throws IOException if an I/O error has occurred or if a CPIO file error has occurred
-     * @deprecated Use {@link #getNextEntry()}.
-     */
-    @Deprecated
-    public CpioArchiveEntry getNextCPIOEntry() throws IOException {
+    @Override
+    public CpioArchiveEntry getNextEntry() throws IOException {
         ensureOpen();
         if (this.entry != null) {
             closeEntry();
@@ -277,17 +270,17 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
             readFully(sixBytesBuf, twoBytesBuf.length, fourBytesBuf.length);
             final String magicString = ArchiveUtils.toAsciiString(sixBytesBuf);
             switch (magicString) {
-            case MAGIC_NEW:
-                this.entry = readNewEntry(false);
-                break;
-            case MAGIC_NEW_CRC:
-                this.entry = readNewEntry(true);
-                break;
-            case MAGIC_OLD_ASCII:
-                this.entry = readOldAsciiEntry();
-                break;
-            default:
-                throw new IOException("Unknown magic [" + magicString + "]. Occurred at byte: " + getBytesRead());
+                case MAGIC_NEW:
+                    this.entry = readNewEntry(false);
+                    break;
+                case MAGIC_NEW_CRC:
+                    this.entry = readNewEntry(true);
+                    break;
+                case MAGIC_OLD_ASCII:
+                    this.entry = readOldAsciiEntry();
+                    break;
+                default:
+                    throw new IOException("Unknown magic [" + magicString + "]. Occurred at byte: " + getBytesRead());
             }
         }
 
@@ -301,11 +294,6 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
             return null;
         }
         return this.entry;
-    }
-
-    @Override
-    public CpioArchiveEntry getNextEntry() throws IOException {
-        return getNextCPIOEntry();
     }
 
     /**

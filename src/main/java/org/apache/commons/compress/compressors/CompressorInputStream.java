@@ -65,17 +65,6 @@ public abstract class CompressorInputStream extends InputStream {
     }
 
     /**
-     * Gets the current number of bytes read from this stream.
-     *
-     * @return the number of read bytes
-     * @deprecated this method may yield wrong results for large archives, use #getBytesRead instead
-     */
-    @Deprecated
-    public int getCount() {
-        return (int) bytesRead;
-    }
-
-    /**
      * Gets the amount of raw or compressed bytes read by the stream.
      *
      * <p>

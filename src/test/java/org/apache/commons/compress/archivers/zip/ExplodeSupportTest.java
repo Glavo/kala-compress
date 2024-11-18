@@ -86,7 +86,7 @@ public class ExplodeSupportTest {
 
     private void testZipStreamWithImplodeCompression(final String fileName, final String entryName) throws IOException {
         try (ZipArchiveInputStream zin = new ZipArchiveInputStream(Files.newInputStream(new File(fileName).toPath()))) {
-            final ZipArchiveEntry entry = zin.getNextZipEntry();
+            final ZipArchiveEntry entry = zin.getNextEntry();
             assertEquals(entryName, entry.getName(), "entry name");
             assertTrue(zin.canReadEntryData(entry), "entry can't be read");
             assertEquals(ZipMethod.IMPLODING.getCode(), entry.getMethod(), "method");

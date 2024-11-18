@@ -148,7 +148,7 @@ public class Zip64SupportIT {
                 ZipArchiveInputStream zin = new ZipArchiveInputStream(fin)) {
             int files = 0;
             ZipArchiveEntry zae;
-            while ((zae = zin.getNextZipEntry()) != null) {
+            while ((zae = zin.getNextEntry()) != null) {
                 if (!zae.isDirectory()) {
                     files++;
                     assertEquals(0, zae.getSize());
@@ -179,9 +179,9 @@ public class Zip64SupportIT {
     private static void read5GBOfZerosImpl(final File f, final String expectedName) throws IOException {
         try (InputStream fin = Files.newInputStream(f.toPath());
                 ZipArchiveInputStream zin = new ZipArchiveInputStream(fin)) {
-            ZipArchiveEntry zae = zin.getNextZipEntry();
+            ZipArchiveEntry zae = zin.getNextEntry();
             while (zae.isDirectory()) {
-                zae = zin.getNextZipEntry();
+                zae = zin.getNextEntry();
             }
             assertEquals(expectedName, zae.getName());
             final byte[] buf = new byte[1024 * 1024];
@@ -198,7 +198,7 @@ public class Zip64SupportIT {
                 read += readNow;
             }
             assertEquals(FIVE_BILLION, read);
-            assertNull(zin.getNextZipEntry());
+            assertNull(zin.getNextEntry());
             assertEquals(FIVE_BILLION, zae.getSize());
         }
     }

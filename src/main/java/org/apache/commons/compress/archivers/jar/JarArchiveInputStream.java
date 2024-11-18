@@ -64,19 +64,7 @@ public class JarArchiveInputStream extends ZipArchiveInputStream {
 
     @Override
     public JarArchiveEntry getNextEntry() throws IOException {
-        return getNextJarEntry();
-    }
-
-    /**
-     * Gets the next entry.
-     *
-     * @return the next entry.
-     * @throws IOException if an I/O error occurs.
-     * @deprecated Use {@link #getNextEntry()}.
-     */
-    @Deprecated
-    public JarArchiveEntry getNextJarEntry() throws IOException {
-        final ZipArchiveEntry entry = getNextZipEntry();
+        final ZipArchiveEntry entry = super.getNextEntry();
         return entry == null ? null : new JarArchiveEntry(entry);
     }
 }

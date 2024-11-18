@@ -241,15 +241,13 @@ public class ArArchiveInputStream extends ArchiveInputStream<ArArchiveEntry> {
         throw new IOException("Failed to read entry: " + offset);
     }
 
-    /**
-     * Returns the next AR entry in this stream.
+    /*
+     * (non-Javadoc)
      *
-     * @return the next AR entry.
-     * @throws IOException if the entry could not be read
-     * @deprecated Use {@link #getNextEntry()}.
+     * @see org.apache.commons.compress.archivers.ArchiveInputStream#getNextEntry()
      */
-    @Deprecated
-    public ArArchiveEntry getNextArEntry() throws IOException {
+    @Override
+    public ArArchiveEntry getNextEntry() throws IOException {
         if (currentEntry != null) {
             final long entryEnd = entryOffset + currentEntry.getLength();
             final long skipped = org.apache.commons.io.IOUtils.skip(in, entryEnd - offset);
@@ -304,7 +302,7 @@ public class ArArchiveInputStream extends ArchiveInputStream<ArArchiveEntry> {
         String temp = ArchiveUtils.toAsciiString(metaData, NAME_OFFSET, NAME_LEN).trim();
         if (isGNUStringTable(temp)) { // GNU extended file names entry
             currentEntry = readGNUStringTable(metaData, LENGTH_OFFSET, LENGTH_LEN);
-            return getNextArEntry();
+            return getNextEntry();
         }
         long len;
         try {
@@ -337,16 +335,6 @@ public class ArArchiveInputStream extends ArchiveInputStream<ArArchiveEntry> {
         } catch (final NumberFormatException ex) {
             throw new IOException("Broken archive, unable to parse entry metadata fields as numbers", ex);
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.apache.commons.compress.archivers.ArchiveInputStream#getNextEntry()
-     */
-    @Override
-    public ArArchiveEntry getNextEntry() throws IOException {
-        return getNextArEntry();
     }
 
     /**

@@ -169,17 +169,18 @@ public class GzipCompressorOutputStreamTest {
         Files.write(tempSourceFile, "<text>Hello World!</text>".getBytes(StandardCharsets.ISO_8859_1));
         final Path targetFile = Files.createTempFile("test", ".gz");
         final GzipParameters parameters = new GzipParameters();
-        parameters.setFilename(sourceFile);
-        assertEquals(parameters.getFilename(), parameters.getFileName());
         parameters.setFileName(sourceFile);
-        assertEquals(parameters.getFilename(), parameters.getFileName());
+        assertEquals(parameters.getFileName(), parameters.getFileName());
+        parameters.setFileName(sourceFile);
+        assertEquals(parameters.getFileName(), parameters.getFileName());
         try (OutputStream fos = Files.newOutputStream(targetFile);
                 GzipCompressorOutputStream gos = new GzipCompressorOutputStream(fos, parameters)) {
             Files.copy(tempSourceFile, gos);
         }
         try (GzipCompressorInputStream gis = new GzipCompressorInputStream(Files.newInputStream(targetFile))) {
             assertEquals(expected, gis.getMetaData().getFileName());
-            assertEquals(expected, gis.getMetaData().getFilename());
+            GzipParameters gzipParameters = gis.getMetaData();
+            assertEquals(expected, gzipParameters.getFileName());
         }
     }
 

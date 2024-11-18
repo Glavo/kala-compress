@@ -629,18 +629,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
     @Override
     public ZipArchiveEntry getNextEntry() throws IOException {
-        return getNextZipEntry();
-    }
-
-    /**
-     * Gets the next entry.
-     *
-     * @return the next entry.
-     * @throws IOException if an I/O error occurs.
-     * @deprecated Use {@link #getNextEntry()}.
-     */
-    @Deprecated
-    public ZipArchiveEntry getNextZipEntry() throws IOException {
         uncompressedCount = 0;
 
         boolean firstEntry = true;
@@ -754,28 +742,28 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
             if (ZipUtil.canHandleEntryData(current.entry) && m != ZipMethod.STORED && m != ZipMethod.DEFLATED) {
                 final InputStream bis = new BoundCountInputStream(in, current.entry.getCompressedSize());
                 switch (m) {
-                case UNSHRINKING:
-                    current.inputStream = new UnshrinkingInputStream(bis);
-                    break;
-                case IMPLODING:
-                    try {
-                        current.inputStream = new ExplodingInputStream(current.entry.getGeneralPurposeBit().getSlidingDictionarySize(),
-                                current.entry.getGeneralPurposeBit().getNumberOfShannonFanoTrees(), bis);
-                    } catch (final IllegalArgumentException ex) {
-                        throw new IOException("bad IMPLODE data", ex);
-                    }
-                    break;
-                case BZIP2:
-                    current.inputStream = new BZip2CompressorInputStream(bis);
-                    break;
-                case ENHANCED_DEFLATED:
-                    current.inputStream = new Deflate64CompressorInputStream(bis);
-                    break;
-                default:
-                    // we should never get here as all supported methods have been covered
-                    // will cause an error when read is invoked, don't throw an exception here so people can
-                    // skip unsupported entries
-                    break;
+                    case UNSHRINKING:
+                        current.inputStream = new UnshrinkingInputStream(bis);
+                        break;
+                    case IMPLODING:
+                        try {
+                            current.inputStream = new ExplodingInputStream(current.entry.getGeneralPurposeBit().getSlidingDictionarySize(),
+                                    current.entry.getGeneralPurposeBit().getNumberOfShannonFanoTrees(), bis);
+                        } catch (final IllegalArgumentException ex) {
+                            throw new IOException("bad IMPLODE data", ex);
+                        }
+                        break;
+                    case BZIP2:
+                        current.inputStream = new BZip2CompressorInputStream(bis);
+                        break;
+                    case ENHANCED_DEFLATED:
+                        current.inputStream = new Deflate64CompressorInputStream(bis);
+                        break;
+                    default:
+                        // we should never get here as all supported methods have been covered
+                        // will cause an error when read is invoked, don't throw an exception here so people can
+                        // skip unsupported entries
+                        break;
                 }
             }
         } else if (m == ZipMethod.ENHANCED_DEFLATED) {

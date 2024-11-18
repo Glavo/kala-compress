@@ -686,11 +686,11 @@ public final class ZipTest extends AbstractTest {
     @Test
     public void testSkipEntryWithUnsupportedCompressionMethod() throws IOException {
         try (ZipArchiveInputStream zip = new ZipArchiveInputStream(newInputStream("moby.zip"))) {
-            final ZipArchiveEntry entry = zip.getNextZipEntry();
+            final ZipArchiveEntry entry = zip.getNextEntry();
             assertEquals(ZipMethod.TOKENIZATION.getCode(), entry.getMethod(), "method");
             assertEquals("README", entry.getName());
             assertFalse(zip.canReadEntryData(entry));
-            assertDoesNotThrow(() -> assertNull(zip.getNextZipEntry()), "COMPRESS-93: Unable to skip an unsupported ZIP entry");
+            assertDoesNotThrow(() -> assertNull(zip.getNextEntry()), "COMPRESS-93: Unable to skip an unsupported ZIP entry");
         }
     }
 

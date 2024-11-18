@@ -217,8 +217,8 @@ public class SevenZOutputFile implements Closeable {
             ++numNonEmptyStreams;
             entry.setSize(currentOutputStream.getByteCount()); // NOSONAR
             entry.setCompressedSize(fileBytesWritten);
-            entry.setCrcValue(crc32.getValue());
-            entry.setCompressedCrcValue(compressedCrc32.getValue());
+            entry.setCrc(crc32.getValue());
+            entry.setCompressedCrc(compressedCrc32.getValue());
             entry.setHasCrc(true);
             if (additionalCountingStreams != null) {
                 final long[] sizes = new long[additionalCountingStreams.length];
@@ -305,7 +305,7 @@ public class SevenZOutputFile implements Closeable {
         channel.write(ByteBuffer.wrap(headerBytes));
 
         final CRC32 crc32 = new CRC32();
-        crc32.update(headerBytes);
+        crc32.update(headerBytes, 0, headerBytes.length);
 
         final ByteBuffer bb = ByteBuffer.allocate(SevenZFile.sevenZSignature.length + 2 /* version */
                 + 4 /* start header CRC */
@@ -352,19 +352,6 @@ public class SevenZOutputFile implements Closeable {
             currentOutputStream = setupFileOutputStream();
         }
         return currentOutputStream;
-    }
-
-    /**
-     * Records an archive entry to add.
-     *
-     * The caller must then write the content to the archive and call {@link #closeArchiveEntry()} to complete the process.
-     *
-     * @param archiveEntry describes the entry
-     * @deprecated Use {@link #putArchiveEntry(SevenZArchiveEntry)}.
-     */
-    @Deprecated
-    public void putArchiveEntry(final ArchiveEntry archiveEntry) {
-        putArchiveEntry((SevenZArchiveEntry) archiveEntry);
     }
 
     /**
@@ -439,7 +426,7 @@ public class SevenZOutputFile implements Closeable {
             @Override
             public void write(final byte[] b) throws IOException {
                 super.write(b);
-                crc32.update(b);
+                crc32.update(b, 0, b.length);
             }
 
             @Override
@@ -913,7 +900,7 @@ public class SevenZOutputFile implements Closeable {
         header.write(1); // "allAreDefined" == true
         for (final SevenZArchiveEntry entry : files) {
             if (entry.hasStream()) {
-                header.writeInt(Integer.reverseBytes((int) entry.getCrcValue()));
+                header.writeInt(Integer.reverseBytes((int) entry.getCrc()));
             }
         }
 

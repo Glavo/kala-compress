@@ -357,17 +357,6 @@ public class GzipParameters {
      * Gets the file name.
      *
      * @return the file name.
-     * @deprecated Use {@link #getFileName()}.
-     */
-    @Deprecated
-    public String getFilename() {
-        return fileName;
-    }
-
-    /**
-     * Gets the file name.
-     *
-     * @return the file name.
      * @since 1.25.0
      */
     public String getFileName() {
@@ -489,17 +478,6 @@ public class GzipParameters {
      */
     public void setExtraField(final ExtraField extra) {
         this.extraField = extra;
-    }
-
-    /**
-     * Sets the name of the compressed file.
-     *
-     * @param fileName the name of the file without the directory path
-     * @deprecated Use {@link #setFileName(String)}.
-     */
-    @Deprecated
-    public void setFilename(final String fileName) {
-        this.fileName = fileName;
     }
 
     /**

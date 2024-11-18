@@ -57,14 +57,12 @@ public class ArjArchiveInputStreamTest extends AbstractTest {
         assertDoesNotThrow(() -> entry.resolveIn(getTempDirPath()));
     }
 
-    @SuppressWarnings("deprecation")
     private void assertArjArchiveInputStream(final ArjArchiveInputStream archive) {
         assertDoesNotThrow(archive::available);
         assertDoesNotThrow(archive::getArchiveComment);
         assertDoesNotThrow(archive::getArchiveName);
         assertDoesNotThrow(archive::getBytesRead);
         assertDoesNotThrow(archive::getCharset);
-        assertDoesNotThrow(archive::getCount);
         assertDoesNotThrow(archive::hashCode);
         assertDoesNotThrow(archive::markSupported);
     }

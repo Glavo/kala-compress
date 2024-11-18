@@ -197,8 +197,8 @@ public class TarArchiveEntryTest implements TarConstants {
     @EnabledOnOs(org.junit.jupiter.api.condition.OS.LINUX)
     public void testLinuxFileInformationFromFile() throws IOException {
         final TarArchiveEntry entry = new TarArchiveEntry(getFile("test1.xml"));
-        assertNotEquals(0, entry.getLongUserId());
-        assertNotEquals(0, entry.getLongGroupId());
+        assertNotEquals(0, entry.getUserId());
+        assertNotEquals(0, entry.getGroupId());
         assertNotEquals("", entry.getUserName());
     }
 
@@ -206,8 +206,8 @@ public class TarArchiveEntryTest implements TarConstants {
     @EnabledOnOs(org.junit.jupiter.api.condition.OS.LINUX)
     public void testLinuxFileInformationFromPath() throws IOException {
         final TarArchiveEntry entry = new TarArchiveEntry(getPath("test1.xml"));
-        assertNotEquals(0, entry.getLongUserId());
-        assertNotEquals(0, entry.getLongGroupId());
+        assertNotEquals(0, entry.getUserId());
+        assertNotEquals(0, entry.getGroupId());
         assertNotEquals("", entry.getUserName());
     }
 

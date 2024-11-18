@@ -39,12 +39,11 @@ import org.junit.jupiter.api.Timeout.ThreadMode;
 
 public class DumpArchiveInputStreamTest extends AbstractTest {
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testConsumesArchiveCompletely() throws Exception {
         try (InputStream is = DumpArchiveInputStreamTest.class.getResourceAsStream("/archive_with_trailer.dump");
                 DumpArchiveInputStream dump = new DumpArchiveInputStream(is)) {
-            while (dump.getNextDumpEntry() != null) {
+            while (dump.getNextEntry() != null) {
                 // just consume the archive
             }
             final byte[] expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', '\n' };

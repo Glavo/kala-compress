@@ -204,14 +204,6 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     public static final int DEFAULT_FILE_MODE = 0100644;
 
     /**
-     * Convert millis to seconds
-     *
-     * @deprecated Unused.
-     */
-    @Deprecated
-    public static final int MILLIS_PER_SECOND = 1000;
-
-    /**
      * Regular expression pattern for validating values in pax extended header file time fields. These fields contain two numeric values (seconds and sub-second
      * values) as per this definition: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_05
      * <p>
@@ -867,17 +859,6 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     }
 
     /**
-     * Gets this entry's group id.
-     *
-     * @return This entry's group id.
-     * @deprecated use #getLongGroupId instead as group ids can be bigger than {@link Integer#MAX_VALUE}
-     */
-    @Deprecated
-    public int getGroupId() {
-        return (int) (groupId & 0xffffffff);
-    }
-
-    /**
      * Gets this entry's group name.
      *
      * @return This entry's group name.
@@ -942,7 +923,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @since 1.10
      * @return This entry's group id.
      */
-    public long getLongGroupId() {
+    public long getGroupId() {
         return groupId;
     }
 
@@ -952,7 +933,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @return This entry's user id.
      * @since 1.10
      */
-    public long getLongUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -1086,17 +1067,6 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      */
     public FileTime getStatusChangeTime() {
         return cTime;
-    }
-
-    /**
-     * Gets this entry's user id.
-     *
-     * @return This entry's user id.
-     * @deprecated use #getLongUserId instead as user ids can be bigger than {@link Integer#MAX_VALUE}
-     */
-    @Deprecated
-    public int getUserId() {
-        return (int) (userId & 0xffffffff);
     }
 
     /**
