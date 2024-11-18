@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.compress.compressors.FileNameUtil;
-import org.apache.commons.compress.utils.OsgiUtils;
 
 /**
  * Utility code for the XZ compression format.
@@ -31,10 +30,6 @@ import org.apache.commons.compress.utils.OsgiUtils;
  * @since 1.4
  */
 public class XZUtils {
-
-    enum CachedAvailability {
-        DONT_CACHE, CACHED_AVAILABLE, CACHED_UNAVAILABLE
-    }
 
     private static final FileNameUtil fileNameUtil;
 
@@ -47,21 +42,12 @@ public class XZUtils {
      */
     private static final byte[] HEADER_MAGIC = { (byte) 0xFD, '7', 'z', 'X', 'Z', '\0' };
 
-    private static volatile CachedAvailability cachedXZAvailability;
-
     static {
         final Map<String, String> uncompressSuffix = new HashMap<>();
         uncompressSuffix.put(".txz", ".tar");
         uncompressSuffix.put(".xz", "");
         uncompressSuffix.put("-xz", "");
         fileNameUtil = new FileNameUtil(uncompressSuffix, ".xz");
-        cachedXZAvailability = CachedAvailability.DONT_CACHE;
-        setCacheXZAvailablity(!OsgiUtils.isRunningInOsgiEnvironment());
-    }
-
-    // only exists to support unit tests
-    static CachedAvailability getCachedXZAvailability() {
-        return cachedXZAvailability;
     }
 
     /**
@@ -91,15 +77,6 @@ public class XZUtils {
         return fileNameUtil.getUncompressedFileName(fileName);
     }
 
-    private static boolean internalIsXZCompressionAvailable() {
-        try {
-            XZCompressorInputStream.matches(null, 0);
-            return true;
-        } catch (final NoClassDefFoundError error) { // NOSONAR
-            return false;
-        }
-    }
-
     /**
      * Detects common xz suffixes in the given file name.
      *
@@ -118,11 +95,12 @@ public class XZUtils {
      * @return true if the classes required to support XZ compression are available
      */
     public static boolean isXZCompressionAvailable() {
-        final CachedAvailability cachedResult = cachedXZAvailability;
-        if (cachedResult != CachedAvailability.DONT_CACHE) {
-            return cachedResult == CachedAvailability.CACHED_AVAILABLE;
+        try {
+            XZCompressorInputStream.matches(null, 0);
+            return true;
+        } catch (final NoClassDefFoundError error) { // NOSONAR
+            return false;
         }
-        return internalIsXZCompressionAvailable();
     }
 
     /**
@@ -149,26 +127,6 @@ public class XZUtils {
         }
 
         return true;
-    }
-
-    /**
-     * Whether to cache the result of the XZ for Java check.
-     *
-     * <p>
-     * This defaults to {@code false} in an OSGi environment and {@code true} otherwise.
-     * </p>
-     *
-     * @param doCache whether to cache the result
-     * @since 1.9
-     */
-    public static void setCacheXZAvailablity(final boolean doCache) {
-        if (!doCache) {
-            cachedXZAvailability = CachedAvailability.DONT_CACHE;
-        } else if (cachedXZAvailability == CachedAvailability.DONT_CACHE) {
-            final boolean hasXz = internalIsXZCompressionAvailable();
-            cachedXZAvailability = hasXz ? CachedAvailability.CACHED_AVAILABLE // NOSONAR
-                    : CachedAvailability.CACHED_UNAVAILABLE;
-        }
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

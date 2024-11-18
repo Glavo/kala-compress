@@ -16,19 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.commons.compress.osgi;
 
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-
-@RunWith(PaxExam.class)
-public class OsgiWithoutOptionalDepsITest  extends AbstractOsgiITest {
-
-    @Configuration
-    @Override
-    public Option[] config() {
-        return Configurations.getConfigWithoutOptionals();
-    }
-}
+/**
+ * Contains example code that is not guaranteed to provide a stable API across releases of Commons Compress.
+ */
+package org.apache.commons.compress.archivers.examples;

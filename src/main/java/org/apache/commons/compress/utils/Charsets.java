@@ -79,7 +79,7 @@ public class Charsets {
      * @return A charset object for the named encoding
      */
     public static Charset toCharset(String name) {
-        return name == null ? StandardCharsets.UTF_8 : Charset.forName(name);
+        return name != null ? Charset.forName(name) : StandardCharsets.UTF_8;
     }
 
     /**
@@ -108,7 +108,17 @@ public class Charsets {
      * @return the given Charset or the UTF-8 if the given Charset is null
      */
     public static Charset toCharset(Charset charset) {
-        return charset == null ? StandardCharsets.UTF_8 : charset;
+        return charset != null ? charset : StandardCharsets.UTF_8;
+    }
+
+    /**
+     * Returns the given charset or the UTF-8 if the given charset is null.
+     *
+     * @param charset A charset or null.
+     * @return the given Charset or the UTF-8 if the given Charset is null
+     */
+    public static Charset toCharset(Charset charset, Charset defaultCharset) {
+        return charset != null ? charset : defaultCharset;
     }
 
     /**

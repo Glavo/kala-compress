@@ -27,24 +27,6 @@ import org.junit.jupiter.api.Test;
 public class LZMAUtilsTest {
 
     @Test
-    public void testCachingIsEnabledByDefaultAndLZMAIsPresent() {
-        assertEquals(LZMAUtils.CachedAvailability.CACHED_AVAILABLE, LZMAUtils.getCachedLZMAAvailability());
-        assertTrue(LZMAUtils.isLZMACompressionAvailable());
-    }
-
-    @Test
-    public void testCanTurnOffCaching() {
-        try {
-            LZMAUtils.setCacheLZMAAvailablity(false);
-            assertEquals(LZMAUtils.CachedAvailability.DONT_CACHE, LZMAUtils.getCachedLZMAAvailability());
-            assertTrue(LZMAUtils.isLZMACompressionAvailable());
-        } finally {
-            LZMAUtils.setCacheLZMAAvailablity(true);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
     public void testGetCompressedFilename() {
         assertEquals(".lzma", LZMAUtils.getCompressedFileName(""));
         assertEquals(".lzma", LZMAUtils.getCompressedFileName(""));
@@ -59,7 +41,6 @@ public class LZMAUtilsTest {
         assertEquals("x.wmf.y.lzma", LZMAUtils.getCompressedFileName("x.wmf.y"));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testGetUncompressedFilename() {
         assertEquals("", LZMAUtils.getUncompressedFileName(""));
@@ -80,7 +61,6 @@ public class LZMAUtilsTest {
         assertEquals("x.lzma.y", LZMAUtils.getUncompressedFileName("x.lzma.y"));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testIsCompressedFilename() {
         assertFalse(LZMAUtils.isCompressedFileName(""));
@@ -116,18 +96,6 @@ public class LZMAUtilsTest {
         assertTrue(LZMAUtils.matches(data, 4));
         data[2] = '0';
         assertFalse(LZMAUtils.matches(data, 3));
-    }
-
-    @Test
-    public void testTurningOnCachingReEvaluatesAvailability() {
-        try {
-            LZMAUtils.setCacheLZMAAvailablity(false);
-            assertEquals(LZMAUtils.CachedAvailability.DONT_CACHE, LZMAUtils.getCachedLZMAAvailability());
-            LZMAUtils.setCacheLZMAAvailablity(true);
-            assertEquals(LZMAUtils.CachedAvailability.CACHED_AVAILABLE, LZMAUtils.getCachedLZMAAvailability());
-        } finally {
-            LZMAUtils.setCacheLZMAAvailablity(true);
-        }
     }
 
 }

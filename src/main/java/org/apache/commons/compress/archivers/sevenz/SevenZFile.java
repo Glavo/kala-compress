@@ -925,7 +925,7 @@ public class SevenZFile implements Closeable {
             // streams to get access to an entry. We defer this until really needed
             // so that entire blocks can be skipped without wasting time for decompression.
             try (InputStream stream = deferredBlockStreams.remove(0)) {
-                IOUtils.skip(stream, Long.MAX_VALUE, org.apache.commons.io.IOUtils::byteArray);
+                IOUtils.skip(stream, Long.MAX_VALUE);
             }
             compressedBytesReadFromCurrentEntry = 0;
         }

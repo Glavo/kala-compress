@@ -27,24 +27,6 @@ import org.junit.jupiter.api.Test;
 public class XZUtilsTest {
 
     @Test
-    public void testCachingIsEnabledByDefaultAndXZIsPresent() {
-        assertEquals(XZUtils.CachedAvailability.CACHED_AVAILABLE, XZUtils.getCachedXZAvailability());
-        assertTrue(XZUtils.isXZCompressionAvailable());
-    }
-
-    @Test
-    public void testCanTurnOffCaching() {
-        try {
-            XZUtils.setCacheXZAvailablity(false);
-            assertEquals(XZUtils.CachedAvailability.DONT_CACHE, XZUtils.getCachedXZAvailability());
-            assertTrue(XZUtils.isXZCompressionAvailable());
-        } finally {
-            XZUtils.setCacheXZAvailablity(true);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
     public void testGetCompressedFilename() {
         assertEquals(".xz", XZUtils.getCompressedFileName(""));
         assertEquals(".xz", XZUtils.getCompressedFileName(""));
@@ -122,18 +104,6 @@ public class XZUtilsTest {
         assertTrue(XZUtils.matches(data, 7));
         data[5] = '0';
         assertFalse(XZUtils.matches(data, 6));
-    }
-
-    @Test
-    public void testTurningOnCachingReEvaluatesAvailability() {
-        try {
-            XZUtils.setCacheXZAvailablity(false);
-            assertEquals(XZUtils.CachedAvailability.DONT_CACHE, XZUtils.getCachedXZAvailability());
-            XZUtils.setCacheXZAvailablity(true);
-            assertEquals(XZUtils.CachedAvailability.CACHED_AVAILABLE, XZUtils.getCachedXZAvailability());
-        } finally {
-            XZUtils.setCacheXZAvailablity(true);
-        }
     }
 
 }

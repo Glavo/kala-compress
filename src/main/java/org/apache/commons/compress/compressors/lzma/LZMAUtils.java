@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.compress.compressors.FileNameUtil;
-import org.apache.commons.compress.utils.OsgiUtils;
 
 /**
  * Utility code for the LZMA compression format.
@@ -32,10 +31,6 @@ import org.apache.commons.compress.utils.OsgiUtils;
  */
 public class LZMAUtils {
 
-    enum CachedAvailability {
-        DONT_CACHE, CACHED_AVAILABLE, CACHED_UNAVAILABLE
-    }
-
     private static final FileNameUtil fileNameUtil;
 
     /**
@@ -43,20 +38,11 @@ public class LZMAUtils {
      */
     private static final byte[] HEADER_MAGIC = { (byte) 0x5D, 0, 0 };
 
-    private static volatile CachedAvailability cachedLZMAAvailability;
-
     static {
         final Map<String, String> uncompressSuffix = new HashMap<>();
         uncompressSuffix.put(".lzma", "");
         uncompressSuffix.put("-lzma", "");
         fileNameUtil = new FileNameUtil(uncompressSuffix, ".lzma");
-        cachedLZMAAvailability = CachedAvailability.DONT_CACHE;
-        setCacheLZMAAvailablity(!OsgiUtils.isRunningInOsgiEnvironment());
-    }
-
-    // only exists to support unit tests
-    static CachedAvailability getCachedLZMAAvailability() {
-        return cachedLZMAAvailability;
     }
 
     /**
@@ -82,15 +68,6 @@ public class LZMAUtils {
         return fileNameUtil.getUncompressedFileName(fileName);
     }
 
-    private static boolean internalIsLZMACompressionAvailable() {
-        try {
-            LZMACompressorInputStream.matches(null, 0);
-            return true;
-        } catch (final NoClassDefFoundError error) { // NOSONAR
-            return false;
-        }
-    }
-
     /**
      * Detects common LZMA suffixes in the given file name.
      *
@@ -108,11 +85,12 @@ public class LZMAUtils {
      * @return true if the classes required to support LZMA compression are available
      */
     public static boolean isLZMACompressionAvailable() {
-        final CachedAvailability cachedResult = cachedLZMAAvailability;
-        if (cachedResult != CachedAvailability.DONT_CACHE) {
-            return cachedResult == CachedAvailability.CACHED_AVAILABLE;
+        try {
+            LZMACompressorInputStream.matches(null, 0);
+            return true;
+        } catch (final NoClassDefFoundError error) { // NOSONAR
+            return false;
         }
-        return internalIsLZMACompressionAvailable();
     }
 
     /**
@@ -134,25 +112,6 @@ public class LZMAUtils {
         }
 
         return true;
-    }
-
-    /**
-     * Whether to cache the result of the LZMA check.
-     *
-     * <p>
-     * This defaults to {@code false} in an OSGi environment and {@code true} otherwise.
-     * </p>
-     *
-     * @param doCache whether to cache the result
-     */
-    public static void setCacheLZMAAvailablity(final boolean doCache) {
-        if (!doCache) {
-            cachedLZMAAvailability = CachedAvailability.DONT_CACHE;
-        } else if (cachedLZMAAvailability == CachedAvailability.DONT_CACHE) {
-            final boolean hasLzma = internalIsLZMACompressionAvailable();
-            cachedLZMAAvailability = hasLzma ? CachedAvailability.CACHED_AVAILABLE // NOSONAR
-                    : CachedAvailability.CACHED_UNAVAILABLE;
-        }
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

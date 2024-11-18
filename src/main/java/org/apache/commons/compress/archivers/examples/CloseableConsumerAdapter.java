@@ -16,19 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.commons.compress.osgi;
+package org.apache.commons.compress.archivers.examples;
 
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Objects;
 
-@RunWith(PaxExam.class)
-public class OsgiITest extends AbstractOsgiITest {
+final class CloseableConsumerAdapter implements Closeable {
+    private final CloseableConsumer consumer;
+    private Closeable closeable;
+
+    CloseableConsumerAdapter(final CloseableConsumer consumer) {
+        this.consumer = Objects.requireNonNull(consumer, "consumer");
+    }
 
     @Override
-    @Configuration
-    public Option[] config() {
-        return Configurations.getDefaultConfig();
+    public void close() throws IOException {
+        if (closeable != null) {
+            consumer.accept(closeable);
+        }
+    }
+
+    <C extends Closeable> C track(final C closeable) {
+        this.closeable = closeable;
+        return closeable;
     }
 }

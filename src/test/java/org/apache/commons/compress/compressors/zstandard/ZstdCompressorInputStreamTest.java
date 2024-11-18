@@ -39,23 +39,6 @@ import com.github.luben.zstd.RecyclingBufferPool;
 public class ZstdCompressorInputStreamTest extends AbstractTest {
 
     @Test
-    public void testCachingIsEnabledByDefaultAndZstdUtilsPresent() {
-        assertEquals(ZstdUtils.CachedAvailability.CACHED_AVAILABLE, ZstdUtils.getCachedZstdAvailability());
-        assertTrue(ZstdUtils.isZstdCompressionAvailable());
-    }
-
-    @Test
-    public void testCanTurnOffCaching() {
-        try {
-            ZstdUtils.setCacheZstdAvailablity(false);
-            assertEquals(ZstdUtils.CachedAvailability.DONT_CACHE, ZstdUtils.getCachedZstdAvailability());
-            assertTrue(ZstdUtils.isZstdCompressionAvailable());
-        } finally {
-            ZstdUtils.setCacheZstdAvailablity(true);
-        }
-    }
-
-    @Test
     public void testMultiByteReadConsistentlyReturnsMinusOneAtEof() throws IOException {
         final File input = getFile("zstandard.testdata.zst");
         final byte[] buf = new byte[2];
@@ -104,18 +87,6 @@ public class ZstdCompressorInputStreamTest extends AbstractTest {
         try (InputStream is = Files.newInputStream(input.toPath());
                 ZstdCompressorInputStream in = new ZstdCompressorInputStream(is)) {
             assertEquals(originalFileContent[0], in.read());
-        }
-    }
-
-    @Test
-    public void testTurningOnCachingReEvaluatesAvailability() {
-        try {
-            ZstdUtils.setCacheZstdAvailablity(false);
-            assertEquals(ZstdUtils.CachedAvailability.DONT_CACHE, ZstdUtils.getCachedZstdAvailability());
-            ZstdUtils.setCacheZstdAvailablity(true);
-            assertEquals(ZstdUtils.CachedAvailability.CACHED_AVAILABLE, ZstdUtils.getCachedZstdAvailability());
-        } finally {
-            ZstdUtils.setCacheZstdAvailablity(true);
         }
     }
 

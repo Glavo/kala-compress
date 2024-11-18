@@ -19,7 +19,6 @@ package org.apache.commons.compress.compressors.brotli;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -73,23 +72,6 @@ public class BrotliCompressorInputStreamTest extends AbstractTest {
     }
 
     @Test
-    public void testCachingIsEnabledByDefaultAndBrotliIsPresent() {
-        assertEquals(BrotliUtils.CachedAvailability.CACHED_AVAILABLE, BrotliUtils.getCachedBrotliAvailability());
-        assertTrue(BrotliUtils.isBrotliCompressionAvailable());
-    }
-
-    @Test
-    public void testCanTurnOffCaching() {
-        try {
-            BrotliUtils.setCacheBrotliAvailablity(false);
-            assertEquals(BrotliUtils.CachedAvailability.DONT_CACHE, BrotliUtils.getCachedBrotliAvailability());
-            assertTrue(BrotliUtils.isBrotliCompressionAvailable());
-        } finally {
-            BrotliUtils.setCacheBrotliAvailablity(true);
-        }
-    }
-
-    @Test
     public void testMultiByteReadConsistentlyReturnsMinusOneAtEof() throws IOException {
         final byte[] buf = new byte[2];
         try (InputStream is = newInputStream("brotli.testdata.compressed");
@@ -126,17 +108,4 @@ public class BrotliCompressorInputStreamTest extends AbstractTest {
             assertEquals('X', in.read());
         }
     }
-
-    @Test
-    public void testTurningOnCachingReEvaluatesAvailability() {
-        try {
-            BrotliUtils.setCacheBrotliAvailablity(false);
-            assertEquals(BrotliUtils.CachedAvailability.DONT_CACHE, BrotliUtils.getCachedBrotliAvailability());
-            BrotliUtils.setCacheBrotliAvailablity(true);
-            assertEquals(BrotliUtils.CachedAvailability.CACHED_AVAILABLE, BrotliUtils.getCachedBrotliAvailability());
-        } finally {
-            BrotliUtils.setCacheBrotliAvailablity(true);
-        }
-    }
-
 }
