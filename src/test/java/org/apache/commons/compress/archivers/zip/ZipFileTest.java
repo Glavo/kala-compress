@@ -39,27 +39,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.CRC32;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.compress.AbstractTest;
+import org.apache.commons.compress.utils.ArrayFill;
 import org.apache.commons.compress.utils.ByteUtils;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.function.IORunnable;
-import org.apache.commons.lang3.ArrayFill;
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assume;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
@@ -795,7 +786,7 @@ public class ZipFileTest extends AbstractTest {
             pb.redirectErrorStream(true);
             final Process process = pb.start();
             final int rc = process.waitFor();
-            if (rc == OUT_OF_MEMORY && SystemUtils.IS_OS_MAC) {
+            if (rc == OUT_OF_MEMORY && System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
                 // On my old Mac mini, this test runs out of memory, so allow the build to continue.
                 Assume.assumeTrue(Boolean.getBoolean("skipReturnCode137"));
                 return;

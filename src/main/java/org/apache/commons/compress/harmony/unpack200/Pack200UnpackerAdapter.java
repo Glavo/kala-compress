@@ -22,11 +22,13 @@ import java.io.FileInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.jar.JarOutputStream;
 
 import org.apache.commons.compress.harmony.pack200.Pack200Adapter;
@@ -34,7 +36,6 @@ import org.apache.commons.compress.harmony.pack200.Pack200Exception;
 import org.apache.commons.compress.java.util.jar.Pack200.Unpacker;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CloseShieldInputStream;
-import org.apache.commons.lang3.reflect.FieldUtils;
 
 /**
  * This class provides the binding between the standard Pack200 interface and the internal interface for (un)packing.
@@ -131,16 +132,19 @@ public class Pack200UnpackerAdapter extends Pack200Adapter implements Unpacker {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T readField(final Object object, final String fieldName) {
+    private static <T> T readField(final Object target, Class<?> cls, final String fieldName) {
+        Objects.requireNonNull(target, "target");
         try {
-            return (T) FieldUtils.readField(object, fieldName, true);
-        } catch (final IllegalAccessException e) {
+            final Field field = cls.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return (T) field.get(target);
+        } catch (final Throwable e) {
             return null;
         }
     }
 
     static String readPathString(final FileInputStream fis) {
-        return readField(fis, "path");
+        return readField(fis, FileInputStream.class, "path");
     }
 
     /**
@@ -150,7 +154,7 @@ public class Pack200UnpackerAdapter extends Pack200Adapter implements Unpacker {
      * @return The wrapped InputStream
      */
     static InputStream unwrap(final FilterInputStream filterInputStream) {
-        return readField(filterInputStream, "in");
+        return readField(filterInputStream, FilterInputStream.class, "in");
     }
 
     /**

@@ -46,9 +46,9 @@ import org.apache.commons.compress.AbstractTest;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.utils.ArrayFill;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
-import org.apache.commons.lang3.ArrayFill;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.compress.compressors.lz77support.LZ77Compressor;
-import org.apache.commons.lang3.ArrayFill;
+import org.apache.commons.compress.utils.ArrayFill;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
