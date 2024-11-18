@@ -21,15 +21,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 
-import org.apache.commons.compress.harmony.archive.internal.nls.Messages;
 import org.apache.commons.io.input.BoundedInputStream;
 
 /**
@@ -259,19 +256,17 @@ public abstract class Pack200 {
     private static final String SYSTEM_PROPERTY_UNPACKER = "java.util.jar.Pack200.Unpacker"; //$NON-NLS-1$
 
     static Object newInstance(final String systemProperty, final String defaultClassName) {
-        return AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            final String className = System.getProperty(systemProperty, defaultClassName);
-            try {
-                // TODO Not sure if this will cause problems loading the class
-                ClassLoader classLoader = Pack200.class.getClassLoader();
-                if (classLoader == null) {
-                    classLoader = Objects.requireNonNull(ClassLoader.getSystemClassLoader(), "ClassLoader.getSystemClassLoader()");
-                }
-                return classLoader.loadClass(className).getConstructor().newInstance();
-            } catch (final Exception e) {
-                throw new Error(Messages.getString("archive.3E", className), e); //$NON-NLS-1$
+        final String className = System.getProperty(systemProperty, defaultClassName);
+        try {
+            // TODO Not sure if this will cause problems loading the class
+            ClassLoader classLoader = Pack200.class.getClassLoader();
+            if (classLoader == null) {
+                classLoader = Objects.requireNonNull(ClassLoader.getSystemClassLoader(), "ClassLoader.getSystemClassLoader()");
             }
-        });
+            return classLoader.loadClass(className).getConstructor().newInstance();
+        } catch (final Exception e) {
+            throw new Error(e);
+        }
     }
 
     /**
