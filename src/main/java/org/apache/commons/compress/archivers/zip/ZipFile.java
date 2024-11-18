@@ -53,13 +53,12 @@ import java.util.stream.IntStream;
 import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
+import org.apache.commons.compress.archivers.ArchiveReaderBuilder;
 import org.apache.commons.compress.archivers.EntryStreamOffsets;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.deflate64.Deflate64CompressorInputStream;
 import org.apache.commons.compress.utils.*;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.build.AbstractOrigin.ByteArrayOrigin;
-import org.apache.commons.io.build.AbstractStreamBuilder;
 import org.apache.commons.io.input.BoundedInputStream;
 
 /**
@@ -124,19 +123,11 @@ public class ZipFile implements Closeable {
      *
      * @since 1.26.0
      */
-    public static class Builder extends AbstractStreamBuilder<ZipFile, Builder> {
+    public static class Builder extends ArchiveReaderBuilder<ZipFile, Builder> {
 
-        static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-        private SeekableByteChannel seekableByteChannel;
         private boolean useUnicodeExtraFields = true;
         private boolean ignoreLocalFileHeader;
         private long maxNumberOfDisks = 1;
-
-        public Builder() {
-            setCharset(DEFAULT_CHARSET);
-            setCharsetDefault(DEFAULT_CHARSET);
-        }
 
         @Override
         public ZipFile get() throws IOException {
@@ -145,20 +136,18 @@ public class ZipFile implements Closeable {
             if (seekableByteChannel != null) {
                 actualChannel = seekableByteChannel;
                 actualDescription = actualChannel.getClass().getSimpleName();
-            } else if (checkOrigin() instanceof ByteArrayOrigin) {
-                actualChannel = new SeekableInMemoryByteChannel(checkOrigin().getByteArray());
-                actualDescription = actualChannel.getClass().getSimpleName();
             } else {
-                OpenOption[] openOptions = getOpenOptions();
+                final Path path = checkPath();
+                OpenOption[] openOptions = this.openOptions;
                 if (openOptions.length == 0) {
                     openOptions = new OpenOption[] { StandardOpenOption.READ };
                 }
-                final Path path = getPath();
+
                 actualChannel = openZipChannel(path, maxNumberOfDisks, openOptions);
                 actualDescription = path.toString();
             }
             final boolean closeOnError = seekableByteChannel != null;
-            return new ZipFile(actualChannel, actualDescription, getCharset(), useUnicodeExtraFields, closeOnError, ignoreLocalFileHeader);
+            return new ZipFile(actualChannel, actualDescription, charset, useUnicodeExtraFields, closeOnError, ignoreLocalFileHeader);
         }
 
         /**
@@ -181,17 +170,6 @@ public class ZipFile implements Closeable {
          */
         public Builder setMaxNumberOfDisks(final long maxNumberOfDisks) {
             this.maxNumberOfDisks = maxNumberOfDisks;
-            return this;
-        }
-
-        /**
-         * The actual channel, overrides any other input aspects like a File, Path, and so on.
-         *
-         * @param seekableByteChannel The actual channel.
-         * @return {@code this} instance.
-         */
-        public Builder setSeekableByteChannel(final SeekableByteChannel seekableByteChannel) {
-            this.seekableByteChannel = seekableByteChannel;
             return this;
         }
 
@@ -845,7 +823,7 @@ public class ZipFile implements Closeable {
     private ZipFile(final SeekableByteChannel channel, final String channelDescription, final Charset encoding, final boolean useUnicodeExtraFields,
             final boolean closeOnError, final boolean ignoreLocalFileHeader) throws IOException {
         this.isSplitZipArchive = channel instanceof ZipSplitReadOnlySeekableByteChannel;
-        this.encoding = Charsets.toCharset(encoding, Builder.DEFAULT_CHARSET);
+        this.encoding = Charsets.toCharset(encoding);
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         this.archive = channel;

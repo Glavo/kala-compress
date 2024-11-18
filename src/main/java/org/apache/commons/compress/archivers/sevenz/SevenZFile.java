@@ -48,12 +48,10 @@ import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
 import org.apache.commons.compress.MemoryLimitException;
+import org.apache.commons.compress.archivers.ArchiveReaderBuilder;
 import org.apache.commons.compress.utils.ByteUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
-import org.apache.commons.io.build.AbstractOrigin.ByteArrayOrigin;
-import org.apache.commons.io.build.AbstractStreamBuilder;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.ChecksumInputStream;
 
@@ -156,14 +154,12 @@ public class SevenZFile implements Closeable {
      *
      * @since 1.26.0
      */
-    public static class Builder extends AbstractStreamBuilder<SevenZFile, Builder> {
+    public static class Builder extends ArchiveReaderBuilder<SevenZFile, Builder> {
 
         static final int MEMORY_LIMIT_IN_KB = Integer.MAX_VALUE;
         static final boolean USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES = false;
         static final boolean TRY_TO_RECOVER_BROKEN_ARCHIVES = false;
 
-        private SeekableByteChannel seekableByteChannel;
-        private String defaultName = DEFAULT_FILE_NAME;
         private byte[] password;
         private int maxMemoryLimitKb = MEMORY_LIMIT_IN_KB;
         private boolean useDefaultNameForUnnamedEntries = USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES;
@@ -173,21 +169,22 @@ public class SevenZFile implements Closeable {
         @Override
         public SevenZFile get() throws IOException {
             final SeekableByteChannel actualChannel;
-            final String actualDescription;
+            String actualDescription = this.originDescription;
             if (seekableByteChannel != null) {
                 actualChannel = seekableByteChannel;
-                actualDescription = defaultName;
-            } else if (checkOrigin() instanceof ByteArrayOrigin) {
-                actualChannel = new SeekableInMemoryByteChannel(checkOrigin().getByteArray());
-                actualDescription = defaultName;
-            } else {
-                OpenOption[] openOptions = getOpenOptions();
-                if (openOptions.length == 0) {
-                    openOptions = new OpenOption[] { StandardOpenOption.READ };
+                if (actualDescription == null) {
+                    actualDescription = DEFAULT_FILE_NAME;
                 }
-                final Path path = getPath();
+            }  else {
+                final Path path = checkPath();
+                OpenOption[] openOptions = this.openOptions;
+                if (openOptions.length == 0) {
+                    openOptions = DEFAULT_OPEN_OPTIONS;
+                }
                 actualChannel = Files.newByteChannel(path, openOptions);
-                actualDescription = path.toAbsolutePath().toString();
+                if (actualDescription == null) {
+                    actualDescription = path.toAbsolutePath().toString();
+                }
             }
             final boolean closeOnError = seekableByteChannel != null;
             return new SevenZFile(actualChannel, actualDescription, password, closeOnError, maxMemoryLimitKb, useDefaultNameForUnnamedEntries,
@@ -199,10 +196,11 @@ public class SevenZFile implements Closeable {
          *
          * @param defaultName the default name.
          * @return {@code this} instance.
+         * @deprecated Use {@link #setOriginDescription(String)}
          */
+        @Deprecated
         public Builder setDefaultName(final String defaultName) {
-            this.defaultName = defaultName;
-            return this;
+            return setOriginDescription(defaultName);
         }
 
         /**
@@ -252,16 +250,6 @@ public class SevenZFile implements Closeable {
             return this;
         }
 
-        /**
-         * Sets the input channel.
-         *
-         * @param seekableByteChannel the input channel.
-         * @return {@code this} instance.
-         */
-        public Builder setSeekableByteChannel(final SeekableByteChannel seekableByteChannel) {
-            this.seekableByteChannel = seekableByteChannel;
-            return this;
-        }
 
         /**
          * Sets whether {@link SevenZFile} will try to recover broken archives where the CRC of the file's metadata is 0.

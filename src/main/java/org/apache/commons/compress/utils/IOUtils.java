@@ -29,6 +29,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 
 /**
  * Utility functions.
@@ -36,6 +37,13 @@ import java.nio.file.LinkOption;
  * @Immutable (has mutable data but it is write-only).
  */
 public final class IOUtils {
+
+    /**
+     * Empty array of type {@link OpenOption}.
+     *
+     * @since 1.27.1-0
+     */
+    public static final OpenOption[] EMPTY_OPEN_OPTIONS = {};
 
     /**
      * Empty array of type {@link LinkOption}.
