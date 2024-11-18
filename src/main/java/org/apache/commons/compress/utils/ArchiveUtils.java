@@ -47,19 +47,6 @@ public class ArchiveUtils {
     }
 
     /**
-     * Compare byte buffers
-     *
-     * @param buffer1 the first buffer
-     * @param buffer2 the second buffer
-     * @return {@code true} if buffer1 and buffer2 have same contents
-     * @deprecated Use {@link Arrays#equals(byte[], byte[])}.
-     */
-    @Deprecated
-    public static boolean isEqual(final byte[] buffer1, final byte[] buffer2) {
-        return Arrays.equals(buffer1, buffer2);
-    }
-
-    /**
      * Compare byte buffers, optionally ignoring trailing nulls
      *
      * @param buffer1             the first buffer

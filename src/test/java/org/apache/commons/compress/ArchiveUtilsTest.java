@@ -70,15 +70,10 @@ public class ArchiveUtilsTest extends AbstractTest {
     public void testCompareBA() {
         final byte[] buffer1 = { 1, 2, 3 };
         final byte[] buffer2 = { 1, 2, 3, 0 };
-        final byte[] buffer3 = { 1, 2, 3 };
         assertTrue(ArchiveUtils.isEqual(buffer1, buffer2, true));
         assertFalse(ArchiveUtils.isEqual(buffer1, buffer2, false));
-        assertFalse(ArchiveUtils.isEqual(buffer1, buffer2));
         assertTrue(ArchiveUtils.isEqual(buffer2, buffer1, true));
         assertFalse(ArchiveUtils.isEqual(buffer2, buffer1, false));
-        assertFalse(ArchiveUtils.isEqual(buffer2, buffer1));
-        assertTrue(ArchiveUtils.isEqual(buffer1, buffer3));
-        assertTrue(ArchiveUtils.isEqual(buffer3, buffer1));
     }
 
     @Test
