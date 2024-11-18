@@ -34,8 +34,8 @@ import java.util.jar.JarOutputStream;
 import org.apache.commons.compress.harmony.pack200.Pack200Adapter;
 import org.apache.commons.compress.harmony.pack200.Pack200Exception;
 import org.apache.commons.compress.java.util.jar.Pack200.Unpacker;
+import org.apache.commons.compress.utils.CloseShieldFilterInputStream;
 import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.io.input.CloseShieldInputStream;
 
 /**
  * This class provides the binding between the standard Pack200 interface and the internal interface for (un)packing.
@@ -66,7 +66,7 @@ public class Pack200UnpackerAdapter extends Pack200Adapter implements Unpacker {
             // Already bound.
             return (BoundedInputStream) inputStream;
         }
-        if (inputStream instanceof CloseShieldInputStream) {
+        if (inputStream instanceof CloseShieldFilterInputStream) {
             // Don't unwrap to keep close shield.
             return newBoundedInputStream(BoundedInputStream.builder().setInputStream(inputStream).get());
         }
