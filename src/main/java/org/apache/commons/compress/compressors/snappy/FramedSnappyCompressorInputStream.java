@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.Arrays;
 
-import org.apache.commons.codec.digest.PureJavaCrc32C;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
 import org.apache.commons.compress.utils.IOUtils;

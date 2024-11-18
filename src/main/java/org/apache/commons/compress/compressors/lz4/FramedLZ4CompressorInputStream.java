@@ -108,10 +108,10 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
     private boolean endReached, inUncompressed;
 
     /** Used for frame header checksum and content checksum, if present. */
-    private final org.apache.commons.codec.digest.XXHash32 contentHash = new org.apache.commons.codec.digest.XXHash32();
+    private final XXHash32 contentHash = new XXHash32();
 
     /** Used for block checksum, if present. */
-    private final org.apache.commons.codec.digest.XXHash32 blockHash = new org.apache.commons.codec.digest.XXHash32();
+    private final XXHash32 blockHash = new XXHash32();
 
     /** Only created if the frame doesn't set the block independence flag. */
     private byte[] blockDependencyBuffer;
@@ -380,7 +380,7 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
         return read;
     }
 
-    private void verifyChecksum(final org.apache.commons.codec.digest.XXHash32 hash, final String kind) throws IOException {
+    private void verifyChecksum(final XXHash32 hash, final String kind) throws IOException {
         final byte[] checksum = new byte[4];
         final int read = IOUtils.readFully(inputStream, checksum);
         count(read);

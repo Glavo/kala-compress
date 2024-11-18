@@ -11,7 +11,6 @@ dependencies {
     implementation("org.brotli:dec:0.1.2")
     implementation("com.github.luben:zstd-jni:1.5.6-7")
     implementation("commons-io:commons-io:2.17.0")
-    implementation("commons-codec:commons-codec:1.17.1")
     implementation("org.ow2.asm:asm:9.7.1")
 
     val junitVersion = "5.11.0"
