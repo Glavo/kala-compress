@@ -1,33 +1,35 @@
 /*
- * Copyright 2024 Glavo
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.commons.compress.compressors.pack200;
 
-import java.io.*;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.SortedMap;
-import java.util.jar.JarInputStream;
+import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
+
+import org.apache.commons.compress.java.util.jar.Pack200;
 
 /**
  * Utility methods for Pack200.
@@ -36,127 +38,6 @@ import java.util.jar.JarOutputStream;
  * @since 1.3
  */
 public class Pack200Utils {
-
-    public static final String JDK_PACK200 = "java.util.jar.Pack200";
-    public static final String GLAVO_PACK200 = "org.glavo.pack200.Pack200";
-    public static final String COMMONS_COMPRESS_PACK200 = "org.apache.commons.compress.java.util.jar.Pack200";
-    public static final String IO_PACK200 = "io.pack200.Pack200";
-
-    private static final String[] BUILTIN_PROVIDERS = {
-            JDK_PACK200, GLAVO_PACK200, COMMONS_COMPRESS_PACK200, IO_PACK200
-    };
-
-    private static volatile Pack200Impl pack200Impl = null;
-    private static volatile String pack200Provider;
-
-
-    /**
-     * Whether to cache the result of the Pack200 check.
-     *
-     * <p>This defaults to {@code true}.</p>
-     * @param doCache whether to cache the result
-     * @since  1.21.0.1
-     */
-    public static synchronized void setCachePack200Availablity(final boolean doCache) {
-        if (doCache) {
-            if (pack200Impl == Pack200Impl.DONT_CACHE) {
-                pack200Impl = null;
-            }
-        } else {
-            pack200Impl = Pack200Impl.DONT_CACHE;
-        }
-    }
-
-    /**
-     * @since 1.21.0.1
-     */
-    public static synchronized void setPack200Provider(String provider) {
-        if (Objects.equals(provider, pack200Provider)) {
-            return;
-        }
-
-        if (provider != null && pack200Impl != null && pack200Impl != Pack200Impl.DONT_CACHE && !pack200Impl.provider.equals(provider)) {
-            pack200Impl = null;
-        }
-        pack200Provider = provider;
-    }
-
-    /**
-     * Are the classes required to support Pack200 compression available?
-     *
-     * @return true if the classes required to support Pack200 compression are available
-     * @since  1.21.0.1
-     */
-    public static boolean isPack200Available() {
-        return Pack200Impl.isAvailable(getPack200Impl());
-    }
-
-    static Pack200Impl getPack200ImplChecked() {
-        Pack200Impl impl = getPack200Impl();
-        if (!Pack200Impl.isAvailable(impl)) {
-            throw new RuntimeException("Pack200 compression is not available"); // TODO
-        }
-        return impl;
-    }
-
-    private static Pack200Impl getPack200Impl() {
-        Pack200Impl impl;
-        if (Pack200Impl.isAvailable(impl = Pack200Utils.pack200Impl)) {
-            return impl;
-        }
-
-        synchronized (Pack200Utils.class) {
-            if (Pack200Impl.isAvailable(impl = Pack200Utils.pack200Impl)) {
-                return impl;
-            }
-
-            impl = internalSearchPack200();
-            if (impl != null && Pack200Utils.pack200Impl != Pack200Impl.DONT_CACHE) {
-                Pack200Utils.pack200Impl = impl;
-            }
-            return impl;
-        }
-    }
-
-    private static Pack200Impl internalSearchPack200() {
-        if (pack200Provider != null) {
-            return internalSearchPack200(pack200Provider);
-        }
-
-        for (String provider : BUILTIN_PROVIDERS) {
-            Pack200Impl impl = internalSearchPack200(provider);
-            if (impl != null) {
-                return impl;
-            }
-        }
-        return null;
-    }
-
-    private static Pack200Impl internalSearchPack200(String provider) {
-        try {
-            Class<?> pack200Class = Class.forName(provider);
-            Class<?> packerClass = Class.forName(provider + "$Packer");
-            Class<?> unpackerClass = Class.forName(provider + "$Unpacker");
-
-            final MethodHandles.Lookup lookup = MethodHandles.publicLookup();
-            final MethodType propertiesType = MethodType.methodType(SortedMap.class);
-
-            MethodHandle newPackerHandle = lookup.findStatic(pack200Class, "newPacker", MethodType.methodType(packerClass));
-            MethodHandle packerPackHandle = lookup.findVirtual(packerClass, "pack", MethodType.methodType(void.class, JarInputStream.class, OutputStream.class));
-            MethodHandle packerPropertiesHandle = lookup.findVirtual(packerClass, "properties", propertiesType);
-
-            MethodHandle newUnpackerHandle = lookup.findStatic(pack200Class, "newUnpacker", MethodType.methodType(unpackerClass));
-            MethodHandle unpackerUnpackHandle = lookup.findVirtual(unpackerClass, "unpack", MethodType.methodType(void.class, InputStream.class, JarOutputStream.class));
-            MethodHandle unpackerPropertiesHandle = lookup.findVirtual(unpackerClass, "properties", propertiesType);
-
-            return new Pack200Impl(provider, newPackerHandle, packerPackHandle, packerPropertiesHandle, newUnpackerHandle, unpackerUnpackHandle, unpackerPropertiesHandle);
-        } catch (Throwable ignored) {
-        }
-
-        return null;
-    }
-
-
     /**
      * Normalizes a JAR archive in-place, so it can be safely signed and packed.
      *
@@ -221,24 +102,21 @@ public class Pack200Utils {
      * @throws IOException if reading or writing fails
      */
     public static void normalize(final File from, final File to, Map<String, String> props) throws IOException {
-        Pack200Impl pack200 = getPack200ImplChecked();
-
         if (props == null) {
             props = new HashMap<>();
         }
-        props.put(Pack200Constants.Packer.SEGMENT_LIMIT, "-1");
+        props.put(Pack200.Packer.SEGMENT_LIMIT, "-1");
         final Path tempFile = Files.createTempFile("commons-compress", "pack200normalize");
         try {
             try (OutputStream fos = Files.newOutputStream(tempFile);
-                    JarInputStream jarFile = new JarInputStream(new FileInputStream(from))) {
-                final Object packer = pack200.newPacker();
-                pack200.getPackerProperties(packer).putAll(props);
-                pack200.pack(packer, jarFile, fos);
+                    JarFile jarFile = new JarFile(from)) {
+                final Pack200.Packer packer = Pack200.newPacker();
+                packer.properties().putAll(props);
+                packer.pack(jarFile, fos);
             }
-            final Object unpacker = pack200.newUnpacker();
-            try (JarOutputStream jos = new JarOutputStream(Files.newOutputStream(to.toPath()));
-                InputStream fis = Files.newInputStream(tempFile)) {
-                pack200.unpack(unpacker, fis, jos);
+            final Pack200.Unpacker unpacker = Pack200.newUnpacker();
+            try (JarOutputStream jos = new JarOutputStream(Files.newOutputStream(to.toPath()))) {
+                unpacker.unpack(tempFile.toFile(), jos);
             }
         } finally {
             Files.delete(tempFile);

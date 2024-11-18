@@ -1,26 +1,33 @@
 /*
- * Copyright 2024 Glavo
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.apache.commons.compress.compressors.pack200;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.jar.JarOutputStream;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.java.util.jar.Pack200;
 
 /**
  * An input stream that decompresses from the Pack200 format to be read as any other stream.
@@ -57,8 +64,6 @@ public class Pack200CompressorInputStream extends CompressorInputStream {
 
         return true;
     }
-
-    private final Pack200Impl pack200 = Pack200Utils.getPack200ImplChecked();
 
     private final InputStream originalInputStream;
 
@@ -127,16 +132,14 @@ public class Pack200CompressorInputStream extends CompressorInputStream {
         this.originalInputStream = inputStream;
         this.abstractStreamBridge = mode.newStreamBridge();
         try (JarOutputStream jarOut = new JarOutputStream(abstractStreamBridge)) {
-            final Object unpacker = pack200.newUnpacker();
+            final Pack200.Unpacker unpacker = Pack200.newUnpacker();
             if (properties != null) {
-                pack200.getUnpackerProperties(unpacker).putAll(properties);
+                unpacker.properties().putAll(properties);
             }
             if (file == null) {
-                pack200.unpack(unpacker, inputStream, jarOut);
+                unpacker.unpack(inputStream, jarOut);
             } else {
-                try (InputStream input = new FileInputStream(file)) {
-                    pack200.unpack(unpacker, input, jarOut);
-                }
+                unpacker.unpack(file, jarOut);
             }
         }
     }
