@@ -19,12 +19,12 @@
 
 package org.apache.commons.compress.compressors.gzip;
 
+import org.apache.commons.compress.utils.Charsets;
+
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.zip.Deflater;
-
-import org.apache.commons.io.Charsets;
 
 
 /**

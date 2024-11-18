@@ -17,13 +17,14 @@
 
 package org.apache.commons.compress.archivers.zip;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.apache.commons.compress.utils.Charsets;
+
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 
-import org.apache.commons.io.Charsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Static helper functions for robustly encoding file names in ZIP files.
