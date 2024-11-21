@@ -18,7 +18,6 @@ package org.apache.commons.compress.utils;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.file.attribute.FileTimes;
@@ -80,18 +79,6 @@ public final class TimeUtils {
     }
 
     /**
-     * Converts NTFS time (100 nanosecond units since 1 January 1601) to Java time.
-     *
-     * @param ntfsTime the NTFS time in 100 nanosecond units.
-     * @return the Date.
-     * @deprecated Use {@link FileTimes#ntfsTimeToDate(long)}.
-     */
-    @Deprecated
-    public static Date ntfsTimeToDate(final long ntfsTime) {
-        return FileTimes.ntfsTimeToDate(ntfsTime);
-    }
-
-    /**
      * Converts NTFS time (100-nanosecond units since 1 January 1601) to a FileTime.
      *
      * @param ntfsTime the NTFS time in 100-nanosecond units.
@@ -102,44 +89,6 @@ public final class TimeUtils {
     @Deprecated
     public static FileTime ntfsTimeToFileTime(final long ntfsTime) {
         return FileTimes.ntfsTimeToFileTime(ntfsTime);
-    }
-
-    /**
-     * Converts {@link FileTime} to a {@link Date}. If the provided FileTime is {@code null}, the returned Date is also {@code null}.
-     *
-     * @param fileTime the file time to be converted.
-     * @return a {@link Date} which corresponds to the supplied time, or {@code null} if the time is {@code null}.
-     * @see FileTimes#toFileTime(Date)
-     * @deprecated Use {@link FileTimes#toDate(FileTime)}.
-     */
-    @Deprecated
-    public static Date toDate(final FileTime fileTime) {
-        return FileTimes.toDate(fileTime);
-    }
-
-    /**
-     * Converts {@link Date} to a {@link FileTime}. If the provided Date is {@code null}, the returned FileTime is also {@code null}.
-     *
-     * @param date the date to be converted.
-     * @return a {@link FileTime} which corresponds to the supplied date, or {@code null} if the date is {@code null}.
-     * @see FileTimes#toDate(FileTime)
-     * @deprecated Use {@link FileTimes#toFileTime(Date)}.
-     */
-    @Deprecated
-    public static FileTime toFileTime(final Date date) {
-        return FileTimes.toFileTime(date);
-    }
-
-    /**
-     * Converts a {@link Date} to NTFS time.
-     *
-     * @param date the Date.
-     * @return the NTFS time.
-     * @deprecated Use {@link FileTimes#toNtfsTime(Date)}.
-     */
-    @Deprecated
-    public static long toNtfsTime(final Date date) {
-        return FileTimes.toNtfsTime(date);
     }
 
     /**

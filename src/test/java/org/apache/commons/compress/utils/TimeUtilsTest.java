@@ -18,22 +18,16 @@ package org.apache.commons.compress.utils;
 
 import static org.apache.commons.compress.utils.TimeUtils.HUNDRED_NANOS_PER_MILLISECOND;
 import static org.apache.commons.compress.utils.TimeUtils.WINDOWS_EPOCH_OFFSET;
-import static org.apache.commons.compress.utils.TimeUtils.ntfsTimeToDate;
 import static org.apache.commons.compress.utils.TimeUtils.ntfsTimeToFileTime;
-import static org.apache.commons.compress.utils.TimeUtils.toDate;
-import static org.apache.commons.compress.utils.TimeUtils.toFileTime;
 import static org.apache.commons.compress.utils.TimeUtils.toNtfsTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.Date;
 import java.util.stream.Stream;
 
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -97,54 +91,10 @@ public class TimeUtilsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("dateToNtfsProvider")
-    public void testJavaTimeToNtfsTime(final String instant, final long ntfsTime) {
-        final long ntfsMillis = Math.floorDiv(ntfsTime, HUNDRED_NANOS_PER_MILLISECOND) * HUNDRED_NANOS_PER_MILLISECOND;
-        final Date parsed = Date.from(Instant.parse(instant));
-        final long converted = toNtfsTime(parsed);
-        assertEquals(ntfsMillis, converted);
-    }
-
-    @ParameterizedTest
     @MethodSource("fileTimeToNtfsProvider")
     public void testNtfsTimeToFileTime(final String instant, final long ntfsTime) {
         final FileTime parsed = FileTime.from(Instant.parse(instant));
         assertEquals(parsed, ntfsTimeToFileTime(ntfsTime));
-    }
-
-    @ParameterizedTest
-    @MethodSource("dateToNtfsProvider")
-    public void testNtfsTimeToJavaTime(final String instant, final long ntfsTime) {
-        final Date converted = ntfsTimeToDate(ntfsTime);
-        assertEquals(Instant.parse(instant), converted.toInstant());
-    }
-
-    @ParameterizedTest
-    @MethodSource("fileTimeToNtfsProvider")
-    public void testToDate(final String instant, final long ignored) {
-        final Instant parsedInstant = Instant.parse(instant);
-        final FileTime parsedFileTime = FileTime.from(parsedInstant);
-        final Date parsedDate = Date.from(parsedInstant);
-        assertEquals(parsedDate, toDate(parsedFileTime));
-    }
-
-    @Test
-    public void testToDateNull() {
-        assertNull(toDate(null));
-    }
-
-    @ParameterizedTest
-    @MethodSource("dateToNtfsProvider")
-    public void testToFileTime(final String instant, final long ignored) {
-        final Instant parsedInstant = Instant.parse(instant);
-        final FileTime parsedFileTime = FileTime.from(parsedInstant);
-        final Date parsedDate = Date.from(parsedInstant);
-        assertEquals(parsedFileTime, toFileTime(parsedDate));
-    }
-
-    @Test
-    public void testToFileTimeNull() {
-        assertNull(toFileTime(null));
     }
 
     @ParameterizedTest
