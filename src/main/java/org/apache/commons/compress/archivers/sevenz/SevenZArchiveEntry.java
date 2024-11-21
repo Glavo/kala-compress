@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.io.file.attribute.FileTimes;
+import org.apache.commons.compress.utils.TimeUtils;
 
 /**
  * An entry in a 7z archive.
@@ -105,7 +105,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      */
     @Deprecated
     public Date getAccessDate() {
-        return FileTimes.toDate(getAccessTime());
+        return TimeUtils.toDate(getAccessTime());
     }
 
     /**
@@ -193,7 +193,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      */
     @Deprecated
     public Date getCreationDate() {
-        return FileTimes.toDate(getCreationTime());
+        return TimeUtils.toDate(getCreationTime());
     }
 
     /**
@@ -348,7 +348,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @see SevenZArchiveEntry#setAccessTime(FileTime)
      */
     public void setAccessDate(final Date accessDate) {
-        setAccessTime(FileTimes.toFileTime(accessDate));
+        setAccessTime(TimeUtils.toFileTime(accessDate));
     }
 
     /**
@@ -357,7 +357,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @param ntfsAccessDate the access date
      */
     public void setAccessDate(final long ntfsAccessDate) {
-        this.accessDate = FileTimes.ntfsTimeToFileTime(ntfsAccessDate);
+        this.accessDate = TimeUtils.ntfsTimeToFileTime(ntfsAccessDate);
     }
 
     /**
@@ -474,7 +474,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @see SevenZArchiveEntry#setCreationTime(FileTime)
      */
     public void setCreationDate(final Date creationDate) {
-        setCreationTime(FileTimes.toFileTime(creationDate));
+        setCreationTime(TimeUtils.toFileTime(creationDate));
     }
 
     /**
@@ -483,7 +483,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @param ntfsCreationDate the creation date
      */
     public void setCreationDate(final long ntfsCreationDate) {
-        this.creationDate = FileTimes.ntfsTimeToFileTime(ntfsCreationDate);
+        this.creationDate = TimeUtils.ntfsTimeToFileTime(ntfsCreationDate);
     }
 
     /**
@@ -569,7 +569,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @see SevenZArchiveEntry#setLastModifiedTime(FileTime)
      */
     public void setLastModifiedDate(final Date lastModifiedDate) {
-        setLastModifiedTime(FileTimes.toFileTime(lastModifiedDate));
+        setLastModifiedTime(TimeUtils.toFileTime(lastModifiedDate));
     }
 
     /**
@@ -578,7 +578,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @param ntfsLastModifiedDate the last modified date
      */
     public void setLastModifiedDate(final long ntfsLastModifiedDate) {
-        this.lastModifiedDate = FileTimes.ntfsTimeToFileTime(ntfsLastModifiedDate);
+        this.lastModifiedDate = TimeUtils.ntfsTimeToFileTime(ntfsLastModifiedDate);
     }
 
     /**

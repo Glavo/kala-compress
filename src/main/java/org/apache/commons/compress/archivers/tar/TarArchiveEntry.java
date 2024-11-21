@@ -51,7 +51,6 @@ import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.ParsingUtils;
 import org.apache.commons.compress.utils.TimeUtils;
-import org.apache.commons.io.file.attribute.FileTimes;
 
 /**
  * An entry in a <a href="https://www.gnu.org/software/tar/manual/html_node/Standard.html">Tar archive</a>.
@@ -211,7 +210,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     private static final Pattern PAX_EXTENDED_HEADER_FILE_TIMES_PATTERN = Pattern.compile("-?\\d{1,19}(?:\\.\\d{1,19})?");
 
     private static FileTime fileTimeFromOptionalSeconds(final long seconds) {
-        return seconds <= 0 ? null : FileTimes.fromUnixTime(seconds);
+        return seconds <= 0 ? null : TimeUtils.unixTimeToFileTime(seconds);
     }
 
     /**
@@ -1465,7 +1464,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
             throw new IOException("broken archive, entry with negative size");
         }
         offset += SIZELEN;
-        mTime = FileTimes.fromUnixTime(parseOctalOrBinary(header, offset, MODTIMELEN, lenient));
+        mTime = TimeUtils.unixTimeToFileTime(parseOctalOrBinary(header, offset, MODTIMELEN, lenient));
         offset += MODTIMELEN;
         checkSumOK = TarUtils.verifyCheckSum(header);
         offset += CHKSUMLEN;

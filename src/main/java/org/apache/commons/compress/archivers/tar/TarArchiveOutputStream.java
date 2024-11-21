@@ -40,7 +40,6 @@ import org.apache.commons.compress.utils.ArrayFill;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.FixedLengthBlockOutputStream;
 import org.apache.commons.compress.utils.TimeUtils;
-import org.apache.commons.io.file.attribute.FileTimes;
 import org.apache.commons.io.output.CountingOutputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -614,7 +613,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
         if (fromModTimeSeconds < 0 || fromModTimeSeconds > TarConstants.MAXSIZE) {
             fromModTimeSeconds = 0;
         }
-        to.setLastModifiedTime(FileTimes.fromUnixTime(fromModTimeSeconds));
+        to.setLastModifiedTime(TimeUtils.unixTimeToFileTime(fromModTimeSeconds));
     }
 
     /**

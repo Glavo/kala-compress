@@ -18,9 +18,8 @@ package org.apache.commons.compress.utils;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.file.attribute.FileTimes;
 
 /**
  * Utility class for handling time-related types and conversions.
@@ -41,6 +40,9 @@ public final class TimeUtils {
     /** The amount of 100-nanosecond intervals in one millisecond. */
     static final long HUNDRED_NANOS_PER_MILLISECOND = TimeUnit.MILLISECONDS.toNanos(1) / 100;
 
+    /** The amount of 100-nanosecond intervals in one second. */
+    private static final long HUNDRED_NANOS_PER_SECOND = TimeUnit.SECONDS.toNanos(1) / 100;
+
     /**
      * <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms724290%28v=vs.85%29.aspx">Windows File Times</a>
      * <p>
@@ -51,6 +53,26 @@ public final class TimeUtils {
     static final long WINDOWS_EPOCH_OFFSET = -116444736000000000L;
 
     /**
+     * Converts {@link FileTime} to a {@link Date}. If the provided FileTime is {@code null}, the returned Date is also {@code null}.
+     *
+     * @param fileTime the file time to be converted.
+     * @return a {@link Date} which corresponds to the supplied time, or {@code null} if the time is {@code null}.
+     */
+    public static Date toDate(final FileTime fileTime) {
+        return fileTime != null ? new Date(fileTime.toMillis()) : null;
+    }
+
+    /**
+     * Converts {@link Date} to a {@link FileTime}. If the provided Date is {@code null}, the returned FileTime is also {@code null}.
+     *
+     * @param date the date to be converted.
+     * @return a {@link FileTime} which corresponds to the supplied date, or {@code null} if the date is {@code null}.
+     */
+    public static FileTime toFileTime(final Date date) {
+        return date != null ? FileTime.fromMillis(date.getTime()) : null;
+    }
+
+    /**
      * Tests whether a FileTime can be safely represented in the standard UNIX time.
      *
      * <p>
@@ -59,11 +81,9 @@ public final class TimeUtils {
      *
      * @param time the FileTime to evaluate, can be null.
      * @return true if the time exceeds the minimum or maximum UNIX time, false otherwise.
-     * @deprecated use {@link FileTimes#isUnixTime(FileTime)}
      */
-    @Deprecated
     public static boolean isUnixTime(final FileTime time) {
-        return FileTimes.isUnixTime(time);
+        return isUnixTime(toUnixTime(time));
     }
 
     /**
@@ -71,11 +91,9 @@ public final class TimeUtils {
      *
      * @param seconds the number of seconds (since Epoch) to evaluate.
      * @return true if the time can be represented in the standard UNIX time, false otherwise.
-     * @deprecated Use {@link FileTimes#isUnixTime(long)}
      */
-    @Deprecated
     public static boolean isUnixTime(final long seconds) {
-        return FileTimes.isUnixTime(seconds);
+        return Integer.MIN_VALUE <= seconds && seconds <= Integer.MAX_VALUE;
     }
 
     /**
@@ -83,12 +101,12 @@ public final class TimeUtils {
      *
      * @param ntfsTime the NTFS time in 100-nanosecond units.
      * @return the FileTime.
-     * @see FileTimes#toNtfsTime(FileTime)
-     * @deprecated Use {@link FileTimes#ntfsTimeToFileTime(long)}.
      */
-    @Deprecated
     public static FileTime ntfsTimeToFileTime(final long ntfsTime) {
-        return FileTimes.ntfsTimeToFileTime(ntfsTime);
+        final long javaHundredsNanos = Math.addExact(ntfsTime, WINDOWS_EPOCH_OFFSET);
+        final long javaSeconds = Math.floorDiv(javaHundredsNanos, HUNDRED_NANOS_PER_SECOND);
+        final long javaNanos = Math.floorMod(javaHundredsNanos, HUNDRED_NANOS_PER_SECOND) * 100;
+        return FileTime.from(Instant.ofEpochSecond(javaSeconds, javaNanos));
     }
 
     /**
@@ -96,12 +114,11 @@ public final class TimeUtils {
      *
      * @param fileTime the FileTime.
      * @return the NTFS time in 100-nanosecond units.
-     * @see FileTimes#ntfsTimeToFileTime(long)
-     * @deprecated Use {@link FileTimes#toNtfsTime(FileTime)}.
      */
-    @Deprecated
     public static long toNtfsTime(final FileTime fileTime) {
-        return FileTimes.toNtfsTime(fileTime);
+        final Instant instant = fileTime.toInstant();
+        final long javaHundredNanos = instant.getEpochSecond() * HUNDRED_NANOS_PER_SECOND + instant.getNano() / 100;
+        return Math.subtractExact(javaHundredNanos, WINDOWS_EPOCH_OFFSET);
     }
 
     /**
@@ -109,11 +126,10 @@ public final class TimeUtils {
      *
      * @param javaTime the Java time.
      * @return the NTFS time.
-     * @deprecated Use {@link FileTimes#toNtfsTime(long)}
      */
-    @Deprecated
     public static long toNtfsTime(final long javaTime) {
-        return FileTimes.toNtfsTime(javaTime);
+        final long javaHundredNanos = javaTime * HUNDRED_NANOS_PER_MILLISECOND;
+        return Math.subtractExact(javaHundredNanos, WINDOWS_EPOCH_OFFSET);
     }
 
     /**
@@ -123,7 +139,7 @@ public final class TimeUtils {
      * @return the UNIX timestamp.
      */
     public static long toUnixTime(final FileTime fileTime) {
-        return FileTimes.toUnixTime(fileTime);
+        return fileTime != null ? fileTime.to(TimeUnit.SECONDS) : 0;
     }
 
     /**
@@ -142,11 +158,9 @@ public final class TimeUtils {
      *
      * @param time UNIX timestamp (in seconds, UTC/GMT).
      * @return the corresponding FileTime.
-     * @deprecated Use {@link FileTimes#fromUnixTime(long)}
      */
-    @Deprecated
     public static FileTime unixTimeToFileTime(final long time) {
-        return FileTimes.fromUnixTime(time);
+        return FileTime.from(time, TimeUnit.SECONDS);
     }
 
     /** Private constructor to prevent instantiation of this utility class. */
