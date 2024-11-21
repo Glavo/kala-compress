@@ -191,6 +191,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @return the new creation date
      * @see SevenZArchiveEntry#getCreationTime()
      */
+    @Deprecated
     public Date getCreationDate() {
         return FileTimes.toDate(getCreationTime());
     }

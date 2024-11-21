@@ -20,7 +20,6 @@ package org.apache.commons.compress.archivers.dump;
 
 import java.nio.file.attribute.FileTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -309,9 +308,9 @@ public class DumpArchiveEntry implements ArchiveEntry {
         entry.setSize(DumpArchiveUtil.convert64(buffer, 40));
 
         long t = 1000L * DumpArchiveUtil.convert32(buffer, 48) + DumpArchiveUtil.convert32(buffer, 52) / 1000;
-        entry.setAccessTime(new Date(t));
+        entry.setAccessTime(FileTime.fromMillis(t));
         t = 1000L * DumpArchiveUtil.convert32(buffer, 56) + DumpArchiveUtil.convert32(buffer, 60) / 1000;
-        entry.setLastModifiedDate(new Date(t));
+        entry.setLastModifiedDate(FileTime.fromMillis(t));
         t = 1000L * DumpArchiveUtil.convert32(buffer, 64) + DumpArchiveUtil.convert32(buffer, 68) / 1000;
         entry.ctime = t;
 
@@ -441,18 +440,22 @@ public class DumpArchiveEntry implements ArchiveEntry {
      * Returns the time the file was last accessed.
      *
      * @return the access time
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
-    public Date getAccessTime() {
-        return new Date(atime);
+    public FileTime getAccessTime() {
+        return FileTime.fromMillis(atime);
     }
 
     /**
      * Gets file creation time.
      *
      * @return the creation time
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
-    public Date getCreationTime() {
-        return new Date(ctime);
+    public FileTime getCreationTime() {
+        return FileTime.fromMillis(ctime);
     }
 
     /**
@@ -709,18 +712,20 @@ public class DumpArchiveEntry implements ArchiveEntry {
      * Sets the time the file was last accessed.
      *
      * @param atime the access time
+     * @since 1.27.1-0
      */
-    public void setAccessTime(final Date atime) {
-        this.atime = atime.getTime();
+    public void setAccessTime(final FileTime atime) {
+        this.atime = atime.toMillis();
     }
 
     /**
      * Sets the file creation time.
      *
      * @param ctime the creation time
+     * @since 1.27.1-0
      */
-    public void setCreationTime(final Date ctime) {
-        this.ctime = ctime.getTime();
+    public void setCreationTime(final FileTime ctime) {
+        this.ctime = ctime.toMillis();
     }
 
     /**
@@ -754,9 +759,10 @@ public class DumpArchiveEntry implements ArchiveEntry {
      * Sets the time the file was last modified.
      *
      * @param mtime the last modified time
+     * @since 1.27.1-0
      */
-    public void setLastModifiedDate(final Date mtime) {
-        this.mtime = mtime.getTime();
+    public void setLastModifiedDate(final FileTime mtime) {
+        this.mtime = mtime.toMillis();
     }
 
     /**

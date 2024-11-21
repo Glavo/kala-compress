@@ -19,13 +19,13 @@
 package org.apache.commons.compress.archivers.dump;
 
 import java.io.IOException;
-import java.util.Date;
+import java.nio.file.attribute.FileTime;
 import java.util.Objects;
 
 import org.apache.commons.compress.archivers.zip.ZipEncoding;
 
 /**
- * This class represents identifying information about a Dump archive volume. It consists the archive's dump date, label, hostname, device name and possibly
+ * This class represents identifying information about a Dump archive volume. It consists the archive's dump time, label, hostname, device name and possibly
  * last mount point plus the volume's volume id and first record number.
  * <p>
  * For the corresponding C structure see the header of {@link DumpArchiveEntry}.
@@ -86,12 +86,13 @@ public class DumpArchiveSummary {
     }
 
     /**
-     * Gets the date of this dump.
+     * Gets the time of this dump.
      *
-     * @return the date of this dump.
+     * @return the time of this dump.
+     * @since 1.27.1-0
      */
-    public Date getDumpDate() {
-        return new Date(dumpDate);
+    public FileTime getDumpTime() {
+        return FileTime.fromMillis(dumpDate);
     }
 
     /**
@@ -160,12 +161,13 @@ public class DumpArchiveSummary {
     }
 
     /**
-     * Gets the date of the previous dump at this level higher.
+     * Gets the time of the previous dump at this level higher.
      *
-     * @return dumpdate may be null
+     * @return dump time may be null
+     * @since 1.27.1-0
      */
-    public Date getPreviousDumpDate() {
-        return new Date(previousDumpDate);
+    public FileTime getPreviousDumpTime() {
+        return FileTime.fromMillis(previousDumpDate);
     }
 
     /**
@@ -237,12 +239,13 @@ public class DumpArchiveSummary {
     }
 
     /**
-     * Sets dump date.
+     * Sets dump time.
      *
-     * @param dumpDate the dump date
+     * @param dumpTime the dump time
+     * @since 1.27.1-0
      */
-    public void setDumpDate(final Date dumpDate) {
-        this.dumpDate = dumpDate.getTime();
+    public void setDumpTime(final FileTime dumpTime) {
+        this.dumpDate = dumpTime.toMillis();
     }
 
     /**
@@ -309,12 +312,13 @@ public class DumpArchiveSummary {
     }
 
     /**
-     * Sets previous dump date.
+     * Sets previous dump time.
      *
-     * @param previousDumpDate the previous dump dat
+     * @param previousDumpTime the previous dump dat
+     * @since 1.27.1-0
      */
-    public void setPreviousDumpDate(final Date previousDumpDate) {
-        this.previousDumpDate = previousDumpDate.getTime();
+    public void setPreviousDumpTime(final FileTime previousDumpTime) {
+        this.previousDumpDate = previousDumpTime.toMillis();
     }
 
     /**
