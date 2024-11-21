@@ -781,21 +781,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     /**
-     * Wraps {@link ZipEntry#getTime} with a {@link Date} as the entry's last modified time.
-     *
-     * <p>
-     * Changes to the implementation of {@link ZipEntry#getTime()} leak through and the returned value may depend on your local time zone as well as
-     * your version of Java.
-     * </p>
-     *
-     * @since 1.27.1-0
-     */
-    @Override
-    public FileTime getLastModifiedTime() {
-        return FileTime.fromMillis(getTime());
-    }
-
-    /**
      * Gets the extra data for the local file data.
      *
      * @return the extra data for local file

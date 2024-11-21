@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -251,7 +250,7 @@ public class SevenZOutputFile implements Closeable {
         try {
             fillDates(inputFile.toPath(), entry);
         } catch (final IOException e) { // NOSONAR
-            entry.setLastModifiedDate(new Date(inputFile.lastModified()));
+            entry.setLastModifiedDate(inputFile.lastModified());
         }
         return entry;
     }

@@ -35,7 +35,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,14 +56,13 @@ import org.junit.jupiter.api.Test;
 
 public class TarArchiveOutputStreamTest extends AbstractTest {
 
-    private static byte[] createTarArchiveContainingOneDirectory(final String fileName, final Date modificationDate) throws IOException {
+    private static byte[] createTarArchiveContainingOneDirectory(final String fileName, final FileTime modificationDate) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (TarArchiveOutputStream tarOut = new TarArchiveOutputStream(baos, 1024)) {
             tarOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
             final TarArchiveEntry tarEntry = new TarArchiveEntry("d");
-            tarEntry.setModTime(modificationDate);
             tarEntry.setMode(TarArchiveEntry.DEFAULT_DIR_MODE);
-            tarEntry.setModTime(modificationDate.getTime());
+            tarEntry.setModTime(modificationDate);
             tarEntry.setName(fileName);
             tarOut.putArchiveEntry(tarEntry);
             tarOut.closeArchiveEntry();
@@ -184,16 +185,16 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         final String longFileName =
             "a/considerably/longer/file/name/which/forces/use/of/the/long/link/header/which/appears/to/always/use/the/current/time/as/modification/date";
         // @formatter:on
-        final Date modificationDate = new Date();
+        final FileTime modificationTime = FileTime.from(Instant.now());
 
-        final byte[] archive1 = createTarArchiveContainingOneDirectory(longFileName, modificationDate);
+        final byte[] archive1 = createTarArchiveContainingOneDirectory(longFileName, modificationTime);
         final byte[] digest1 = MessageDigest.getInstance("MD5").digest(archive1);
 
         // let a second elapse otherwise the modification dates will be equal
         Thread.sleep(1000L);
 
         // now recreate exactly the same tar file
-        final byte[] archive2 = createTarArchiveContainingOneDirectory(longFileName, modificationDate);
+        final byte[] archive2 = createTarArchiveContainingOneDirectory(longFileName, modificationTime);
         // and I would expect the MD5 hash to be the same, but for long names it isn't
         final byte[] digest2 = MessageDigest.getInstance("MD5").digest(archive2);
 
@@ -206,7 +207,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
             final ArchiveEntry nextEntry = tarIn.getNextEntry();
             assertEquals(longFileName, nextEntry.getName());
             // tar archive stores modification time to second granularity only (floored)
-            assertEquals(modificationDate.getTime() / 1000, nextEntry.getLastModifiedDate().getTime() / 1000);
+            assertEquals(modificationTime.toMillis() / 1000, nextEntry.getLastModifiedTime().toMillis() / 1000);
         }
     }
 
