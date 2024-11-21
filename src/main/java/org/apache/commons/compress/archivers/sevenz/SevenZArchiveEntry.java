@@ -37,32 +37,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
 
     static final SevenZArchiveEntry[] EMPTY_SEVEN_Z_ARCHIVE_ENTRY_ARRAY = {};
 
-    /**
-     * Converts Java time to NTFS time.
-     *
-     * @param date the Java time
-     * @return the NTFS time-
-     * @deprecated Use {@link FileTimes#toNtfsTime(Date)} instead.
-     * @see FileTimes#toNtfsTime(Date)
-     */
-    @Deprecated
-    public static long javaTimeToNtfsTime(final Date date) {
-        return FileTimes.toNtfsTime(date);
-    }
-
-    /**
-     * Converts NTFS time (100 nanosecond units since 1 January 1601) to Java time.
-     *
-     * @param ntfsTime the NTFS time in 100 nanosecond units
-     * @return the Java time
-     * @deprecated Use {@link FileTimes#ntfsTimeToDate(long)} instead.
-     * @see FileTimes#ntfsTimeToDate(long)
-     */
-    @Deprecated
-    public static Date ntfsTimeToJavaTime(final long ntfsTime) {
-        return FileTimes.ntfsTimeToDate(ntfsTime);
-    }
-
     private String name;
     private boolean hasStream;
     private boolean isDirectory;

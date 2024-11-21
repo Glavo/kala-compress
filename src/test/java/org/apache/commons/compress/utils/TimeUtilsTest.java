@@ -103,8 +103,6 @@ public class TimeUtilsTest {
         final Date parsed = Date.from(Instant.parse(instant));
         final long converted = toNtfsTime(parsed);
         assertEquals(ntfsMillis, converted);
-        // ensuring the deprecated method still works
-        assertEquals(converted, SevenZArchiveEntry.javaTimeToNtfsTime(parsed));
     }
 
     @ParameterizedTest
@@ -119,8 +117,6 @@ public class TimeUtilsTest {
     public void testNtfsTimeToJavaTime(final String instant, final long ntfsTime) {
         final Date converted = ntfsTimeToDate(ntfsTime);
         assertEquals(Instant.parse(instant), converted.toInstant());
-        // ensuring the deprecated method still works
-        assertEquals(converted, SevenZArchiveEntry.ntfsTimeToJavaTime(ntfsTime));
     }
 
     @ParameterizedTest

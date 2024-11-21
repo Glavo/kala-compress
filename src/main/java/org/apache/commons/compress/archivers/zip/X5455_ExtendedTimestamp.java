@@ -195,7 +195,9 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * since the underlying data offers only per-second precision.
      *
      * @return access time as java.util.Date or null.
+     * @deprecated Use {@link #getAccessFileTime()}
      */
+    @Deprecated
     public Date getAccessJavaTime() {
         return zipLongToDate(accessTime);
     }
@@ -257,7 +259,9 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * </p>
      *
      * @return create time as java.util.Date or null.
+     * @deprecated Use {@link #getCreateFileTime()}
      */
+    @Deprecated
     public Date getCreateJavaTime() {
         return zipLongToDate(createTime);
     }
@@ -359,7 +363,9 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * since the underlying data offers only per-second precision.
      *
      * @return modify time as java.util.Date or null.
+     * @deprecated Use {@link #getModifyFileTime()}
      */
+    @Deprecated
     public Date getModifyJavaTime() {
         return zipLongToDate(modifyTime);
     }
