@@ -492,7 +492,7 @@ public final class ZipTest extends AbstractTest {
             assertEquals("foo/", out.getName());
             assertEquals(0, out.getSize());
             // ZIP stores time with a granularity of 2 seconds
-            assertEquals(beforeArchiveWrite / 2000, out.getLastModifiedDate().getTime() / 2000);
+            assertEquals(beforeArchiveWrite / 2000, out.getTime() / 2000);
             assertTrue(out.isDirectory());
         }
     }
@@ -513,7 +513,7 @@ public final class ZipTest extends AbstractTest {
             assertNotNull(out);
             assertEquals("foo/", out.getName());
             assertEquals(0, out.getSize());
-            assertEquals(beforeArchiveWrite / 2000, out.getLastModifiedDate().getTime() / 2000);
+            assertEquals(beforeArchiveWrite / 2000, out.getTime() / 2000);
             assertTrue(out.isDirectory());
         }
     }
@@ -540,7 +540,7 @@ public final class ZipTest extends AbstractTest {
             assertNotNull(out);
             assertEquals("foo", out.getName());
             assertEquals(tmp.length(), out.getSize());
-            assertEquals(tmp.lastModified() / 2000, out.getLastModifiedDate().getTime() / 2000);
+            assertEquals(tmp.lastModified() / 2000, out.getTime() / 2000);
             assertFalse(out.isDirectory());
         }
     }
@@ -565,7 +565,7 @@ public final class ZipTest extends AbstractTest {
             assertNotNull(out);
             assertEquals("foo", out.getName());
             assertEquals(tmpFile.length(), out.getSize());
-            assertEquals(tmpFile.lastModified() / 2000, out.getLastModifiedDate().getTime() / 2000);
+            assertEquals(tmpFile.lastModified() / 2000, out.getTime() / 2000);
             assertFalse(out.isDirectory());
         }
     }
@@ -850,7 +850,7 @@ public final class ZipTest extends AbstractTest {
             assertNotNull(out);
             assertEquals("foo", out.getName());
             assertEquals(tmpFile.length(), out.getSize());
-            assertEquals(tmpFile.lastModified() / 2000, out.getLastModifiedDate().getTime() / 2000);
+            assertEquals(tmpFile.lastModified() / 2000, out.getTime() / 2000);
             assertFalse(out.isDirectory());
         }
     }

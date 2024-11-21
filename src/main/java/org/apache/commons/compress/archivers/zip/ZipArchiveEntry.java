@@ -158,7 +158,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         DRACONIC(ExtraFieldUtils.UnparseableExtraField.THROW);
 
         private static ZipExtraField fillAndMakeUnrecognizedOnError(final ZipExtraField field, final byte[] data, final int off, final int len,
-                final boolean local) {
+                                                                    final boolean local) {
             try {
                 return ExtraFieldUtils.fillExtraField(field, data, off, len, local);
             } catch (final ZipException ex) {
@@ -256,6 +256,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * <p>
      * The default value -1 means that the method has not been specified.
      * </p>
+     *
      * @see <a href="https://issues.apache.org/jira/browse/COMPRESS-93">COMPRESS-93</a>
      */
     private int method = ZipMethod.UNKNOWN_CODE;
@@ -297,6 +298,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     private long time = -1;
 
     /**
+     *
      */
     protected ZipArchiveEntry() {
         this("");
@@ -326,8 +328,8 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * </p>
      *
      * @param extraFieldFactory custom lookup factory for extra fields or null
-     * @param inputFile file to create the entry from
-     * @param entryName name of the entry
+     * @param inputFile         file to create the entry from
+     * @param entryName         name of the entry
      */
     private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final File inputFile, final String entryName) {
         this(extraFieldFactory, toEntryName(inputFile, entryName));
@@ -350,13 +352,13 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * </p>
      *
      * @param extraFieldFactory custom lookup factory for extra fields or null
-     * @param inputPath path to create the entry from.
-     * @param entryName name of the entry.
-     * @param options   options indicating how symbolic links are handled.
+     * @param inputPath         path to create the entry from.
+     * @param entryName         name of the entry.
+     * @param options           options indicating how symbolic links are handled.
      * @throws IOException if an I/O error occurs.
      */
     private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final Path inputPath, final String entryName,
-            final LinkOption... options) throws IOException {
+                            final LinkOption... options) throws IOException {
         this(extraFieldFactory, toEntryName(inputPath, entryName, options));
         setAttributes(inputPath, options);
     }
@@ -369,7 +371,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * </p>
      *
      * @param extraFieldFactory custom lookup factory for extra fields or null
-     * @param name the name of the entry
+     * @param name              the name of the entry
      */
     private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final String name) {
         super(name);
@@ -385,7 +387,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * </p>
      *
      * @param extraFieldFactory the extra field lookup factory.
-     * @param entry the entry to get fields from
+     * @param entry             the entry to get fields from
      * @throws ZipException on error
      */
     private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final ZipEntry entry) throws ZipException {
@@ -580,13 +582,13 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
             otherComment = "";
         }
         return Objects.equals(getLastModifiedTime(), other.getLastModifiedTime()) && Objects.equals(getLastAccessTime(), other.getLastAccessTime())
-                && Objects.equals(getCreationTime(), other.getCreationTime()) && myComment.equals(otherComment)
-                && getInternalAttributes() == other.getInternalAttributes() && getPlatform() == other.getPlatform()
-                && getExternalAttributes() == other.getExternalAttributes() && getMethod() == other.getMethod() && getSize() == other.getSize()
-                && getCrc() == other.getCrc() && getCompressedSize() == other.getCompressedSize()
-                && Arrays.equals(getCentralDirectoryExtra(), other.getCentralDirectoryExtra())
-                && Arrays.equals(getLocalFileDataExtra(), other.getLocalFileDataExtra()) && localHeaderOffset == other.localHeaderOffset
-                && dataOffset == other.dataOffset && generalPurposeBit.equals(other.generalPurposeBit);
+               && Objects.equals(getCreationTime(), other.getCreationTime()) && myComment.equals(otherComment)
+               && getInternalAttributes() == other.getInternalAttributes() && getPlatform() == other.getPlatform()
+               && getExternalAttributes() == other.getExternalAttributes() && getMethod() == other.getMethod() && getSize() == other.getSize()
+               && getCrc() == other.getCrc() && getCompressedSize() == other.getCompressedSize()
+               && Arrays.equals(getCentralDirectoryExtra(), other.getCentralDirectoryExtra())
+               && Arrays.equals(getLocalFileDataExtra(), other.getLocalFileDataExtra()) && localHeaderOffset == other.localHeaderOffset
+               && dataOffset == other.dataOffset && generalPurposeBit.equals(other.generalPurposeBit);
     }
 
     private ZipExtraField findMatching(final ZipShort headerId, final List<ZipExtraField> fs) {
@@ -708,7 +710,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      *
      * @param includeUnparseable whether to also return unparseable extra fields as {@link UnparseableExtraFieldData} if such data exists.
      * @return an array of the extra fields
-     *
      * @since 1.1
      */
     public ZipExtraField[] getExtraFields(final boolean includeUnparseable) {
@@ -721,7 +722,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @param parsingBehavior controls parsing of extra fields.
      * @return an array of the extra fields
      * @throws ZipException if parsing fails, cannot happen if {@code
-     * parsingBehavior}  is {@link ExtraFieldParsingMode#BEST_EFFORT}.
+     *                      parsingBehavior}  is {@link ExtraFieldParsingMode#BEST_EFFORT}.
      * @since 1.19
      */
     public ZipExtraField[] getExtraFields(final ExtraFieldParsingBehavior parsingBehavior) throws ZipException {
@@ -781,6 +782,22 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     /**
+     * Wraps {@link ZipEntry#getTime} with a {@link Date} as the entry's last modified date.
+     *
+     * <p>
+     * Changes to the implementation of {@link ZipEntry#getTime()} leak through and the returned value may depend on your local time zone as well as
+     * your version of Java.
+     * </p>
+     *
+     * @deprecated Use {@link #getTime()}
+     */
+    @Deprecated
+    @Override
+    public Date getLastModifiedDate() {
+        return new Date(getTime());
+    }
+
+    /**
      * Gets the extra data for the local file data.
      *
      * @return the extra data for local file
@@ -810,7 +827,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * Gets the compression method of this entry, or -1 if the compression method has not been specified.
      *
      * @return compression method
-     *
      * @since 1.1
      */
     @Override
@@ -913,7 +929,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * </p>
      *
      * @return The last modification time of the entry in milliseconds since the epoch, or -1 if not specified
-     *
      * @see #setTime(long)
      * @see #setLastModifiedTime(FileTime)
      */
@@ -938,7 +953,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * Gets up extra field data that couldn't be parsed correctly.
      *
      * @return null if no such field exists.
-     *
      * @since 1.1
      */
     public UnparseableExtraFieldData getUnparseableExtraFieldData() {
@@ -946,7 +960,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     private ZipExtraField[] getUnparseableOnly() {
-        return unparseableExtra == null ? ExtraFieldUtils.EMPTY_ZIP_EXTRA_FIELD_ARRAY : new ZipExtraField[] { unparseableExtra };
+        return unparseableExtra == null ? ExtraFieldUtils.EMPTY_ZIP_EXTRA_FIELD_ARRAY : new ZipExtraField[]{unparseableExtra};
     }
 
     /**
@@ -987,7 +1001,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         if (ze instanceof UnparseableExtraFieldData) {
             unparseableExtra = (UnparseableExtraFieldData) ze;
         } else if (extraFields == null) {
-            extraFields = new ZipExtraField[] { ze };
+            extraFields = new ZipExtraField[]{ze};
         } else {
             if (getExtraField(ze.getHeaderId()) != null) {
                 internalRemoveExtraField(ze.getHeaderId());
@@ -1038,8 +1052,8 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     /**
      * Returns true if this entry represents a unix symlink, in which case the entry's content contains the target path for the symlink.
      *
-     * @since 1.5
      * @return true if the entry represents a unix symlink, false otherwise.
+     * @since 1.5
      */
     public boolean isUnixSymlink() {
         return (getUnixMode() & UnixStat.FILE_TYPE_FLAG) == UnixStat.LINK_FLAG;
@@ -1263,7 +1277,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         } catch (final ZipException e) {
             // actually this is not possible as of Commons Compress 1.1
             throw new IllegalArgumentException("Error parsing extra fields for entry: " // NOSONAR
-                    + getName() + " - " + e.getMessage(), e);
+                                               + getName() + " - " + e.getMessage(), e);
         }
     }
 
@@ -1348,7 +1362,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * Sets the compression method of this entry.
      *
      * @param method compression method
-     *
      * @since 1.1
      */
     @Override
@@ -1441,7 +1454,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     /**
-     *
      * {@inheritDoc}
      *
      * <p>
@@ -1472,10 +1484,10 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     public void setUnixMode(final int mode) {
         // CheckStyle:MagicNumberCheck OFF - no point
         setExternalAttributes(mode << SHORT_SHIFT
-                // MS-DOS read-only attribute
-                | ((mode & 0200) == 0 ? 1 : 0)
-                // MS-DOS directory flag
-                | (isDirectory() ? 0x10 : 0));
+                              // MS-DOS read-only attribute
+                              | ((mode & 0200) == 0 ? 1 : 0)
+                              // MS-DOS directory flag
+                              | (isDirectory() ? 0x10 : 0));
         // CheckStyle:MagicNumberCheck ON
         platform = PLATFORM_UNIX;
     }
