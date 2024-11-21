@@ -1,12 +1,7 @@
 * `SevenZArchiveEntry`:
   * `getCrc`
-  * `getCrcValue`
-  * `setCompressedCrc`
-  * `setCompressedCrcValue`
   * `setCrc`
-  * `setCrcValue`
 * `TarArchiveEntry`
   * `getGroupId`
-  * `getLongGroupId`
   * `getUserId`
   * `getLongUserId`

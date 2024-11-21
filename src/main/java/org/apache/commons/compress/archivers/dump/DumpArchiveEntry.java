@@ -18,6 +18,7 @@
  */
 package org.apache.commons.compress.archivers.dump;
 
+import java.nio.file.attribute.FileTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -515,14 +516,9 @@ public class DumpArchiveEntry implements ArchiveEntry {
         return header.getIno();
     }
 
-    /**
-     * The last modified date.
-     *
-     * @return the last modified date
-     */
     @Override
-    public Date getLastModifiedDate() {
-        return new Date(mtime);
+    public FileTime getLastModifiedTime() {
+        return FileTime.fromMillis(mtime);
     }
 
     /**

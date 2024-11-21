@@ -18,7 +18,7 @@
  */
 package org.apache.commons.compress.archivers.memory;
 
-import java.util.Date;
+import java.nio.file.attribute.FileTime;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 
@@ -31,8 +31,8 @@ public final class MemoryArchiveEntry implements ArchiveEntry {
     }
 
     @Override
-    public Date getLastModifiedDate() {
-        return new Date();
+    public FileTime getLastModifiedTime() {
+        return FileTime.fromMillis(System.currentTimeMillis());
     }
 
     @Override

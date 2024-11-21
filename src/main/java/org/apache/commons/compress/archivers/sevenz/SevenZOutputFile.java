@@ -802,7 +802,7 @@ public class SevenZOutputFile implements Closeable {
         header.write(1); // "allAreDefined" == true
         for (final SevenZArchiveEntry entry : files) {
             if (entry.hasStream()) {
-                header.writeInt(Integer.reverseBytes((int) entry.getCompressedCrcValue()));
+                header.writeInt(Integer.reverseBytes((int) entry.getCompressedCrc()));
             }
         }
 

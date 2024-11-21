@@ -35,7 +35,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -877,22 +876,12 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     }
 
     /**
-     * Gets this entry's modification time. This is equivalent to {@link TarArchiveEntry#getLastModifiedTime()}, but precision is truncated to milliseconds.
-     *
-     * @return This entry's modification time.
-     * @see TarArchiveEntry#getLastModifiedTime()
-     */
-    @Override
-    public Date getLastModifiedDate() {
-        return getModTime();
-    }
-
-    /**
      * Gets this entry's modification time.
      *
      * @since 1.22
      * @return This entry's modification time.
      */
+    @Override
     public FileTime getLastModifiedTime() {
         return mTime;
     }
@@ -919,7 +908,8 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     /**
      * Gets this entry's group id.
      *
-     * @since 1.10
+     * @since 1.27.1-0
+     * @apiNote This method has a different signature in commons-compress.
      * @return This entry's group id.
      */
     public long getGroupId() {
@@ -927,12 +917,37 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     }
 
     /**
+     * Gets this entry's group id.
+     *
+     * @since 1.10
+     * @return This entry's group id.
+     * @deprecated See {@link #getGroupId()}
+     */
+    @Deprecated
+    public long getLongGroupId() {
+        return getGroupId();
+    }
+
+    /**
+     * Gets this entry's user id.
+     *
+     * @return This entry's user id.
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
+     */
+    public long getUserId() {
+        return userId;
+    }
+
+    /**
      * Gets this entry's user id.
      *
      * @return This entry's user id.
      * @since 1.10
+     * @deprecated See {@link #getUserId()}
      */
-    public long getUserId() {
+    @Deprecated
+    public long getLongUserId() {
         return userId;
     }
 
@@ -949,11 +964,12 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * Gets this entry's modification time. This is equivalent to {@link TarArchiveEntry#getLastModifiedTime()}, but precision is truncated to milliseconds.
      *
      * @return This entry's modification time.
+     * @apiNote This method has a different signature in commons-compress.
      * @see TarArchiveEntry#getLastModifiedTime()
+     * @since 1.27.1-0
      */
-    public Date getModTime() {
-        final FileTime fileTime = mTime;
-        return FileTimes.toDate(fileTime);
+    public FileTime getModTime() {
+        return mTime;
     }
 
     /**
@@ -1799,16 +1815,6 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      */
     public void setMode(final int mode) {
         this.mode = mode;
-    }
-
-    /**
-     * Sets this entry's modification time.
-     *
-     * @param time This entry's new modification time.
-     * @see TarArchiveEntry#setLastModifiedTime(FileTime)
-     */
-    public void setModTime(final Date time) {
-        setLastModifiedTime(FileTimes.toFileTime(time));
     }
 
     /**

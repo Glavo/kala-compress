@@ -18,8 +18,11 @@
  */
 package org.apache.commons.compress.archivers;
 
+import org.apache.commons.io.file.attribute.FileTimes;
+
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Date;
 
 /**
@@ -37,8 +40,20 @@ public interface ArchiveEntry {
      *
      * @return the last modified date of this entry.
      * @since 1.1
+     * @deprecated Use {@link #getLastModifiedTime()}
      */
-    Date getLastModifiedDate();
+    @Deprecated
+    default Date getLastModifiedDate() {
+        return FileTimes.toDate(getLastModifiedTime());
+    }
+
+    /**
+     * Gets the last modified time of this entry.
+     *
+     * @return the last modified time of this entry.
+     * @since 1.27.1-0
+     */
+    FileTime getLastModifiedTime();
 
     /**
      * Gets the name of the entry in this archive. May refer to a file or directory or other item.

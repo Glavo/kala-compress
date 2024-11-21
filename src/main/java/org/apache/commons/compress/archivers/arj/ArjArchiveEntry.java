@@ -17,6 +17,7 @@
 package org.apache.commons.compress.archivers.arj;
 
 import java.io.File;
+import java.nio.file.attribute.FileTime;
 import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -139,11 +140,12 @@ public class ArjArchiveEntry implements ArchiveEntry {
      * </p>
      *
      * @return the last modified date
+     * @see 1.27.1-0
      */
     @Override
-    public Date getLastModifiedDate() {
+    public FileTime getLastModifiedTime() {
         final long ts = isHostOsUnix() ? localFileHeader.dateTimeModified * 1000L : ZipUtil.dosToJavaTime(0xFFFFFFFFL & localFileHeader.dateTimeModified);
-        return new Date(ts);
+        return FileTime.fromMillis(ts);
     }
 
     int getMethod() {

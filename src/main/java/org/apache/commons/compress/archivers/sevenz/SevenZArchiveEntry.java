@@ -41,7 +41,7 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * Converts Java time to NTFS time.
      *
      * @param date the Java time
-     * @return the NTFS time
+     * @return the NTFS time-
      * @deprecated Use {@link FileTimes#toNtfsTime(Date)} instead.
      * @see FileTimes#toNtfsTime(Date)
      */
@@ -127,8 +127,9 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      *
      * @throws UnsupportedOperationException if the entry hasn't got an access date.
      * @return the access date
-     * @see SevenZArchiveEntry#getAccessTime()
+     * @deprecated Use {@link #getAccessTime())
      */
+    @Deprecated
     public Date getAccessDate() {
         return FileTimes.toDate(getAccessTime());
     }
@@ -150,21 +151,11 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Gets the compressed CRC.
      *
-     * @return the compressed CRC
-     * @deprecated Use {@link #getCompressedCrcValue()} instead.
-     */
-    @Deprecated
-    int getCompressedCrc() {
-        return (int) compressedCrc;
-    }
-
-    /**
-     * Gets the compressed CRC.
-     *
-     * @since 1.7
      * @return the CRC
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
-    long getCompressedCrcValue() {
+    long getCompressedCrc() {
         return compressedCrc;
     }
 
@@ -199,11 +190,24 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Gets the CRC.
      *
-     * @since 1.7
      * @return the CRC
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
     public long getCrc() {
         return crc;
+    }
+
+    /**
+     * Gets the CRC.
+     *
+     * @since 1.7
+     * @return the CRC
+     * @deprecated Use {@link #getCrc()}
+     */
+    @Deprecated
+    public long getCrcValue() {
+        return getCrc();
     }
 
     /**
@@ -281,24 +285,13 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Gets the last modified date. This is equivalent to {@link SevenZArchiveEntry#getLastModifiedTime()}, but precision is truncated to milliseconds.
-     *
-     * @throws UnsupportedOperationException if the entry hasn't got a last modified date.
-     * @return the last modified date
-     * @see SevenZArchiveEntry#getLastModifiedTime()
-     */
-    @Override
-    public Date getLastModifiedDate() {
-        return FileTimes.toDate(getLastModifiedTime());
-    }
-
-    /**
      * Gets the last modified time.
      *
      * @throws UnsupportedOperationException if the entry hasn't got a last modified time.
      * @return the last modified time
      * @since 1.23
      */
+    @Override
     public FileTime getLastModifiedTime() {
         if (hasLastModifiedDate) {
             return lastModifiedDate;
@@ -417,7 +410,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Sets the compressed CRC.
      *
-     * @since 1.7
      * @param crc the CRC
      */
     void setCompressedCrc(final long crc) {
@@ -480,11 +472,24 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     /**
      * Sets the CRC.
      *
-     * @since 1.7
      * @param crc the CRC
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
     public void setCrc(final long crc) {
         this.crc = crc;
+    }
+
+    /**
+     * Sets the CRC.
+     *
+     * @since 1.7
+     * @param crc the CRC
+     * @deprecated Use {@link #setCrc(long)}
+     */
+    @Deprecated
+    public void setCrcValue(final long crc) {
+        setCrc(crc);
     }
 
     /**

@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.utils.ExactMath;
@@ -578,8 +579,8 @@ public class CpioArchiveEntry implements CpioConstants, ArchiveEntry {
     }
 
     @Override
-    public Date getLastModifiedDate() {
-        return new Date(1000 * getTime());
+    public FileTime getLastModifiedTime() {
+        return FileTime.from(getTime(), TimeUnit.SECONDS);
     }
 
     /**
