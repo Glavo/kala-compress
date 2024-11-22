@@ -21,10 +21,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import org.apache.commons.io.IOExceptionList;
-import org.apache.commons.io.IOIndexedException;
 
 /**
  * Like {@link Consumer} but throws {@link IOException}.
