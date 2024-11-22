@@ -63,7 +63,7 @@ public class IOUtilsTest {
         final InputStream in = new NullInputStream(size);
         final OutputStream out = NullOutputStream.INSTANCE;
         // Test copy() method
-        assertEquals(-1, IOUtils.copy(in, out));
+        assertEquals(size, IOUtils.copy(in, out));
         // reset the input
         in.close();
     }
