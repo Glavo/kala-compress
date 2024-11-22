@@ -24,10 +24,11 @@ import java.io.PushbackInputStream;
 import java.util.Arrays;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
+import org.apache.commons.compress.utils.CountingInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * CompressorInputStream for the framing Snappy format.
@@ -95,7 +96,7 @@ public class FramedSnappyCompressorInputStream extends CompressorInputStream imp
 
     private long unreadBytes;
 
-    private final BoundedInputStream countingStream;
+    private final CountingInputStream countingStream;
 
     /** The underlying stream to read compressed data from */
     private final PushbackInputStream inputStream;
@@ -153,7 +154,7 @@ public class FramedSnappyCompressorInputStream extends CompressorInputStream imp
         if (blockSize <= 0) {
             throw new IllegalArgumentException("blockSize must be bigger than 0");
         }
-        countingStream = BoundedInputStream.builder().setInputStream(in).get();
+        countingStream = new CountingInputStream(in);
         this.inputStream = new PushbackInputStream(countingStream, 1);
         this.blockSize = blockSize;
         this.dialect = dialect;
@@ -192,7 +193,7 @@ public class FramedSnappyCompressorInputStream extends CompressorInputStream imp
      */
     @Override
     public long getCompressedCount() {
-        return countingStream.getCount() - unreadBytes;
+        return countingStream.getBytesRead() - unreadBytes;
     }
 
     /** {@inheritDoc} */
@@ -263,14 +264,7 @@ public class FramedSnappyCompressorInputStream extends CompressorInputStream imp
             } else {
                 expectedChecksum = -1;
             }
-            // @formatter:off
-            currentCompressedChunk = new SnappyCompressorInputStream(BoundedInputStream.builder()
-                    .setInputStream(inputStream)
-                    .setMaxCount(size)
-                    .setPropagateClose(false)
-                    .get(),
-                    blockSize);
-            // @formatter:on
+            currentCompressedChunk = new SnappyCompressorInputStream(new BoundedInputStream(inputStream, size), blockSize);
             // constructor reads uncompressed size
             count(currentCompressedChunk.getBytesRead());
         } else {

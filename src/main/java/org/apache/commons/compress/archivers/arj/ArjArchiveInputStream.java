@@ -28,9 +28,9 @@ import java.util.zip.CRC32;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
+import org.apache.commons.compress.utils.CRC32VerifyingInputStream;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.io.input.ChecksumInputStream;
 
 /**
  * Implements the "arj" archive format as an InputStream.
@@ -138,22 +138,10 @@ public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
 
         currentLocalFileHeader = readLocalFileHeader();
         if (currentLocalFileHeader != null) {
-            // @formatter:off
-            currentInputStream = BoundedInputStream.builder()
-                    .setInputStream(dis)
-                    .setMaxCount(currentLocalFileHeader.compressedSize)
-                    .setPropagateClose(false)
-                    .get();
-            // @formatter:on
+            currentInputStream = new BoundedInputStream(dis, currentLocalFileHeader.compressedSize);
             if (currentLocalFileHeader.method == LocalFileHeader.Methods.STORED) {
-                // @formatter:off
-                currentInputStream = ChecksumInputStream.builder()
-                        .setChecksum(new CRC32())
-                        .setInputStream(currentInputStream)
-                        .setCountThreshold(currentLocalFileHeader.originalSize)
-                        .setExpectedChecksumValue(currentLocalFileHeader.originalCrc32)
-                        .get();
-                // @formatter:on
+                currentInputStream = new CRC32VerifyingInputStream(currentInputStream, currentLocalFileHeader.originalSize,
+                        currentLocalFileHeader.originalCrc32);
             }
             return new ArjArchiveEntry(currentLocalFileHeader);
         }

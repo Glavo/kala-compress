@@ -27,7 +27,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.output.NullOutputStream;
 
 import java.io.*;

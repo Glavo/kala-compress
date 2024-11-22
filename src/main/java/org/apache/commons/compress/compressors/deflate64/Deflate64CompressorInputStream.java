@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.IOUtils;
 
 /**
  * Deflate64 decompressor.

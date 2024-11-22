@@ -24,9 +24,7 @@ import java.util.zip.CRC32;
  *
  * @NotThreadSafe
  * @since 1.6
- * @deprecated Use {@link org.apache.commons.io.input.ChecksumInputStream}.
  */
-@Deprecated
 public class CRC32VerifyingInputStream extends ChecksumVerifyingInputStream {
     /**
      * Constructs a new instance.
@@ -34,9 +32,7 @@ public class CRC32VerifyingInputStream extends ChecksumVerifyingInputStream {
      * @param in            the stream to wrap
      * @param size          the of the stream's content
      * @param expectedCrc32 the expected checksum
-     * @deprecated No longer used.
      */
-    @Deprecated
     public CRC32VerifyingInputStream(final InputStream in, final long size, final int expectedCrc32) {
         this(in, size, expectedCrc32 & 0xFFFFffffL);
     }

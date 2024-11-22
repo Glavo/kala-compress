@@ -26,9 +26,7 @@ import java.util.zip.Checksum;
  *
  * @NotThreadSafe
  * @since 1.7
- * @deprecated Use {@link org.apache.commons.io.input.ChecksumInputStream}.
  */
-@Deprecated
 public class ChecksumVerifyingInputStream extends CheckedInputStream {
     private long remaining;
     private final long expected;

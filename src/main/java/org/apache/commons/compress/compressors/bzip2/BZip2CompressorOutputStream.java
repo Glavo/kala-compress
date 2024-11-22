@@ -23,7 +23,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 
 import org.apache.commons.compress.compressors.CompressorOutputStream;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.compress.utils.IOUtils;
 
 /**
  * An output stream that compresses into the BZip2 format into another stream.

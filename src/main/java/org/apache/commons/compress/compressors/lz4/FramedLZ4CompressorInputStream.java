@@ -24,10 +24,11 @@ import java.util.Arrays;
 import java.util.zip.CheckedInputStream;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
+import org.apache.commons.compress.utils.CountingInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * CompressorInputStream for the LZ4 frame format.
@@ -96,7 +97,7 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
     private final byte[] oneByte = new byte[1];
     private final ByteUtils.ByteSupplier supplier = this::readOneByte;
 
-    private final BoundedInputStream inputStream;
+    private final CountingInputStream inputStream;
     private final boolean decompressConcatenated;
     private boolean expectBlockChecksum;
     private boolean expectBlockDependency;
@@ -135,7 +136,7 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
      * @throws IOException if reading fails
      */
     public FramedLZ4CompressorInputStream(final InputStream in, final boolean decompressConcatenated) throws IOException {
-        this.inputStream = BoundedInputStream.builder().setInputStream(in).get();
+        this.inputStream = new CountingInputStream(in);
         this.decompressConcatenated = decompressConcatenated;
         init(true);
     }
@@ -171,7 +172,7 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
      */
     @Override
     public long getCompressedCount() {
-        return inputStream.getCount();
+        return inputStream.getBytesRead();
     }
 
     private void init(final boolean firstFrame) throws IOException {
@@ -206,13 +207,7 @@ public class FramedLZ4CompressorInputStream extends CompressorInputStream implem
             }
             return;
         }
-        // @formatter:off
-        InputStream capped = BoundedInputStream.builder()
-                .setInputStream(inputStream)
-                .setMaxCount(realLen)
-                .setPropagateClose(false)
-                .get();
-        // @formatter:on
+        InputStream capped = new BoundedInputStream(inputStream, realLen);
         if (expectBlockChecksum) {
             capped = new CheckedInputStream(capped, blockHash);
         }

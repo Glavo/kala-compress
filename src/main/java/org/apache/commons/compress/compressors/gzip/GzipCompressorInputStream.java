@@ -32,9 +32,9 @@ import java.util.zip.Inflater;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
+import org.apache.commons.compress.utils.CountingInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * Input stream that decompresses .gz files.
@@ -98,7 +98,7 @@ public class GzipCompressorInputStream extends CompressorInputStream implements 
         }
     }
 
-    private final BoundedInputStream countingStream;
+    private final CountingInputStream countingStream;
 
     // Compressed input stream, possibly wrapped in a
     // BufferedInputStream, always wrapped in countingStream above
@@ -153,7 +153,7 @@ public class GzipCompressorInputStream extends CompressorInputStream implements 
      * @throws IOException if the stream could not be created
      */
     public GzipCompressorInputStream(final InputStream inputStream, final boolean decompressConcatenated) throws IOException {
-        countingStream = BoundedInputStream.builder().setInputStream(inputStream).get();
+        countingStream = new CountingInputStream(inputStream);
         // Mark support is strictly needed for concatenated files only,
         // but it's simpler if it is always available.
         if (countingStream.markSupported()) {
@@ -188,7 +188,7 @@ public class GzipCompressorInputStream extends CompressorInputStream implements 
      */
     @Override
     public long getCompressedCount() {
-        return countingStream.getCount();
+        return countingStream.getBytesRead();
     }
 
     /**

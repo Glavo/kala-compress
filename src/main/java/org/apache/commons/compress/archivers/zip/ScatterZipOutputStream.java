@@ -30,7 +30,7 @@ import java.util.zip.Deflater;
 
 import org.apache.commons.compress.parallel.FileBasedScatterGatherBackingStore;
 import org.apache.commons.compress.parallel.ScatterGatherBackingStore;
-import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
 
 /**
  * A ZIP output stream that is optimized for multi-threaded scatter/gather construction of ZIP files.
@@ -97,15 +97,9 @@ public class ScatterZipOutputStream implements Closeable {
 
         public void writeNextZipEntry(final ZipArchiveOutputStream target) throws IOException {
             final CompressedEntry compressedEntry = itemsIterator.next();
-            // @formatter:off
-            try (BoundedInputStream rawStream = BoundedInputStream.builder()
-                    .setInputStream(itemsIteratorData)
-                    .setMaxCount(compressedEntry.compressedSize)
-                    .setPropagateClose(false)
-                    .get()) {
+            try (BoundedInputStream rawStream = new BoundedInputStream(itemsIteratorData, compressedEntry.compressedSize)) {
                 target.addRawArchiveEntry(compressedEntry.transferToArchiveEntry(), rawStream);
             }
-            // @formatter:on
         }
     }
 
@@ -220,15 +214,9 @@ public class ScatterZipOutputStream implements Closeable {
         backingStore.closeForWriting();
         try (InputStream data = backingStore.getInputStream()) {
             for (final CompressedEntry compressedEntry : items) {
-                // @formatter:off
-                try (BoundedInputStream rawStream = BoundedInputStream.builder()
-                        .setInputStream(data)
-                        .setMaxCount(compressedEntry.compressedSize)
-                        .setPropagateClose(false)
-                        .get()) {
+                try (BoundedInputStream rawStream = new BoundedInputStream(data, compressedEntry.compressedSize)) {
                     target.addRawArchiveEntry(compressedEntry.transferToArchiveEntry(), rawStream);
                 }
-                // @formatter:on
             }
         }
     }

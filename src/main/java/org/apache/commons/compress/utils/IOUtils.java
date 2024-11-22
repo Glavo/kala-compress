@@ -53,6 +53,19 @@ public final class IOUtils {
     public static final LinkOption[] EMPTY_LINK_OPTIONS = {};
 
     /**
+     * Closes the given {@link Closeable} as a null-safe operation.
+     *
+     * @param closeable The resource to close, may be null.
+     * @throws IOException if an I/O error occurs.
+     * @since 1.27.1-0
+     */
+    public static void close(final Closeable closeable) throws IOException {
+        if (closeable != null) {
+            closeable.close();
+        }
+    }
+
+    /**
      * Closes the given Closeable and swallows any IOException that may occur.
      *
      * @param closeable Closeable to close, can be null

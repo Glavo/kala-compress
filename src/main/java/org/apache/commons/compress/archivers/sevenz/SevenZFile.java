@@ -49,11 +49,7 @@ import java.util.zip.CheckedInputStream;
 
 import org.apache.commons.compress.MemoryLimitException;
 import org.apache.commons.compress.archivers.ArchiveReaderBuilder;
-import org.apache.commons.compress.utils.ByteUtils;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.io.input.ChecksumInputStream;
+import org.apache.commons.compress.utils.*;
 
 /**
  * Reads a 7z file, using SeekableByteChannel under the covers.
@@ -736,14 +732,7 @@ public class SevenZFile implements Closeable {
         }
         entry.setContentMethods(methods);
         if (folder.hasCrc) {
-            // @formatter:off
-            return ChecksumInputStream.builder()
-                    .setChecksum(new CRC32())
-                    .setInputStream(inputStreamStack)
-                    .setCountThreshold(folder.getUnpackSize())
-                    .setExpectedChecksumValue(folder.crc)
-                    .get();
-            // @formatter:on
+            return new CRC32VerifyingInputStream(inputStreamStack, folder.getUnpackSize(), folder.crc);
         }
         return inputStreamStack;
     }
@@ -810,19 +799,9 @@ public class SevenZFile implements Closeable {
             return;
         }
 
-        InputStream fileStream = BoundedInputStream.builder()
-                .setInputStream(currentFolderInputStream)
-                .setMaxCount(file.getSize())
-                .setPropagateClose(false)
-                .get();
+        InputStream fileStream = new BoundedInputStream(currentFolderInputStream, file.getSize());
         if (file.getHasCrc()) {
-            // @formatter:off
-            fileStream = ChecksumInputStream.builder()
-                    .setChecksum(new CRC32())
-                    .setInputStream(fileStream)
-                    .setExpectedChecksumValue(file.getCrc())
-                    .get();
-            // @formatter:on
+            fileStream = new CRC32VerifyingInputStream(fileStream, file.getSize(), file.getCrcValue());
         }
 
         deferredBlockStreams.add(fileStream);
@@ -1042,10 +1021,13 @@ public class SevenZFile implements Closeable {
             final InputStream currentEntryInputStream = deferredBlockStreams.get(deferredBlockStreams.size() - 1);
             // get the bytes remaining to read, and compare it with the size of
             // the file to figure out if the file has been read
-            if (currentEntryInputStream instanceof ChecksumInputStream) {
-                hasCurrentEntryBeenRead = ((ChecksumInputStream) currentEntryInputStream).getRemaining() != archive.files[currentEntryIndex].getSize();
-            } else if (currentEntryInputStream instanceof BoundedInputStream) {
-                hasCurrentEntryBeenRead = ((BoundedInputStream) currentEntryInputStream).getRemaining() != archive.files[currentEntryIndex].getSize();
+            if (currentEntryInputStream instanceof CRC32VerifyingInputStream) {
+                hasCurrentEntryBeenRead = ((CRC32VerifyingInputStream) currentEntryInputStream).getBytesRemaining() != archive.files[currentEntryIndex]
+                        .getSize();
+            }
+
+            if (currentEntryInputStream instanceof BoundedInputStream) {
+                hasCurrentEntryBeenRead = ((BoundedInputStream) currentEntryInputStream).getBytesRemaining() != archive.files[currentEntryIndex].getSize();
             }
         }
         return hasCurrentEntryBeenRead;
@@ -1202,14 +1184,7 @@ public class SevenZFile implements Closeable {
                     folder.getUnpackSizeForCoder(coder), coder, password, maxMemoryLimitKb);
         }
         if (folder.hasCrc) {
-            // @formatter:off
-            inputStreamStack = ChecksumInputStream.builder()
-                    .setChecksum(new CRC32())
-                    .setInputStream(inputStreamStack)
-                    .setCountThreshold(folder.getUnpackSize())
-                    .setExpectedChecksumValue(folder.crc)
-                    .get();
-            // @formatter:on
+            inputStreamStack = new CRC32VerifyingInputStream(inputStreamStack, folder.getUnpackSize(), folder.crc);
         }
         final int unpackSize = assertFitsIntoNonNegativeInt("unpackSize", folder.getUnpackSize());
         final byte[] nextHeader = IOUtils.readRange(inputStreamStack, unpackSize);
@@ -1543,13 +1518,8 @@ public class SevenZFile implements Closeable {
 
     private StartHeader readStartHeader(final long startHeaderCrc) throws IOException {
         // using Stream rather than ByteBuffer for the benefit of the built-in CRC check
-        try (DataInputStream dataInputStream = new DataInputStream(ChecksumInputStream.builder()
-                // @formatter:off
-                .setChecksum(new CRC32())
-                .setInputStream(new BoundedSeekableByteChannelInputStream(channel, 20))
-                .setCountThreshold(20L)
-                .setExpectedChecksumValue(startHeaderCrc)
-                .get())) {
+        try (DataInputStream dataInputStream = new DataInputStream(
+                new CRC32VerifyingInputStream(new BoundedSeekableByteChannelInputStream(channel, 20), 20, startHeaderCrc))) {
                 // @formatter:on
             final long nextHeaderOffset = Long.reverseBytes(dataInputStream.readLong());
             if (nextHeaderOffset < 0 || nextHeaderOffset + SIGNATURE_HEADER_SIZE > channel.size()) {
@@ -2180,20 +2150,9 @@ public class SevenZFile implements Closeable {
 
         for (int i = filesToSkipStartIndex; i < entryIndex; i++) {
             final SevenZArchiveEntry fileToSkip = archive.files[i];
-            InputStream fileStreamToSkip = BoundedInputStream.builder()
-                    .setInputStream(currentFolderInputStream)
-                    .setMaxCount(fileToSkip.getSize())
-                    .setPropagateClose(false)
-                    .get();
+            InputStream fileStreamToSkip = new BoundedInputStream(currentFolderInputStream, fileToSkip.getSize());
             if (fileToSkip.getHasCrc()) {
-                // @formatter:off
-                fileStreamToSkip = ChecksumInputStream.builder()
-                        .setChecksum(new CRC32())
-                        .setInputStream(fileStreamToSkip)
-                        .setCountThreshold(fileToSkip.getSize())
-                        .setExpectedChecksumValue(fileToSkip.getCrc())
-                        .get();
-                // @formatter:on
+                fileStreamToSkip = new CRC32VerifyingInputStream(fileStreamToSkip, fileToSkip.getSize(), fileToSkip.getCrcValue());
             }
             deferredBlockStreams.add(fileStreamToSkip);
 

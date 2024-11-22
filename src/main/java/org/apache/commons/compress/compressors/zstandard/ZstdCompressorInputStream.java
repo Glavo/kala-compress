@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.apache.commons.compress.utils.CountingInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 
 import com.github.luben.zstd.BufferPool;
 import com.github.luben.zstd.ZstdInputStream;
@@ -36,11 +36,11 @@ import com.github.luben.zstd.ZstdInputStream;
  */
 public class ZstdCompressorInputStream extends CompressorInputStream implements InputStreamStatistics {
 
-    private final BoundedInputStream countingStream;
+    private final CountingInputStream countingStream;
     private final ZstdInputStream decIS;
 
     public ZstdCompressorInputStream(final InputStream in) throws IOException {
-        this.decIS = new ZstdInputStream(countingStream = BoundedInputStream.builder().setInputStream(in).get());
+        this.decIS = new ZstdInputStream(countingStream = new CountingInputStream(in));
     }
 
     /**
@@ -52,7 +52,7 @@ public class ZstdCompressorInputStream extends CompressorInputStream implements 
      * @throws IOException if an IO error occurs.
      */
     public ZstdCompressorInputStream(final InputStream in, final BufferPool bufferPool) throws IOException {
-        this.decIS = new ZstdInputStream(countingStream = BoundedInputStream.builder().setInputStream(in).get(), bufferPool);
+        this.decIS = new ZstdInputStream(countingStream = new CountingInputStream(in), bufferPool);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class ZstdCompressorInputStream extends CompressorInputStream implements 
      */
     @Override
     public long getCompressedCount() {
-        return countingStream.getCount();
+        return countingStream.getBytesRead();
     }
 
     @Override

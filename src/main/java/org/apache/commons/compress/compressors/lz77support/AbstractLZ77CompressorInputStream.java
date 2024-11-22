@@ -24,9 +24,9 @@ import java.util.Arrays;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
+import org.apache.commons.compress.utils.CountingInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * Encapsulates code common to LZ77 decompressors.
@@ -90,7 +90,7 @@ public abstract class AbstractLZ77CompressorInputStream extends CompressorInputS
     private int readIndex;
 
     /** The underlying stream to read compressed data from */
-    private final BoundedInputStream in;
+    private final CountingInputStream in;
 
     /** Number of bytes still to be read from the current literal or back-reference. */
     private long bytesRemaining;
@@ -118,7 +118,7 @@ public abstract class AbstractLZ77CompressorInputStream extends CompressorInputS
      * @throws IllegalArgumentException if windowSize is not bigger than 0
      */
     public AbstractLZ77CompressorInputStream(final InputStream is, final int windowSize) {
-        this.in = BoundedInputStream.builder().setInputStream(is).asSupplier().get();
+        this.in = new CountingInputStream(is);
         if (windowSize <= 0) {
             throw new IllegalArgumentException("windowSize must be bigger than 0");
         }
@@ -145,7 +145,7 @@ public abstract class AbstractLZ77CompressorInputStream extends CompressorInputS
      */
     @Override
     public long getCompressedCount() {
-        return in.getCount();
+        return in.getBytesRead();
     }
 
     /**
