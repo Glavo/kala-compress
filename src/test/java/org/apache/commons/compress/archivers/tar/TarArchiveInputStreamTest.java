@@ -55,8 +55,8 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.AbstractTest;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.function.IOConsumer;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.function.IOConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -98,7 +98,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testCompress197ForEach() throws IOException {
         try (TarArchiveInputStream tar = getTestStream("/COMPRESS-197.tar")) {
-            tar.forEach(IOConsumer.noop());
+            tar.forEach(org.apache.commons.compress.function.IOConsumer.noop());
         }
     }
 

@@ -22,12 +22,11 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 import java.util.Objects;
 
+import org.apache.commons.compress.function.IOConsumer;
+import org.apache.commons.compress.function.IOIterator;
 import org.apache.commons.compress.utils.Charsets;
-import org.apache.commons.io.function.IOConsumer;
-import org.apache.commons.io.function.IOIterator;
 import org.apache.commons.io.input.NullInputStream;
 
 /**
@@ -69,7 +68,7 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
         }
 
         @Override
-        public synchronized E next() throws IOException {
+        public E next() throws IOException {
             if (next != null) {
                 final E e = next;
                 next = null;
@@ -77,17 +76,6 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
             }
             return getNextEntry();
         }
-
-        /**
-         * Always returns null, this is a "native" IOIterator.
-         *
-         * @return Always returns null.
-         */
-        @Override
-        public Iterator<E> unwrap() {
-            return null;
-        }
-
     }
 
     private static final int BYTE_MASK = 0xFF;

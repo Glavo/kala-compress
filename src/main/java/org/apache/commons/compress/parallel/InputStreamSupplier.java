@@ -29,6 +29,7 @@ import java.io.InputStream;
  *
  * @since 1.10
  */
+@FunctionalInterface
 public interface InputStreamSupplier {
 
     /**
