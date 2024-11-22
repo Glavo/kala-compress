@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    id("jacoco")
 }
 
 repositories {
@@ -52,5 +53,15 @@ tasks.test {
     exclude("org/apache/commons/compress/osgi/**")
     if ((project.properties["run-it"] ?: "false") != "true") {
         exclude("**/**IT.class")
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(false)
     }
 }

@@ -1,0 +1,13 @@
+name: Gradle Check
+on:
+  push:
+  pull_request:
+jobs:
+  gradle-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Running Tests
+        run: ./gradlew check --info --no-daemon --stacktrace
