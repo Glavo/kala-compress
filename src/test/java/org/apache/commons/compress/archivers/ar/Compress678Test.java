@@ -44,14 +44,20 @@ public class Compress678Test {
         test_LONGFILE_BSD(StringUtils.repeat('x', fileNameLen));
     }
 
+    private static File getTestFile(final String fileName) throws IOException {
+        final File file = new File(fileName);
+        Files.deleteIfExists(file.toPath());
+        file.getParentFile().mkdirs();
+        return file;
+    }
+
     /**
      * @param fileName
      * @throws IOException
      * @throws FileNotFoundException
      */
     private void test_LONGFILE_BSD(final String fileName) throws IOException, FileNotFoundException {
-        final File file = new File("target/Compress678Test-b.ar");
-        Files.deleteIfExists(file.toPath());
+        final File file = getTestFile("target/Compress678Test-b.ar");
         // First entry's name length is longer than 16 bytes and odd
         // data length is odd.
         final byte[] data = { 1 };
@@ -85,8 +91,7 @@ public class Compress678Test {
 
     @Test
     public void test_LONGFILE_ERROR() throws IOException {
-        final File file = new File("target/Compress678Test-a.ar");
-        Files.deleteIfExists(file.toPath());
+        final File file = getTestFile("target/Compress678Test-a.ar");
         // First entry's name length is longer than 16 bytes and odd
         final String name1 = "01234567891234567";
         // data length is odd.
@@ -100,8 +105,7 @@ public class Compress678Test {
 
     @Test
     public void testShortName() throws IOException {
-        final File file = new File("target/Compress678Test-c.ar");
-        Files.deleteIfExists(file.toPath());
+        final File file = getTestFile("target/Compress678Test-c.ar");
         // First entry's name length is <= than 16 bytes and odd
         final String name1 = "0123456789123456";
         // data length is odd.
