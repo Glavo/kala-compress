@@ -279,7 +279,7 @@ public class TarFileTest extends AbstractTest {
             tos.closeArchiveEntry();
         }
         final byte[] data = bos.toByteArray();
-        try (TarFile tarFile = new TarFile(data, encoding.name())) {
+        try (TarFile tarFile = new TarFile(data, encoding)) {
             final List<TarArchiveEntry> entries = tarFile.getEntries();
             assertEquals(1, entries.size());
             assertEquals(name, entries.get(0).getName());

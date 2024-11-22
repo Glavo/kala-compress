@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -207,8 +208,9 @@ public class TarFile implements Closeable {
      * @param content  the content to use
      * @param encoding the encoding to use
      * @throws IOException when reading the tar archive fails
+     * @since 1.27.1-0
      */
-    public TarFile(final byte[] content, final String encoding) throws IOException {
+    public TarFile(final byte[] content, final Charset encoding) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
@@ -240,8 +242,9 @@ public class TarFile implements Closeable {
      * @param archive  the file of the archive to use
      * @param encoding the encoding to use
      * @throws IOException when reading the tar archive fails
+     * @since 1.27.1-0
      */
-    public TarFile(final File archive, final String encoding) throws IOException {
+    public TarFile(final File archive, final Charset encoding) throws IOException {
         this(archive.toPath(), encoding);
     }
 
@@ -273,8 +276,9 @@ public class TarFile implements Closeable {
      * @param archivePath the path of the archive to use
      * @param encoding    the encoding to use
      * @throws IOException when reading the tar archive fails
+     * @since 1.27.1-0
      */
-    public TarFile(final Path archivePath, final String encoding) throws IOException {
+    public TarFile(final Path archivePath, final Charset encoding) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
@@ -298,8 +302,9 @@ public class TarFile implements Closeable {
      * @param lenient    when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
      *                   {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @throws IOException when reading the tar archive fails
+     * @since 1.27.1-0
      */
-    public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final String encoding, final boolean lenient)
+    public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient)
             throws IOException {
         this.archive = archive;
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);

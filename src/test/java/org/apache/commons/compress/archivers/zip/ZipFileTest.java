@@ -218,7 +218,7 @@ public class ZipFileTest extends AbstractTest {
             testCDOrderInMemory(zf);
         }
         try (SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(data)) {
-            zf = new ZipFile(channel, StandardCharsets.UTF_8.name());
+            zf = new ZipFile(channel, StandardCharsets.UTF_8);
             testCDOrderInMemory(zf);
         }
     }

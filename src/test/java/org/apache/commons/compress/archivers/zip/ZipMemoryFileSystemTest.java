@@ -228,7 +228,7 @@ public class ZipMemoryFileSystemTest {
                 }
             }
 
-            try (ZipFile zf = new ZipFile(Files.newByteChannel(target, StandardOpenOption.READ), target.getFileName().toString(), StandardCharsets.UTF_8.name(),
+            try (ZipFile zf = new ZipFile(Files.newByteChannel(target, StandardOpenOption.READ), target.getFileName().toString(), StandardCharsets.UTF_8,
                     true)) {
                 final ZipArchiveEntry b_entry = zf.getEntries("b.txt").iterator().next();
                 assertEquals(8, b_entry.getSize());
@@ -243,7 +243,7 @@ public class ZipMemoryFileSystemTest {
                 }
             }
 
-            try (ZipFile zf = new ZipFile(Files.newByteChannel(target, StandardOpenOption.READ), target.getFileName().toString(), StandardCharsets.UTF_8.name(),
+            try (ZipFile zf = new ZipFile(Files.newByteChannel(target, StandardOpenOption.READ), target.getFileName().toString(), StandardCharsets.UTF_8,
                     true, false)) {
                 final ZipArchiveEntry b_entry = zf.getEntries("b.txt").iterator().next();
                 assertEquals(8, b_entry.getSize());

@@ -299,7 +299,7 @@ public final class TarTest extends AbstractTest {
     @Test
     public void testTarFileCOMPRESS114() throws Exception {
         final File input = getFile("COMPRESS-114.tar");
-        try (TarFile tarFile = new TarFile(input, StandardCharsets.ISO_8859_1.name())) {
+        try (TarFile tarFile = new TarFile(input, StandardCharsets.ISO_8859_1)) {
             final List<TarArchiveEntry> entries = tarFile.getEntries();
             TarArchiveEntry entry = entries.get(0);
             assertEquals("3\u00b1\u00b1\u00b1F06\u00b1W2345\u00b1ZB\u00b1la\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1BLA", entry.getName());
