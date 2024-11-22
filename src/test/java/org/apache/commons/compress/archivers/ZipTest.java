@@ -373,7 +373,7 @@ public final class ZipTest extends AbstractTest {
         final File lastFile = newTempFile("splitZip.zip");
         try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile);
                 InputStream inputStream = Channels.newInputStream(channel);
-                ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, UTF_8.toString(), true, false, true)) {
+                ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, UTF_8, true, false, true)) {
 
             ArchiveEntry entry;
             final int filesNum = countNonDirectories(directoryToZip);

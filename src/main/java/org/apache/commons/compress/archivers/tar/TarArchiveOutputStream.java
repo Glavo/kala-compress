@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -150,44 +151,12 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
     /**
      * Constructs a new instance.
      *
-     * @param os         the output stream to use
-     * @param blockSize  the block size to use
-     * @param recordSize the record size to use. Must be 512 bytes.
-     * @deprecated recordSize must always be 512 bytes. An IllegalArgumentException will be thrown if any other value is used
-     */
-    @Deprecated
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final int recordSize) {
-        this(os, blockSize, recordSize, null);
-    }
-
-    /**
-     * Constructs a new instance.
-     *
-     * @param os         the output stream to use
-     * @param blockSize  the block size to use . Must be a multiple of 512 bytes.
-     * @param recordSize the record size to use. Must be 512 bytes.
-     * @param encoding   name of the encoding to use for file names
-     * @since 1.4
-     * @deprecated recordSize must always be 512 bytes. An IllegalArgumentException will be thrown if any other value is used.
-     */
-    @Deprecated
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final int recordSize, final String encoding) {
-        this(os, blockSize, encoding);
-        if (recordSize != RECORD_SIZE) {
-            throw new IllegalArgumentException("Tar record size must always be 512 bytes. Attempt to set size of " + recordSize);
-        }
-
-    }
-
-    /**
-     * Constructs a new instance.
-     *
      * @param os        the output stream to use
      * @param blockSize the block size to use. Must be a multiple of 512 bytes.
      * @param encoding  name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      */
-    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final String encoding) {
+    public TarArchiveOutputStream(final OutputStream os, final int blockSize, final Charset encoding) {
         super(os);
         final int realBlockSize;
         if (BLOCK_SIZE_UNSPECIFIED == blockSize) {
@@ -216,9 +185,9 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
      *
      * @param os       the output stream to use
      * @param encoding name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      */
-    public TarArchiveOutputStream(final OutputStream os, final String encoding) {
+    public TarArchiveOutputStream(final OutputStream os, final Charset encoding) {
         this(os, BLOCK_SIZE_UNSPECIFIED, encoding);
     }
 

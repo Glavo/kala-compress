@@ -325,7 +325,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
     /**
      * The ZIP encoding to use for file names and the file comment.
      *
-     * This field is of internal use and will be set in {@link #setEncoding(String)}.
+     * This field is of internal use and will be set in {@link #setEncoding(Charset)}.
      */
     private ZipEncoding zipEncoding = ZipEncodingHelper.getZipEncoding(DEFAULT_CHARSET);
 
@@ -1004,9 +1004,11 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      * The encoding to use for file names and the file comment.
      *
      * @return null if using the platform's default character encoding.
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
-    public String getEncoding() {
-        return charset != null ? charset.name() : null;
+    public Charset getEncoding() {
+        return charset;
     }
 
     private ZipEncoding getEntryEncoding(final ZipArchiveEntry ze) {
@@ -1313,14 +1315,6 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
         }
     }
 
-    private void setEncoding(final Charset encoding) {
-        this.charset = encoding;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
-        if (useUTF8Flag && !ZipEncodingHelper.isUTF8(encoding)) {
-            useUTF8Flag = false;
-        }
-    }
-
     /**
      * The encoding to use for file names and the file comment.
      * <p>
@@ -1328,10 +1322,15 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      * Defaults to UTF-8.
      * </p>
      *
-     * @param encoding the encoding to use for file names, use null for the platform's default encoding
+     * @param encoding the encoding to use for file names, use null for the UTF-8
+     * @since 1.27.1-0
      */
-    public void setEncoding(final String encoding) {
-        setEncoding(Charsets.toCharset(encoding));
+    public void setEncoding(final Charset encoding) {
+        this.charset = Charsets.toCharset(encoding);
+        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        if (useUTF8Flag && !ZipEncodingHelper.isUTF8(encoding)) {
+            useUTF8Flag = false;
+        }
     }
 
     /**

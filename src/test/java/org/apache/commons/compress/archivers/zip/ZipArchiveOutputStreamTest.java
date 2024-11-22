@@ -50,10 +50,12 @@ public class ZipArchiveOutputStreamTest extends AbstractTempDirTest {
     @Test
     public void testSetEncoding() throws IOException {
         try (ZipArchiveOutputStream stream = new ZipArchiveOutputStream(createTempFile())) {
-            stream.setEncoding(StandardCharsets.UTF_8.name());
-            assertEquals(StandardCharsets.UTF_8.name(), stream.getEncoding());
+            stream.setEncoding(StandardCharsets.UTF_8);
+            assertEquals(StandardCharsets.UTF_8, stream.getEncoding());
+            stream.setEncoding(StandardCharsets.UTF_16LE);
+            assertEquals(StandardCharsets.UTF_16LE, stream.getEncoding());
             stream.setEncoding(null);
-            assertEquals(Charset.defaultCharset().name(), stream.getEncoding());
+            assertEquals(StandardCharsets.UTF_8, stream.getEncoding());
         }
     }
 }

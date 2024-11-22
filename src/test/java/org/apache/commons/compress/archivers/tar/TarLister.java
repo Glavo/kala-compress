@@ -17,9 +17,12 @@
 
 package org.apache.commons.compress.archivers.tar;
 
+import org.apache.commons.compress.utils.Charsets;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 /**
@@ -86,7 +89,7 @@ public final class TarLister {
             System.err.println(f + " doesn't exist or is a directory");
         }
         try (InputStream fis = new BufferedInputStream(Files.newInputStream(f.toPath()));
-                TarArchiveInputStream ais = args.length > 1 ? new TarArchiveInputStream(fis, args[1]) : new TarArchiveInputStream(fis)) {
+                TarArchiveInputStream ais = args.length > 1 ? new TarArchiveInputStream(fis, Charsets.toCharset(args[1])) : new TarArchiveInputStream(fis)) {
             System.out.println("Created " + ais);
             TarArchiveEntry ae;
             while ((ae = ais.getNextTarEntry()) != null) {

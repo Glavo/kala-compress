@@ -21,6 +21,7 @@ package org.apache.commons.compress.archivers.dump;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -115,11 +116,11 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
      * Constructs a new instance.
      *
      * @param is       stream to read from
-     * @param encoding the encoding to use for file names, use null for the platform's default encoding
-     * @since 1.6
+     * @param encoding the encoding to use for file names, use null for the UTF-8
+     * @since 1.27.1-0
      * @throws ArchiveException on error
      */
-    public DumpArchiveInputStream(final InputStream is, final String encoding) throws ArchiveException {
+    public DumpArchiveInputStream(final InputStream is, final Charset encoding) throws ArchiveException {
         super(is, encoding);
         this.raw = new TapeInputStream(is);
         this.hasHitEOF = false;

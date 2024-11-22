@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.ServiceLoader;
@@ -358,7 +359,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     /**
      * Entry encoding, null for the default.
      */
-    private volatile String entryEncoding;
+    private volatile Charset entryEncoding;
 
     private SortedMap<String, ArchiveStreamProvider> archiveInputStreamProviders;
 
@@ -376,9 +377,9 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      *
      * @param entryEncoding the encoding to be used.
      *
-     * @since 1.10
+     * @since 1.27.1-0
      */
-    public ArchiveStreamFactory(final String entryEncoding) {
+    public ArchiveStreamFactory(final Charset entryEncoding) {
         this.entryEncoding = entryEncoding;
     }
 
@@ -417,7 +418,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     @SuppressWarnings("unchecked")
     @Override
     public <I extends ArchiveInputStream<? extends ArchiveEntry>> I createArchiveInputStream(final String archiverName, final InputStream in,
-            final String actualEncoding) throws ArchiveException {
+            final Charset actualEncoding) throws ArchiveException {
 
         if (archiverName == null) {
             throw new IllegalArgumentException("Archiver name must not be null.");
@@ -497,7 +498,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     @SuppressWarnings("unchecked")
     @Override
     public <O extends ArchiveOutputStream<? extends ArchiveEntry>> O createArchiveOutputStream(final String archiverName, final OutputStream out,
-            final String actualEncoding) throws ArchiveException {
+            final Charset actualEncoding) throws ArchiveException {
         if (archiverName == null) {
             throw new IllegalArgumentException("Archiver name must not be null.");
         }
@@ -575,9 +576,10 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * Gets the encoding to use for arj, jar, ZIP, dump, cpio and tar files, or null for the archiver default.
      *
      * @return entry encoding, or null for the archiver default
-     * @since 1.5
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
-    public String getEntryEncoding() {
+    public Charset getEntryEncoding() {
         return entryEncoding;
     }
 
@@ -589,18 +591,6 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     @Override
     public Set<String> getOutputStreamArchiveNames() {
         return Sets.newHashSet(AR, ZIP, TAR, JAR, CPIO, SEVEN_Z);
-    }
-
-    /**
-     * Sets the encoding to use for arj, jar, ZIP, dump, cpio and tar files. Use null for the archiver default.
-     *
-     * @param entryEncoding the entry encoding, null uses the archiver default.
-     * @since 1.5
-     * @deprecated 1.10 use {@link #ArchiveStreamFactory(String)} to specify the encoding
-     */
-    @Deprecated
-    public void setEntryEncoding(final String entryEncoding) {
-        this.entryEncoding = entryEncoding;
     }
 
 }

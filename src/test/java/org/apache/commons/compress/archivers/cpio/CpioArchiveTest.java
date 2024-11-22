@@ -43,7 +43,7 @@ public class CpioArchiveTest {
     @Test
     public void utf18RoundtripTestCtor2() throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (CpioArchiveOutputStream os = new CpioArchiveOutputStream(baos, StandardCharsets.UTF_8.name())) {
+            try (CpioArchiveOutputStream os = new CpioArchiveOutputStream(baos, StandardCharsets.UTF_8)) {
                 final CpioArchiveEntry entry = new CpioArchiveEntry("Test.txt", 4);
                 os.putArchiveEntry(entry);
                 os.write(new byte[] { 1, 2, 3, 4 });
@@ -51,7 +51,7 @@ public class CpioArchiveTest {
             }
             baos.close();
             try (ByteArrayInputStream bin = new ByteArrayInputStream(baos.toByteArray());
-                    CpioArchiveInputStream in = new CpioArchiveInputStream(bin, StandardCharsets.UTF_8.name())) {
+                    CpioArchiveInputStream in = new CpioArchiveInputStream(bin, StandardCharsets.UTF_8)) {
                 final CpioArchiveEntry entry = in.getNextEntry();
                 assertNotNull(entry);
                 assertEquals("Test.txt", entry.getName());
@@ -88,7 +88,7 @@ public class CpioArchiveTest {
     @MethodSource("factory")
     public void utf18RoundtripTestCtor4(final short format) throws Exception {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            try (CpioArchiveOutputStream os = new CpioArchiveOutputStream(baos, format, CpioConstants.BLOCK_SIZE, StandardCharsets.UTF_16LE.name())) {
+            try (CpioArchiveOutputStream os = new CpioArchiveOutputStream(baos, format, CpioConstants.BLOCK_SIZE, StandardCharsets.UTF_16LE)) {
                 final CpioArchiveEntry entry = new CpioArchiveEntry(format, "T\u00e4st.txt", 4);
                 if (format == CpioConstants.FORMAT_NEW_CRC) {
                     entry.setChksum(10);
@@ -99,7 +99,7 @@ public class CpioArchiveTest {
             }
             baos.close();
             try (ByteArrayInputStream bin = new ByteArrayInputStream(baos.toByteArray());
-                    CpioArchiveInputStream in = new CpioArchiveInputStream(bin, StandardCharsets.UTF_16LE.name())) {
+                    CpioArchiveInputStream in = new CpioArchiveInputStream(bin, StandardCharsets.UTF_16LE)) {
                 final CpioArchiveEntry entry = in.getNextEntry();
                 assertNotNull(entry);
                 assertEquals("T\u00e4st.txt", entry.getName());

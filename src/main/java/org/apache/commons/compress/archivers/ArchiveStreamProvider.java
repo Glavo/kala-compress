@@ -21,6 +21,7 @@ package org.apache.commons.compress.archivers;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 /**
@@ -49,7 +50,7 @@ public interface ArchiveStreamProvider {
      * @throws StreamingNotSupportedException if the format cannot be read from a stream
      * @throws IllegalArgumentException       if the archiver name or stream is null
      */
-    <I extends ArchiveInputStream<? extends ArchiveEntry>> I createArchiveInputStream(String archiverName, InputStream inputStream, String encoding)
+    <I extends ArchiveInputStream<? extends ArchiveEntry>> I createArchiveInputStream(String archiverName, InputStream inputStream, Charset encoding)
             throws ArchiveException;
 
     /**
@@ -68,7 +69,7 @@ public interface ArchiveStreamProvider {
      * @throws StreamingNotSupportedException if the format cannot be written to a stream
      * @throws IllegalArgumentException       if the archiver name or stream is null
      */
-    <O extends ArchiveOutputStream<? extends ArchiveEntry>> O createArchiveOutputStream(String archiverName, OutputStream outputStream, String encoding)
+    <O extends ArchiveOutputStream<? extends ArchiveEntry>> O createArchiveOutputStream(String archiverName, OutputStream outputStream, Charset encoding)
             throws ArchiveException;
 
     /**

@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.utils.Charsets;
 
 /**
  * Simple command line application that lists the contents of a ZIP archive.
@@ -69,7 +70,7 @@ public final class Lister {
         }
         if (cl.useStream) {
             try (BufferedInputStream fs = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
-                final ZipArchiveInputStream zs = new ZipArchiveInputStream(fs, cl.encoding, true, cl.allowStoredEntriesWithDataDescriptor);
+                final ZipArchiveInputStream zs = new ZipArchiveInputStream(fs, Charsets.toCharset(cl.encoding), true, cl.allowStoredEntriesWithDataDescriptor);
                 for (ArchiveEntry entry = zs.getNextEntry(); entry != null; entry = zs.getNextEntry()) {
                     final ZipArchiveEntry ze = (ZipArchiveEntry) entry;
                     list(ze);

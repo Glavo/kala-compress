@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -111,7 +112,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      * @param format The format of the stream
      */
     public CpioArchiveOutputStream(final OutputStream out, final short format) {
-        this(out, format, BLOCK_SIZE, CpioUtil.DEFAULT_CHARSET_NAME);
+        this(out, format, BLOCK_SIZE, CpioUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -124,7 +125,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      * @since 1.1
      */
     public CpioArchiveOutputStream(final OutputStream out, final short format, final int blockSize) {
-        this(out, format, blockSize, CpioUtil.DEFAULT_CHARSET_NAME);
+        this(out, format, blockSize, CpioUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -135,9 +136,9 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      * @param blockSize The block size of the archive.
      * @param encoding  The encoding of file names to write - use null for the platform's default.
      *
-     * @since 1.6
+     * @since 1.27.1-0
      */
-    public CpioArchiveOutputStream(final OutputStream out, final short format, final int blockSize, final String encoding) {
+    public CpioArchiveOutputStream(final OutputStream out, final short format, final int blockSize, final Charset encoding) {
         super(out);
         switch (format) {
         case FORMAT_NEW:
@@ -151,7 +152,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
         }
         this.entryFormat = format;
         this.blockSize = blockSize;
-        this.charsetName = encoding;
+        this.charsetName = encoding != null ? encoding.name() : null;
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
     }
 
@@ -160,9 +161,9 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      *
      * @param out      The cpio stream
      * @param encoding The encoding of file names to write - use null for the platform's default.
-     * @since 1.6
+     * @since 1.27.1-0
      */
-    public CpioArchiveOutputStream(final OutputStream out, final String encoding) {
+    public CpioArchiveOutputStream(final OutputStream out, final Charset encoding) {
         this(out, FORMAT_NEW, BLOCK_SIZE, encoding);
     }
 

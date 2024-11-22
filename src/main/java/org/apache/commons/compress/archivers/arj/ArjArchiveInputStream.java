@@ -22,6 +22,7 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.zip.CRC32;
 
@@ -30,6 +31,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.CRC32VerifyingInputStream;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -44,7 +46,7 @@ import org.apache.commons.compress.utils.IOUtils;
  */
 public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
 
-    private static final String ENCODING_NAME = "CP437";
+    private static final Charset ENCODING = Charsets.toCharset("CP437");
     private static final int ARJ_MAGIC_1 = 0x60;
     private static final int ARJ_MAGIC_2 = 0xEA;
 
@@ -71,18 +73,19 @@ public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
      * @throws ArchiveException if an exception occurs while reading
      */
     public ArjArchiveInputStream(final InputStream inputStream) throws ArchiveException {
-        this(inputStream, ENCODING_NAME);
+        this(inputStream, ENCODING);
     }
 
     /**
      * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in.
      *
      * @param inputStream the underlying stream, whose ownership is taken
-     * @param charsetName the charset used for file names and comments in the archive. May be {@code null} to use the platform default.
+     * @param charset the charset used for file names and comments in the archive. May be {@code null} to use the UTF-8.
      * @throws ArchiveException if an exception occurs while reading
+     * @since 1.27.1-0
      */
-    public ArjArchiveInputStream(final InputStream inputStream, final String charsetName) throws ArchiveException {
-        super(inputStream, charsetName);
+    public ArjArchiveInputStream(final InputStream inputStream, final Charset charset) throws ArchiveException {
+        super(inputStream, charset);
         in = dis = new DataInputStream(inputStream);
         try {
             mainHeader = readMainHeader();

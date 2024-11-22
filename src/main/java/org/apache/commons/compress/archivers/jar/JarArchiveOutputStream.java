@@ -20,6 +20,7 @@ package org.apache.commons.compress.archivers.jar;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.compress.archivers.zip.JarMarker;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -43,9 +44,9 @@ public class JarArchiveOutputStream extends ZipArchiveOutputStream {
      *
      * @param out      the output stream to wrap
      * @param encoding the encoding to use. Use null for the platform default.
-     * @since 1.10
+     * @since 1.27.1-0
      */
-    public JarArchiveOutputStream(final OutputStream out, final String encoding) {
+    public JarArchiveOutputStream(final OutputStream out, final Charset encoding) {
         super(out);
         setEncoding(encoding);
     }

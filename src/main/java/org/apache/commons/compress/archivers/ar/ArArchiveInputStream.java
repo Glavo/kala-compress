@@ -152,7 +152,7 @@ public class ArArchiveInputStream extends ArchiveInputStream<ArArchiveEntry> {
      * @param inputStream the ar input stream
      */
     public ArArchiveInputStream(final InputStream inputStream) {
-        super(inputStream, StandardCharsets.US_ASCII.name());
+        super(inputStream, StandardCharsets.US_ASCII);
     }
 
     private int asInt(final byte[] byteArray, final int offset, final int len) throws IOException {

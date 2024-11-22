@@ -74,7 +74,7 @@ public class CpioArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testCpioUnarchiveMultibyteCharName() throws Exception {
         long count = 0;
-        try (CpioArchiveInputStream in = new CpioArchiveInputStream(newInputStream("COMPRESS-459.cpio"), StandardCharsets.UTF_8.name())) {
+        try (CpioArchiveInputStream in = new CpioArchiveInputStream(newInputStream("COMPRESS-459.cpio"), StandardCharsets.UTF_8)) {
             count = consumeEntries(in);
         }
         assertEquals(2, count);

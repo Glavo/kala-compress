@@ -21,6 +21,7 @@ package org.apache.commons.compress.archivers.cpio;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipEncoding;
@@ -155,7 +156,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
      * @param in The cpio stream
      */
     public CpioArchiveInputStream(final InputStream in) {
-        this(in, BLOCK_SIZE, CpioUtil.DEFAULT_CHARSET_NAME);
+        this(in, BLOCK_SIZE, CpioUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -166,7 +167,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
      * @since 1.5
      */
     public CpioArchiveInputStream(final InputStream in, final int blockSize) {
-        this(in, blockSize, CpioUtil.DEFAULT_CHARSET_NAME);
+        this(in, blockSize, CpioUtil.DEFAULT_CHARSET);
     }
 
     /**
@@ -174,11 +175,11 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
      *
      * @param in        The cpio stream
      * @param blockSize The block size of the archive.
-     * @param encoding  The encoding of file names to expect - use null for the platform's default.
+     * @param encoding  The encoding of file names to expect - use null for the UTF-8
      * @throws IllegalArgumentException if {@code blockSize} is not bigger than 0
-     * @since 1.6
+     * @since 1.27.1-0
      */
-    public CpioArchiveInputStream(final InputStream in, final int blockSize, final String encoding) {
+    public CpioArchiveInputStream(final InputStream in, final int blockSize, final Charset encoding) {
         super(in, encoding);
         this.in = in;
         if (blockSize <= 0) {
@@ -192,10 +193,10 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
      * Constructs the cpio input stream with a blocksize of {@link CpioConstants#BLOCK_SIZE BLOCK_SIZE}.
      *
      * @param in       The cpio stream
-     * @param encoding The encoding of file names to expect - use null for the platform's default.
-     * @since 1.6
+     * @param encoding The encoding of file names to expect - use null for the UTF-8
+     * @since 1.27.1-0
      */
-    public CpioArchiveInputStream(final InputStream in, final String encoding) {
+    public CpioArchiveInputStream(final InputStream in, final Charset encoding) {
         this(in, BLOCK_SIZE, encoding);
     }
 

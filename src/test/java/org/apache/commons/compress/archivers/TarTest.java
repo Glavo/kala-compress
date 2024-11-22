@@ -71,7 +71,7 @@ public final class TarTest extends AbstractTest {
     public void testCOMPRESS114() throws Exception {
         final File input = getFile("COMPRESS-114.tar");
         try (InputStream is = Files.newInputStream(input.toPath());
-                TarArchiveInputStream in = new TarArchiveInputStream(is, StandardCharsets.ISO_8859_1.name())) {
+                TarArchiveInputStream in = new TarArchiveInputStream(is, StandardCharsets.ISO_8859_1)) {
             TarArchiveEntry entry = in.getNextEntry();
             assertEquals("3\u00b1\u00b1\u00b1F06\u00b1W2345\u00b1ZB\u00b1la\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1BLA", entry.getName());
             assertEquals(TarConstants.LF_NORMAL, entry.getLinkFlag());

@@ -26,6 +26,7 @@ import static org.apache.commons.compress.archivers.zip.ZipConstants.ZIP64_MAGIC
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
@@ -41,6 +42,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.deflate64.Deflate64CompressorInputStream;
 import org.apache.commons.compress.utils.ArchiveUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
 
@@ -318,17 +320,17 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
      * @param inputStream the stream to wrap
      */
     public ZipArchiveInputStream(final InputStream inputStream) {
-        this(inputStream, StandardCharsets.UTF_8.name());
+        this(inputStream, StandardCharsets.UTF_8);
     }
 
     /**
      * Constructs an instance using the specified encoding
      *
      * @param inputStream the stream to wrap
-     * @param encoding    the encoding to use for file names, use null for the platform's default encoding
-     * @since 1.5
+     * @param encoding    the encoding to use for file names, use null for the UTF-8
+     * @since 1.27.1-0
      */
-    public ZipArchiveInputStream(final InputStream inputStream, final String encoding) {
+    public ZipArchiveInputStream(final InputStream inputStream, final Charset encoding) {
         this(inputStream, encoding, true);
     }
 
@@ -336,40 +338,43 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
      * Constructs an instance using the specified encoding
      *
      * @param inputStream           the stream to wrap
-     * @param encoding              the encoding to use for file names, use null for the platform's default encoding
+     * @param encoding              the encoding to use for file names, use null for the UTF-8
      * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+     * @since 1.27.1-0
      */
-    public ZipArchiveInputStream(final InputStream inputStream, final String encoding, final boolean useUnicodeExtraFields) {
+    public ZipArchiveInputStream(final InputStream inputStream, final Charset encoding, final boolean useUnicodeExtraFields) {
         this(inputStream, encoding, useUnicodeExtraFields, false);
     }
 
-    /**
-     * Constructs an instance using the specified encoding
-     *
-     * @param inputStream                          the stream to wrap
-     * @param encoding                             the encoding to use for file names, use null for the platform's default encoding
-     * @param useUnicodeExtraFields                whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @param allowStoredEntriesWithDataDescriptor whether the stream will try to read STORED entries that use a data descriptor
-     * @since 1.1
-     */
-    public ZipArchiveInputStream(final InputStream inputStream, final String encoding, final boolean useUnicodeExtraFields,
-            final boolean allowStoredEntriesWithDataDescriptor) {
-        this(inputStream, encoding, useUnicodeExtraFields, allowStoredEntriesWithDataDescriptor, false);
-    }
 
     /**
      * Constructs an instance using the specified encoding
      *
      * @param inputStream                          the stream to wrap
-     * @param encoding                             the encoding to use for file names, use null for the platform's default encoding
+     * @param encoding                             the encoding to use for file names, use null for the UTF-8
+     * @param useUnicodeExtraFields                whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+     * @param allowStoredEntriesWithDataDescriptor whether the stream will try to read STORED entries that use a data descriptor
+     * @since 1.27.1-0
+     */
+    public ZipArchiveInputStream(final InputStream inputStream, final Charset encoding, final boolean useUnicodeExtraFields,
+                                 final boolean allowStoredEntriesWithDataDescriptor) {
+        this(inputStream, encoding, useUnicodeExtraFields, allowStoredEntriesWithDataDescriptor, false);
+    }
+
+
+    /**
+     * Constructs an instance using the specified encoding
+     *
+     * @param inputStream                          the stream to wrap
+     * @param encoding                             the encoding to use for file names, use null for the UTF-8
      * @param useUnicodeExtraFields                whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
      * @param allowStoredEntriesWithDataDescriptor whether the stream will try to read STORED entries that use a data descriptor
      * @param skipSplitSig                         Whether the stream will try to skip the zip split signature(08074B50) at the beginning. You will need to set
      *                                             this to true if you want to read a split archive.
-     * @since 1.20
+     * @since 1.27.1-0
      */
-    public ZipArchiveInputStream(final InputStream inputStream, final String encoding, final boolean useUnicodeExtraFields,
-            final boolean allowStoredEntriesWithDataDescriptor, final boolean skipSplitSig) {
+    public ZipArchiveInputStream(final InputStream inputStream, final Charset encoding, final boolean useUnicodeExtraFields,
+                                 final boolean allowStoredEntriesWithDataDescriptor, final boolean skipSplitSig) {
         super(inputStream, encoding);
         this.in = new PushbackInputStream(inputStream, buf.capacity());
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);

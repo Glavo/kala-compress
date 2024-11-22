@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -267,7 +268,7 @@ public class TarFileTest extends AbstractTest {
     @Test
     public void testShouldUseSpecifiedEncodingWhenReadingGNULongNames() throws Exception {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final String encoding = StandardCharsets.UTF_16.name();
+        final Charset encoding = StandardCharsets.UTF_16;
         final String name = "1234567890123456789012345678901234567890123456789" + "01234567890123456789012345678901234567890123456789" + "01234567890\u00e4";
         try (TarArchiveOutputStream tos = new TarArchiveOutputStream(bos, encoding)) {
             tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
@@ -278,7 +279,7 @@ public class TarFileTest extends AbstractTest {
             tos.closeArchiveEntry();
         }
         final byte[] data = bos.toByteArray();
-        try (TarFile tarFile = new TarFile(data, encoding)) {
+        try (TarFile tarFile = new TarFile(data, encoding.name())) {
             final List<TarArchiveEntry> entries = tarFile.getEntries();
             assertEquals(1, entries.size());
             assertEquals(name, entries.get(0).getName());

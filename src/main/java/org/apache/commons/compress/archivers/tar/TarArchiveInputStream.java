@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -166,9 +167,9 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      * @param blockSize   the block size to use
      * @param recordSize  the record size to use
      * @param encoding    name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      */
-    public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final int recordSize, final String encoding) {
+    public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final int recordSize, final Charset encoding) {
         this(inputStream, blockSize, recordSize, encoding, false);
     }
 
@@ -181,9 +182,9 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      * @param encoding    name of the encoding to use for file names
      * @param lenient     when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
      *                    {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an exception instead.
-     * @since 1.19
+     * @since 1.27.1-0
      */
-    public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final int recordSize, final String encoding, final boolean lenient) {
+    public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient) {
         super(inputStream, encoding);
         this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
         this.recordBuffer = new byte[recordSize];
@@ -197,9 +198,9 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      * @param inputStream the input stream to use
      * @param blockSize   the block size to use
      * @param encoding    name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      */
-    public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final String encoding) {
+    public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final Charset encoding) {
         this(inputStream, blockSize, TarConstants.DEFAULT_RCDSIZE, encoding);
     }
 
@@ -208,9 +209,9 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      *
      * @param inputStream the input stream to use
      * @param encoding    name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      */
-    public TarArchiveInputStream(final InputStream inputStream, final String encoding) {
+    public TarArchiveInputStream(final InputStream inputStream, final Charset encoding) {
         this(inputStream, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding);
     }
 
