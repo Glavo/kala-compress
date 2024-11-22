@@ -58,6 +58,8 @@ public final class IOUtils {
      */
     public static final LinkOption[] EMPTY_LINK_OPTIONS = {};
 
+    private static final byte[] SKIP_BUFFER = new byte[DEFAULT_BUFFER_SIZE];
+
     /**
      * Closes the given {@link Closeable} as a null-safe operation.
      *
@@ -303,9 +305,8 @@ public final class IOUtils {
         //
         long remain = toSkip;
         while (remain > 0) {
-            final byte[] skipBuffer = new byte[8192];
             // See https://issues.apache.org/jira/browse/IO-203 for why we use read() rather than delegating to skip()
-            final long n = input.read(skipBuffer, 0, (int) Math.min(remain, skipBuffer.length));
+            final long n = input.read(SKIP_BUFFER, 0, (int) Math.min(remain, SKIP_BUFFER.length));
             if (n < 0) { // EOF
                 break;
             }
