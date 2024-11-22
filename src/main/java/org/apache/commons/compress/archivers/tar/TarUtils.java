@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +46,7 @@ public class TarUtils {
 
     private static final int BYTE_MASK = 255;
 
-    static final ZipEncoding DEFAULT_ENCODING = ZipEncodingHelper.getZipEncoding(Charset.defaultCharset());
+    static final ZipEncoding DEFAULT_ENCODING = ZipEncodingHelper.getZipEncoding(StandardCharsets.UTF_8);
 
     /**
      * Encapsulates the algorithms used up to Commons Compress 1.3 as ZipEncoding.
@@ -107,7 +106,7 @@ public class TarUtils {
         // archive (deprecating the existing public methods, of
         // course) and dealing with the fact that ZipEncoding#decode
         // can throw an IOException which parseOctal* doesn't declare
-        String string = new String(buffer, offset, length, Charset.defaultCharset());
+        String string = new String(buffer, offset, length, StandardCharsets.UTF_8);
 
         string = string.replace("\0", "{NUL}"); // Replace NULs to allow string to be printed
         return "Invalid byte " + currentByte + " at offset " + (current - offset) + " in '" + string + "' len=" + length;

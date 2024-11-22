@@ -21,7 +21,7 @@ package org.apache.commons.compress.archivers.zip;
 import static org.apache.commons.compress.archivers.zip.ZipConstants.SHORT;
 import static org.apache.commons.compress.archivers.zip.ZipConstants.WORD;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.CRC32;
 import java.util.zip.ZipException;
 
@@ -56,7 +56,7 @@ import java.util.zip.ZipException;
  *
  *                <p>
  *                Since the documentation this class is based upon doesn't mention the character encoding of the file name at all, it is assumed that it uses
- *                the current platform's default encoding.
+ *                the UTF-8.
  *                </p>
  */
 public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
@@ -169,7 +169,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
         final byte[] data = new byte[getLocalFileDataLength().getValue() - WORD];
         System.arraycopy(ZipShort.getBytes(getMode()), 0, data, 0, 2);
 
-        final byte[] linkArray = getLinkedFile().getBytes(Charset.defaultCharset()); // Uses default charset - see class Javadoc
+        final byte[] linkArray = getLinkedFile().getBytes(StandardCharsets.UTF_8);
         // CheckStyle:MagicNumber OFF
         System.arraycopy(ZipLong.getBytes(linkArray.length), 0, data, 2, WORD);
 
@@ -202,7 +202,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
                           + WORD      // SizDev
                           + 2         // UID
                           + 2         // GID
-                          + getLinkedFile().getBytes(Charset.defaultCharset()).length);
+                          + getLinkedFile().getBytes(StandardCharsets.UTF_8).length);
                           // Uses default charset - see class Javadoc
         // @formatter:on
     }
@@ -304,7 +304,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
         } else {
             final byte[] linkArray = new byte[linkArrayLength];
             System.arraycopy(tmp, 10, linkArray, 0, linkArrayLength);
-            link = new String(linkArray, Charset.defaultCharset()); // Uses default charset - see class Javadoc
+            link = new String(linkArray, StandardCharsets.UTF_8);
         }
         // CheckStyle:MagicNumber ON
         setDirectory((newMode & DIR_FLAG) != 0);

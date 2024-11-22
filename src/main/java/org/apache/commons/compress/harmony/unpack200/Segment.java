@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -453,7 +454,7 @@ public class Segment {
     }
 
     public void setLogStream(final OutputStream logStream) {
-        this.logStream = new PrintWriter(new OutputStreamWriter(logStream, Charset.defaultCharset()), false);
+        this.logStream = new PrintWriter(new OutputStreamWriter(logStream, StandardCharsets.UTF_8), false);
     }
 
     public void setPreRead(final boolean value) {

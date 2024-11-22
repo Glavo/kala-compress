@@ -102,7 +102,7 @@ public class ZipEncodingTest {
         assertNotNull(ze);
         if (ze instanceof CharsetAccessor) {
             final CharsetAccessor hasCharset = (CharsetAccessor) ze;
-            Assertions.assertEquals(Charset.defaultCharset(), hasCharset.getCharset());
+            Assertions.assertEquals(StandardCharsets.UTF_8, hasCharset.getCharset());
         }
     }
 
@@ -110,8 +110,8 @@ public class ZipEncodingTest {
     public void testIsUTF8() {
         assertTrue(ZipEncodingHelper.isUTF8(StandardCharsets.UTF_8.name()));
         assertTrue(ZipEncodingHelper.isUTF8("UTF8"));
-        Assertions.assertEquals(Charset.defaultCharset().name().equals(StandardCharsets.UTF_8.name()), ZipEncodingHelper.isUTF8((Charset) null));
-        Assertions.assertEquals(Charset.defaultCharset().name().equals(StandardCharsets.UTF_8.name()), ZipEncodingHelper.isUTF8((String) null));
+        assertTrue(ZipEncodingHelper.isUTF8((Charset) null));
+        assertTrue(ZipEncodingHelper.isUTF8((String) null));
     }
 
     @Test

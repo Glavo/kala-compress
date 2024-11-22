@@ -79,7 +79,7 @@ public abstract class ZipEncodingHelper {
      * @param charset If the given charset is null, then check the platform's default encoding.
      */
     static boolean isUTF8(final Charset charset) {
-        return isUTF8Alias(Charsets.toCharset(charset).name());
+        return charset == null || charset == UTF_8;
     }
 
     /**
@@ -88,7 +88,7 @@ public abstract class ZipEncodingHelper {
      * @param charsetName If the given name is null, then check the platform's default encoding.
      */
     static boolean isUTF8(final String charsetName) {
-        return isUTF8Alias(charsetName != null ? charsetName : Charset.defaultCharset().name());
+        return charsetName == null || isUTF8Alias(charsetName);
     }
 
     private static boolean isUTF8Alias(final String actual) {
@@ -96,7 +96,7 @@ public abstract class ZipEncodingHelper {
     }
 
     private static Charset toSafeCharset(final String name) {
-        Charset charset = Charset.defaultCharset();
+        Charset charset = UTF_8;
         try {
             charset = Charsets.toCharset(name);
         } catch (final UnsupportedCharsetException ignored) {

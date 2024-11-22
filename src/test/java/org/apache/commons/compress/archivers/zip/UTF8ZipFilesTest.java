@@ -223,12 +223,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     @Test
     public void testReadWinZipArchive() throws IOException {
         final File archive = getFile("utf8-winzip-test.zip");
-        // fix for test fails on Windows with default charset that is not UTF-8
-        String encoding = null;
-        if (Charset.defaultCharset() != UTF_8) {
-            encoding = UTF_8.name();
-        }
-        try (ZipFile zf = ZipFile.builder().setFile(archive).setCharset(encoding).setUseUnicodeExtraFields(true).get()) {
+        try (ZipFile zf = ZipFile.builder().setFile(archive).setUseUnicodeExtraFields(true).get()) {
             assertCanRead(zf, ASCII_TXT);
             assertCanRead(zf, EURO_FOR_DOLLAR_TXT);
             assertCanRead(zf, OIL_BARREL_TXT);

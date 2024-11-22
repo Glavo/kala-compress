@@ -22,6 +22,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.apache.commons.compress.function.IOConsumer;
@@ -92,7 +93,7 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
      */
     @SuppressWarnings("resource")
     public ArchiveInputStream() {
-        this(new NullInputStream(), Charset.defaultCharset());
+        this(new NullInputStream(), StandardCharsets.UTF_8);
     }
 
     /**
