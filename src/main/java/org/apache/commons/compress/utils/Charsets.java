@@ -132,10 +132,7 @@ public class Charsets {
      * @see CharsetEncoder#canEncode(CharSequence)
      */
     public static boolean canEncode(Charset charset, String name) {
-        if (charset == StandardCharsets.UTF_8
-            || charset == StandardCharsets.UTF_16
-            || charset == StandardCharsets.UTF_16LE
-            || charset == StandardCharsets.UTF_16BE) {
+        if (charset == StandardCharsets.UTF_8 || charset.name().startsWith("UTF-")) {
             final int length = name.length();
             for (int i = 0; i < length; i++) {
                 char ch = name.charAt(i);

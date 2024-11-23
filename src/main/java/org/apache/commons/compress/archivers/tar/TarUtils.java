@@ -49,41 +49,6 @@ public class TarUtils {
     static final ZipEncoding DEFAULT_ENCODING = ZipEncodingHelper.getZipEncoding(StandardCharsets.UTF_8);
 
     /**
-     * Encapsulates the algorithms used up to Commons Compress 1.3 as ZipEncoding.
-     */
-    static final ZipEncoding FALLBACK_ENCODING = new ZipEncoding() {
-
-        @Override
-        public boolean canEncode(final String name) {
-            return true;
-        }
-
-        @Override
-        public String decode(final byte[] buffer) {
-            final int length = buffer.length;
-            final StringBuilder result = new StringBuilder(length);
-            for (final byte b : buffer) {
-                if (b == 0) { // Trailing null
-                    break;
-                }
-                result.append((char) (b & 0xFF)); // Allow for sign-extension
-            }
-            return result.toString();
-        }
-
-        @Override
-        public ByteBuffer encode(final String name) {
-            final int length = name.length();
-            final byte[] buf = new byte[length];
-            // copy until end of input or output is reached.
-            for (int i = 0; i < length; ++i) {
-                buf[i] = (byte) name.charAt(i);
-            }
-            return ByteBuffer.wrap(buf);
-        }
-    };
-
-    /**
      * Computes the checksum of a tar entry header.
      *
      * @param buf The tar entry's header buffer.
@@ -228,12 +193,8 @@ public class TarUtils {
         try {
             return formatNameBytes(name, buf, offset, length, DEFAULT_ENCODING);
         } catch (final IOException ex) { // NOSONAR
-            try {
-                return formatNameBytes(name, buf, offset, length, FALLBACK_ENCODING);
-            } catch (final IOException ex2) {
-                // impossible
-                throw new UncheckedIOException(ex2); // NOSONAR
-            }
+            // impossible
+            throw new UncheckedIOException(ex); // NOSONAR
         }
     }
 
@@ -400,12 +361,8 @@ public class TarUtils {
         try {
             return parseName(buffer, offset, length, DEFAULT_ENCODING);
         } catch (final IOException ex) { // NOSONAR
-            try {
-                return parseName(buffer, offset, length, FALLBACK_ENCODING);
-            } catch (final IOException ex2) {
-                // impossible
-                throw new UncheckedIOException(ex2); // NOSONAR
-            }
+            // impossible
+            throw new UncheckedIOException(ex); // NOSONAR
         }
     }
 

@@ -1942,12 +1942,8 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         try {
             writeEntryHeader(outbuf, TarUtils.DEFAULT_ENCODING, false);
         } catch (final IOException ex) { // NOSONAR
-            try {
-                writeEntryHeader(outbuf, TarUtils.FALLBACK_ENCODING, false);
-            } catch (final IOException ex2) {
-                // impossible
-                throw new UncheckedIOException(ex2); // NOSONAR
-            }
+            // impossible
+            throw new UncheckedIOException(ex); // NOSONAR
         }
     }
 
