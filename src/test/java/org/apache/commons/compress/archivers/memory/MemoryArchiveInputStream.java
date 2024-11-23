@@ -19,8 +19,10 @@
 package org.apache.commons.compress.archivers.memory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.io.input.NullInputStream;
 
 /**
  * A test input stream.
@@ -32,6 +34,7 @@ public final class MemoryArchiveInputStream extends ArchiveInputStream<MemoryArc
     private int p;
 
     public MemoryArchiveInputStream(final String[][] pFiles) {
+        super(new NullInputStream(), StandardCharsets.UTF_8);
         final int pFilesLength = pFiles.length;
         fileNames = new String[pFilesLength];
         content = new String[pFilesLength];

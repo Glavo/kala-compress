@@ -60,10 +60,10 @@ import org.apache.commons.compress.compressors.deflate64.Deflate64CompressorInpu
 import org.apache.commons.compress.utils.BoundedArchiveInputStream;
 import org.apache.commons.compress.utils.BoundedSeekableByteChannelInputStream;
 import org.apache.commons.compress.utils.Charsets;
+import org.apache.commons.compress.utils.CountingInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * Replacement for {@link java.util.zip.ZipFile}.
@@ -222,14 +222,14 @@ public class ZipFile implements Closeable {
         }
     }
 
-    private static final class StoredStatisticsStream extends BoundedInputStream implements InputStreamStatistics {
+    private static final class StoredStatisticsStream extends CountingInputStream implements InputStreamStatistics {
         StoredStatisticsStream(final InputStream in) {
             super(in);
         }
 
         @Override
         public long getCompressedCount() {
-            return super.getCount();
+            return super.getBytesRead();
         }
 
         @Override

@@ -22,13 +22,11 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.apache.commons.compress.function.IOConsumer;
 import org.apache.commons.compress.function.IOIterator;
 import org.apache.commons.compress.utils.Charsets;
-import org.apache.commons.io.input.NullInputStream;
 
 /**
  * Archive input streams <strong>MUST</strong> override the {@link #read(byte[], int, int)} - or {@link #read()} - method so that reading from the stream
@@ -86,15 +84,7 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
     /** The number of bytes read in this stream. */
     private long bytesRead;
 
-    private Charset charset;
-
-    /**
-     * Constructs a new instance.
-     */
-    @SuppressWarnings("resource")
-    public ArchiveInputStream() {
-        this(new NullInputStream(), StandardCharsets.UTF_8);
-    }
+    private final Charset charset;
 
     /**
      * Constructs a new instance.
@@ -103,21 +93,9 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
      * @param charset charset.
      * @since 1.26.0
      */
-    // This will be protected once subclasses use builders.
     protected ArchiveInputStream(final InputStream inputStream, final Charset charset) {
         super(inputStream);
         this.charset = Charsets.toCharset(charset);
-    }
-
-    /**
-     * Constructs a new instance.
-     *
-     * @param inputStream the underlying input stream, or {@code null} if this instance is to be created without an underlying stream.
-     * @param charsetName charset name.
-     * @since 1.26.0
-     */
-    protected ArchiveInputStream(final InputStream inputStream, final String charsetName) {
-        this(inputStream, Charsets.toCharset(charsetName));
     }
 
     /**
@@ -183,9 +161,9 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
     }
 
     /**
-     * Gets the Charest.
+     * Gets the Charset.
      *
-     * @return the Charest.
+     * @return the Charset.
      */
     public Charset getCharset() {
         return charset;

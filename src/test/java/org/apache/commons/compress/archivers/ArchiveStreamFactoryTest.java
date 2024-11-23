@@ -114,7 +114,8 @@ public class ArchiveStreamFactoryTest extends AbstractTest {
         DUMP_DEFAULT = dflt;
     }
 
-    static final TestData[] TESTS = { new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, ARJ_DEFAULT, FACTORY, "charsetName"),
+    static final TestData[] TESTS = {
+            new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, ARJ_DEFAULT, FACTORY, "charsetName"),
             new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charsetName"),
             new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charsetName"),
 
