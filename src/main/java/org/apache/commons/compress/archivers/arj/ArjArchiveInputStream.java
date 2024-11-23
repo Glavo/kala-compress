@@ -31,7 +31,6 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.CRC32VerifyingInputStream;
-import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -46,7 +45,6 @@ import org.apache.commons.compress.utils.IOUtils;
  */
 public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
 
-    private static final Charset ENCODING = Charsets.toCharset("CP437");
     private static final int ARJ_MAGIC_1 = 0x60;
     private static final int ARJ_MAGIC_2 = 0xEA;
 
@@ -71,9 +69,10 @@ public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
      *
      * @param inputStream the underlying stream, whose ownership is taken
      * @throws ArchiveException if an exception occurs while reading
+     * @throws java.nio.charset.UnsupportedCharsetException if the current operating environment does not support CP437
      */
     public ArjArchiveInputStream(final InputStream inputStream) throws ArchiveException {
-        this(inputStream, ENCODING);
+        this(inputStream, Charset.forName("CP437"));
     }
 
     /**

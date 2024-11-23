@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
 
+import static java.nio.charset.StandardCharsets.*;
+
 /**
  * Utility methods for charsets.
  *
@@ -28,9 +30,6 @@ import java.nio.charset.*;
  * @since 1.21.0.1
  */
 public class Charsets {
-    private static final char REPLACEMENT = '?';
-    private static final byte[] REPLACEMENT_BYTES = {(byte) REPLACEMENT};
-    private static final String REPLACEMENT_STRING = String.valueOf(REPLACEMENT);
     private static final char[] HEX_CHARS = new char[]{
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
@@ -79,7 +78,7 @@ public class Charsets {
      * @return A charset object for the named encoding
      */
     public static Charset toCharset(String name) {
-        return name != null ? Charset.forName(name) : StandardCharsets.UTF_8;
+        return name != null ? Charset.forName(name) : UTF_8;
     }
 
     /**
@@ -108,7 +107,7 @@ public class Charsets {
      * @return the given Charset or the UTF-8 if the given Charset is null
      */
     public static Charset toCharset(Charset charset) {
-        return charset != null ? charset : StandardCharsets.UTF_8;
+        return charset != null ? charset : UTF_8;
     }
 
     /**
@@ -132,7 +131,7 @@ public class Charsets {
      * @see CharsetEncoder#canEncode(CharSequence)
      */
     public static boolean canEncode(Charset charset, String name) {
-        if (charset == StandardCharsets.UTF_8 || charset.name().startsWith("UTF-")) {
+        if (charset == UTF_8 || charset.name().startsWith("UTF-")) {
             final int length = name.length();
             for (int i = 0; i < length; i++) {
                 char ch = name.charAt(i);
@@ -150,8 +149,8 @@ public class Charsets {
             return true;
         }
 
-        if (charset == StandardCharsets.US_ASCII || charset == StandardCharsets.ISO_8859_1) {
-            final int maxChar = charset == StandardCharsets.US_ASCII ? 127 : 255;
+        if (charset == US_ASCII || charset == ISO_8859_1) {
+            final int maxChar = charset == US_ASCII ? 127 : 255;
             final int length = name.length();
             for (int i = 0; i < length; i++) {
                 char ch = name.charAt(i);
@@ -189,6 +188,10 @@ public class Charsets {
      * @throws IOException on error
      */
     public static ByteBuffer encode(Charset charset, String name) throws IOException {
+        if (charset == UTF_8) {
+            return ByteBuffer.wrap(name.getBytes(UTF_8));
+        }
+
         final CharsetEncoder enc = encoderFor(charset);
 
         final CharBuffer cb = CharBuffer.wrap(name);
@@ -205,7 +208,7 @@ public class Charsets {
 
                 final int spaceForSurrogate = estimateIncrementalEncodingSize(enc, 6 * res.length());
                 if (spaceForSurrogate > out.remaining()) {
-                    // if the destination buffer isn't over sized, assume that the presence of one
+                    // if the destination buffer isn't oversized, assume that the presence of one
                     // unmappable character makes it likely that there will be more. Find all the
                     // un-encoded characters and allocate space based on those estimates.
                     int charCount = 0;
@@ -247,6 +250,10 @@ public class Charsets {
      * @throws IOException on error
      */
     public static String decode(Charset charset, final byte[] data) throws IOException {
+        if (charset == UTF_8) {
+            return new String(data, UTF_8);
+        }
+
         return decoderFor(charset).decode(ByteBuffer.wrap(data)).toString();
     }
 
@@ -285,87 +292,12 @@ public class Charsets {
         return cb;
     }
 
-    private static final int CODER_CACHE_LENGTH = 4;
-
-    private static final int UTF_8_CODER_CACHE_INDEX = 0;
-    private static final int NATIVE_CODER_CACHE_INDEX = 1;
-    private static final int ISO_8859_1_CODER_CACHE_INDEX = 2;
-
-    private static final ThreadLocal<CharsetEncoder[]> encoderCache = ThreadLocal.withInitial(() -> new CharsetEncoder[CODER_CACHE_LENGTH]);
-    private static final ThreadLocal<CharsetDecoder[]> decoderCache = ThreadLocal.withInitial(() -> new CharsetDecoder[CODER_CACHE_LENGTH]);
-
-    private static int coderCacheIndexFor(Charset charset) {
-        if (charset == StandardCharsets.UTF_8) {
-            return UTF_8_CODER_CACHE_INDEX;
-        } else if (charset == StandardCharsets.ISO_8859_1) {
-            return ISO_8859_1_CODER_CACHE_INDEX;
-        } else if (charset.equals(NATIVE_CHARSET)) {
-            return NATIVE_CODER_CACHE_INDEX;
-        } else {
-            return -1;
-        }
-    }
-
     private static CharsetEncoder encoderFor(Charset charset) {
-        CharsetEncoder[] cacheArray = null;
-        CharsetEncoder encoder;
-
-        int idx = coderCacheIndexFor(charset);
-        if (idx >= 0) {
-            cacheArray = encoderCache.get();
-            encoder = cacheArray[idx];
-            if (encoder != null) {
-                encoder.reset();
-                return encoder;
-            }
-        }
-
-        if (charset == StandardCharsets.UTF_8) {
-            encoder = charset.newEncoder()
-                    .onMalformedInput(CodingErrorAction.REPLACE)
-                    .onUnmappableCharacter(CodingErrorAction.REPLACE)
-                    .replaceWith(REPLACEMENT_BYTES);
-        } else {
-            encoder = charset.newEncoder()
-                    .onMalformedInput(CodingErrorAction.REPORT)
-                    .onUnmappableCharacter(CodingErrorAction.REPORT);
-        }
-
-        if (cacheArray != null) {
-            cacheArray[idx] = encoder;
-        }
-        return encoder;
+        return charset.newEncoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
     }
 
     private static CharsetDecoder decoderFor(Charset charset) {
-        CharsetDecoder[] cacheArray = null;
-        CharsetDecoder decoder;
-
-        int idx = coderCacheIndexFor(charset);
-        if (idx >= 0) {
-            cacheArray = decoderCache.get();
-            decoder = cacheArray[idx];
-            if (decoder != null) {
-                decoder.reset();
-                return decoder;
-            }
-        }
-
-        if (charset == StandardCharsets.UTF_8) {
-            decoder = charset.newDecoder()
-                    .onMalformedInput(CodingErrorAction.REPLACE)
-                    .onUnmappableCharacter(CodingErrorAction.REPLACE)
-                    .replaceWith(REPLACEMENT_STRING);
-        } else {
-            decoder = charset.newDecoder()
-                    .onMalformedInput(CodingErrorAction.REPORT)
-                    .onUnmappableCharacter(CodingErrorAction.REPORT);
-        }
-
-        if (cacheArray != null) {
-            cacheArray[idx] = decoder;
-        }
-        return decoder;
+        return charset.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
     }
 
     /**
