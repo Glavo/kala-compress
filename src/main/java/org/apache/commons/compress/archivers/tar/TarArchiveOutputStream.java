@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -35,14 +34,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArrayFill;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.FixedLengthBlockOutputStream;
 import org.apache.commons.compress.utils.TimeUtils;
 import org.apache.commons.io.output.CountingOutputStream;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -95,8 +93,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
     public static final int BIGNUMBER_POSIX = 2;
     private static final int RECORD_SIZE = 512;
 
-    private static final ZipEncoding ASCII = ZipEncodingHelper.getZipEncoding(StandardCharsets.US_ASCII);
-
     private static final int BLOCK_SIZE_UNSPECIFIED = -511;
     private long currSize;
     private String currName;
@@ -116,12 +112,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
 
     private final CountingOutputStream countingOut;
 
-    private final ZipEncoding zipEncoding;
-
-    /**
-     * The provided encoding (for unit tests).
-     */
-    final String charsetName;
+    private final Charset encoding;
 
     private boolean addPaxHeadersForNonAsciiNames;
 
@@ -169,8 +160,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
             throw new IllegalArgumentException("Block size must be a multiple of 512 bytes. Attempt to use set size of " + blockSize);
         }
         this.out = new FixedLengthBlockOutputStream(countingOut = new CountingOutputStream(os), RECORD_SIZE);
-        this.charsetName = Charsets.toCharset(encoding).name();
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
 
         this.recordBuf = new byte[RECORD_SIZE];
         this.recordsPerBlock = realBlockSize / RECORD_SIZE;
@@ -416,7 +406,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
      */
     private boolean handleLongName(final TarArchiveEntry entry, final String name, final Map<String, String> paxHeaders, final String paxHeaderName,
             final byte linkType, final String fieldName) throws IOException {
-        final ByteBuffer encodedName = zipEncoding.encode(name);
+        final ByteBuffer encodedName = Charsets.encode(encoding, name);
         final int len = encodedName.limit() - encodedName.position();
         if (len >= TarConstants.NAMELEN) {
 
@@ -471,7 +461,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
         if (archiveEntry.isGlobalPaxHeader()) {
             final byte[] data = encodeExtendedPaxHeadersContents(archiveEntry.getExtraPaxHeaders());
             archiveEntry.setSize(data.length);
-            archiveEntry.writeEntryHeader(recordBuf, zipEncoding, bigNumberMode == BIGNUMBER_STAR);
+            archiveEntry.writeEntryHeader(recordBuf, encoding, bigNumberMode == BIGNUMBER_STAR);
             writeRecord(recordBuf);
             currSize = archiveEntry.getSize();
             currBytes = 0;
@@ -492,12 +482,12 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
                 failForBigNumbers(archiveEntry);
             }
 
-            if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath && !ASCII.canEncode(entryName)) {
+            if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsPath && !Charsets.canEncode(US_ASCII, entryName)) {
                 paxHeaders.put("path", entryName);
             }
 
             if (addPaxHeadersForNonAsciiNames && !paxHeaderContainsLinkPath && (archiveEntry.isLink() || archiveEntry.isSymbolicLink())
-                    && !ASCII.canEncode(linkName)) {
+                    && !Charsets.canEncode(US_ASCII, linkName)) {
                 paxHeaders.put("linkpath", linkName);
             }
             paxHeaders.putAll(archiveEntry.getExtraPaxHeaders());
@@ -506,7 +496,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
                 writePaxHeaders(archiveEntry, entryName, paxHeaders);
             }
 
-            archiveEntry.writeEntryHeader(recordBuf, zipEncoding, bigNumberMode == BIGNUMBER_STAR);
+            archiveEntry.writeEntryHeader(recordBuf, encoding, bigNumberMode == BIGNUMBER_STAR);
             writeRecord(recordBuf);
 
             currBytes = 0;

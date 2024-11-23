@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,8 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.ParsingUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -45,8 +45,6 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 public class TarUtils {
 
     private static final int BYTE_MASK = 255;
-
-    static final ZipEncoding DEFAULT_ENCODING = ZipEncodingHelper.getZipEncoding(StandardCharsets.UTF_8);
 
     /**
      * Computes the checksum of a tar entry header.
@@ -191,7 +189,7 @@ public class TarUtils {
      */
     public static int formatNameBytes(final String name, final byte[] buf, final int offset, final int length) {
         try {
-            return formatNameBytes(name, buf, offset, length, DEFAULT_ENCODING);
+            return formatNameBytes(name, buf, offset, length, StandardCharsets.UTF_8);
         } catch (final IOException ex) { // NOSONAR
             // impossible
             throw new UncheckedIOException(ex); // NOSONAR
@@ -207,11 +205,11 @@ public class TarUtils {
      * @param offset   The starting offset into the buffer
      * @param length   The maximum number of header bytes to copy.
      * @param encoding name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      * @return The updated offset, i.e. offset + length
      * @throws IOException on error
      */
-    public static int formatNameBytes(final String name, final byte[] buf, final int offset, final int length, final ZipEncoding encoding) throws IOException {
+    public static int formatNameBytes(final String name, final byte[] buf, final int offset, final int length, final Charset encoding) throws IOException {
         int len = name.length();
         ByteBuffer b = encoding.encode(name);
         while (b.limit() > length && len > 0) {
@@ -359,7 +357,7 @@ public class TarUtils {
      */
     public static String parseName(final byte[] buffer, final int offset, final int length) {
         try {
-            return parseName(buffer, offset, length, DEFAULT_ENCODING);
+            return parseName(buffer, offset, length, StandardCharsets.UTF_8);
         } catch (final IOException ex) { // NOSONAR
             // impossible
             throw new UncheckedIOException(ex); // NOSONAR
@@ -373,11 +371,11 @@ public class TarUtils {
      * @param offset   The offset into the buffer from which to parse.
      * @param length   The maximum number of bytes to parse.
      * @param encoding name of the encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      * @return The entry name.
      * @throws IOException on error
      */
-    public static String parseName(final byte[] buffer, final int offset, final int length, final ZipEncoding encoding) throws IOException {
+    public static String parseName(final byte[] buffer, final int offset, final int length, final Charset encoding) throws IOException {
         int len = 0;
         for (int i = offset; len < length && buffer[i] != 0; i++) {
             len++;
@@ -385,7 +383,7 @@ public class TarUtils {
         if (len > 0) {
             final byte[] b = new byte[len];
             System.arraycopy(buffer, offset, b, 0, len);
-            return encoding.decode(b);
+            return Charsets.decode(encoding, b);
         }
         return "";
     }

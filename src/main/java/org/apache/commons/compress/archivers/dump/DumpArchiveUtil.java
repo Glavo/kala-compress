@@ -19,10 +19,11 @@
 package org.apache.commons.compress.archivers.dump;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
 import org.apache.commons.compress.utils.ByteUtils;
+import org.apache.commons.compress.utils.Charsets;
 
 /**
  * Various utilities for dump archives.
@@ -79,11 +80,11 @@ final class DumpArchiveUtil {
     /**
      * Decodes a byte array to a string.
      */
-    static String decode(final ZipEncoding encoding, final byte[] b, final int offset, final int len) throws IOException {
-            if (offset > offset + len) {
-                throw new IOException("Invalid offset/length combination");
-            }
-            return encoding.decode(Arrays.copyOfRange(b, offset, offset + len));
+    static String decode(final Charset encoding, final byte[] b, final int offset, final int len) throws IOException {
+        if (offset > offset + len) {
+            throw new IOException("Invalid offset/length combination");
+        }
+        return Charsets.decode(encoding, Arrays.copyOfRange(b, offset, offset + len));
     }
 
     /**

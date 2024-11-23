@@ -43,7 +43,6 @@ import java.util.Locale;
 import java.util.Random;
 
 import org.apache.commons.compress.AbstractTest;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.lang3.SystemProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -247,7 +246,7 @@ public class TarArchiveEntryTest implements TarConstants {
             + "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000").getBytes(UTF_8);
         // @formatter:on
         assertThrows(IllegalArgumentException.class,
-                () -> new TarArchiveEntry(entryContent, ZipEncodingHelper.getZipEncoding(StandardCharsets.ISO_8859_1.name()), false, -1));
+                () -> new TarArchiveEntry(entryContent, StandardCharsets.ISO_8859_1, false, -1));
     }
 
     @Test

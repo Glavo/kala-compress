@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -46,7 +48,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.EntryStreamOffsets;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.ParsingUtils;
@@ -404,11 +405,11 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      *
      * @param headerBuf The header bytes from a tar archive entry.
      * @param encoding  encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format
      * @throws IOException              on error
      */
-    public TarArchiveEntry(final byte[] headerBuf, final ZipEncoding encoding) throws IOException {
+    public TarArchiveEntry(final byte[] headerBuf, final Charset encoding) throws IOException {
         this(headerBuf, encoding, false);
     }
 
@@ -419,11 +420,11 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @param encoding  encoding to use for file names
      * @param lenient   when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
      *                  {@link #UNKNOWN}. When set to false such illegal fields cause an exception instead.
-     * @since 1.19
+     * @since 1.27.1-0
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format
      * @throws IOException              on error
      */
-    public TarArchiveEntry(final byte[] headerBuf, final ZipEncoding encoding, final boolean lenient) throws IOException {
+    public TarArchiveEntry(final byte[] headerBuf, final Charset encoding, final boolean lenient) throws IOException {
         this(Collections.emptyMap(), headerBuf, encoding, lenient);
     }
 
@@ -435,11 +436,11 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @param lenient    when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
      *                   {@link #UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @param dataOffset position of the entry data in the random access file.
-     * @since 1.21
+     * @since 1.27.1-0
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format.
      * @throws IOException              on error.
      */
-    public TarArchiveEntry(final byte[] headerBuf, final ZipEncoding encoding, final boolean lenient, final long dataOffset) throws IOException {
+    public TarArchiveEntry(final byte[] headerBuf, final Charset encoding, final boolean lenient, final long dataOffset) throws IOException {
         this(headerBuf, encoding, lenient);
         setDataOffset(dataOffset);
     }
@@ -508,11 +509,11 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @param encoding         encoding to use for file names
      * @param lenient          when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
      *                         {@link #UNKNOWN}. When set to false such illegal fields cause an exception instead.
-     * @since 1.22
+     * @since 1.27.1-0
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format
      * @throws IOException              on error
      */
-    public TarArchiveEntry(final Map<String, String> globalPaxHeaders, final byte[] headerBuf, final ZipEncoding encoding, final boolean lenient)
+    public TarArchiveEntry(final Map<String, String> globalPaxHeaders, final byte[] headerBuf, final Charset encoding, final boolean lenient)
             throws IOException {
         this(false);
         parseTarHeader(globalPaxHeaders, headerBuf, encoding, false, lenient);
@@ -527,11 +528,11 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @param lenient          when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
      *                         {@link #UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @param dataOffset       position of the entry data in the random access file.
-     * @since 1.22
+     * @since 1.27.1-0
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format.
      * @throws IOException              on error.
      */
-    public TarArchiveEntry(final Map<String, String> globalPaxHeaders, final byte[] headerBuf, final ZipEncoding encoding, final boolean lenient,
+    public TarArchiveEntry(final Map<String, String> globalPaxHeaders, final byte[] headerBuf, final Charset encoding, final boolean lenient,
             final long dataOffset) throws IOException {
         this(globalPaxHeaders, headerBuf, encoding, lenient);
         setDataOffset(dataOffset);
@@ -1411,14 +1412,10 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      */
     public void parseTarHeader(final byte[] header) {
         try {
-            parseTarHeader(header, TarUtils.DEFAULT_ENCODING);
+            parseTarHeader(header, StandardCharsets.UTF_8);
         } catch (final IOException ex) { // NOSONAR
-            try {
-                parseTarHeader(header, TarUtils.DEFAULT_ENCODING, true, false);
-            } catch (final IOException ex2) {
-                // not really possible
-                throw new UncheckedIOException(ex2); // NOSONAR
-            }
+            // not really possible
+            throw new UncheckedIOException(ex); // NOSONAR
         }
     }
 
@@ -1427,19 +1424,19 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      *
      * @param header   The tar entry header buffer to get information from.
      * @param encoding encoding to use for file names
-     * @since 1.4
+     * @since 1.27.1-0
      * @throws IllegalArgumentException if any of the numeric fields have an invalid format
      * @throws IOException              on error
      */
-    public void parseTarHeader(final byte[] header, final ZipEncoding encoding) throws IOException {
+    public void parseTarHeader(final byte[] header, final Charset encoding) throws IOException {
         parseTarHeader(header, encoding, false, false);
     }
 
-    private void parseTarHeader(final byte[] header, final ZipEncoding encoding, final boolean oldStyle, final boolean lenient) throws IOException {
+    private void parseTarHeader(final byte[] header, final Charset encoding, final boolean oldStyle, final boolean lenient) throws IOException {
         parseTarHeader(Collections.emptyMap(), header, encoding, oldStyle, lenient);
     }
 
-    private void parseTarHeader(final Map<String, String> globalPaxHeaders, final byte[] header, final ZipEncoding encoding, final boolean oldStyle,
+    private void parseTarHeader(final Map<String, String> globalPaxHeaders, final byte[] header, final Charset encoding, final boolean oldStyle,
             final boolean lenient) throws IOException {
         try {
             parseTarHeaderUnwrapped(globalPaxHeaders, header, encoding, oldStyle, lenient);
@@ -1448,8 +1445,8 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
         }
     }
 
-    private void parseTarHeaderUnwrapped(final Map<String, String> globalPaxHeaders, final byte[] header, final ZipEncoding encoding, final boolean oldStyle,
-            final boolean lenient) throws IOException {
+    private void parseTarHeaderUnwrapped(final Map<String, String> globalPaxHeaders, final byte[] header, final Charset encoding, final boolean oldStyle,
+                                         final boolean lenient) throws IOException {
         int offset = 0;
         name = oldStyle ? TarUtils.parseName(header, offset, NAMELEN) : TarUtils.parseName(header, offset, NAMELEN, encoding);
         offset += NAMELEN;
@@ -1940,7 +1937,7 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      */
     public void writeEntryHeader(final byte[] outbuf) {
         try {
-            writeEntryHeader(outbuf, TarUtils.DEFAULT_ENCODING, false);
+            writeEntryHeader(outbuf, StandardCharsets.UTF_8, false);
         } catch (final IOException ex) { // NOSONAR
             // impossible
             throw new UncheckedIOException(ex); // NOSONAR
@@ -1954,10 +1951,10 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
      * @param encoding encoding to use when writing the file name.
      * @param starMode whether to use the star/GNU tar/BSD tar extension for numeric fields if their value doesn't fit in the maximum size of standard tar
      *                 archives
-     * @since 1.4
+     * @since 1.27.1-0
      * @throws IOException on error
      */
-    public void writeEntryHeader(final byte[] outbuf, final ZipEncoding encoding, final boolean starMode) throws IOException {
+    public void writeEntryHeader(final byte[] outbuf, final Charset encoding, final boolean starMode) throws IOException {
         int offset = 0;
         offset = TarUtils.formatNameBytes(name, outbuf, offset, NAMELEN, encoding);
         offset = writeEntryHeaderField(mode, outbuf, offset, MODELEN, starMode);

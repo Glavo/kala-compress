@@ -22,6 +22,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -32,8 +33,7 @@ import java.util.Stack;
 
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -100,16 +100,16 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
     /**
      * The encoding to use for file names and labels.
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset encoding;
 
     /**
-     * Constructor using the platform's default encoding for file names.
+     * Constructor using the UTF-8 for file names.
      *
      * @param is stream to read from
      * @throws ArchiveException on error
      */
     public DumpArchiveInputStream(final InputStream is) throws ArchiveException {
-        this(is, null);
+        this(is, StandardCharsets.UTF_8);
     }
 
     /**
@@ -124,7 +124,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
         super(is, encoding);
         this.raw = new TapeInputStream(is);
         this.hasHitEOF = false;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
 
         try {
             // read header, verify it's a dump archive.
@@ -135,7 +135,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
             }
 
             // get summary information
-            summary = new DumpArchiveSummary(headerBytes, this.zipEncoding);
+            summary = new DumpArchiveSummary(headerBytes, this.encoding);
 
             // reset buffer with actual block size.
             raw.resetBlockSize(summary.getNTRec(), summary.isCompressed());
@@ -480,7 +480,7 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
 
                 final byte type = blockBuffer[i + 6];
 
-                final String name = DumpArchiveUtil.decode(zipEncoding, blockBuffer, i + 8, blockBuffer[i + 7]);
+                final String name = DumpArchiveUtil.decode(encoding, blockBuffer, i + 8, blockBuffer[i + 7]);
 
                 if (CURRENT_PATH_SEGMENT.equals(name) || PARENT_PATH_SEGMENT.equals(name)) {
                     // do nothing...

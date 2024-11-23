@@ -33,13 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
-import org.apache.commons.compress.utils.ArchiveUtils;
-import org.apache.commons.compress.utils.BoundedArchiveInputStream;
-import org.apache.commons.compress.utils.BoundedInputStream;
-import org.apache.commons.compress.utils.BoundedSeekableByteChannelInputStream;
-import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
+import org.apache.commons.compress.utils.*;
 
 /**
  * Provides random access to UNIX archives.
@@ -153,7 +147,7 @@ public class TarFile implements Closeable {
     /**
      * The encoding of the tar file
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset encoding;
 
     private final LinkedList<TarArchiveEntry> entries = new LinkedList<>();
 
@@ -307,7 +301,7 @@ public class TarFile implements Closeable {
     public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient)
             throws IOException {
         this.archive = archive;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
         this.recordSize = recordSize;
         this.recordBuffer = ByteBuffer.allocate(this.recordSize);
         this.blockSize = blockSize;
@@ -477,7 +471,7 @@ public class TarFile implements Closeable {
 
         try {
             final long position = archive.position();
-            currEntry = new TarArchiveEntry(globalPaxHeaders, headerBuf.array(), zipEncoding, lenient, position);
+            currEntry = new TarArchiveEntry(globalPaxHeaders, headerBuf.array(), encoding, lenient, position);
         } catch (final IllegalArgumentException e) {
             throw new IOException("Error detected parsing the header", e);
         }
@@ -490,7 +484,7 @@ public class TarFile implements Closeable {
                 // entry
                 return null;
             }
-            currEntry.setLinkName(zipEncoding.decode(longLinkData));
+            currEntry.setLinkName(Charsets.decode(encoding, longLinkData));
         }
 
         if (currEntry.isGNULongNameEntry()) {
@@ -503,7 +497,7 @@ public class TarFile implements Closeable {
             }
 
             // COMPRESS-509 : the name of directories should end with '/'
-            final String name = zipEncoding.decode(longNameData);
+            final String name = Charsets.decode(encoding, longNameData);
             currEntry.setName(name);
             if (currEntry.isDirectory() && !name.endsWith("/")) {
                 currEntry.setName(name + "/");

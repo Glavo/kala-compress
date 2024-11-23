@@ -68,7 +68,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     public enum CommentSource {
         /**
          * The comment has been read from the archive using the encoding of the archive specified when creating the {@link ZipArchiveInputStream} or
-         * {@link ZipFile} (defaults to the platform's default encoding).
+         * {@link ZipFile} (defaults to the UTF-8).
          */
         COMMENT,
         /**

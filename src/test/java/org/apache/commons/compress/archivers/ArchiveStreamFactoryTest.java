@@ -45,7 +45,6 @@ import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.ByteUtils;
-import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.io.input.BrokenInputStream;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
@@ -119,25 +118,25 @@ public class ArchiveStreamFactoryTest extends AbstractTest {
             new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charsetName"),
             new TestData("bla.arj", ArchiveStreamFactory.ARJ, false, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charsetName"),
 
-            new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "charsetName"),
-            new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charsetName"),
-            new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charsetName"),
+            new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, CPIO_DEFAULT, FACTORY, "encoding"),
+            new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "encoding"),
+            new TestData("bla.cpio", ArchiveStreamFactory.CPIO, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "encoding"),
 
             new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, DUMP_DEFAULT, FACTORY, "charsetName"),
             new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charsetName"),
             new TestData("bla.dump", ArchiveStreamFactory.DUMP, false, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charsetName"),
 
-            new TestData("bla.tar", ArchiveStreamFactory.TAR, true, TAR_DEFAULT, FACTORY, "charsetName"),
-            new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charsetName"),
-            new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charsetName"),
+            new TestData("bla.tar", ArchiveStreamFactory.TAR, true, TAR_DEFAULT, FACTORY, "encoding"),
+            new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "encoding"),
+            new TestData("bla.tar", ArchiveStreamFactory.TAR, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "encoding"),
 
-            new TestData("bla.jar", ArchiveStreamFactory.JAR, true, JAR_DEFAULT, FACTORY, "charset"),
-            new TestData("bla.jar", ArchiveStreamFactory.JAR, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charset"),
-            new TestData("bla.jar", ArchiveStreamFactory.JAR, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charset"),
+            new TestData("bla.jar", ArchiveStreamFactory.JAR, true, JAR_DEFAULT, FACTORY, "encoding"),
+            new TestData("bla.jar", ArchiveStreamFactory.JAR, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "encoding"),
+            new TestData("bla.jar", ArchiveStreamFactory.JAR, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "encoding"),
 
-            new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, ZIP_DEFAULT, FACTORY, "charset"),
-            new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "charset"),
-            new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "charset"),
+            new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, ZIP_DEFAULT, FACTORY, "encoding"),
+            new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, StandardCharsets.UTF_8.name(), FACTORY_UTF8, "encoding"),
+            new TestData("bla.zip", ArchiveStreamFactory.ZIP, true, StandardCharsets.US_ASCII.name(), FACTORY_ASCII, "encoding"),
     };
 
     /** equals allowing null. */

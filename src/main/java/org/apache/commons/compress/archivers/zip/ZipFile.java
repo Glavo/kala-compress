@@ -239,7 +239,6 @@ public class ZipFile implements Closeable {
     }
 
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-    private static final String DEFAULT_CHARSET_NAME = StandardCharsets.UTF_8.name();
 
     private static final EnumSet<StandardOpenOption> READ = EnumSet.of(StandardOpenOption.READ);
 
@@ -614,11 +613,6 @@ public class ZipFile implements Closeable {
     private final Charset encoding;
 
     /**
-     * The ZIP encoding to use for file names and the file comment.
-     */
-    private final ZipEncoding zipEncoding;
-
-    /**
      * The actual data source.
      */
     private final SeekableByteChannel archive;
@@ -855,7 +849,6 @@ public class ZipFile implements Closeable {
                     final boolean closeOnError, final boolean ignoreLocalFileHeader) throws IOException {
         this.isSplitZipArchive = channel instanceof ZipSplitReadOnlySeekableByteChannel;
         this.encoding = Charsets.toCharset(encoding);
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         this.archive = channel;
         boolean success = false;
@@ -969,9 +962,11 @@ public class ZipFile implements Closeable {
      * Gets the encoding to use for file names and the file comment.
      *
      * @return null if using the platform's default character encoding.
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-0
      */
-    public String getEncoding() {
-        return encoding.name();
+    public Charset getEncoding() {
+        return encoding;
     }
 
     /**
@@ -1157,7 +1152,7 @@ public class ZipFile implements Closeable {
     public String getUnixSymlink(final ZipArchiveEntry entry) throws IOException {
         if (entry != null && entry.isUnixSymlink()) {
             try (InputStream in = getInputStream(entry)) {
-                return zipEncoding.decode(IOUtils.toByteArray(in));
+                return Charsets.decode(encoding, IOUtils.toByteArray(in));
             }
         }
         return null;
@@ -1317,7 +1312,7 @@ public class ZipFile implements Closeable {
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(cfhBuf, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
-        final ZipEncoding entryEncoding = hasUTF8Flag ? ZipEncodingHelper.ZIP_ENCODING_UTF_8 : zipEncoding;
+        final Charset entryEncoding = hasUTF8Flag ? StandardCharsets.UTF_8 : encoding;
         if (hasUTF8Flag) {
             ze.setNameSource(ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG);
         }
@@ -1382,7 +1377,7 @@ public class ZipFile implements Closeable {
         if (fileName.length < fileNameLen) {
             throw new EOFException();
         }
-        ze.setName(entryEncoding.decode(fileName), fileName);
+        ze.setName(Charsets.decode(entryEncoding, fileName), fileName);
 
         // LFH offset,
         ze.setLocalHeaderOffset(ZipLong.getValue(cfhBuf, off) + firstLocalFileHeaderOffset);
@@ -1408,7 +1403,7 @@ public class ZipFile implements Closeable {
         if (comment.length < commentLen) {
             throw new EOFException();
         }
-        ze.setComment(entryEncoding.decode(comment));
+        ze.setComment(Charsets.decode(entryEncoding, comment));
 
         if (!hasUTF8Flag && useUnicodeExtraFields) {
             noUTF8Flag.put(ze, new NameAndComment(fileName, comment));

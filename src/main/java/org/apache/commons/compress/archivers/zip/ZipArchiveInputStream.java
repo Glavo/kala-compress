@@ -253,8 +253,8 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
                 || checksig(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER.getBytes(), signature);
     }
 
-    /** The ZIP encoding to use for file names and the file comment. */
-    private final ZipEncoding zipEncoding;
+    /** The encoding to use for file names and the file comment. */
+    private final Charset encoding;
 
     /** Whether to look for and use Unicode extra fields. */
     private final boolean useUnicodeExtraFields;
@@ -377,7 +377,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
                                  final boolean allowStoredEntriesWithDataDescriptor, final boolean skipSplitSig) {
         super(inputStream, encoding);
         this.in = new PushbackInputStream(inputStream, buf.capacity());
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         this.allowStoredEntriesWithDataDescriptor = allowStoredEntriesWithDataDescriptor;
         this.skipSplitSig = skipSplitSig;
@@ -697,7 +697,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(lfhBuf, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
-        final ZipEncoding entryEncoding = hasUTF8Flag ? ZipEncodingHelper.ZIP_ENCODING_UTF_8 : zipEncoding;
+        final Charset entryEncoding = hasUTF8Flag ? StandardCharsets.UTF_8 : encoding;
         current.hasDataDescriptor = gpFlag.usesDataDescriptor();
         current.entry.setGeneralPurposeBit(gpFlag);
 
@@ -732,7 +732,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         off += SHORT; // NOSONAR - assignment as documentation
 
         final byte[] fileName = readRange(fileNameLen);
-        current.entry.setName(entryEncoding.decode(fileName), fileName);
+        current.entry.setName(Charsets.decode(entryEncoding, fileName), fileName);
         if (hasUTF8Flag) {
             current.entry.setNameSource(ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG);
         }

@@ -93,7 +93,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     private static final int SIGNATURE_SIZE = 12;
 
     /**
-     * The singleton instance using the platform default encoding.
+     * The singleton instance using the UTF-8.
      *
      * @since 1.21
      */
@@ -366,7 +366,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     private SortedMap<String, ArchiveStreamProvider> archiveOutputStreamProviders;
 
     /**
-     * Constructs an instance using the platform default encoding.
+     * Constructs an instance using the UTF-8.
      */
     public ArchiveStreamFactory() {
         this(null);

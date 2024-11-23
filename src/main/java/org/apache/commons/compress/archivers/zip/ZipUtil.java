@@ -16,8 +16,8 @@
  */
 package org.apache.commons.compress.archivers.zip;
 
-import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -213,12 +213,7 @@ public abstract class ZipUtil {
             final long origCRC32 = crc32.getValue();
 
             if (origCRC32 == f.getNameCRC32()) {
-                try {
-                    return ZipEncodingHelper.ZIP_ENCODING_UTF_8.decode(f.getUnicodeName());
-                } catch (final IOException ignored) {
-                    // UTF-8 unsupported? should be impossible the
-                    // Unicode*ExtraField must contain some bad bytes
-                }
+                return new String(f.getUnicodeName(), StandardCharsets.UTF_8);
             }
         }
         // TODO log this anywhere?

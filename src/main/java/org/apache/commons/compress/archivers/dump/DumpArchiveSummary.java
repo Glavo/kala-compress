@@ -19,10 +19,9 @@
 package org.apache.commons.compress.archivers.dump;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.attribute.FileTime;
 import java.util.Objects;
-
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
 
 /**
  * This class represents identifying information about a Dump archive volume. It consists the archive's dump time, label, hostname, device name and possibly
@@ -45,7 +44,7 @@ public class DumpArchiveSummary {
     private int firstrec;
     private int ntrec;
 
-    DumpArchiveSummary(final byte[] buffer, final ZipEncoding encoding) throws IOException {
+    DumpArchiveSummary(final byte[] buffer, final Charset encoding) throws IOException {
         dumpDate = 1000L * DumpArchiveUtil.convert32(buffer, 4);
         previousDumpDate = 1000L * DumpArchiveUtil.convert32(buffer, 8);
         volume = DumpArchiveUtil.convert32(buffer, 12);

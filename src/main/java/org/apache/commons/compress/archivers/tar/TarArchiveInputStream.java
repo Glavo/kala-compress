@@ -35,10 +35,9 @@ import java.util.Map;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
 import org.apache.commons.compress.utils.BoundedInputStream;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 
 /**
@@ -108,7 +107,7 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
     private TarArchiveEntry currEntry;
 
     /** The encoding of the file. */
-    private final ZipEncoding zipEncoding;
+    private final Charset encoding;
 
     /** The global PAX header. */
     private Map<String, String> globalPaxHeaders = new HashMap<>();
@@ -186,7 +185,7 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      */
     public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient) {
         super(inputStream, encoding);
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
         this.recordBuffer = new byte[recordSize];
         this.blockSize = blockSize;
         this.lenient = lenient;
@@ -422,7 +421,7 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
         }
 
         try {
-            currEntry = new TarArchiveEntry(globalPaxHeaders, headerBuf, zipEncoding, lenient);
+            currEntry = new TarArchiveEntry(globalPaxHeaders, headerBuf, encoding, lenient);
         } catch (final IllegalArgumentException e) {
             throw new IOException("Error detected parsing the header", e);
         }
@@ -437,7 +436,7 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
                 // Malformed tar file - long link entry name not followed by entry
                 return null;
             }
-            currEntry.setLinkName(zipEncoding.decode(longLinkData));
+            currEntry.setLinkName(Charsets.decode(encoding, longLinkData));
         }
 
         if (currEntry.isGNULongNameEntry()) {
@@ -449,7 +448,7 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
             }
 
             // COMPRESS-509 : the name of directories should end with '/'
-            final String name = zipEncoding.decode(longNameData);
+            final String name = Charsets.decode(encoding, longNameData);
             currEntry.setName(name);
             if (currEntry.isDirectory() && !name.endsWith("/")) {
                 currEntry.setName(name + "/");

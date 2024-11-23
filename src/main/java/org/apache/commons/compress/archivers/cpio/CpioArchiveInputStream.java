@@ -24,9 +24,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
+import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.ParsingUtils;
 
@@ -148,7 +147,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
     /**
      * The encoding to use for file names and labels.
      */
-    private final ZipEncoding zipEncoding;
+    private final Charset encoding;
 
     /**
      * Constructs the cpio input stream with a blocksize of {@link CpioConstants#BLOCK_SIZE BLOCK_SIZE} and expecting ASCII file names.
@@ -186,7 +185,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
             throw new IllegalArgumentException("blockSize must be bigger than 0");
         }
         this.blockSize = blockSize;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
     }
 
     /**
@@ -362,7 +361,7 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
         if (this.in.read() == -1) {
             throw new EOFException();
         }
-        return zipEncoding.decode(tmpBuffer);
+        return Charsets.decode(encoding, tmpBuffer);
     }
 
     private int readFully(final byte[] b, final int off, final int len) throws IOException {

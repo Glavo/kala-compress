@@ -65,6 +65,15 @@ public class Charsets {
     }
 
     /**
+     * Tests whether a given encoding is UTF-8 or null.
+     *
+     * @since 1.27.1-0
+     */
+    public static boolean isUTF8(final Charset charset) {
+        return charset == null || charset == UTF_8;
+    }
+
+    /**
      * Returns a charset object for the named charset.
      *
      * Use this method instead of {@code kala.compress.archivers.zip.ZipEncodingHelper#getZipEncoding(String)}
@@ -187,7 +196,7 @@ public class Charsets {
      * to the end of the encoded result.
      * @throws IOException on error
      */
-    public static ByteBuffer encode(Charset charset, String name) throws IOException {
+    public static ByteBuffer encode(Charset charset, String name) {
         if (charset == UTF_8) {
             return ByteBuffer.wrap(name.getBytes(UTF_8));
         }

@@ -1,48 +1,48 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Copyright 2024 Glavo
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+package org.apache.commons.compress.utils;
 
-package org.apache.commons.compress.archivers.zip;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.Arrays;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static java.nio.charset.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.US_ASCII;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test ZIP encodings.
+ * @author Glavo
  */
-public class ZipEncodingTest {
-
+public class CharsetsTest {
     private static final String UNENC_STRING = "\u2016";
 
     // stress test for internal grow method.
     private static final String BAD_STRING = "\u2016\u2015\u2016\u2015\u2016\u2015\u2016\u2015\u2016\u2015\u2016";
 
     private static final String BAD_STRING_ENC = "%U2016%U2015%U2016%U2015%U2016%U2015%U2016%U2015%U2016%U2015%U2016";
+
+    private static final String UMLAUTS = "\u00e4\u00f6\u00fc";
+
+    private static final String RAINBOW_EMOJI = "\ud83c\udf08";
 
     private static void assertEquals(final byte[] expected, final ByteBuffer actual) {
 
@@ -66,8 +66,7 @@ public class ZipEncodingTest {
 
     private void doSimpleEncodingTest(final String name, byte[] testBytes) throws IOException {
 
-        final ZipEncoding enc = ZipEncodingHelper.getZipEncoding(name);
-        assertInstanceOf(NioZipEncoding.class, enc);
+        final Charset enc = Charsets.toCharset(name);
         if (testBytes == null) {
 
             testBytes = new byte[256];
@@ -76,18 +75,18 @@ public class ZipEncodingTest {
             }
         }
 
-        final String decoded = enc.decode(testBytes);
+        final String decoded = Charsets.decode(enc, testBytes);
 
-        assertTrue(enc.canEncode(decoded));
+        assertTrue(Charsets.canEncode(enc, decoded));
 
-        final ByteBuffer encoded = enc.encode(decoded);
+        final ByteBuffer encoded = Charsets.encode(enc, decoded);
 
         assertEquals(testBytes, encoded);
 
-        assertFalse(enc.canEncode(UNENC_STRING));
-        assertEquals("%U2016".getBytes(name), enc.encode(UNENC_STRING));
-        assertFalse(enc.canEncode(BAD_STRING));
-        assertEquals(BAD_STRING_ENC.getBytes(name), enc.encode(BAD_STRING));
+        assertFalse(Charsets.canEncode(enc, UNENC_STRING));
+        assertEquals("%U2016".getBytes(name), Charsets.encode(enc, UNENC_STRING));
+        assertFalse(Charsets.canEncode(enc, BAD_STRING));
+        assertEquals(BAD_STRING_ENC.getBytes(name), Charsets.encode(enc, BAD_STRING));
     }
 
     @Test
@@ -98,20 +97,17 @@ public class ZipEncodingTest {
 
     @Test
     public void testGetNonexistentEncoding() {
-        final ZipEncoding ze = ZipEncodingHelper.getZipEncoding("I-am-a-banana");
-        assertNotNull(ze);
-        if (ze instanceof CharsetAccessor) {
-            final CharsetAccessor hasCharset = (CharsetAccessor) ze;
-            Assertions.assertEquals(StandardCharsets.UTF_8, hasCharset.getCharset());
-        }
+        assertThrows(UnsupportedCharsetException.class, () -> Charsets.toCharset("I-am-a-banana"));
     }
 
     @Test
     public void testIsUTF8() {
-        assertTrue(ZipEncodingHelper.isUTF8(StandardCharsets.UTF_8.name()));
-        assertTrue(ZipEncodingHelper.isUTF8("UTF8"));
-        assertTrue(ZipEncodingHelper.isUTF8((Charset) null));
-        assertTrue(ZipEncodingHelper.isUTF8((String) null));
+        assertTrue(Charsets.isUTF8(StandardCharsets.UTF_8));
+        assertTrue(Charsets.isUTF8(null));
+        assertFalse(Charsets.isUTF8(StandardCharsets.US_ASCII));
+        assertFalse(Charsets.isUTF8(StandardCharsets.UTF_16LE));
+        assertFalse(Charsets.isUTF8(StandardCharsets.ISO_8859_1));
+        assertFalse(Charsets.isUTF8(Charset.forName("GBK")));
     }
 
     @Test
@@ -142,13 +138,6 @@ public class ZipEncodingTest {
     }
 
     @Test
-    public void testNothingToMakeCoverallsHappier() {
-        final Object o = new ZipEncodingHelper() {
-        };
-        assertNotNull(o);
-    }
-
-    @Test
     public void testSimpleCp437Encoding() throws IOException {
         doSimpleEncodingsTest(437);
     }
@@ -158,4 +147,59 @@ public class ZipEncodingTest {
         doSimpleEncodingsTest(850);
     }
 
+    @Test
+    public void testPartialSurrogatePair() {
+        final ByteBuffer bb = Charsets.encode(US_ASCII, "\ud83c");
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        Assertions.assertEquals(0, result.length);
+    }
+
+    @Test
+    public void testRainbowEmojiToSurrogatePairUTF16() {
+        final ByteBuffer bb = Charsets.encode(UTF_16BE, RAINBOW_EMOJI);
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        assertArrayEquals(RAINBOW_EMOJI.getBytes(UTF_16BE), result);
+    }
+
+    @Test
+    public void testUmlautToISO88591() {
+        final ByteBuffer bb = Charsets.encode(ISO_8859_1, "\u00e4\u00f6\u00fc");
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        assertArrayEquals(UMLAUTS.getBytes(ISO_8859_1), result);
+    }
+
+    @Test
+    public void testUmlautToUTF16BE() {
+        final ByteBuffer bb = Charsets.encode(UTF_16BE, UMLAUTS);
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        assertArrayEquals(UMLAUTS.getBytes(UTF_16BE), result);
+    }
+
+    @Test
+    public void testUmlautToUTF8() {
+        final ByteBuffer bb = Charsets.encode(UTF_8, "\u00e4\u00f6\u00fc");
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        assertArrayEquals(UMLAUTS.getBytes(UTF_8), result);
+    }
+
+    @Test
+    public void testUnmappableRainbowEmoji() {
+        final ByteBuffer bb = Charsets.encode(US_ASCII, RAINBOW_EMOJI);
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        Assertions.assertEquals("%UD83C%UDF08", new String(result, US_ASCII));
+    }
+
+    @Test
+    public void testUnmappableUmlauts() {
+        final ByteBuffer bb = Charsets.encode(US_ASCII, "\u00e4\u00f6\u00fc");
+        final int off = bb.arrayOffset();
+        final byte[] result = Arrays.copyOfRange(bb.array(), off, off + bb.limit() - bb.position());
+        Assertions.assertEquals("%U00E4%U00F6%U00FC", new String(result, US_ASCII));
+    }
 }

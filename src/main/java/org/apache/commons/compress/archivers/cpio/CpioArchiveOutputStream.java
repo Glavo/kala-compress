@@ -29,9 +29,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipEncoding;
-import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
 import org.apache.commons.compress.utils.ArchiveUtils;
+import org.apache.commons.compress.utils.Charsets;
 
 /**
  * CpioArchiveOutputStream is a stream for writing CPIO streams. All formats of CPIO are supported (old ASCII, old binary, new portable format and the new
@@ -90,10 +89,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
     /**
      * The encoding to use for file names and labels.
      */
-    private final ZipEncoding zipEncoding;
-
-    // the provided encoding (for unit tests)
-    final String charsetName;
+    private final Charset encoding;
 
     /**
      * Constructs the cpio output stream. The format for this CPIO stream is the "new" format using ASCII encoding for file names
@@ -141,19 +137,17 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
     public CpioArchiveOutputStream(final OutputStream out, final short format, final int blockSize, final Charset encoding) {
         super(out);
         switch (format) {
-        case FORMAT_NEW:
-        case FORMAT_NEW_CRC:
-        case FORMAT_OLD_ASCII:
-        case FORMAT_OLD_BINARY:
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown format: " + format);
-
+            case FORMAT_NEW:
+            case FORMAT_NEW_CRC:
+            case FORMAT_OLD_ASCII:
+            case FORMAT_OLD_BINARY:
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown format: " + format);
         }
         this.entryFormat = format;
         this.blockSize = blockSize;
-        this.charsetName = encoding != null ? encoding.name() : null;
-        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
     }
 
     /**
@@ -240,7 +234,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      * @return result of encoding the string
      */
     private byte[] encode(final String str) throws IOException {
-        final ByteBuffer buf = zipEncoding.encode(str);
+        final ByteBuffer buf = Charsets.encode(encoding, str);
         final int len = buf.limit() - buf.position();
         return Arrays.copyOfRange(buf.array(), buf.arrayOffset(), buf.arrayOffset() + len);
     }

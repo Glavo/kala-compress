@@ -35,6 +35,7 @@ import java.util.Enumeration;
 import java.util.zip.CRC32;
 
 import org.apache.commons.compress.AbstractTest;
+import org.apache.commons.compress.utils.Charsets;
 import org.junit.jupiter.api.Test;
 
 public class UTF8ZipFilesTest extends AbstractTest {
@@ -60,8 +61,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
             final UnicodePathExtraField ucpf = findUniCodePath(ze);
             assertNotNull(ucpf);
 
-            final ZipEncoding enc = ZipEncodingHelper.getZipEncoding(encoding);
-            final ByteBuffer ne = enc.encode(ze.getName());
+            final ByteBuffer ne = Charsets.encode(encoding, ze.getName());
 
             final CRC32 crc = new CRC32();
             crc.update(ne.array(), ne.arrayOffset(), ne.limit() - ne.position());
@@ -74,8 +74,6 @@ public class UTF8ZipFilesTest extends AbstractTest {
     private static void createTestFile(final File file, final Charset encoding, final boolean withEFS, final boolean withExplicitUnicodeExtra)
             throws IOException {
 
-        final ZipEncoding zipEncoding = ZipEncodingHelper.getZipEncoding(encoding);
-
         try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file)) {
             zos.setEncoding(encoding);
             zos.setUseLanguageEncodingFlag(withEFS);
@@ -83,9 +81,9 @@ public class UTF8ZipFilesTest extends AbstractTest {
                     withExplicitUnicodeExtra ? ZipArchiveOutputStream.UnicodeExtraFieldPolicy.NEVER : ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS);
 
             ZipArchiveEntry ze = new ZipArchiveEntry(OIL_BARREL_TXT);
-            if (withExplicitUnicodeExtra && !zipEncoding.canEncode(ze.getName())) {
+            if (withExplicitUnicodeExtra && !Charsets.canEncode(encoding, ze.getName())) {
 
-                final ByteBuffer en = zipEncoding.encode(ze.getName());
+                final ByteBuffer en = Charsets.encode(encoding, ze.getName());
 
                 ze.addExtraField(new UnicodePathExtraField(ze.getName(), en.array(), en.arrayOffset(), en.limit() - en.position()));
             }
@@ -95,9 +93,9 @@ public class UTF8ZipFilesTest extends AbstractTest {
             zos.closeArchiveEntry();
 
             ze = new ZipArchiveEntry(EURO_FOR_DOLLAR_TXT);
-            if (withExplicitUnicodeExtra && !zipEncoding.canEncode(ze.getName())) {
+            if (withExplicitUnicodeExtra && !Charsets.canEncode(encoding, ze.getName())) {
 
-                final ByteBuffer en = zipEncoding.encode(ze.getName());
+                final ByteBuffer en = Charsets.encode(encoding, ze.getName());
 
                 ze.addExtraField(new UnicodePathExtraField(ze.getName(), en.array(), en.arrayOffset(), en.limit() - en.position()));
             }
@@ -108,9 +106,9 @@ public class UTF8ZipFilesTest extends AbstractTest {
 
             ze = new ZipArchiveEntry(ASCII_TXT);
 
-            if (withExplicitUnicodeExtra && !zipEncoding.canEncode(ze.getName())) {
+            if (withExplicitUnicodeExtra && !Charsets.canEncode(encoding, ze.getName())) {
 
-                final ByteBuffer en = zipEncoding.encode(ze.getName());
+                final ByteBuffer en = Charsets.encode(encoding, ze.getName());
 
                 ze.addExtraField(new UnicodePathExtraField(ze.getName(), en.array(), en.arrayOffset(), en.limit() - en.position()));
             }
