@@ -35,6 +35,7 @@ public final class ByteUtils {
      *
      * @since 1.14
      */
+    @FunctionalInterface
     public interface ByteConsumer {
         /**
          * The contract is similar to {@link OutputStream#write(int)}, consume the lower eight bytes of the int as a byte.
@@ -50,6 +51,7 @@ public final class ByteUtils {
      *
      * @since 1.14
      */
+    @FunctionalInterface
     public interface ByteSupplier {
         /**
          * The contract is similar to {@link InputStream#read()}, return the byte as an unsigned int, -1 if there are no more bytes.
