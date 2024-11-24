@@ -16,12 +16,10 @@
  */
 package org.apache.commons.compress.archivers.zip;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import java.util.zip.ZipException;
 
@@ -113,10 +111,10 @@ public class ExtraFieldUtils {
     /**
      * Static registry of known extra fields.
      */
-    private static final ConcurrentMap<ZipShort, Supplier<ZipExtraField>> IMPLEMENTATIONS;
+    private static final HashMap<ZipShort, Supplier<ZipExtraField>> IMPLEMENTATIONS;
 
     static {
-        IMPLEMENTATIONS = new ConcurrentHashMap<>();
+        IMPLEMENTATIONS = new HashMap<>();
         IMPLEMENTATIONS.put(AsiExtraField.HEADER_ID, AsiExtraField::new);
         IMPLEMENTATIONS.put(X5455_ExtendedTimestamp.HEADER_ID, X5455_ExtendedTimestamp::new);
         IMPLEMENTATIONS.put(X7875_NewUnix.HEADER_ID, X7875_NewUnix::new);
@@ -363,33 +361,5 @@ public class ExtraFieldUtils {
                 return onUnparseableData.onUnparseableExtraField(data, off, len, local, claimedLength);
             }
         });
-    }
-
-    /**
-     * Registers a ZipExtraField implementation, overriding a matching existing entry.
-     * <p>
-     * The given class must have a no-arg constructor and implement the {@link ZipExtraField ZipExtraField interface}.
-     * </p>
-     *
-     * @param clazz the class to register.
-     *
-     * @deprecated Use {@link ZipArchiveInputStream#setExtraFieldSupport} instead
-     *             to not leak instances between archives and applications.
-     */
-    @Deprecated // note: when dropping update registration to move to a HashMap (static init)
-    public static void register(final Class<?> clazz) {
-        try {
-            final Constructor<? extends ZipExtraField> constructor = clazz.asSubclass(ZipExtraField.class).getConstructor();
-            final ZipExtraField zef = clazz.asSubclass(ZipExtraField.class).getConstructor().newInstance();
-            IMPLEMENTATIONS.put(zef.getHeaderId(), () -> {
-                try {
-                    return constructor.newInstance();
-                } catch (final ReflectiveOperationException e) {
-                    throw new IllegalStateException(clazz.toString(), e);
-                }
-            });
-        } catch (final ReflectiveOperationException e) {
-            throw new IllegalArgumentException(clazz.toString(), e);
-        }
     }
 }

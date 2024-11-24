@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.zip.ZipException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,45 +28,6 @@ import org.junit.jupiter.api.Test;
  * JUnit tests for org.apache.commons.compress.archivers.zip.ExtraFieldUtils.
  */
 public class ExtraFieldUtilsTest implements UnixStat {
-
-    public static class AiobThrowingExtraField implements ZipExtraField {
-        static final int LENGTH = 4;
-
-        @Override
-        public byte[] getCentralDirectoryData() {
-            return getLocalFileDataData();
-        }
-
-        @Override
-        public ZipShort getCentralDirectoryLength() {
-            return getLocalFileDataLength();
-        }
-
-        @Override
-        public ZipShort getHeaderId() {
-            return AIOB_HEADER;
-        }
-
-        @Override
-        public byte[] getLocalFileDataData() {
-            return new byte[LENGTH];
-        }
-
-        @Override
-        public ZipShort getLocalFileDataLength() {
-            return new ZipShort(LENGTH);
-        }
-
-        @Override
-        public void parseFromCentralDirectoryData(final byte[] buffer, final int offset, final int length) {
-            parseFromLocalFileData(buffer, offset, length);
-        }
-
-        @Override
-        public void parseFromLocalFileData(final byte[] buffer, final int offset, final int length) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-    }
 
     /**
      * Header-ID of a ZipExtraField not supported by Commons Compress.
@@ -188,18 +147,6 @@ public class ExtraFieldUtilsTest implements UnixStat {
         assertTrue(ze[1] instanceof UnrecognizedExtraField, "type field 2");
         assertEquals(1, ze[1].getCentralDirectoryLength().getValue(), "data length field 2");
 
-    }
-
-    @Test
-    public void testParseTurnsArrayIndexOutOfBoundsIntoZipException() {
-        ExtraFieldUtils.register(AiobThrowingExtraField.class);
-        final AiobThrowingExtraField f = new AiobThrowingExtraField();
-        final byte[] d = new byte[4 + AiobThrowingExtraField.LENGTH];
-        System.arraycopy(f.getHeaderId().getBytes(), 0, d, 0, 2);
-        System.arraycopy(f.getLocalFileDataLength().getBytes(), 0, d, 2, 2);
-        System.arraycopy(f.getLocalFileDataData(), 0, d, 4, AiobThrowingExtraField.LENGTH);
-        final ZipException e = assertThrows(ZipException.class, () -> ExtraFieldUtils.parse(d), "data should be invalid");
-        assertEquals("Failed to parse corrupt ZIP extra field of type 1000", e.getMessage(), "message");
     }
 
     @Test

@@ -30,7 +30,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -308,11 +307,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
     private final byte[] twoDwordBuf = new byte[2 * DWORD];
 
     private int entriesRead;
-
-    /**
-     * The factory for extra fields or null.
-     */
-    // private Function<ZipShort, ZipExtraField> extraFieldSupport;
 
     /**
      * Constructs an instance using UTF-8 encoding
@@ -1255,18 +1249,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
             return;
         }
         throw new IllegalArgumentException();
-    }
-
-    /**
-     * Currently unused.
-     *
-     * Sets the custom extra fields factory.
-     * @param extraFieldSupport the lookup function based on extra field header id.
-     * @return the archive.
-     */
-    public ZipArchiveInputStream setExtraFieldSupport(final Function<ZipShort, ZipExtraField> extraFieldSupport) {
-        // this.extraFieldSupport = extraFieldSupport;
-        return this;
     }
 
     /**
