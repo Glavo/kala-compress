@@ -28,7 +28,7 @@ import java.util.jar.JarOutputStream;
 
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.java.util.jar.Pack200;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.compress.utils.IOUtils;
 
 /**
  * An input stream that decompresses from the Pack200 format to be read as any other stream.
