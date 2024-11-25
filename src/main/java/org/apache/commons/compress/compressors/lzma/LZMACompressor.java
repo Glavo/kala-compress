@@ -32,7 +32,12 @@ import java.io.OutputStream;
  */
 final class LZMACompressor extends CompressorStreamFactory.BuiltinCompressor {
     public LZMACompressor() {
-        super(CompressorStreamFactory.LZMA);
+        super(CompressorStreamFactory.LZMA, "XZ for Java", "https://tukaani.org/xz/java.html");
+    }
+
+    @Override
+    public boolean isCompressionAvailable() {
+        return LZMAUtils.isLZMACompressionAvailable();
     }
 
     @Override
