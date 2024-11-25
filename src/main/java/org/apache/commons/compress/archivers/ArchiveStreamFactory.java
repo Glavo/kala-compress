@@ -359,14 +359,14 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     /**
      * Entry encoding, null for the default.
      */
-    private volatile Charset entryEncoding;
+    private final Charset entryEncoding;
 
     private SortedMap<String, ArchiveStreamProvider> archiveInputStreamProviders;
 
     private SortedMap<String, ArchiveStreamProvider> archiveOutputStreamProviders;
 
     /**
-     * Constructs an instance using the UTF-8.
+     * Constructs an instance using the archiver default encoding.
      */
     public ArchiveStreamFactory() {
         this(null);
