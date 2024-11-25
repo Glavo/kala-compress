@@ -37,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -620,11 +619,6 @@ public class ZipFile implements Closeable {
     private final boolean useUnicodeExtraFields;
 
     /**
-     * Whether the file is closed.
-     */
-    private volatile boolean closed = true;
-
-    /**
      * Whether the ZIP archive is a split ZIP archive
      */
     private final boolean isSplitZipArchive;
@@ -859,7 +853,6 @@ public class ZipFile implements Closeable {
         } catch (final IOException e) {
             throw new IOException("Error reading Zip content from " + channelDescription, e);
         } finally {
-            this.closed = !success;
             if (!success && closeOnError) {
                 IOUtils.closeQuietly(archive);
             }
@@ -887,10 +880,6 @@ public class ZipFile implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        // this flag is only written here and read in finalize() which
-        // can never be run in parallel.
-        // no synchronization needed.
-        closed = true;
         archive.close();
     }
 
