@@ -36,9 +36,9 @@ import java.util.Map;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.utils.ArrayFill;
 import org.apache.commons.compress.utils.Charsets;
+import org.apache.commons.compress.utils.CountingOutputStream;
 import org.apache.commons.compress.utils.FixedLengthBlockOutputStream;
 import org.apache.commons.compress.utils.TimeUtils;
-import org.apache.commons.io.output.CountingOutputStream;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -367,7 +367,7 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
 
     @Override
     public long getBytesWritten() {
-        return countingOut.getByteCount();
+        return countingOut.getBytesWritten();
     }
 
     /**
