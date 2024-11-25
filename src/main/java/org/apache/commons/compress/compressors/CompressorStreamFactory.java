@@ -403,16 +403,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         return " In addition to Apache Commons Compress you need the " + name + " library - see " + url;
     }
 
-    /**
-     * If true, decompress until the end of the input. If false, stop after the first stream and leave the input position to point to the next byte after the
-     * stream
-     */
-    private final Boolean decompressUntilEof;
-    // This is Boolean so setDecompressConcatenated can determine whether it has
-    // been set by the ctor
-    // once the setDecompressConcatenated method has been removed, it can revert
-    // to boolean
-
     private SortedMap<String, CompressorStreamProvider> compressorInputStreamProviders;
 
     private SortedMap<String, CompressorStreamProvider> compressorOutputStreamProviders;
@@ -421,7 +411,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * If true, decompress until the end of the input. If false, stop after the first stream and leave the input position to point to the next byte after the
      * stream
      */
-    private volatile boolean decompressConcatenated;
+    private final boolean decompressConcatenated;
 
     private final int memoryLimitInKb;
 
@@ -429,7 +419,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * Constructs an instance with the decompress Concatenated option set to false.
      */
     public CompressorStreamFactory() {
-        this.decompressUntilEof = null;
+        this.decompressConcatenated = false;
         this.memoryLimitInKb = -1;
     }
 
@@ -455,7 +445,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * @since 1.14
      */
     public CompressorStreamFactory(final boolean decompressUntilEOF, final int memoryLimitInKb) {
-        this.decompressUntilEof = decompressUntilEOF;
         // Also copy to existing variable so can continue to use that as the
         // current value
         this.decompressConcatenated = decompressUntilEOF;
@@ -649,13 +638,11 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         return compressorOutputStreamProviders;
     }
 
-    /** For tests. */
-    boolean getDecompressConcatenated() {
+    /**
+     * @since 1.27.1-0
+     */
+    public boolean getDecompressConcatenated() {
         return decompressConcatenated;
-    }
-
-    public Boolean getDecompressUntilEOF() {
-        return decompressUntilEof;
     }
 
     @Override
@@ -666,27 +653,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
     @Override
     public Set<String> getOutputStreamCompressorNames() {
         return Sets.newHashSet(GZIP, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_FRAMED, LZ4_BLOCK, LZ4_FRAMED, ZSTANDARD);
-    }
-
-    /**
-     * Sets whether to decompress the full input or only the first stream in formats supporting multiple concatenated input streams.
-     *
-     * <p>
-     * This setting applies to the gzip, bzip2 and XZ formats only.
-     * </p>
-     *
-     * @param decompressConcatenated if true, decompress until the end of the input; if false, stop after the first stream and leave the input position to point
-     *                               to the next byte after the stream
-     * @since 1.5
-     * @deprecated 1.10 use the {@link #CompressorStreamFactory(boolean)} constructor instead
-     * @throws IllegalStateException if the constructor {@link #CompressorStreamFactory(boolean)} was used to create the factory
-     */
-    @Deprecated
-    public void setDecompressConcatenated(final boolean decompressConcatenated) {
-        if (this.decompressUntilEof != null) {
-            throw new IllegalStateException("Cannot override the setting defined by the constructor");
-        }
-        this.decompressConcatenated = decompressConcatenated;
     }
 
 }

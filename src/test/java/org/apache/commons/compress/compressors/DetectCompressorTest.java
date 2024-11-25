@@ -76,10 +76,8 @@ public final class DetectCompressorTest {
     private static final CompressorStreamFactory factorySetFalse;
 
     static {
-        factorySetTrue = new CompressorStreamFactory();
-        factorySetTrue.setDecompressConcatenated(true);
-        factorySetFalse = new CompressorStreamFactory();
-        factorySetFalse.setDecompressConcatenated(false);
+        factorySetTrue = new CompressorStreamFactory(true);
+        factorySetFalse = new CompressorStreamFactory(false);
     }
 
     public static Stream<Arguments> getDetectLimitedByNameParams() {
@@ -321,22 +319,6 @@ public final class DetectCompressorTest {
                 assertEquals(-1, in.read());
             }
         }
-    }
-
-    @Test
-    public void testOverride() {
-        final CompressorStreamFactory fac1 = new CompressorStreamFactory();
-        assertFalse(fac1.getDecompressConcatenated());
-        fac1.setDecompressConcatenated(true);
-        assertTrue(fac1.getDecompressConcatenated());
-
-        final CompressorStreamFactory fac2 = new CompressorStreamFactory(false);
-        assertFalse(fac2.getDecompressConcatenated());
-        assertThrows(IllegalStateException.class, () -> fac2.setDecompressConcatenated(true), "Expected IllegalStateException");
-
-        final CompressorStreamFactory fac3 = new CompressorStreamFactory(true);
-        assertTrue(fac3.getDecompressConcatenated());
-        assertThrows(IllegalStateException.class, () -> fac3.setDecompressConcatenated(true), "Expected IllegalStateException");
     }
 
     @Test
