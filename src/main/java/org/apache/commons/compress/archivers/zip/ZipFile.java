@@ -47,7 +47,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.Inflater;
@@ -61,9 +60,9 @@ import org.apache.commons.compress.utils.BoundedArchiveInputStream;
 import org.apache.commons.compress.utils.BoundedSeekableByteChannelInputStream;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.CountingInputStream;
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.InputStreamStatistics;
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * Replacement for {@link java.util.zip.ZipFile}.
@@ -470,7 +469,6 @@ public class ZipFile implements Closeable {
 
     private static SeekableByteChannel openZipChannel(final Path path, final long maxNumberOfDisks, final OpenOption[] openOptions) throws IOException {
         final FileChannel channel = FileChannel.open(path, StandardOpenOption.READ);
-        final List<FileChannel> channels = new ArrayList<>();
         try {
             final boolean is64 = positionAtEndOfCentralDirectoryRecord(channel);
             long numberOfDisks;
@@ -499,7 +497,7 @@ public class ZipFile implements Closeable {
             channel.close();
 
             final Path parent = path.getParent();
-            final String basename = FilenameUtils.removeExtension(Objects.toString(path.getFileName(), null));
+            final String basename = FileNameUtils.getBaseName(path);
 
             return ZipSplitReadOnlySeekableByteChannel.forPaths(IntStream.range(0, (int) numberOfDisks).mapToObj(i -> {
                 if (i == numberOfDisks - 1) {
@@ -517,7 +515,6 @@ public class ZipFile implements Closeable {
             }).collect(Collectors.toList()), openOptions);
         } catch (final Throwable ex) {
             IOUtils.closeQuietly(channel);
-            channels.forEach(IOUtils::closeQuietly);
             throw ex;
         }
     }

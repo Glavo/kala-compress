@@ -18,6 +18,7 @@
  */
 package org.apache.commons.compress.archivers.tar;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -34,7 +35,6 @@ import java.util.Map;
 import org.apache.commons.compress.utils.Charsets;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.ParsingUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 /**
  * This class provides static utility methods to work with byte streams.
@@ -620,7 +620,7 @@ public class TarUtils {
                             break;
                         }
                         if (ch == '=') { // end of keyword
-                            final String keyword = coll.toString(StandardCharsets.UTF_8);
+                            final String keyword = coll.toString("UTF-8");
                             // Get rest of entry
                             final int restLen = len - read;
                             if (restLen <= 1) { // only NL

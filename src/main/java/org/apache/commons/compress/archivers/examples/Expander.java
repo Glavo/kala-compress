@@ -28,7 +28,6 @@ import org.apache.commons.compress.archivers.tar.TarFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.output.NullOutputStream;
 
 import java.io.*;
 import java.nio.channels.Channels;
@@ -77,7 +76,12 @@ public class Expander {
                     throw new IOException("Failed to create directory " + parent);
                 }
                 if (nullTarget) {
-                    writer.accept(nextEntry, NullOutputStream.INSTANCE);
+                    writer.accept(nextEntry, new OutputStream() {
+                        @Override
+                        public void write(int b) throws IOException {
+                            // do nothing
+                        }
+                    });
                 } else {
                     try (OutputStream outputStream = Files.newOutputStream(targetPath)) {
                         writer.accept(nextEntry, outputStream);
