@@ -32,12 +32,7 @@ public class BrotliUtils {
      * @return true if the classes required to support Brotli compression are available
      */
     public static boolean isBrotliCompressionAvailable() {
-        try {
-            Class.forName("org.brotli.dec.BrotliInputStream");
-            return true;
-        } catch (final NoClassDefFoundError | Exception error) { // NOSONAR
-            return false;
-        }
+        return true;
     }
 
     /** Private constructor to prevent instantiation of this utility class. */
