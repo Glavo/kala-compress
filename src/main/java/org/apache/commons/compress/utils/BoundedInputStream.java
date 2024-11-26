@@ -59,7 +59,16 @@ public class BoundedInputStream extends FilterInputStream {
         this.propagateClose = false;
     }
 
-    public BoundedInputStream(InputStream in, long maxCount, boolean propagateClose) {
+    /**
+     * Creates the stream that will at most read the given amount of bytes from the given stream.
+     *
+     * @param in             the stream to read from
+     * @param maxCount       the maximum amount of bytes to read
+     * @param propagateClose {@code true} if calling {@link #close()} propagates to the {@code close()} method of
+     *                       the underlying stream or {@code false} if it does not.
+     * @since 1.27.1-0
+     */
+    public BoundedInputStream(final InputStream in, final long maxCount, final boolean propagateClose) {
         super(in);
         this.maxCount = maxCount;
         this.propagateClose = propagateClose;
