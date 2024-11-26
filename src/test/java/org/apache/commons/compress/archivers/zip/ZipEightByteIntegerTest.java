@@ -106,7 +106,7 @@ public class ZipEightByteIntegerTest {
         assertEquals(zl2, zl, "symmetric");
 
         assertNotEquals(null, zl, "null handling");
-        assertNotEquals(0x1234, zl, "non ZipEightByteInteger handling");
+        assertNotEquals(zl, Integer.valueOf(0x1234), "non ZipEightByteInteger handling");
     }
 
     /**
@@ -149,7 +149,10 @@ public class ZipEightByteIntegerTest {
      */
     @Test
     public void testToString() {
-        assertEquals("ZipEightByteInteger value: 18446744073709551615", newMaxValue().toString());
+        assertEquals("0", ZipEightByteInteger.ZERO.toString());
+        assertEquals("0", ZipEightByteInteger.getValue(new byte[ZipEightByteInteger.BYTES]).toString());
+        assertEquals(Long.toString(Long.MAX_VALUE), new ZipEightByteInteger(BigInteger.valueOf(Long.MAX_VALUE)).toString());
+        assertEquals("18446744073709551615", newMaxValue().toString());
     }
 
     /**
