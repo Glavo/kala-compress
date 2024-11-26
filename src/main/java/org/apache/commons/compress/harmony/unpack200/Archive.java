@@ -32,8 +32,8 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.harmony.pack200.Pack200Exception;
+import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * Archive is the main entry point to unpack200. An archive is constructed with either two file names, a pack file and an output file name or an input stream
@@ -98,7 +98,7 @@ public class Archive {
     public Archive(final String inputFileName, final String outputFileName) throws FileNotFoundException, IOException {
         this.inputPath = Paths.get(inputFileName);
         this.inputSize = Files.size(this.inputPath);
-        this.inputStream = new BoundedInputStream(Files.newInputStream(inputPath), inputSize);
+        this.inputStream = new BoundedInputStream(Files.newInputStream(inputPath), inputSize, true);
         this.outputStream = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(outputFileName)));
         this.outputFileName = outputFileName;
         this.closeStreams = true;
@@ -157,7 +157,7 @@ public class Archive {
         outputStream.setComment("PACK200");
         try {
             if (!inputStream.markSupported()) {
-                inputStream = new BoundedInputStream(new BufferedInputStream(inputStream));
+                inputStream = new BoundedInputStream(new BufferedInputStream(inputStream), Long.MAX_VALUE, true);
                 if (!inputStream.markSupported()) {
                     throw new IllegalStateException();
                 }
@@ -165,7 +165,7 @@ public class Archive {
             inputStream.mark(2);
             if ((inputStream.read() & 0xFF | (inputStream.read() & 0xFF) << 8) == GZIPInputStream.GZIP_MAGIC) {
                 inputStream.reset();
-                inputStream = new BoundedInputStream(new BufferedInputStream(new GZIPInputStream(inputStream)));
+                inputStream = new BoundedInputStream(new BufferedInputStream(new GZIPInputStream(inputStream)), Long.MAX_VALUE, true);
             } else {
                 inputStream.reset();
             }

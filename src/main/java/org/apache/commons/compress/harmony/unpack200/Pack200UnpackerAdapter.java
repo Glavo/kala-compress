@@ -34,8 +34,8 @@ import java.util.jar.JarOutputStream;
 import org.apache.commons.compress.harmony.pack200.Pack200Adapter;
 import org.apache.commons.compress.harmony.pack200.Pack200Exception;
 import org.apache.commons.compress.java.util.jar.Pack200.Unpacker;
+import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.compress.utils.CloseShieldFilterInputStream;
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * This class provides the binding between the standard Pack200 interface and the internal interface for (un)packing.
@@ -68,7 +68,7 @@ public class Pack200UnpackerAdapter extends Pack200Adapter implements Unpacker {
         }
         if (inputStream instanceof CloseShieldFilterInputStream) {
             // Don't unwrap to keep close shield.
-            return newBoundedInputStream(BoundedInputStream.builder().setInputStream(inputStream).get());
+            return newBoundedInputStream(new BoundedInputStream(inputStream, Long.MAX_VALUE, true));
         }
         if (inputStream instanceof FilterInputStream) {
             return newBoundedInputStream(unwrap((FilterInputStream) inputStream));
@@ -77,7 +77,7 @@ public class Pack200UnpackerAdapter extends Pack200Adapter implements Unpacker {
             return newBoundedInputStream((FileInputStream) inputStream);
         }
         // No limit
-        return newBoundedInputStream(BoundedInputStream.builder().setInputStream(inputStream).get());
+        return newBoundedInputStream(new BoundedInputStream(inputStream, Long.MAX_VALUE, true));
     }
 
     /**
@@ -92,13 +92,7 @@ public class Pack200UnpackerAdapter extends Pack200Adapter implements Unpacker {
      */
     @SuppressWarnings("resource") // Caller closes.
     static BoundedInputStream newBoundedInputStream(final Path path) throws IOException {
-        // @formatter:off
-        return BoundedInputStream.builder()
-                .setInputStream(new BufferedInputStream(Files.newInputStream(path)))
-                .setMaxCount(Files.size(path))
-                .setPropagateClose(false)
-                .get();
-        // @formatter:on
+        return new BoundedInputStream(new BufferedInputStream(Files.newInputStream(path)), Files.size(path), false);
     }
 
     /**

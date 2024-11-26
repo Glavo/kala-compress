@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -50,7 +49,7 @@ import org.apache.commons.compress.harmony.unpack200.bytecode.ClassFile;
 import org.apache.commons.compress.harmony.unpack200.bytecode.ClassFileEntry;
 import org.apache.commons.compress.harmony.unpack200.bytecode.InnerClassesAttribute;
 import org.apache.commons.compress.harmony.unpack200.bytecode.SourceFileAttribute;
-import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
 
 /**
  * A Pack200 archive consists of one or more segments. Each segment is stand-alone, in the sense that every segment has the magic number header; thus, every

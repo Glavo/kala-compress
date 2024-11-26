@@ -32,7 +32,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 import org.apache.commons.compress.AbstractTempDirTest;
-import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.compress.utils.BoundedInputStream;
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -110,7 +110,7 @@ public class SegmentTest extends AbstractTempDirTest {
     public void testParsingOOMBounded(final String testFileName) throws Exception {
         final URL url = Segment.class.getResource("/org/apache/commons/compress/pack/" + testFileName);
         try (BoundedInputStream in = Pack200UnpackerAdapter.newBoundedInputStream(url);
-                JarOutputStream out = new JarOutputStream(NullOutputStream.INSTANCE)) {
+             JarOutputStream out = new JarOutputStream(NullOutputStream.INSTANCE)) {
             assertThrows(IOException.class, () -> new Segment().unpack(in, out));
         }
     }

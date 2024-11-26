@@ -16,6 +16,8 @@
  */
 package org.apache.commons.compress.java.util.jar;
 
+import org.apache.commons.compress.utils.BoundedInputStream;
+
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +28,6 @@ import java.util.SortedMap;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
-
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * Class factory for {@link Packer} and {@link Unpacker}.

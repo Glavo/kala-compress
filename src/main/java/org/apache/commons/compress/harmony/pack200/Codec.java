@@ -16,10 +16,10 @@
  */
 package org.apache.commons.compress.harmony.pack200;
 
+import org.apache.commons.compress.utils.BoundedInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.apache.commons.io.input.BoundedInputStream;
 
 /**
  * A Codec allows a sequence of bytes to be decoded into integer values (or vice versa).
@@ -84,9 +84,9 @@ public abstract class Codec {
     int check(final int n, final InputStream in) throws Pack200Exception {
         if (in instanceof BoundedInputStream) {
             final BoundedInputStream bin = (BoundedInputStream) in;
-            final long count = bin.getCount();
+            final long count = bin.getBytesRead();
             final long maxLength = bin.getMaxCount();
-            if (maxLength > -1) {
+            if (maxLength < Long.MAX_VALUE) {
                 final long remaining = maxLength - count;
                 final String format = "Can't read beyond end of stream (n = %,d, count = %,d, maxLength = %,d, remaining = %,d)";
                 if (count < -1) {

@@ -27,23 +27,69 @@ import java.io.InputStream;
  * @since 1.6
  */
 public class BoundedInputStream extends FilterInputStream {
-    private long bytesRemaining;
+    /**
+     * The current count of bytes counted.
+     */
+    private long count;
+
+    /**
+     * The max count of bytes to read.
+     */
+    private final long maxCount;
+
+    /**
+     * Flag if close should be propagated.
+     */
+    private final boolean propagateClose;
+
+    /**
+     * The current mark.
+     */
+    private long mark;
 
     /**
      * Creates the stream that will at most read the given amount of bytes from the given stream.
      *
-     * @param in   the stream to read from
-     * @param size the maximum amount of bytes to read
+     * @param in       the stream to read from
+     * @param maxCount the maximum amount of bytes to read
      */
-    public BoundedInputStream(final InputStream in, final long size) {
+    public BoundedInputStream(final InputStream in, final long maxCount) {
         super(in);
-        bytesRemaining = size;
+        this.maxCount = maxCount;
+        this.propagateClose = false;
+    }
+
+    public BoundedInputStream(InputStream in, long maxCount, boolean propagateClose) {
+        super(in);
+        this.maxCount = maxCount;
+        this.propagateClose = propagateClose;
     }
 
     @Override
-    public void close() {
-        // there isn't anything to close in this stream and the nested
-        // stream is controlled externally
+    public void close() throws IOException {
+        if (propagateClose) {
+            in.close();
+        }
+    }
+
+    /**
+     * Returns the current number of bytes read from this stream.
+     *
+     * @return the number of read bytes
+     * @since 1.27.1-0
+     */
+    public long getBytesRead() {
+        return count;
+    }
+
+    /**
+     * Gets the max count of bytes to read.
+     *
+     * @return The max count of bytes to read.
+     * @since 1.27.1-0
+     */
+    public long getMaxCount() {
+        return maxCount;
     }
 
     /**
@@ -53,13 +99,13 @@ public class BoundedInputStream extends FilterInputStream {
      * @since 1.21
      */
     public long getBytesRemaining() {
-        return bytesRemaining;
+        return maxCount - count;
     }
 
     @Override
     public int read() throws IOException {
-        if (bytesRemaining > 0) {
-            --bytesRemaining;
+        if (count < maxCount) {
+            count++;
             return in.read();
         }
         return -1;
@@ -70,29 +116,51 @@ public class BoundedInputStream extends FilterInputStream {
         if (len == 0) {
             return 0;
         }
+        long bytesRemaining = getBytesRemaining();
         if (bytesRemaining == 0) {
             return -1;
         }
-        int bytesToRead = len;
-        if (bytesToRead > bytesRemaining) {
-            bytesToRead = (int) bytesRemaining;
-        }
+        int bytesToRead = (int) Math.min(len, bytesRemaining);
         final int bytesRead = in.read(b, off, bytesToRead);
         if (bytesRead >= 0) {
-            bytesRemaining -= bytesRead;
+            count += bytesRead;
         }
         return bytesRead;
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @since 1.20
      */
     @Override
     public long skip(final long n) throws IOException {
-        final long bytesToSkip = Math.min(bytesRemaining, n);
+        final long bytesToSkip = Math.min(getBytesRemaining(), n);
         final long bytesSkipped = in.skip(bytesToSkip);
-        bytesRemaining -= bytesSkipped;
+        count += bytesSkipped;
 
         return bytesSkipped;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @since 1.27.1-0
+     */
+    @Override
+    public void mark(final int readLimit) {
+        in.mark(readLimit);
+        mark = count;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @since 1.27.1-0
+     */
+    @Override
+    public void reset() throws IOException {
+        in.reset();
+        count = mark;
     }
 }

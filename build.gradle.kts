@@ -11,7 +11,6 @@ dependencies {
     compileOnlyApi("org.jetbrains:annotations:26.0.1")
     implementation("org.tukaani:xz:1.10")
     implementation("com.github.luben:zstd-jni:1.5.6-7")
-    implementation("commons-io:commons-io:2.17.0")
     implementation("org.ow2.asm:asm:9.7.1")
 
     val junitVersion = "5.11.0"
@@ -29,10 +28,11 @@ dependencies {
     testImplementation("org.ops4j.pax.exam:pax-exam-link-mvn:$paxExamVersion")
     testImplementation("org.apache.felix:org.apache.felix.framework:7.0.5")
     testImplementation("org.apache.commons:commons-lang3:3.17.0")
+    testImplementation("commons-io:commons-io:2.17.0")
     testImplementation("javax.inject:javax.inject:1")
 }
 
-tasks.compileJava {
+tasks.withType<JavaCompile> {
     options.release.set(8)
     options.encoding = "UTF-8"
 }
