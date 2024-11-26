@@ -32,13 +32,14 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * <p>
  * Creates a Compressor[In|Out]putStreams from names. To add other implementations you should extend CompressorStreamFactory and override the
  * appropriate methods (and call their implementation from super of course).
  * </p>
- *
+ * <p>
  * Example (Compressing a file):
  *
  * <pre>
@@ -47,7 +48,7 @@ import org.apache.commons.compress.utils.IOUtils;
  * IOUtils.copy(Files.newInputStream(input.toPath()), cos);
  * cos.close();
  * </pre>
- *
+ * <p>
  * Example (Decompressing a file):
  *
  * <pre>
@@ -61,11 +62,6 @@ import org.apache.commons.compress.utils.IOUtils;
  * @ThreadSafe even if the deprecated method setDecompressConcatenated is used
  */
 public class CompressorStreamFactory implements CompressorStreamProvider {
-
-    /**
-     * @since 1.27.1-0
-     */
-    public static final CompressorStreamFactory DEFAULT = new CompressorStreamFactory();
 
     /**
      * Constant (value {@value}) used to identify the BROTLI compression algorithm.
@@ -225,9 +221,10 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         OUTPUT_NAMES = Collections.unmodifiableSet(outputCompressorNames);
     }
 
-    private static Iterable<CompressorStreamProvider> archiveStreamProviderIterable() {
-        return ServiceLoader.load(CompressorStreamProvider.class, ClassLoader.getSystemClassLoader());
-    }
+    /**
+     * @since 1.27.1-0
+     */
+    public static final CompressorStreamFactory DEFAULT = new CompressorStreamFactory();
 
     /**
      * Detects the type of compressor stream.
@@ -236,7 +233,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * @return type of compressor stream detected
      * @throws CompressorException      if no compressor stream type was detected or if something else went wrong
      * @throws IllegalArgumentException if stream is null or does not support mark
-     *
      * @since 1.14
      */
     public static String detect(final InputStream inputStream) throws CompressorException {
@@ -280,71 +276,14 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         throw new CompressorException("No Compressor found for the stream signature.");
     }
 
-    /**
-     * Constructs a new sorted map from input stream provider names to provider objects.
-     *
-     * <p>
-     * The map returned by this method will have one entry for each provider for which support is available in the current Java virtual machine. If two or more
-     * supported provider have the same name then the resulting map will contain just one of them; which one it will contain is not specified.
-     * </p>
-     *
-     * <p>
-     * The invocation of this method, and the subsequent use of the resulting map, may cause time-consuming disk or network I/O operations to occur. This method
-     * is provided for applications that need to enumerate all of the available providers, for example to allow user provider selection.
-     * </p>
-     *
-     * <p>
-     * This method may return different results at different times if new providers are dynamically made available to the current Java virtual machine.
-     * </p>
-     *
-     * @return An immutable, map from names to provider objects
-     * @since 1.13
-     */
-    public static SortedMap<String, CompressorStreamProvider> findAvailableCompressorInputStreamProviders() {
-        final TreeMap<String, CompressorStreamProvider> map = new TreeMap<>();
-        putAll(DEFAULT.getInputStreamCompressorNames(), DEFAULT, map);
-        archiveStreamProviderIterable().forEach(provider -> putAll(provider.getInputStreamCompressorNames(), provider, map));
-        return map;
-    }
-
-    /**
-     * Constructs a new sorted map from output stream provider names to provider objects.
-     *
-     * <p>
-     * The map returned by this method will have one entry for each provider for which support is available in the current Java virtual machine. If two or more
-     * supported provider have the same name then the resulting map will contain just one of them; which one it will contain is not specified.
-     * </p>
-     *
-     * <p>
-     * The invocation of this method, and the subsequent use of the resulting map, may cause time-consuming disk or network I/O operations to occur. This method
-     * is provided for applications that need to enumerate all of the available providers, for example to allow user provider selection.
-     * </p>
-     *
-     * <p>
-     * This method may return different results at different times if new providers are dynamically made available to the current Java virtual machine.
-     * </p>
-     *
-     * @return An immutable, map from names to provider objects
-     * @since 1.13
-     */
-    public static SortedMap<String, CompressorStreamProvider> findAvailableCompressorOutputStreamProviders() {
-        final TreeMap<String, CompressorStreamProvider> map = new TreeMap<>();
-        putAll(DEFAULT.getOutputStreamCompressorNames(), DEFAULT, map);
-        archiveStreamProviderIterable().forEach(provider -> putAll(provider.getOutputStreamCompressorNames(), provider, map));
-        return map;
-    }
-
-    static void putAll(final Set<String> names, final CompressorStreamProvider provider, final TreeMap<String, CompressorStreamProvider> map) {
-        names.forEach(name -> map.put(toKey(name), provider));
-    }
-
     private static String toKey(final String name) {
-        return name.toUpperCase(Locale.ROOT);
+        return name.toLowerCase(Locale.ROOT);
     }
 
-    private SortedMap<String, CompressorStreamProvider> compressorInputStreamProviders;
-
-    private SortedMap<String, CompressorStreamProvider> compressorOutputStreamProviders;
+    private final SortedMap<String, CompressorStreamProvider> compressorInputStreamProviders = new TreeMap<>();
+    private final SortedMap<String, CompressorStreamProvider> compressorOutputStreamProviders = new TreeMap<>();
+    private final Set<String> inputStreamCompressorNames = new HashSet<>(ALL_NAMES);
+    private final Set<String> outputStreamCompressorNames = new HashSet<>(OUTPUT_NAMES);
 
     /**
      * If true, decompress until the end of the input. If false, stop after the first stream and leave the input position to point to the next byte after the
@@ -379,7 +318,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      *                           the next byte after the stream. This setting applies to the gzip, bzip2 and XZ formats only.
      * @param memoryLimitInKb    Some streams require allocation of potentially significant byte arrays/tables, and they can offer checks to prevent OOMs on
      *                           corrupt files. Set the maximum allowed memory allocation in KBs.
-     *
      * @since 1.14
      */
     public CompressorStreamFactory(final boolean decompressUntilEOF, final int memoryLimitInKb) {
@@ -447,7 +385,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
             }
         }
 
-        final CompressorStreamProvider compressorStreamProvider = getCompressorInputStreamProviders().get(toKey(name));
+        final CompressorStreamProvider compressorStreamProvider = compressorInputStreamProviders.get(toKey(name));
         if (compressorStreamProvider != null) {
             return compressorStreamProvider.createCompressorInputStream(name, in, actualDecompressConcatenated);
         }
@@ -482,7 +420,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
             }
         }
 
-        final CompressorStreamProvider compressorStreamProvider = getCompressorOutputStreamProviders().get(toKey(name));
+        final CompressorStreamProvider compressorStreamProvider = compressorOutputStreamProviders.get(toKey(name));
         if (compressorStreamProvider != null) {
             return compressorStreamProvider.createCompressorOutputStream(name, out);
         }
@@ -494,20 +432,6 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
         }
     }
 
-    public SortedMap<String, CompressorStreamProvider> getCompressorInputStreamProviders() {
-        if (compressorInputStreamProviders == null) {
-            compressorInputStreamProviders = Collections.unmodifiableSortedMap(findAvailableCompressorInputStreamProviders());
-        }
-        return compressorInputStreamProviders;
-    }
-
-    public SortedMap<String, CompressorStreamProvider> getCompressorOutputStreamProviders() {
-        if (compressorOutputStreamProviders == null) {
-            compressorOutputStreamProviders = Collections.unmodifiableSortedMap(findAvailableCompressorOutputStreamProviders());
-        }
-        return compressorOutputStreamProviders;
-    }
-
     /**
      * @since 1.27.1-0
      */
@@ -517,12 +441,47 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
 
     @Override
     public Set<String> getInputStreamCompressorNames() {
-        return ALL_NAMES;
+        return Collections.unmodifiableSet(inputStreamCompressorNames);
     }
 
     @Override
     public Set<String> getOutputStreamCompressorNames() {
-        return OUTPUT_NAMES;
+        return Collections.unmodifiableSet(outputStreamCompressorNames);
+    }
+
+    /**
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Experimental
+    public CompressorStreamFactory withInstalledProviders() {
+       return withProviders(ServiceLoader.load(CompressorStreamProvider.class));
+    }
+
+    /**
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Experimental
+    public CompressorStreamFactory withInstalledProviders(ClassLoader classLoader) {
+        return withProviders(ServiceLoader.load(CompressorStreamProvider.class, classLoader));
+    }
+
+    /**
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Experimental
+    public CompressorStreamFactory withProviders(Iterable<? extends CompressorStreamProvider> providers) {
+        CompressorStreamFactory result = new CompressorStreamFactory(this.decompressConcatenated, this.memoryLimitInKb);
+        for (CompressorStreamProvider provider : providers) {
+            for (String name : provider.getInputStreamCompressorNames()) {
+                result.compressorInputStreamProviders.put(toKey(name), provider);
+                result.inputStreamCompressorNames.add(name);
+            }
+            for (String name : provider.getOutputStreamCompressorNames()) {
+                result.compressorOutputStreamProviders.put(toKey(name), provider);
+                result.outputStreamCompressorNames.add(name);
+            }
+        }
+        return result;
     }
 
     /**

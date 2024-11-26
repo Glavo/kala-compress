@@ -43,7 +43,7 @@ public class TestCompressorStreamProvider implements CompressorStreamProvider {
     }
 
     @Override
-    public CompressorOutputStream createCompressorOutputStream(final String name, final OutputStream out) throws CompressorException {
+    public CompressorOutputStream<?> createCompressorOutputStream(final String name, final OutputStream out) throws CompressorException {
         throw new InvocationConfirmationException(name);
     }
 

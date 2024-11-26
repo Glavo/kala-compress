@@ -8,6 +8,7 @@ repositories {
 }
 
 dependencies {
+    compileOnlyApi("org.jetbrains:annotations:26.0.1")
     implementation("org.tukaani:xz:1.10")
     implementation("com.github.luben:zstd-jni:1.5.6-7")
     implementation("commons-io:commons-io:2.17.0")

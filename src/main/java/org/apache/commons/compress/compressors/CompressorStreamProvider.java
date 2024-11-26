@@ -64,7 +64,7 @@ public interface CompressorStreamProvider {
      * @throws CompressorException      if the archiver name is not known
      * @throws IllegalArgumentException if the archiver name or stream is null
      */
-    CompressorOutputStream createCompressorOutputStream(String name, OutputStream out) throws CompressorException;
+    CompressorOutputStream<?> createCompressorOutputStream(String name, OutputStream out) throws CompressorException;
 
     /**
      * Gets all the input stream compressor names for this provider
