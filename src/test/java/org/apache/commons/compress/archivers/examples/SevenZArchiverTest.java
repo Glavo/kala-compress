@@ -38,7 +38,7 @@ import org.apache.commons.compress.AbstractTest;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.StreamingNotSupportedException;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveReader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +51,7 @@ public class SevenZArchiverTest extends AbstractTest {
         assertTrue(entry.isDirectory(), expectedName + " is not a directory");
     }
 
-    private void assertHelloWorld(final String expectedName, final String suffix, final ArchiveEntry entry, final SevenZFile z) throws IOException {
+    private void assertHelloWorld(final String expectedName, final String suffix, final ArchiveEntry entry, final SevenZArchiveReader z) throws IOException {
         assertNotNull(entry, () -> expectedName + " does not exists");
         assertEquals(expectedName, entry.getName());
         assertFalse(entry.isDirectory(), expectedName + " is a directory");
@@ -107,7 +107,7 @@ public class SevenZArchiverTest extends AbstractTest {
     }
 
     private void verifyContent() throws IOException {
-        try (SevenZFile z = SevenZFile.builder().setFile(target).get()) {
+        try (SevenZArchiveReader z = SevenZArchiveReader.builder().setFile(target).get()) {
             assertDir("a", z.getNextEntry());
             assertDir("a/b", z.getNextEntry());
             final ArchiveEntry n = z.getNextEntry();

@@ -32,7 +32,7 @@ import javax.crypto.Cipher;
 
 import org.apache.commons.compress.AbstractTest;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveReader;
 import org.apache.commons.compress.archivers.sevenz.SevenZMethod;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.apache.commons.compress.utils.TimeUtils;
@@ -81,7 +81,7 @@ public class SevenZTest extends AbstractTest {
         }
     }
 
-    private void multiByteReadConsistentlyReturnsMinusOneAtEof(final SevenZFile archive) throws Exception {
+    private void multiByteReadConsistentlyReturnsMinusOneAtEof(final SevenZArchiveReader archive) throws Exception {
         final byte[] buf = new byte[2];
         assertNotNull(archive.getNextEntry());
         assertNotNull(archive.getNextEntry());
@@ -92,12 +92,12 @@ public class SevenZTest extends AbstractTest {
 
     private void multiByteReadConsistentlyReturnsMinusOneAtEof(final SevenZMethod method) throws Exception {
         createArchive(method);
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             multiByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
 
-    private void readFully(final SevenZFile archive) throws IOException {
+    private void readFully(final SevenZArchiveReader archive) throws IOException {
         final byte[] buf = new byte[1024];
         int x = 0;
         while (0 <= (x = archive.read(buf))) {
@@ -110,7 +110,7 @@ public class SevenZTest extends AbstractTest {
         output = newTempFile("bla.7z");
     }
 
-    private void singleByteReadConsistentlyReturnsMinusOneAtEof(final SevenZFile archive) throws Exception {
+    private void singleByteReadConsistentlyReturnsMinusOneAtEof(final SevenZArchiveReader archive) throws Exception {
         assertNotNull(archive.getNextEntry());
         assertNotNull(archive.getNextEntry());
         readFully(archive);
@@ -120,7 +120,7 @@ public class SevenZTest extends AbstractTest {
 
     private void singleByteReadConsistentlyReturnsMinusOneAtEof(final SevenZMethod method) throws Exception {
         createArchive(method);
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             singleByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
@@ -128,7 +128,7 @@ public class SevenZTest extends AbstractTest {
     @Test
     public void testMultiByteReadConsistentlyReturnsMinusOneAtEofUsingAES() throws Exception {
         assumeStrongCryptoIsAvailable();
-        try (SevenZFile archive = new SevenZFile(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
             multiByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
@@ -155,7 +155,7 @@ public class SevenZTest extends AbstractTest {
 
     private void testSevenZArchiveCreation(final SevenZMethod method) throws Exception {
         createArchive(method);
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             SevenZArchiveEntry entry;
 
             entry = archive.getNextEntry();
@@ -206,7 +206,7 @@ public class SevenZTest extends AbstractTest {
     @Test
     public void testSingleByteReadConsistentlyReturnsMinusOneAtEofUsingAES() throws Exception {
         assumeStrongCryptoIsAvailable();
-        try (SevenZFile archive = new SevenZFile(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
             singleByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }

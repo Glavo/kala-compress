@@ -32,7 +32,7 @@ import org.apache.commons.compress.AbstractTest;
 import org.apache.commons.compress.archivers.zip.JarMarker;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipExtraField;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.junit.jupiter.api.Test;
 
 public class JarArchiveOutputStreamTest extends AbstractTempDirTest {
@@ -53,7 +53,7 @@ public class JarArchiveOutputStreamTest extends AbstractTempDirTest {
             out.closeArchiveEntry();
             out.finish();
         }
-        try (ZipFile zf = ZipFile.builder().setPath(testArchive).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setPath(testArchive).get()) {
             ZipArchiveEntry ze = zf.getEntry("foo/");
             assertNotNull(ze);
             ZipExtraField[] fes = ze.getExtraFields();

@@ -42,10 +42,10 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.StreamingNotSupportedException;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveReader;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
 import org.apache.commons.compress.archivers.tar.TarFile;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.junit.jupiter.api.Test;
 
 public class ExpanderTest extends AbstractTest {
@@ -183,7 +183,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testFileCantEscapeDoubleDotPath() throws IOException, ArchiveException {
         setupZip("../foo");
-        try (ZipFile f = ZipFile.builder().setFile(archive).get()) {
+        try (ZipArchiveReader f = ZipArchiveReader.builder().setFile(archive).get()) {
             assertThrows(IOException.class, () -> new Expander().expand(f, tempResultDir));
         }
     }
@@ -196,7 +196,7 @@ public class ExpanderTest extends AbstractTest {
         s.mkdirs();
         assumeTrue(s.exists());
         setupZip("../" + sibling + "/a");
-        try (ZipFile f = ZipFile.builder().setFile(archive).get()) {
+        try (ZipArchiveReader f = ZipArchiveReader.builder().setFile(archive).get()) {
             assertThrows(IOException.class, () -> new Expander().expand(f, tempResultDir));
         }
     }
@@ -204,7 +204,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testFileCantEscapeViaAbsolutePath() throws IOException, ArchiveException {
         setupZip("/tmp/foo");
-        try (ZipFile f = ZipFile.builder().setFile(archive).get()) {
+        try (ZipArchiveReader f = ZipArchiveReader.builder().setFile(archive).get()) {
             assertThrows(IOException.class, () -> new Expander().expand(f, tempResultDir));
         }
         assertFalse(new File(tempResultDir, "tmp/foo").isFile());
@@ -222,7 +222,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testSevenZFileVersion() throws IOException {
         setup7z();
-        try (SevenZFile file = SevenZFile.builder().setFile(archive).get()) {
+        try (SevenZArchiveReader file = SevenZArchiveReader.builder().setFile(archive).get()) {
             new Expander().expand(file, tempResultDir);
         }
         verifyTargetDir();
@@ -270,7 +270,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testZipFileVersion() throws IOException, ArchiveException {
         setupZip();
-        try (ZipFile f = ZipFile.builder().setFile(archive).get()) {
+        try (ZipArchiveReader f = ZipArchiveReader.builder().setFile(archive).get()) {
             new Expander().expand(f, tempResultDir);
         }
         verifyTargetDir();

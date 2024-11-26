@@ -45,7 +45,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -673,10 +673,10 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
         final Path input = createArchive(archiverName);
         final File result = createTempFile("test", "." + archiverName);
         final File file1 = getFile("test.txt");
-        try (ZipFile ais = ZipFile.builder().setPath(input).get();
-                OutputStream outputStream = Files.newOutputStream(result.toPath());
-                ArchiveOutputStream<ZipArchiveEntry> out = createArchiveOutputStream(archiverName, outputStream);
-                InputStream csInputStream = Files.newInputStream(file1.toPath())) {
+        try (ZipArchiveReader ais = ZipArchiveReader.builder().setPath(input).get();
+             OutputStream outputStream = Files.newOutputStream(result.toPath());
+             ArchiveOutputStream<ZipArchiveEntry> out = createArchiveOutputStream(archiverName, outputStream);
+             InputStream csInputStream = Files.newInputStream(file1.toPath())) {
             final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
             final ZipArchiveEntry entry = new ZipArchiveEntry("blub/test.txt");
             changeSet.add(entry, csInputStream);

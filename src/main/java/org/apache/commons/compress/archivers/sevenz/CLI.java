@@ -44,7 +44,7 @@ public class CLI {
             }
 
             @Override
-            public void takeAction(final SevenZFile archive, final SevenZArchiveEntry entry) {
+            public void takeAction(final SevenZArchiveReader archive, final SevenZArchiveEntry entry) {
                 System.out.print(entry.getName());
                 if (entry.isDirectory()) {
                     System.out.print(" dir");
@@ -74,7 +74,7 @@ public class CLI {
             return message;
         }
 
-        public abstract void takeAction(SevenZFile archive, SevenZArchiveEntry entry) throws IOException;
+        public abstract void takeAction(SevenZArchiveReader archive, SevenZArchiveEntry entry) throws IOException;
     }
 
     private static Mode grabMode(final String[] args) {
@@ -95,7 +95,7 @@ public class CLI {
         if (!file.isFile()) {
             System.err.println(file + " doesn't exist or is a directory");
         }
-        try (SevenZFile archive = SevenZFile.builder().setFile(file).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(file).get()) {
             SevenZArchiveEntry ae;
             while ((ae = archive.getNextEntry()) != null) {
                 mode.takeAction(archive, ae);

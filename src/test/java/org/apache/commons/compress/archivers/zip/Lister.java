@@ -80,7 +80,7 @@ public final class Lister {
                 }
             }
         } else {
-            try (ZipFile zf = ZipFile.builder().setFile(f).setCharset(cl.encoding).get()) {
+            try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(f).setCharset(cl.encoding).get()) {
                 for (final Enumeration<ZipArchiveEntry> entries = zf.getEntries(); entries.hasMoreElements();) {
                     final ZipArchiveEntry ze = entries.nextElement();
                     list(ze);

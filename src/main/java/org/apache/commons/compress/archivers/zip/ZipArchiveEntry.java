@@ -68,7 +68,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     public enum CommentSource {
         /**
          * The comment has been read from the archive using the encoding of the archive specified when creating the {@link ZipArchiveInputStream} or
-         * {@link ZipFile} (defaults to the UTF-8).
+         * {@link ZipArchiveReader} (defaults to the UTF-8).
          */
         COMMENT,
         /**
@@ -204,7 +204,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     public enum NameSource {
         /**
          * The name has been read from the archive using the encoding of the archive specified when creating the {@link ZipArchiveInputStream} or
-         * {@link ZipFile} (defaults to the platform's default encoding).
+         * {@link ZipArchiveReader} (defaults to the platform's default encoding).
          */
         NAME,
         /**
@@ -664,7 +664,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * Retrieves the external file attributes.
      *
      * <p>
-     * <strong>Note</strong>: {@link ZipArchiveInputStream} is unable to fill this field, you must use {@link ZipFile} if you want to read entries using this
+     * <strong>Note</strong>: {@link ZipArchiveInputStream} is unable to fill this field, you must use {@link ZipArchiveReader} if you want to read entries using this
      * attribute.
      * </p>
      *
@@ -771,7 +771,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * Gets the internal file attributes.
      *
      * <p>
-     * <strong>Note</strong>: {@link ZipArchiveInputStream} is unable to fill this field, you must use {@link ZipFile} if you want to read entries using this
+     * <strong>Note</strong>: {@link ZipArchiveInputStream} is unable to fill this field, you must use {@link ZipArchiveReader} if you want to read entries using this
      * attribute.
      * </p>
      *

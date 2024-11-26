@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 public class ExplodeSupportTest {
 
     private void testArchiveWithImplodeCompression(final String fileName, final String entryName) throws IOException {
-        try (ZipFile zip = ZipFile.builder().setFile(fileName).get()) {
+        try (ZipArchiveReader zip = ZipArchiveReader.builder().setFile(fileName).get()) {
             final ZipArchiveEntry entry = zip.getEntries().nextElement();
             assertEquals(entryName, entry.getName(), "entry name");
             assertTrue(zip.canReadEntryData(entry), "entry can't be read");

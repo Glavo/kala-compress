@@ -27,10 +27,10 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Objects;
 
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveReader;
 import org.apache.commons.compress.archivers.tar.TarFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 
 /**
  * Simple command line application that lists the contents of an archive.
@@ -126,7 +126,7 @@ public final class Lister {
     }
 
     private  void list7z(final Path file) throws IOException {
-        try (SevenZFile sevenZFile = SevenZFile.builder().setPath(file).get()) {
+        try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setPath(file).get()) {
             println("Created " + sevenZFile);
             ArchiveEntry entry;
             while ((entry = sevenZFile.getNextEntry()) != null) {
@@ -151,7 +151,7 @@ public final class Lister {
     }
 
     private  void listZipUsingZipFile(final Path file) throws IOException {
-        try (ZipFile zipFile = ZipFile.builder().setPath(file).get()) {
+        try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setPath(file).get()) {
             println("Created " + zipFile);
             for (final Enumeration<ZipArchiveEntry> en = zipFile.getEntries(); en.hasMoreElements();) {
                 println(en.nextElement());

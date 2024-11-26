@@ -29,7 +29,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.apache.commons.compress.changes.Change.ChangeType;
 import org.apache.commons.compress.utils.IOUtils;
 
@@ -89,11 +89,11 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
 
     private static final class ZipFileIterator implements ArchiveEntryIterator<ZipArchiveEntry> {
 
-        private final ZipFile zipFile;
+        private final ZipArchiveReader zipFile;
         private final Enumeration<ZipArchiveEntry> nestedEnumeration;
         private ZipArchiveEntry currentEntry;
 
-        ZipFileIterator(final ZipFile zipFile) {
+        ZipFileIterator(final ZipArchiveReader zipFile) {
             this.zipFile = zipFile;
             this.nestedEnumeration = zipFile.getEntriesInPhysicalOrder();
         }
@@ -265,7 +265,7 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
      * @return the results of this operation
      * @since 1.5
      */
-    public ChangeSetResults perform(final ZipFile zipFile, final O outputStream) throws IOException {
+    public ChangeSetResults perform(final ZipArchiveReader zipFile, final O outputStream) throws IOException {
         @SuppressWarnings("unchecked")
         final ArchiveEntryIterator<E> entryIterator = (ArchiveEntryIterator<E>) new ZipFileIterator(zipFile);
         return perform(entryIterator, outputStream);

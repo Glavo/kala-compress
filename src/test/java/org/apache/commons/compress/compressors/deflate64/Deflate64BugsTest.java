@@ -22,14 +22,14 @@ import java.io.InputStream;
 import java.util.Enumeration;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.junit.jupiter.api.Test;
 
 public class Deflate64BugsTest {
 
     @Test
     public void testReadBeyondMemoryException() throws Exception {
-        try (ZipFile zfile = ZipFile.builder().setFile(getFile("COMPRESS-380/COMPRESS-380-readbeyondmemory.zip")).get()) {
+        try (ZipArchiveReader zfile = ZipArchiveReader.builder().setFile(getFile("COMPRESS-380/COMPRESS-380-readbeyondmemory.zip")).get()) {
             final Enumeration<ZipArchiveEntry> entries = zfile.getEntries();
             while (entries.hasMoreElements()) {
                 final ZipArchiveEntry e = entries.nextElement();

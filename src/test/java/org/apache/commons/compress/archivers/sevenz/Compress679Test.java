@@ -41,7 +41,7 @@ public class Compress679Test {
         final Path origin = Paths.get("src/test/resources/org/apache/commons/compress/COMPRESS-679/file.7z");
         assertTrue(Files.exists(origin));
         final Callable<Boolean> runnable = () -> {
-            try (SevenZFile sevenZFile = SevenZFile.builder().setPath(origin).get()) {
+            try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setPath(origin).get()) {
                 SevenZArchiveEntry sevenZArchiveEntry;
                 while ((sevenZArchiveEntry = sevenZFile.getNextEntry()) != null) {
                     if ("file4.txt".equals(sevenZArchiveEntry.getName())) { // The entry must not be the first of the ZIP archive to reproduce

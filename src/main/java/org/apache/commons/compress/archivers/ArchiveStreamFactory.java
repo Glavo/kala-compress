@@ -38,7 +38,7 @@ import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
 import org.apache.commons.compress.archivers.dump.DumpArchiveInputStream;
 import org.apache.commons.compress.archivers.jar.JarArchiveInputStream;
 import org.apache.commons.compress.archivers.jar.JarArchiveOutputStream;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveReader;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -243,7 +243,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
         if (ArjArchiveInputStream.matches(signature, signatureLength)) {
             return ARJ;
         }
-        if (SevenZFile.matches(signature, signatureLength)) {
+        if (SevenZArchiveReader.matches(signature, signatureLength)) {
             return SEVEN_Z;
         }
 

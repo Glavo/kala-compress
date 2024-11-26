@@ -160,9 +160,9 @@ public class Zip64SupportIT {
     }
 
     private static void read100KFilesUsingZipFileImpl(final File f) throws IOException {
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = ZipFile.builder().setFile(f).get();
+            zf = ZipArchiveReader.builder().setFile(f).get();
             int files = 0;
             for (final Enumeration<ZipArchiveEntry> e = zf.getEntries(); e.hasMoreElements();) {
                 final ZipArchiveEntry zae = e.nextElement();
@@ -205,9 +205,9 @@ public class Zip64SupportIT {
     }
 
     private static void read5GBOfZerosUsingZipFileImpl(final File f, final String expectedName) throws IOException {
-        ZipFile zf = null;
+        ZipArchiveReader zf = null;
         try {
-            zf = ZipFile.builder().setFile(f).get();
+            zf = ZipArchiveReader.builder().setFile(f).get();
             final Enumeration<ZipArchiveEntry> e = zf.getEntries();
             assertTrue(e.hasMoreElements());
             ZipArchiveEntry zae = e.nextElement();
@@ -1891,9 +1891,9 @@ public class Zip64SupportIT {
     public void testRead3EntriesCreatingBigArchiveFileUsingZipFile() throws Throwable {
         withTemporaryArchive("read3EntriesCreatingBigArchiveFileUsingZipFile", (f, zos) -> {
             write3EntriesCreatingBigArchiveToStream(zos);
-            ZipFile zf = null;
+            ZipArchiveReader zf = null;
             try {
-                zf = ZipFile.builder().setFile(f).get();
+                zf = ZipArchiveReader.builder().setFile(f).get();
                 int idx = 0;
                 for (final Enumeration<ZipArchiveEntry> e = zf.getEntriesInPhysicalOrder(); e.hasMoreElements();) {
                     final ZipArchiveEntry zae = e.nextElement();
@@ -2286,7 +2286,7 @@ public class Zip64SupportIT {
         // start will not be set in extra fields
         final File zipUsingModeAlwaysWithCompatibility = buildZipWithZip64Mode("testZip64ModeAlwaysWithCompatibility-output-1",
                 Zip64Mode.AlwaysWithCompatibility, inputFile);
-        final ZipFile zipFileWithAlwaysWithCompatibility = ZipFile.builder().setFile(zipUsingModeAlwaysWithCompatibility).get();
+        final ZipArchiveReader zipFileWithAlwaysWithCompatibility = ZipArchiveReader.builder().setFile(zipUsingModeAlwaysWithCompatibility).get();
         ZipArchiveEntry entry = zipFileWithAlwaysWithCompatibility.getEntries().nextElement();
         for (final ZipExtraField extraField : entry.getExtraFields()) {
             if (!(extraField instanceof Zip64ExtendedInformationExtraField)) {
@@ -2300,7 +2300,7 @@ public class Zip64SupportIT {
         // with Zip64Mode.Always, the relative header offset and disk number start will be
         // set in extra fields
         final File zipUsingModeAlways = buildZipWithZip64Mode("testZip64ModeAlwaysWithCompatibility-output-2", Zip64Mode.Always, inputFile);
-        final ZipFile zipFileWithAlways = ZipFile.builder().setFile(zipUsingModeAlways).get();
+        final ZipArchiveReader zipFileWithAlways = ZipArchiveReader.builder().setFile(zipUsingModeAlways).get();
         entry = zipFileWithAlways.getEntries().nextElement();
         for (final ZipExtraField extraField : entry.getExtraFields()) {
             if (!(extraField instanceof Zip64ExtendedInformationExtraField)) {

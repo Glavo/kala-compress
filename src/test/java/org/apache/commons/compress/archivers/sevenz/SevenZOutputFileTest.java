@@ -102,7 +102,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             addFile(outArchive, 0, true);
         }
 
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             assertEquals(Boolean.TRUE, verifyFile(archive, 0, methods));
         }
     }
@@ -112,7 +112,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             outArchive.setContentMethods(methods);
             addFile(outArchive, 0, true);
         }
-        try (SevenZFile archive = SevenZFile.builder().setByteArray(output.array()).setDefaultName("in memory").get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setByteArray(output.array()).setDefaultName("in memory").get()) {
             assertEquals(Boolean.TRUE, verifyFile(archive, 0, methods));
         }
     }
@@ -143,7 +143,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             addFile(outArchive, 1, true, Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.BZIP2)));
         }
 
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             assertEquals(Boolean.TRUE, verifyFile(archive, 0, Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.LZMA2))));
             assertEquals(Boolean.TRUE, verifyFile(archive, 1, Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.BZIP2))));
         }
@@ -337,7 +337,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             outArchive.finish();
         }
 
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             SevenZArchiveEntry entry = archive.getNextEntry();
             assertNotNull(entry, "Entry should not be null");
             assertEquals("foo/", entry.getName());
@@ -445,7 +445,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             outArchive.closeArchiveEntry();
         }
 
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             final SevenZArchiveEntry entry = archive.getNextEntry();
             assertNotNull(entry, "entry should not be null");
             assertEquals("foo/", entry.getName());
@@ -487,12 +487,12 @@ public class SevenZOutputFileTest extends AbstractTest {
         }
 
         // Is archive really password-based encrypted ?
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             assertThrows(
                     PasswordRequiredException.class, () -> verifyFile(archive, 0), "A password should be needed");
         }
 
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).setPassword("foo").get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).setPassword("foo").get()) {
             assertEquals(Boolean.TRUE, verifyFile(archive, 0, 1, null));
             assertEquals(Boolean.TRUE, verifyFile(archive, 1, 16, null));
             assertEquals(Boolean.TRUE, verifyFile(archive, 2, 32, null));
@@ -615,7 +615,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     private void verifyCompress252(final File output, final int numberOfFiles, final int numberOfNonEmptyFiles) throws Exception {
         int filesFound = 0;
         int nonEmptyFilesFound = 0;
-        try (SevenZFile archive = SevenZFile.builder().setFile(output).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(output).get()) {
             verifyDir(archive);
             Boolean b = verifyFile(archive, filesFound++);
             while (b != null) {
@@ -629,18 +629,18 @@ public class SevenZOutputFileTest extends AbstractTest {
         assertEquals(numberOfNonEmptyFiles, nonEmptyFilesFound);
     }
 
-    private void verifyDir(final SevenZFile archive) throws Exception {
+    private void verifyDir(final SevenZArchiveReader archive) throws Exception {
         final SevenZArchiveEntry entry = archive.getNextEntry();
         assertNotNull(entry);
         assertEquals("foo/", entry.getName());
         assertTrue(entry.isDirectory());
     }
 
-    private Boolean verifyFile(final SevenZFile archive, final int index) throws Exception {
+    private Boolean verifyFile(final SevenZArchiveReader archive, final int index) throws Exception {
         return verifyFile(archive, index, null);
     }
 
-    private Boolean verifyFile(final SevenZFile archive, final int index, final int size, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
+    private Boolean verifyFile(final SevenZArchiveReader archive, final int index, final int size, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
         final SevenZArchiveEntry entry = archive.getNextEntry();
         if (entry == null) {
             return null;
@@ -667,7 +667,7 @@ public class SevenZOutputFileTest extends AbstractTest {
         return Boolean.TRUE;
     }
 
-    private Boolean verifyFile(final SevenZFile archive, final int index, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
+    private Boolean verifyFile(final SevenZArchiveReader archive, final int index, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
         return verifyFile(archive, index, 1, methods);
     }
 }

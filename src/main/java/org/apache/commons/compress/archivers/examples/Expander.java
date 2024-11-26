@@ -22,11 +22,11 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveReader;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarFile;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
@@ -212,7 +212,7 @@ public class Expander {
      * @param targetDirectory the target directory, may be null to simulate output to dev/null on Linux and NUL on Windows.
      * @throws IOException if an I/O error occurs
      */
-    public void expand(final SevenZFile archive, final File targetDirectory) throws IOException {
+    public void expand(final SevenZArchiveReader archive, final File targetDirectory) throws IOException {
         expand(archive, toPath(targetDirectory));
     }
 
@@ -224,7 +224,7 @@ public class Expander {
      * @throws IOException if an I/O error occurs
      * @since 1.22
      */
-    public void expand(final SevenZFile archive, final Path targetDirectory) throws IOException {
+    public void expand(final SevenZArchiveReader archive, final Path targetDirectory) throws IOException {
         expand(archive::getNextEntry, (entry, out) -> {
             final byte[] buffer = new byte[8192];
             int n;
@@ -405,9 +405,9 @@ public class Expander {
             } else if (ArchiveStreamFactory.TAR.equalsIgnoreCase(format)) {
                 expand(c.track(new TarFile(archive)), targetDirectory);
             } else if (ArchiveStreamFactory.ZIP.equalsIgnoreCase(format)) {
-                expand(c.track(ZipFile.builder().setSeekableByteChannel(archive).get()), targetDirectory);
+                expand(c.track(ZipArchiveReader.builder().setSeekableByteChannel(archive).get()), targetDirectory);
             } else if (ArchiveStreamFactory.SEVEN_Z.equalsIgnoreCase(format)) {
-                expand(c.track(SevenZFile.builder().setSeekableByteChannel(archive).get()), targetDirectory);
+                expand(c.track(SevenZArchiveReader.builder().setSeekableByteChannel(archive).get()), targetDirectory);
             } else {
                 // never reached as prefersSeekableByteChannel only returns true for TAR, ZIP and 7z
                 throw new ArchiveException("Don't know how to handle format " + format);
@@ -451,7 +451,7 @@ public class Expander {
      * @param targetDirectory the target directory, may be null to simulate output to dev/null on Linux and NUL on Windows.
      * @throws IOException if an I/O error occurs
      */
-    public void expand(final ZipFile archive, final File targetDirectory) throws IOException {
+    public void expand(final ZipArchiveReader archive, final File targetDirectory) throws IOException {
         expand(archive, toPath(targetDirectory));
     }
 
@@ -463,7 +463,7 @@ public class Expander {
      * @throws IOException if an I/O error occurs
      * @since 1.22
      */
-    public void expand(final ZipFile archive, final Path targetDirectory) throws IOException {
+    public void expand(final ZipArchiveReader archive, final Path targetDirectory) throws IOException {
         final Enumeration<ZipArchiveEntry> entries = archive.getEntries();
         expand(() -> {
             ZipArchiveEntry next = entries.hasMoreElements() ? entries.nextElement() : null;

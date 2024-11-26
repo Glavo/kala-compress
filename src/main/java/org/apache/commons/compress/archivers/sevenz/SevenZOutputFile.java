@@ -176,7 +176,7 @@ public class SevenZOutputFile implements Closeable {
      */
     public SevenZOutputFile(final SeekableByteChannel channel, final char[] password) throws IOException {
         this.channel = channel;
-        channel.position(SevenZFile.SIGNATURE_HEADER_SIZE);
+        channel.position(SevenZArchiveReader.SIGNATURE_HEADER_SIZE);
         if (password != null) {
             this.aes256Options = new AES256Options(password);
         }
@@ -305,14 +305,14 @@ public class SevenZOutputFile implements Closeable {
         final CRC32 crc32 = new CRC32();
         crc32.update(headerBytes, 0, headerBytes.length);
 
-        final ByteBuffer bb = ByteBuffer.allocate(SevenZFile.sevenZSignature.length + 2 /* version */
-                + 4 /* start header CRC */
-                + 8 /* next header position */
-                + 8 /* next header length */
-                + 4 /* next header CRC */).order(ByteOrder.LITTLE_ENDIAN);
+        final ByteBuffer bb = ByteBuffer.allocate(SevenZArchiveReader.sevenZSignature.length + 2 /* version */
+                                                  + 4 /* start header CRC */
+                                                  + 8 /* next header position */
+                                                  + 8 /* next header length */
+                                                  + 4 /* next header CRC */).order(ByteOrder.LITTLE_ENDIAN);
         // signature header
         channel.position(0);
-        bb.put(SevenZFile.sevenZSignature);
+        bb.put(SevenZArchiveReader.sevenZSignature);
         // version
         bb.put((byte) 0).put((byte) 2);
 
@@ -320,10 +320,10 @@ public class SevenZOutputFile implements Closeable {
         bb.putInt(0);
 
         // start header
-        bb.putLong(headerPosition - SevenZFile.SIGNATURE_HEADER_SIZE).putLong(0xffffFFFFL & headerBytes.length).putInt((int) crc32.getValue());
+        bb.putLong(headerPosition - SevenZArchiveReader.SIGNATURE_HEADER_SIZE).putLong(0xffffFFFFL & headerBytes.length).putInt((int) crc32.getValue());
         crc32.reset();
-        crc32.update(bb.array(), SevenZFile.sevenZSignature.length + 6, 20);
-        bb.putInt(SevenZFile.sevenZSignature.length + 2, (int) crc32.getValue());
+        crc32.update(bb.array(), SevenZArchiveReader.sevenZSignature.length + 6, 20);
+        bb.putInt(SevenZArchiveReader.sevenZSignature.length + 2, (int) crc32.getValue());
         bb.flip();
         channel.write(bb);
     }

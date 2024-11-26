@@ -126,7 +126,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     }
 
     private static void testFile(final File file, final Charset encoding) throws IOException {
-        try (ZipFile zf = ZipFile.builder().setFile(file).setCharset(encoding).setUseUnicodeExtraFields(false).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(file).setCharset(encoding).setUseUnicodeExtraFields(false).get()) {
             final Enumeration<ZipArchiveEntry> e = zf.getEntries();
             while (e.hasMoreElements()) {
                 final ZipArchiveEntry ze = e.nextElement();
@@ -141,7 +141,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
         }
     }
 
-    private void assertCanRead(final ZipFile zf, final String fileName) throws IOException {
+    private void assertCanRead(final ZipArchiveReader zf, final String fileName) throws IOException {
         final ZipArchiveEntry entry = zf.getEntry(fileName);
         assertNotNull(entry, "Entry doesn't exist");
         try (InputStream is = zf.getInputStream(entry)) {
@@ -186,7 +186,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     @Test
     public void testRawNameReadFromZipFile() throws IOException {
         final File archive = getFile("utf8-7zip-test.zip");
-        try (ZipFile zf = ZipFile.builder().setFile(archive).setCharset(CP437).setUseUnicodeExtraFields(false).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(archive).setCharset(CP437).setUseUnicodeExtraFields(false).get()) {
             assertRawNameOfAcsiiTxt(zf.getEntry(ASCII_TXT));
         }
     }
@@ -199,7 +199,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     @Test
     public void testRead7ZipArchive() throws IOException {
         final File archive = getFile("utf8-7zip-test.zip");
-        try (ZipFile zf = new ZipFile(archive, CP437, false)) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(archive, CP437, false)) {
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry(EURO_FOR_DOLLAR_TXT));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));
@@ -221,7 +221,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     @Test
     public void testReadWinZipArchive() throws IOException {
         final File archive = getFile("utf8-winzip-test.zip");
-        try (ZipFile zf = ZipFile.builder().setFile(archive).setUseUnicodeExtraFields(true).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(archive).setUseUnicodeExtraFields(true).get()) {
             assertCanRead(zf, ASCII_TXT);
             assertCanRead(zf, EURO_FOR_DOLLAR_TXT);
             assertCanRead(zf, OIL_BARREL_TXT);
@@ -283,7 +283,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     public void testZipArchiveInputStreamReadsUnicodeFields() throws IOException {
         final File file = createTempFile("unicode-test", ".zip");
         createTestFile(file, StandardCharsets.US_ASCII, false, true);
-        try (ZipFile zf = ZipFile.builder().setFile(file).setCharset(StandardCharsets.US_ASCII).setUseUnicodeExtraFields(true).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(file).setCharset(StandardCharsets.US_ASCII).setUseUnicodeExtraFields(true).get()) {
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry(EURO_FOR_DOLLAR_TXT));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));
@@ -306,7 +306,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
      */
     @Test
     public void testZipFileSkipsOverUnicodeExtraFieldWithUnsupportedVersion() throws IOException {
-        try (ZipFile zf = ZipFile.builder().setFile(getFile("COMPRESS-479.zip")).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(getFile("COMPRESS-479.zip")).get()) {
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry("%U20AC_for_Dollar.txt"));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));

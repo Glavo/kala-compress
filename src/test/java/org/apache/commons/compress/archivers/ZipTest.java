@@ -54,7 +54,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntryPredicate;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.archivers.zip.ZipArchiveReader;
 import org.apache.commons.compress.archivers.zip.ZipMethod;
 import org.apache.commons.compress.archivers.zip.ZipSplitReadOnlySeekableByteChannel;
 import org.apache.commons.compress.utils.InputStreamStatistics;
@@ -90,8 +90,8 @@ public final class ZipTest extends AbstractTest {
 
     private void assertSameFileContents(final File expectedFile, final File actualFile) throws IOException {
         final int size = (int) Math.max(expectedFile.length(), actualFile.length());
-        try (ZipFile expected = newZipFile(expectedFile);
-                ZipFile actual = newZipFile(actualFile)) {
+        try (ZipArchiveReader expected = newZipFile(expectedFile);
+             ZipArchiveReader actual = newZipFile(actualFile)) {
             final byte[] expectedBuf = new byte[size];
             final byte[] actualBuf = new byte[size];
 
@@ -183,7 +183,7 @@ public final class ZipTest extends AbstractTest {
 
     private File getFilesToZip() throws IOException {
         final File originalZipFile = getFile("COMPRESS-477/split_zip_created_by_zip/zip_to_compare_created_by_zip.zip");
-        try (ZipFile zipFile = newZipFile(originalZipFile)) {
+        try (ZipArchiveReader zipFile = newZipFile(originalZipFile)) {
             final Enumeration<ZipArchiveEntry> zipEntries = zipFile.getEntries();
             ZipArchiveEntry zipEntry;
             File outputFile;
@@ -214,8 +214,8 @@ public final class ZipTest extends AbstractTest {
         return getTempDirFile().listFiles()[0];
     }
 
-    private ZipFile newZipFile(final File file) throws IOException {
-        return ZipFile.builder().setFile(file).get();
+    private ZipArchiveReader newZipFile(final File file) throws IOException {
+        return ZipArchiveReader.builder().setFile(file).get();
     }
 
     private void readStream(final InputStream in, final ArchiveEntry entry, final Map<String, List<List<Long>>> map) throws IOException {
@@ -254,7 +254,7 @@ public final class ZipTest extends AbstractTest {
             zipArchiveOutputStream.closeArchiveEntry();
         }
 
-        try (ZipFile zipFile = ZipFile.builder()
+        try (ZipArchiveReader zipFile = ZipArchiveReader.builder()
                 .setPath(outputZipFile.toPath())
                 .setMaxNumberOfDisks(Integer.MAX_VALUE)
                 .get()
@@ -285,7 +285,7 @@ public final class ZipTest extends AbstractTest {
             zipArchiveOutputStream.write(data);
             zipArchiveOutputStream.closeArchiveEntry();
         }
-        try (ZipFile zipFile = ZipFile.builder().setPath(outputZipFile.toPath()).setMaxNumberOfDisks(Integer.MAX_VALUE).get()) {
+        try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setPath(outputZipFile.toPath()).setMaxNumberOfDisks(Integer.MAX_VALUE).get()) {
             assertArrayEquals(data, IOUtils.toByteArray(zipFile.getInputStream(zipFile.getEntry("file01"))));
             assertArrayEquals(data, IOUtils.toByteArray(zipFile.getInputStream(zipFile.getEntry("file02"))));
         }
@@ -311,7 +311,7 @@ public final class ZipTest extends AbstractTest {
             zipArchiveOutputStream.closeArchiveEntry();
         }
         assertEquals(64 * 1024L - 1, Files.size(outputZipFile.toPath().getParent().resolve("artificialSplitZip.z01")));
-        try (ZipFile zipFile = ZipFile.builder().setPath(outputZipFile.toPath()).setMaxNumberOfDisks(Integer.MAX_VALUE).get()) {
+        try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setPath(outputZipFile.toPath()).setMaxNumberOfDisks(Integer.MAX_VALUE).get()) {
             assertArrayEquals(data1, IOUtils.toByteArray(zipFile.getInputStream(zipFile.getEntry("file01"))));
         }
     }
@@ -358,7 +358,7 @@ public final class ZipTest extends AbstractTest {
             zipArchiveOutputStream.write(data4);
             zipArchiveOutputStream.closeArchiveEntry();
         }
-        try (ZipFile zipFile = ZipFile.builder().setPath(outputZipFile.toPath()).setMaxNumberOfDisks(Integer.MAX_VALUE).get()) {
+        try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setPath(outputZipFile.toPath()).setMaxNumberOfDisks(Integer.MAX_VALUE).get()) {
             assertArrayEquals(data1, IOUtils.toByteArray(zipFile.getInputStream(zipFile.getEntry("file01"))));
             assertArrayEquals(data2, IOUtils.toByteArray(zipFile.getInputStream(zipFile.getEntry("file02"))));
             assertArrayEquals(data3, IOUtils.toByteArray(zipFile.getInputStream(zipFile.getEntry("file03"))));
@@ -439,8 +439,8 @@ public final class ZipTest extends AbstractTest {
             zos1.setUseZip64(Zip64Mode.Never);
             createSecondEntry(zos1).close();
         }
-        try (ZipFile zipFile1 = newZipFile(file1);
-                ZipFile zipFile2 = newZipFile(file2)) {
+        try (ZipArchiveReader zipFile1 = newZipFile(file1);
+             ZipArchiveReader zipFile2 = newZipFile(file2)) {
             final File fileResult = createTempFile("file-actual.", ".zip");
             try (ZipArchiveOutputStream zos2 = new ZipArchiveOutputStream(fileResult)) {
                 zipFile1.copyRawEntries(zos2, allFilesPredicate);
@@ -466,7 +466,7 @@ public final class ZipTest extends AbstractTest {
             createFirstEntry(zos).close();
         }
         final File fileResult = createTempFile("file-actual.", ".zip");
-        try (ZipFile zipFile1 = newZipFile(file1)) {
+        try (ZipArchiveReader zipFile1 = newZipFile(file1)) {
             try (ZipArchiveOutputStream zos2 = new ZipArchiveOutputStream(fileResult)) {
                 zos2.setUseZip64(Zip64Mode.Always);
                 zipFile1.copyRawEntries(zos2, allFilesPredicate);
@@ -486,7 +486,7 @@ public final class ZipTest extends AbstractTest {
             zos.putArchiveEntry(in);
             zos.closeArchiveEntry();
         }
-        try (ZipFile zf = newZipFile(archive)) {
+        try (ZipArchiveReader zf = newZipFile(archive)) {
             final ZipArchiveEntry out = zf.getEntry("foo/");
             assertNotNull(out);
             assertEquals("foo/", out.getName());
@@ -508,7 +508,7 @@ public final class ZipTest extends AbstractTest {
             zos.putArchiveEntry(in);
             zos.closeArchiveEntry();
         }
-        try (ZipFile zf = newZipFile(archive)) {
+        try (ZipArchiveReader zf = newZipFile(archive)) {
             final ZipArchiveEntry out = zf.getEntry("foo/");
             assertNotNull(out);
             assertEquals("foo/", out.getName());
@@ -535,7 +535,7 @@ public final class ZipTest extends AbstractTest {
             }
             zos.closeArchiveEntry();
         }
-        try (ZipFile zf = newZipFile(archive)) {
+        try (ZipArchiveReader zf = newZipFile(archive)) {
             final ZipArchiveEntry out = zf.getEntry("foo");
             assertNotNull(out);
             assertEquals("foo", out.getName());
@@ -560,7 +560,7 @@ public final class ZipTest extends AbstractTest {
             }
             zos.closeArchiveEntry();
         }
-        try (ZipFile zf = newZipFile(archive)) {
+        try (ZipArchiveReader zf = newZipFile(archive)) {
             final ZipArchiveEntry out = zf.getEntry("foo");
             assertNotNull(out);
             assertEquals("foo", out.getName());
@@ -579,7 +579,7 @@ public final class ZipTest extends AbstractTest {
             in.forEach(entry -> readStream(in, entry, actualStatistics));
         }
         // file access
-        try (ZipFile zf = newZipFile(input)) {
+        try (ZipArchiveReader zf = newZipFile(input)) {
             final Enumeration<ZipArchiveEntry> entries = zf.getEntries();
             while (entries.hasMoreElements()) {
                 final ZipArchiveEntry zae = entries.nextElement();
@@ -714,7 +714,7 @@ public final class ZipTest extends AbstractTest {
      */
     @Test
     public void testTokenizationCompressionMethod() throws IOException {
-        try (ZipFile moby = ZipFile.builder().setFile(getFile("moby.zip")).get()) {
+        try (ZipArchiveReader moby = ZipArchiveReader.builder().setFile(getFile("moby.zip")).get()) {
             final ZipArchiveEntry entry = moby.getEntry("README");
             assertEquals(ZipMethod.TOKENIZATION.getCode(), entry.getMethod(), "method");
             assertFalse(moby.canReadEntryData(entry));
@@ -732,7 +732,7 @@ public final class ZipTest extends AbstractTest {
             archiveEntry.setCompressedSize(3);
             zos.addRawArchiveEntry(archiveEntry, new ByteArrayInputStream("fud".getBytes()));
         }
-        try (ZipFile zf1 = newZipFile(file1)) {
+        try (ZipArchiveReader zf1 = newZipFile(file1)) {
             final ZipArchiveEntry fred = zf1.getEntry("fred");
             assertEquals(0664, fred.getUnixMode());
         }
@@ -845,7 +845,7 @@ public final class ZipTest extends AbstractTest {
             }
             zos.closeArchiveEntry();
         }
-        try (ZipFile zf = newZipFile(archiveFile)) {
+        try (ZipArchiveReader zf = newZipFile(archiveFile)) {
             final ZipArchiveEntry out = zf.getEntry("foo");
             assertNotNull(out);
             assertEquals("foo", out.getName());

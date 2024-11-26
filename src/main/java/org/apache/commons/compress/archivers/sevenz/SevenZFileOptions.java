@@ -21,7 +21,7 @@ package org.apache.commons.compress.archivers.sevenz;
  *
  * @since 1.19
  * @Immutable
- * @deprecated Use {@link SevenZFile.Builder}.
+ * @deprecated Use {@link SevenZArchiveReader.Builder}.
  */
 @Deprecated
 public class SevenZFileOptions {
@@ -33,9 +33,9 @@ public class SevenZFileOptions {
      */
     public static class Builder {
 
-        private int maxMemoryLimitKb = SevenZFile.Builder.MEMORY_LIMIT_IN_KB;
-        private boolean useDefaultNameForUnnamedEntries = SevenZFile.Builder.USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES;
-        private boolean tryToRecoverBrokenArchives = SevenZFile.Builder.TRY_TO_RECOVER_BROKEN_ARCHIVES;
+        private int maxMemoryLimitKb = SevenZArchiveReader.Builder.MEMORY_LIMIT_IN_KB;
+        private boolean useDefaultNameForUnnamedEntries = SevenZArchiveReader.Builder.USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES;
+        private boolean tryToRecoverBrokenArchives = SevenZArchiveReader.Builder.TRY_TO_RECOVER_BROKEN_ARCHIVES;
 
         /**
          * Builds the {@link SevenZFileOptions}.
@@ -61,7 +61,7 @@ public class SevenZFileOptions {
         }
 
         /**
-         * Sets whether {@link SevenZFile} will try to recover broken archives where the CRC of the file's metadata is 0.
+         * Sets whether {@link SevenZArchiveReader} will try to recover broken archives where the CRC of the file's metadata is 0.
          * <p>
          * This special kind of broken archive is encountered when mutli volume archives are closed prematurely. If you enable this option SevenZFile will trust
          * data that looks as if it could contain metadata of an archive and allocate big amounts of memory. It is strongly recommended to not enable this
@@ -96,8 +96,8 @@ public class SevenZFileOptions {
      * <li>don't modify the name of unnamed entries</li>
      * </ul>
      */
-    public static final SevenZFileOptions DEFAULT = new SevenZFileOptions(SevenZFile.Builder.MEMORY_LIMIT_IN_KB,
-            SevenZFile.Builder.USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES, SevenZFile.Builder.TRY_TO_RECOVER_BROKEN_ARCHIVES);
+    public static final SevenZFileOptions DEFAULT = new SevenZFileOptions(SevenZArchiveReader.Builder.MEMORY_LIMIT_IN_KB,
+            SevenZArchiveReader.Builder.USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES, SevenZArchiveReader.Builder.TRY_TO_RECOVER_BROKEN_ARCHIVES);
 
     /**
      * Obtains a builder for SevenZFileOptions.
@@ -131,7 +131,7 @@ public class SevenZFileOptions {
     }
 
     /**
-     * Whether {@link SevenZFile} shall try to recover from a certain type of broken archive.
+     * Whether {@link SevenZArchiveReader} shall try to recover from a certain type of broken archive.
      *
      * @return whether SevenZFile shall try to recover from a certain type of broken archive.
      * @since 1.21

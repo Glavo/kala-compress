@@ -166,7 +166,7 @@ public class X7875_NewUnixTest {
 
     @Test
     public void testSampleFile() throws Exception {
-        try (ZipFile zf = ZipFile.builder().setFile(getFile("COMPRESS-211_uid_gid_zip_test.zip")).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(getFile("COMPRESS-211_uid_gid_zip_test.zip")).get()) {
             final Enumeration<ZipArchiveEntry> en = zf.getEntries();
 
             // We expect EVERY entry of this ZIP file (dir & file) to

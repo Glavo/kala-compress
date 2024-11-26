@@ -52,7 +52,7 @@ import org.apache.commons.compress.utils.InputStreamStatistics;
  * entries.
  * </p>
  * <p>
- * The {@link ZipFile} class is preferred when reading from files as {@link ZipArchiveInputStream} is limited by not being able to read the central directory
+ * The {@link ZipArchiveReader} class is preferred when reading from files as {@link ZipArchiveInputStream} is limited by not being able to read the central directory
  * header before returning entries. In particular {@link ZipArchiveInputStream}
  * </p>
  * <ul>
@@ -63,7 +63,7 @@ import org.apache.commons.compress.utils.InputStreamStatistics;
  * <li>may return unknown sizes and CRC values for entries until the next entry has been reached if the archive uses the data descriptor feature.</li>
  * </ul>
  *
- * @see ZipFile
+ * @see ZipArchiveReader
  * @NotThreadSafe
  */
 public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> implements InputStreamStatistics {
@@ -687,7 +687,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
         final int versionMadeBy = ZipShort.getValue(lfhBuf, off);
         off += SHORT;
-        current.entry.setPlatform(versionMadeBy >> ZipFile.BYTE_SHIFT & ZipFile.NIBLET_MASK);
+        current.entry.setPlatform(versionMadeBy >> ZipArchiveReader.BYTE_SHIFT & ZipArchiveReader.NIBLET_MASK);
 
         final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(lfhBuf, off);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
@@ -1016,7 +1016,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
      */
     private boolean readFirstLocalFileHeader() throws IOException {
         // for empty archive, we may get only EOCD size:
-        final byte[] header = new byte[Math.min(LFH_LEN, ZipFile.MIN_EOCD_SIZE)];
+        final byte[] header = new byte[Math.min(LFH_LEN, ZipArchiveReader.MIN_EOCD_SIZE)];
         readFully(header);
         try {
             READ_LOOP: for (int i = 0; ; ) {
@@ -1294,7 +1294,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         }
         final boolean foundEocd = findEocdRecord();
         if (foundEocd) {
-            realSkip((long) ZipFile.MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
+            realSkip((long) ZipArchiveReader.MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
             readFully(shortBuf);
             // file comment
             final int commentLen = ZipShort.getValue(shortBuf);
