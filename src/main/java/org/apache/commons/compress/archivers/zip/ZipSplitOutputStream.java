@@ -16,7 +16,6 @@
  */
 package org.apache.commons.compress.archivers.zip;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -62,19 +61,6 @@ final class ZipSplitOutputStream extends RandomAccessOutputStream {
     private final byte[] singleByte = new byte[1];
     private final List<Long> diskToPosition = new ArrayList<>();
     private final TreeMap<Long, Path> positionToFiles = new TreeMap<>();
-
-    /**
-     * Creates a split ZIP. If the ZIP file is smaller than the split size, then there will only be one split ZIP, and its suffix is .zip, otherwise the split
-     * segments should be like .z01, .z02, ... .z(N-1), .zip
-     *
-     * @param zipFile   the ZIP file to write to
-     * @param splitSize the split size
-     * @throws IllegalArgumentException if arguments are illegal: Zip split segment size should between 64K and 4,294,967,295.
-     * @throws IOException              if an I/O error occurs
-     */
-    ZipSplitOutputStream(final File zipFile, final long splitSize) throws IllegalArgumentException, IOException {
-        this(zipFile.toPath(), splitSize);
-    }
 
     /**
      * Creates a split ZIP. If the ZIP file is smaller than the split size, then there will only be one split ZIP, and its suffix is .zip, otherwise the split

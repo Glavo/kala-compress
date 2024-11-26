@@ -49,7 +49,7 @@ public final class Lister {
     private static final ArchiveStreamFactory FACTORY = ArchiveStreamFactory.DEFAULT;
 
     private static <T extends ArchiveInputStream<? extends E>, E extends ArchiveEntry> T createArchiveInputStream(final String[] args,
-            final InputStream inputStream) throws ArchiveException {
+                                                                                                                  final InputStream inputStream) throws ArchiveException {
         if (args.length > 1) {
             return FACTORY.createArchiveInputStream(args[1], inputStream);
         }
@@ -111,21 +111,21 @@ public final class Lister {
         final String format = (args.length > 1 ? args[1] : detectFormat(file)).toLowerCase(Locale.ROOT);
         println("Detected format " + format);
         switch (format) {
-        case ArchiveStreamFactory.SEVEN_Z:
-            list7z(file);
-            break;
-        case ArchiveStreamFactory.ZIP:
-            listZipUsingZipFile(file);
-            break;
-        case ArchiveStreamFactory.TAR:
-            listZipUsingTarFile(file);
-            break;
-        default:
-            listStream(file, args);
+            case ArchiveStreamFactory.SEVEN_Z:
+                list7z(file);
+                break;
+            case ArchiveStreamFactory.ZIP:
+                listZipUsingZipFile(file);
+                break;
+            case ArchiveStreamFactory.TAR:
+                listZipUsingTarFile(file);
+                break;
+            default:
+                listStream(file, args);
         }
     }
 
-    private  void list7z(final Path file) throws IOException {
+    private void list7z(final Path file) throws IOException {
         try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setPath(file).get()) {
             println("Created " + sevenZFile);
             ArchiveEntry entry;
@@ -135,25 +135,25 @@ public final class Lister {
         }
     }
 
-    private  void listStream(final Path file, final String[] args) throws ArchiveException, IOException {
+    private void listStream(final Path file, final String[] args) throws ArchiveException, IOException {
         try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(file));
-                ArchiveInputStream<?> archiveInputStream = createArchiveInputStream(args, inputStream)) {
+             ArchiveInputStream<?> archiveInputStream = createArchiveInputStream(args, inputStream)) {
             println("Created " + archiveInputStream.toString());
             archiveInputStream.forEach(this::println);
         }
     }
 
-    private  void listZipUsingTarFile(final Path file) throws IOException {
+    private void listZipUsingTarFile(final Path file) throws IOException {
         try (TarFile tarFile = new TarFile(file)) {
             println("Created " + tarFile);
             tarFile.getEntries().forEach(this::println);
         }
     }
 
-    private  void listZipUsingZipFile(final Path file) throws IOException {
-        try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setPath(file).get()) {
-            println("Created " + zipFile);
-            for (final Enumeration<ZipArchiveEntry> en = zipFile.getEntries(); en.hasMoreElements();) {
+    private void listZipUsingZipFile(final Path file) throws IOException {
+        try (ZipArchiveReader reader = ZipArchiveReader.builder().setPath(file).get()) {
+            println("Created " + reader);
+            for (final Enumeration<ZipArchiveEntry> en = reader.getEntries(); en.hasMoreElements(); ) {
                 println(en.nextElement());
             }
         }

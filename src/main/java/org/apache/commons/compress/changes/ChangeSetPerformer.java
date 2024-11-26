@@ -89,18 +89,18 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
 
     private static final class ZipFileIterator implements ArchiveEntryIterator<ZipArchiveEntry> {
 
-        private final ZipArchiveReader zipFile;
+        private final ZipArchiveReader reader;
         private final Enumeration<ZipArchiveEntry> nestedEnumeration;
         private ZipArchiveEntry currentEntry;
 
-        ZipFileIterator(final ZipArchiveReader zipFile) {
-            this.zipFile = zipFile;
-            this.nestedEnumeration = zipFile.getEntriesInPhysicalOrder();
+        ZipFileIterator(final ZipArchiveReader reader) {
+            this.reader = reader;
+            this.nestedEnumeration = reader.getEntriesInPhysicalOrder();
         }
 
         @Override
         public InputStream getInputStream() throws IOException {
-            return zipFile.getInputStream(currentEntry);
+            return reader.getInputStream(currentEntry);
         }
 
         @Override
@@ -259,15 +259,15 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
      *
      * This method finishes the stream, no other entries should be added after that.
      *
-     * @param zipFile      the ZipFile to perform the changes on
+     * @param reader      the ZipFile to perform the changes on
      * @param outputStream the resulting OutputStream with all modifications
      * @throws IOException if a read/write error occurs
      * @return the results of this operation
      * @since 1.5
      */
-    public ChangeSetResults perform(final ZipArchiveReader zipFile, final O outputStream) throws IOException {
+    public ChangeSetResults perform(final ZipArchiveReader reader, final O outputStream) throws IOException {
         @SuppressWarnings("unchecked")
-        final ArchiveEntryIterator<E> entryIterator = (ArchiveEntryIterator<E>) new ZipFileIterator(zipFile);
+        final ArchiveEntryIterator<E> entryIterator = (ArchiveEntryIterator<E>) new ZipFileIterator(reader);
         return perform(entryIterator, outputStream);
     }
 }
