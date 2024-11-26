@@ -168,6 +168,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
 
     private static final BuiltinCompressor[] BUILTIN_COMPRESSORS;
     private static final Set<String> ALL_NAMES;
+    private static final Set<String> OUTPUT_NAMES;
 
     static {
         final String className = CompressorStreamFactory.class.getName();
@@ -192,6 +193,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
 
         ArrayList<BuiltinCompressor> compressors = new ArrayList<>();
         HashSet<String> compressorNames = new HashSet<>();
+        HashSet<String> outputCompressorNames = new HashSet<>();
         for (String cls : builtinCompressorClasses) {
             Class<?> clazz;
 
@@ -211,13 +213,17 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
                 BuiltinCompressor compressor = (BuiltinCompressor) constructor.newInstance();
                 compressors.add(compressor);
                 compressorNames.add(compressor.getName());
+                if (compressor.isOutputAvailable()) {
+                    outputCompressorNames.add(compressor.getName());
+                }
             } catch (Throwable e) {
                 throw new LinkageError(null, e);
             }
         }
 
         BUILTIN_COMPRESSORS = compressors.toArray(new BuiltinCompressor[0]);
-        ALL_NAMES = compressorNames;
+        ALL_NAMES = Collections.unmodifiableSet(compressorNames);
+        OUTPUT_NAMES = Collections.unmodifiableSet(outputCompressorNames);
     }
 
     private static Iterable<CompressorStreamProvider> archiveStreamProviderIterable() {
@@ -512,12 +518,12 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
 
     @Override
     public Set<String> getInputStreamCompressorNames() {
-        return Sets.newHashSet(GZIP, BROTLI, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_RAW, SNAPPY_FRAMED, Z, LZ4_BLOCK, LZ4_FRAMED, ZSTANDARD, DEFLATE64);
+        return ALL_NAMES;
     }
 
     @Override
     public Set<String> getOutputStreamCompressorNames() {
-        return Sets.newHashSet(GZIP, BZIP2, XZ, LZMA, PACK200, DEFLATE, SNAPPY_FRAMED, LZ4_BLOCK, LZ4_FRAMED, ZSTANDARD);
+        return OUTPUT_NAMES;
     }
 
     /**
