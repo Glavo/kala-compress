@@ -32,7 +32,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.compress.utils.Sets;
 
 /**
  * <p>
