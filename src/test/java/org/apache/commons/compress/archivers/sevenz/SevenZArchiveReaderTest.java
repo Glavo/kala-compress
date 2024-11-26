@@ -65,7 +65,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     }
 
     private void assertDate(final SevenZArchiveEntry entry, final String value, final Function<SevenZArchiveEntry, Boolean> hasValue,
-            final Function<SevenZArchiveEntry, FileTime> timeFunction, final Function<SevenZArchiveEntry, Date> dateFunction) {
+                            final Function<SevenZArchiveEntry, FileTime> timeFunction, final Function<SevenZArchiveEntry, Date> dateFunction) {
         if (value != null) {
             assertTrue(hasValue.apply(entry));
             final Instant parsedInstant = Instant.parse(value);
@@ -116,7 +116,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     private byte[] readFully(final SevenZArchiveReader archive) throws IOException {
         final byte[] buf = new byte[1024];
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (int len = 0; (len = archive.read(buf)) > 0;) {
+        for (int len = 0; (len = archive.read(buf)) > 0; ) {
             baos.write(buf, 0, len);
         }
         return baos.toByteArray();
@@ -188,12 +188,11 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     }
 
     private void test7zUnarchive(final File file, final SevenZMethod m, final char[] password, final boolean tryToRecoverBrokenArchives) throws Exception {
-        try (@SuppressWarnings("deprecation")
-             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(file, password,
-                SevenZFileOptions.builder().withTryToRecoverBrokenArchives(tryToRecoverBrokenArchives).build())) {
-            test7zUnarchive(sevenZFile, m);
-        }
-        try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setFile(file).setPassword(password).setTryToRecoverBrokenArchives(tryToRecoverBrokenArchives).get()) {
+        try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder()
+                .setFile(file)
+                .setPassword(password)
+                .setTryToRecoverBrokenArchives(tryToRecoverBrokenArchives)
+                .get()) {
             test7zUnarchive(sevenZFile, m);
         }
     }
@@ -277,9 +276,9 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     public void testExtractSpecifiedFile() throws Exception {
         try (SevenZArchiveReader sevenZFile = getSevenZFile("COMPRESS-256.7z")) {
             final String testTxtContents = "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011";
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011";
 
             for (final SevenZArchiveEntry entry : sevenZFile.getEntries()) {
                 if (entry.getName().equals("commons-compress-1.7-src/src/test/resources/test.txt")) {
@@ -303,9 +302,9 @@ public class SevenZArchiveReaderTest extends AbstractTest {
         try (@SuppressWarnings("deprecation")
              SevenZArchiveReader sevenZFile = new SevenZArchiveReader(getFile("COMPRESS-256.7z"))) {
             final String testTxtContents = "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011";
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011";
 
             for (final SevenZArchiveEntry entry : sevenZFile.getEntries()) {
                 if (entry.getName().equals("commons-compress-1.7-src/src/test/resources/test.txt")) {
@@ -375,17 +374,9 @@ public class SevenZArchiveReaderTest extends AbstractTest {
 
     @Test
     public void testGivenNameWinsOverDefaultName() throws Exception {
-        try (@SuppressWarnings("deprecation")
-             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(getFile("bla.7z"), SevenZFileOptions.builder().withUseDefaultNameForUnnamedEntries(true).build())) {
-            SevenZArchiveEntry ae = sevenZFile.getNextEntry();
-            assertNotNull(ae);
-            assertEquals("test1.xml", ae.getName());
-            ae = sevenZFile.getNextEntry();
-            assertNotNull(ae);
-            assertEquals("test2.xml", ae.getName());
-            assertNull(sevenZFile.getNextEntry());
-        }
-        try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setFile(getFile("bla.7z")).setUseDefaultNameForUnnamedEntries(true).get()) {
+        try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder()
+                .setFile(getFile("bla.7z"))
+                .setUseDefaultNameForUnnamedEntries(true).get()) {
             SevenZArchiveEntry ae = sevenZFile.getNextEntry();
             assertNotNull(ae);
             assertEquals("test1.xml", ae.getName());
@@ -475,23 +466,15 @@ public class SevenZArchiveReaderTest extends AbstractTest {
         testFiles.add(getPath("COMPRESS-542-endheadercorrupted2.7z"));
 
         for (final Path file : testFiles) {
-            {
-                final IOException e = assertThrows(IOException.class, () -> {
-                    try (@SuppressWarnings("deprecation")
-                         SevenZArchiveReader sevenZFile = new SevenZArchiveReader(Files.newByteChannel(file),
-                            SevenZFileOptions.builder().withTryToRecoverBrokenArchives(true).build())) {
-                    }
-                }, "Expected IOException: start header corrupt and unable to guess end header");
-                assertEquals("Start header corrupt and unable to guess end header", e.getMessage());
-            }
-            {
-                final IOException e = assertThrows(IOException.class, () -> {
-                    try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setSeekableByteChannel(Files.newByteChannel(file)).setTryToRecoverBrokenArchives(true)
-                            .get()) {
-                    }
-                }, "Expected IOException: start header corrupt and unable to guess end header");
-                assertEquals("Start header corrupt and unable to guess end header", e.getMessage());
-            }
+            final IOException e = assertThrows(IOException.class, () -> {
+                //noinspection EmptyTryBlock
+                try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder()
+                        .setSeekableByteChannel(Files.newByteChannel(file))
+                        .setTryToRecoverBrokenArchives(true)
+                        .get()) {
+                }
+            }, "Expected IOException: start header corrupt and unable to guess end header");
+            assertEquals("Start header corrupt and unable to guess end header", e.getMessage());
         }
     }
 
@@ -499,9 +482,9 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     public void testRandomAccessMultipleReadSameFile() throws Exception {
         try (SevenZArchiveReader sevenZFile = getSevenZFile("COMPRESS-256.7z")) {
             final String testTxtContents = "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
-                    + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011";
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
+                                           + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011";
 
             SevenZArchiveEntry entry;
             SevenZArchiveEntry testTxtEntry = null;
