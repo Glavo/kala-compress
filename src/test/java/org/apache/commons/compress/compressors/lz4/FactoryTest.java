@@ -49,11 +49,11 @@ public class FactoryTest extends AbstractTest {
 
     @Test
     public void testBlockRoundtripViaFactory() throws Exception {
-        roundtripViaFactory(CompressorStreamFactory.getLZ4Block());
+        roundtripViaFactory(CompressorStreamFactory.LZ4_BLOCK);
     }
 
     @Test
     public void testFrameRoundtripViaFactory() throws Exception {
-        roundtripViaFactory(CompressorStreamFactory.getLZ4Framed());
+        roundtripViaFactory(CompressorStreamFactory.LZ4_FRAMED);
     }
 }

@@ -131,8 +131,8 @@ public final class FramedLZ4CompressorInputStreamTest extends AbstractTest {
 
     @Test
     public void testReadBlaLz4ViaFactory() throws Exception {
-        try (InputStream a = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.getLZ4Framed(), newInputStream("bla.tar.lz4"));
-                InputStream e = newInputStream("bla.tar")) {
+        try (InputStream a = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.LZ4_FRAMED, newInputStream("bla.tar.lz4"));
+             InputStream e = newInputStream("bla.tar")) {
             final byte[] expected = IOUtils.toByteArray(e);
             final byte[] actual = IOUtils.toByteArray(a);
             assertArrayEquals(expected, actual);
@@ -151,7 +151,7 @@ public final class FramedLZ4CompressorInputStreamTest extends AbstractTest {
 
     @Test
     public void testReadBlaLz4ViaFactoryWithDecompressConcatenated() throws Exception {
-        try (InputStream a = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.getLZ4Framed(), newInputStream("bla.tar.lz4"),
+        try (InputStream a = new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.LZ4_FRAMED, newInputStream("bla.tar.lz4"),
                 true);
                 InputStream e = newInputStream("bla.tar")) {
             final byte[] expected = IOUtils.toByteArray(e);
@@ -172,17 +172,17 @@ public final class FramedLZ4CompressorInputStreamTest extends AbstractTest {
 
     @Test
     public void testReadDoubledBlaLz4ViaFactoryWithDecompressConcatenatedFalse() throws Exception {
-        readDoubledBlaLz4(in -> new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.getLZ4Framed(), in, false), false);
+        readDoubledBlaLz4(in -> new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.LZ4_FRAMED, in, false), false);
     }
 
     @Test
     public void testReadDoubledBlaLz4ViaFactoryWithDecompressConcatenatedTrue() throws Exception {
-        readDoubledBlaLz4(in -> new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.getLZ4Framed(), in, true), true);
+        readDoubledBlaLz4(in -> new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.LZ4_FRAMED, in, true), true);
     }
 
     @Test
     public void testReadDoubledBlaLz4ViaFactoryWithoutExplicitDecompressConcatenated() throws Exception {
-        readDoubledBlaLz4(in -> new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.getLZ4Framed(), in), false);
+        readDoubledBlaLz4(in -> new CompressorStreamFactory().createCompressorInputStream(CompressorStreamFactory.LZ4_FRAMED, in), false);
     }
 
     @Test

@@ -63,7 +63,10 @@ import org.apache.commons.compress.utils.Sets;
  */
 public class CompressorStreamFactory implements CompressorStreamProvider {
 
-    private static final CompressorStreamFactory SINGLETON = new CompressorStreamFactory();
+    /**
+     * @since 1.27.1-0
+     */
+    public static final CompressorStreamFactory DEFAULT = new CompressorStreamFactory();
 
     /**
      * Constant (value {@value}) used to identify the BROTLI compression algorithm.
@@ -294,7 +297,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      */
     public static SortedMap<String, CompressorStreamProvider> findAvailableCompressorInputStreamProviders() {
         final TreeMap<String, CompressorStreamProvider> map = new TreeMap<>();
-        putAll(SINGLETON.getInputStreamCompressorNames(), SINGLETON, map);
+        putAll(DEFAULT.getInputStreamCompressorNames(), DEFAULT, map);
         archiveStreamProviderIterable().forEach(provider -> putAll(provider.getInputStreamCompressorNames(), provider, map));
         return map;
     }
@@ -321,73 +324,9 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      */
     public static SortedMap<String, CompressorStreamProvider> findAvailableCompressorOutputStreamProviders() {
         final TreeMap<String, CompressorStreamProvider> map = new TreeMap<>();
-        putAll(SINGLETON.getOutputStreamCompressorNames(), SINGLETON, map);
+        putAll(DEFAULT.getOutputStreamCompressorNames(), DEFAULT, map);
         archiveStreamProviderIterable().forEach(provider -> putAll(provider.getOutputStreamCompressorNames(), provider, map));
         return map;
-    }
-
-    public static String getBrotli() {
-        return BROTLI;
-    }
-
-    public static String getBzip2() {
-        return BZIP2;
-    }
-
-    public static String getDeflate() {
-        return DEFLATE;
-    }
-
-    /**
-     * @since 1.16
-     * @return the constant {@link #DEFLATE64}
-     */
-    public static String getDeflate64() {
-        return DEFLATE64;
-    }
-
-    public static String getGzip() {
-        return GZIP;
-    }
-
-    public static String getLZ4Block() {
-        return LZ4_BLOCK;
-    }
-
-    public static String getLZ4Framed() {
-        return LZ4_FRAMED;
-    }
-
-    public static String getLzma() {
-        return LZMA;
-    }
-
-    public static String getPack200() {
-        return PACK200;
-    }
-
-    public static CompressorStreamFactory getSingleton() {
-        return SINGLETON;
-    }
-
-    public static String getSnappyFramed() {
-        return SNAPPY_FRAMED;
-    }
-
-    public static String getSnappyRaw() {
-        return SNAPPY_RAW;
-    }
-
-    public static String getXz() {
-        return XZ;
-    }
-
-    public static String getZ() {
-        return Z;
-    }
-
-    public static String getZstandard() {
-        return ZSTANDARD;
     }
 
     static void putAll(final Set<String> names, final CompressorStreamProvider provider, final TreeMap<String, CompressorStreamProvider> map) {
