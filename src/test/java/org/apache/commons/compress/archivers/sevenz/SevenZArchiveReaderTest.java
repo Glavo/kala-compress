@@ -151,11 +151,11 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     @Test
     public void test7zMultiVolumeUnarchive() throws Exception {
         try (@SuppressWarnings("deprecation")
-             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(MultiReadOnlySeekableByteChannel.forFiles(getFile("bla-multi.7z.001"), getFile("bla-multi.7z.002")))) {
+             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(MultiReadOnlySeekableByteChannel.forPaths(getPath("bla-multi.7z.001"), getPath("bla-multi.7z.002")))) {
             test7zUnarchive(sevenZFile, SevenZMethod.LZMA2);
         }
         try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder()
-                .setSeekableByteChannel(MultiReadOnlySeekableByteChannel.forFiles(getFile("bla-multi.7z.001"), getFile("bla-multi.7z.002"))).get()) {
+                .setSeekableByteChannel(MultiReadOnlySeekableByteChannel.forPaths(getPath("bla-multi.7z.001"), getPath("bla-multi.7z.002"))).get()) {
             test7zUnarchive(sevenZFile, SevenZMethod.LZMA2);
         }
     }

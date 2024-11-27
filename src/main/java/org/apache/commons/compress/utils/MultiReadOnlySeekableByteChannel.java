@@ -17,7 +17,6 @@
 
 package org.apache.commons.compress.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -44,24 +43,6 @@ import java.util.Objects;
  * @since 1.19
  */
 public class MultiReadOnlySeekableByteChannel implements SeekableByteChannel {
-
-    private static final Path[] EMPTY_PATH_ARRAY = {};
-
-    /**
-     * Concatenates the given files.
-     *
-     * @param files the files to concatenate
-     * @throws NullPointerException if files is null
-     * @throws IOException          if opening a channel for one of the files fails
-     * @return SeekableByteChannel that concatenates all provided files
-     */
-    public static SeekableByteChannel forFiles(final File... files) throws IOException {
-        final List<Path> paths = new ArrayList<>();
-        for (final File f : Objects.requireNonNull(files, "files")) {
-            paths.add(f.toPath());
-        }
-        return forPaths(paths.toArray(EMPTY_PATH_ARRAY));
-    }
 
     /**
      * Concatenates the given file paths.

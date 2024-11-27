@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NonWritableChannelException;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -263,8 +264,8 @@ public class MultiReadOnlySeekableByteChannelTest {
     }
 
     @Test
-    public void testForFilesThrowsOnNullArg() {
-        assertThrows(NullPointerException.class, () -> MultiReadOnlySeekableByteChannel.forFiles((File[]) null));
+    public void testForPathsThrowsOnNullArg() {
+        assertThrows(NullPointerException.class, () -> MultiReadOnlySeekableByteChannel.forPaths((Path[]) null));
     }
 
     @Test
