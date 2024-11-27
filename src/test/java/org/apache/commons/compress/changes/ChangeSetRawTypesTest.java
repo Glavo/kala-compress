@@ -225,7 +225,7 @@ public final class ChangeSetRawTypesTest extends AbstractTest {
                 ArchiveOutputStream archiveOutputStream = factory.createArchiveOutputStream(archiverName, newOutputStream);
                 InputStream csInputStream = Files.newInputStream(file.toPath())) {
             setLongFileMode(archiveOutputStream);
-            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file, "bla/test.txt");
+            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             changeSet.delete("test1.xml");
@@ -302,7 +302,7 @@ public final class ChangeSetRawTypesTest extends AbstractTest {
             changeSet.deleteDir("bla");
             archiveListDeleteDir("bla");
             // Add a file
-            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1, "bla/test.txt");
+            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             final ChangeSetResults results = new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
@@ -383,7 +383,7 @@ public final class ChangeSetRawTypesTest extends AbstractTest {
             setLongFileMode(archiveOutputStream);
             changeSet.delete("test1.xml");
             archiveListDelete("test1.xml");
-            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file, "bla/test.txt");
+            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
@@ -814,7 +814,7 @@ public final class ChangeSetRawTypesTest extends AbstractTest {
             changeSet.deleteDir("bla");
             archiveListDeleteDir("bla");
             // Add a file
-            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1, "bla/test.txt");
+            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
@@ -848,7 +848,7 @@ public final class ChangeSetRawTypesTest extends AbstractTest {
                 changes.delete("test/test3.xml");
                 archiveListDelete("test/test3.xml");
                 // Add a file
-                final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(testTxt, "test/test3.xml");
+                final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(testTxt.toPath(), "test/test3.xml");
                 changes.add(entry, csInputStream);
                 archiveList.add("test/test3.xml");
                 new ChangeSetPerformer(changes).perform(archiveInputStream, archiveOutputStream);

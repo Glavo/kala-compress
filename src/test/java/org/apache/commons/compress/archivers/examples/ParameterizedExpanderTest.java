@@ -132,14 +132,16 @@ public class ParameterizedExpanderTest extends AbstractTest {
         try (ArchiveOutputStream<ArchiveEntry> aos = ArchiveStreamFactory.DEFAULT.createArchiveOutputStream(format, Files.newOutputStream(archive.toPath()))) {
             aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile().toPath(), "a"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b"));
+            File inputFile1 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile1.toPath(), "a/b"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b/c"));
+            File inputFile = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile.toPath(), "a/b/c"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/d.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/d.txt"));
             aos.write("Hello, world 1".getBytes(UTF_8));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/c/e.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/c/e.txt"));
             aos.write("Hello, world 2".getBytes(UTF_8));
             aos.closeArchiveEntry();
             aos.finish();

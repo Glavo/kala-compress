@@ -233,7 +233,7 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
                 OutputStream outputStream = Files.newOutputStream(result.toPath());
                 CpioArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
                 InputStream csInputStream = Files.newInputStream(file.toPath())) {
-            changeSet.add(out.createArchiveEntry(file, "bla/test.txt"), csInputStream);
+            changeSet.add(out.createArchiveEntry(file.toPath(), "bla/test.txt"), csInputStream);
             archiveList.add("bla/test.txt");
             changeSet.delete("test1.xml");
             archiveListDelete("test1.xml");
@@ -274,7 +274,7 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
                 OutputStream outputStream = Files.newOutputStream(result.toPath());
                 ArchiveOutputStream<E> out = createArchiveOutputStream(archiverName, outputStream);
                 InputStream csInputStream = Files.newInputStream(file1.toPath())) {
-            changeSet.add(out.createArchiveEntry(file1, "bla/test.txt"), csInputStream);
+            changeSet.add(out.createArchiveEntry(file1.toPath(), "bla/test.txt"), csInputStream);
             archiveList.add("bla/test.txt");
             new ChangeSetPerformer<>(changeSet).perform(ais, out);
         }
@@ -346,7 +346,7 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
             changeSet.deleteDir("bla");
             archiveListDeleteDir("bla");
             // Add a file
-            final E entry = out.createArchiveEntry(file1, "bla/test.txt");
+            final E entry = out.createArchiveEntry(file1.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
@@ -415,7 +415,7 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
                 InputStream csInputStream = Files.newInputStream(file.toPath())) {
             changeSet.delete("test1.xml");
             archiveListDelete("test1.xml");
-            final ZipArchiveEntry entry = out.createArchiveEntry(file, "bla/test.txt");
+            final ZipArchiveEntry entry = out.createArchiveEntry(file.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             new ChangeSetPerformer<>(changeSet).perform(ais, out);
@@ -809,7 +809,7 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
             changeSet.deleteDir("bla");
             archiveListDeleteDir("bla");
             // Add a file
-            final E entry = out.createArchiveEntry(file1, "bla/test.txt");
+            final E entry = out.createArchiveEntry(file1.toPath(), "bla/test.txt");
             changeSet.add(entry, csInputStream);
             archiveList.add("bla/test.txt");
             new ChangeSetPerformer<>(changeSet).perform(ais, out);
@@ -838,7 +838,7 @@ public final class ChangeSetSafeTypesTest<I extends ArchiveInputStream<E>, O ext
             changeSet.delete("test/test3.xml");
             archiveListDelete("test/test3.xml");
             // Add a file
-            final E entry = out.createArchiveEntry(testTxt, "test/test3.xml");
+            final E entry = out.createArchiveEntry(testTxt.toPath(), "test/test3.xml");
             changeSet.add(entry, csInputStream);
             archiveList.add("test/test3.xml");
             new ChangeSetPerformer<>(changeSet).perform(ais, out);

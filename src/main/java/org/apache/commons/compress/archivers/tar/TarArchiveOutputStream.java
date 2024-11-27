@@ -18,7 +18,6 @@
  */
 package org.apache.commons.compress.archivers.tar;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -283,12 +282,6 @@ public class TarArchiveOutputStream extends ArchiveOutputStream<TarArchiveEntry>
             recordsWritten++;
         }
         haveUnclosedEntry = false;
-    }
-
-    @Override
-    public TarArchiveEntry createArchiveEntry(final File inputFile, final String entryName) throws IOException {
-        checkFinished();
-        return new TarArchiveEntry(inputFile, entryName);
     }
 
     @Override

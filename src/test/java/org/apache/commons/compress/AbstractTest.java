@@ -123,7 +123,7 @@ public abstract class AbstractTest extends AbstractTempDirTest {
      */
     private <O extends ArchiveOutputStream<E>, E extends ArchiveEntry> void addArchiveEntry(final O outputStream, final String fileName, final File inputFile)
             throws IOException, FileNotFoundException {
-        final E entry = outputStream.createArchiveEntry(inputFile, fileName);
+        final E entry = outputStream.createArchiveEntry(inputFile.toPath(), fileName);
         outputStream.putArchiveEntry(entry);
         Files.copy(inputFile.toPath(), outputStream);
         outputStream.closeArchiveEntry();

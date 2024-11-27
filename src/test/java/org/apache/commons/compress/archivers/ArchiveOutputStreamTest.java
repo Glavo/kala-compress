@@ -38,7 +38,7 @@ public class ArchiveOutputStreamTest<O extends ArchiveOutputStream<E>, E extends
 
     private O createArchiveWithDummyEntry(final String archiveType, final OutputStream out1, final File dummy) throws Exception {
         final O aos1 = factory.createArchiveOutputStream(archiveType, out1);
-        aos1.putArchiveEntry(aos1.createArchiveEntry(dummy, "dummy"));
+        aos1.putArchiveEntry(aos1.createArchiveEntry(dummy.toPath(), "dummy"));
         Files.copy(dummy.toPath(), aos1);
         return aos1;
     }
@@ -48,7 +48,7 @@ public class ArchiveOutputStreamTest<O extends ArchiveOutputStream<E>, E extends
         final File dummy = getFile("test1.xml"); // need a real file
 
         try (O aos1 = factory.createArchiveOutputStream(archiveType, out1)) {
-            aos1.putArchiveEntry(aos1.createArchiveEntry(dummy, "dummy"));
+            aos1.putArchiveEntry(aos1.createArchiveEntry(dummy.toPath(), "dummy"));
             Files.copy(dummy.toPath(), aos1);
             aos1.closeArchiveEntry();
             // omitted finish
@@ -59,7 +59,7 @@ public class ArchiveOutputStreamTest<O extends ArchiveOutputStream<E>, E extends
         final O aos2 = factory.createArchiveOutputStream(archiveType, out1);
         assertThrows(IOException.class, aos2::closeArchiveEntry, "Should have raised IOException - closeArchiveEntry() called before putArchiveEntry()");
 
-        aos2.putArchiveEntry(aos2.createArchiveEntry(dummy, "dummy"));
+        aos2.putArchiveEntry(aos2.createArchiveEntry(dummy.toPath(), "dummy"));
         Files.copy(dummy.toPath(), aos2);
 
         // TODO check if second putArchiveEntry() can follow without closeAE?

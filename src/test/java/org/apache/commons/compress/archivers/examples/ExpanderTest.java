@@ -90,16 +90,19 @@ public class ExpanderTest extends AbstractTest {
         }
         try (@SuppressWarnings("resource") // Files.newOutputStream result closed by ArchiveOutputStream
         ArchiveOutputStream<ArchiveEntry> aos = ArchiveStreamFactory.DEFAULT.createArchiveOutputStream("tar", Files.newOutputStream(archive.toPath()))) {
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a"));
+            File inputFile2 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile2.toPath(), "a"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b"));
+            File inputFile1 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile1.toPath(), "a/b"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b/c"));
+            File inputFile = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile.toPath(), "a/b/c"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/d.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/d.txt"));
             aos.write("Hello, world 1".getBytes(UTF_8));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/c/e.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/c/e.txt"));
             aos.write("Hello, world 2".getBytes(UTF_8));
             aos.closeArchiveEntry();
             aos.finish();
@@ -114,18 +117,22 @@ public class ExpanderTest extends AbstractTest {
         }
         try (@SuppressWarnings("resource") // Files.newOutputStream result closed by ArchiveOutputStream
         ArchiveOutputStream<ArchiveEntry> aos = ArchiveStreamFactory.DEFAULT.createArchiveOutputStream("tar", Files.newOutputStream(archive.toPath()))) {
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "./"));
+            File inputFile3 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile3.toPath(), "./"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "./a"));
+            File inputFile2 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile2.toPath(), "./a"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "./a/b"));
+            File inputFile1 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile1.toPath(), "./a/b"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "./a/b/c"));
+            File inputFile = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile.toPath(), "./a/b/c"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "./a/b/d.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "./a/b/d.txt"));
             aos.write("Hello, world 1".getBytes(UTF_8));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "./a/b/c/e.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "./a/b/c/e.txt"));
             aos.write("Hello, world 2".getBytes(UTF_8));
             aos.closeArchiveEntry();
             aos.finish();
@@ -140,16 +147,19 @@ public class ExpanderTest extends AbstractTest {
         }
         try (@SuppressWarnings("resource") // // Files.newOutputStream result closed by ArchiveOutputStream
         ArchiveOutputStream<ArchiveEntry> aos = ArchiveStreamFactory.DEFAULT.createArchiveOutputStream("zip", Files.newOutputStream(archive.toPath()))) {
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a"));
+            File inputFile2 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile2.toPath(), "a"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b"));
+            File inputFile1 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile1.toPath(), "a/b"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b/c"));
+            File inputFile = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile.toPath(), "a/b/c"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/d.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/d.txt"));
             aos.write("Hello, world 1".getBytes(UTF_8));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/c/e.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/c/e.txt"));
             aos.write("Hello, world 2".getBytes(UTF_8));
             aos.closeArchiveEntry();
             aos.finish();
@@ -164,7 +174,7 @@ public class ExpanderTest extends AbstractTest {
         }
         try (@SuppressWarnings("resource") // Files.newOutputStream result closed by ArchiveOutputStream
         ArchiveOutputStream<ArchiveEntry> aos = ArchiveStreamFactory.DEFAULT.createArchiveOutputStream("zip", Files.newOutputStream(archive.toPath()))) {
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, entry));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), entry));
             aos.write("Hello, world 1".getBytes(UTF_8));
             aos.closeArchiveEntry();
             aos.finish();

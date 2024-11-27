@@ -39,7 +39,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.CloseShieldFilterInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
 import org.junit.jupiter.api.Test;
 
@@ -71,13 +70,13 @@ public final class Pack200UtilsTest extends AbstractTest {
         }
         try (OutputStream os = new FileOutputStream(archiveFile);
                 TarArchiveOutputStream taos = new TarArchiveOutputStream(os)) {
-            final TarArchiveEntry ae = taos.createArchiveEntry(pack, "./bla.pack");
+            final TarArchiveEntry ae = taos.createArchiveEntry(pack.toPath(), "./bla.pack");
             taos.putArchiveEntry(ae);
             try (FileInputStream in = new FileInputStream(pack)) {
                 IOUtils.copy(in, taos);
             }
             taos.closeArchiveEntry();
-            final TarArchiveEntry ae2 = taos.createArchiveEntry(pack, "./bla2.pack");
+            final TarArchiveEntry ae2 = taos.createArchiveEntry(pack.toPath(), "./bla2.pack");
             taos.putArchiveEntry(ae2);
             try (FileInputStream in = new FileInputStream(pack)) {
                 IOUtils.copy(in, taos);

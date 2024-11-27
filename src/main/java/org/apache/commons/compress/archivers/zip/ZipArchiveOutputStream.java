@@ -17,7 +17,6 @@
 package org.apache.commons.compress.archivers.zip;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -596,24 +595,6 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
             streamCompressor.writeCounted(copyBuffer, 0, length);
             count(length);
         }
-    }
-
-    /**
-     * Creates a new ZIP entry taking some information from the given file and using the provided name.
-     * <p>
-     * The name will be adjusted to end with a forward slash "/" if the file is a directory. If the file is not a directory a potential trailing forward slash
-     * will be stripped from the entry name.
-     * </p>
-     * <p>
-     * Must not be used if the stream has already been closed.
-     * </p>
-     */
-    @Override
-    public ZipArchiveEntry createArchiveEntry(final File inputFile, final String entryName) throws IOException {
-        if (finished) {
-            throw new IOException("Stream has already been finished");
-        }
-        return new ZipArchiveEntry(inputFile, entryName);
     }
 
     /**

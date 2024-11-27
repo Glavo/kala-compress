@@ -20,7 +20,6 @@ package org.apache.commons.compress.archivers.ar;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.LinkOption;
@@ -88,12 +87,6 @@ public class ArArchiveOutputStream extends ArchiveOutputStream<ArArchiveEntry> {
             out.write(PAD); // Pad byte
         }
         prevEntryOpen = false;
-    }
-
-    @Override
-    public ArArchiveEntry createArchiveEntry(final File inputFile, final String entryName) throws IOException {
-        checkFinished();
-        return new ArArchiveEntry(inputFile, entryName);
     }
 
     /**

@@ -18,7 +18,6 @@
  */
 package org.apache.commons.compress.archivers;
 
-import java.io.File;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -164,17 +163,6 @@ public abstract class ArchiveOutputStream<E extends ArchiveEntry> extends Filter
     }
 
     /**
-     * Creates an archive entry using the inputFile and entryName provided.
-     *
-     * @param inputFile the file to create the entry from
-     * @param entryName name to use for the entry
-     * @return the ArchiveEntry set up with details from the file
-     *
-     * @throws IOException if an I/O error occurs
-     */
-    public abstract E createArchiveEntry(File inputFile, String entryName) throws IOException;
-
-    /**
      * Creates an archive entry using the inputPath and entryName provided.
      * <p>
      * The default implementation calls simply delegates as:
@@ -195,9 +183,7 @@ public abstract class ArchiveOutputStream<E extends ArchiveEntry> extends Filter
      * @throws IOException if an I/O error occurs
      * @since 1.21
      */
-    public E createArchiveEntry(final Path inputPath, final String entryName, final LinkOption... options) throws IOException {
-        return createArchiveEntry(inputPath.toFile(), entryName);
-    }
+    public abstract E createArchiveEntry(final Path inputPath, final String entryName, final LinkOption... options) throws IOException;
 
     /**
      * Finishes the addition of entries to this stream, without closing it. Additional data can be written, if the format supports it.
