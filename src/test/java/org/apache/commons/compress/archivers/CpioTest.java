@@ -122,7 +122,7 @@ public final class CpioTest extends AbstractTest {
         assertEquals("foo", entryOut.getName());
         assertEquals(0, entryOut.getSize());
         // CPIO stores time with a granularity of 1 second
-        assertEquals(beforeArchiveWrite / 1000, entryOut.getLastModifiedDate().getTime() / 1000);
+        assertEquals(beforeArchiveWrite / 1000, entryOut.getLastModifiedTime().toMillis() / 1000);
         assertTrue(entryOut.isDirectory());
     }
 
@@ -145,7 +145,7 @@ public final class CpioTest extends AbstractTest {
         assertNotNull(out);
         assertEquals("foo/", out.getName());
         assertEquals(0, out.getSize());
-        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertTrue(out.isDirectory());
     }
 
@@ -174,7 +174,7 @@ public final class CpioTest extends AbstractTest {
         assertNotNull(out);
         assertEquals("foo", out.getName());
         assertEquals(tmp.length(), out.getSize());
-        assertEquals(tmp.lastModified() / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(tmp.lastModified() / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertFalse(out.isDirectory());
     }
 
@@ -200,7 +200,7 @@ public final class CpioTest extends AbstractTest {
         assertNotNull(out);
         assertEquals("foo", out.getName());
         assertEquals(tmp.length(), out.getSize());
-        assertEquals(tmp.lastModified() / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(tmp.lastModified() / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertFalse(out.isDirectory());
     }
 }

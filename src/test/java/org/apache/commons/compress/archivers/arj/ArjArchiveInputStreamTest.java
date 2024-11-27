@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.attribute.FileTime;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -44,7 +45,7 @@ public class ArjArchiveInputStreamTest extends AbstractTest {
 
     private void assertArjArchiveEntry(final ArjArchiveEntry entry) {
         assertNotNull(entry.getName());
-        assertNotNull(entry.getLastModifiedDate());
+        assertNotNull(entry.getLastModifiedTime());
         assertDoesNotThrow(entry::getHostOs);
         assertDoesNotThrow(entry::getMethod);
         assertDoesNotThrow(entry::getMode);
@@ -135,7 +136,7 @@ public class ArjArchiveInputStreamTest extends AbstractTest {
             final Calendar cal = Calendar.getInstance();
             cal.set(2008, 9, 6, 23, 50, 52);
             cal.set(Calendar.MILLISECOND, 0);
-            assertEquals(cal.getTime(), entry.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(cal.getTimeInMillis()), entry.getLastModifiedTime());
             assertForEach(archive);
         }
     }
@@ -150,7 +151,7 @@ public class ArjArchiveInputStreamTest extends AbstractTest {
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0000"));
             cal.set(2008, 9, 6, 21, 50, 52);
             cal.set(Calendar.MILLISECOND, 0);
-            assertEquals(cal.getTime(), entry.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(cal.getTimeInMillis()), entry.getLastModifiedTime());
             assertForEach(in);
         }
     }

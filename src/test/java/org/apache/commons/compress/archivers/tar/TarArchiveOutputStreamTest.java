@@ -251,7 +251,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             cal.set(1969, 11, 31, 23, 59, 59);
             cal.set(Calendar.MILLISECOND, 0);
-            assertEquals(cal.getTime(), e.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(cal.getTimeInMillis()), e.getLastModifiedTime());
         }
         // generates IOE because of unclosed entries.
         // However, we don't really want to create such large entries.
@@ -276,7 +276,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             cal.set(1969, 11, 31, 23, 59, 59);
             cal.set(Calendar.MILLISECOND, 0);
-            assertEquals(cal.getTime(), e.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(cal.getTimeInMillis()), e.getLastModifiedTime());
         }
         // generates IOE because of unclosed entries.
         // However, we don't really want to create such large entries.

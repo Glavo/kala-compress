@@ -18,7 +18,6 @@ package org.apache.commons.compress.utils;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,26 +50,6 @@ public final class TimeUtils {
      * </p>
      */
     static final long WINDOWS_EPOCH_OFFSET = -116444736000000000L;
-
-    /**
-     * Converts {@link FileTime} to a {@link Date}. If the provided FileTime is {@code null}, the returned Date is also {@code null}.
-     *
-     * @param fileTime the file time to be converted.
-     * @return a {@link Date} which corresponds to the supplied time, or {@code null} if the time is {@code null}.
-     */
-    public static Date toDate(final FileTime fileTime) {
-        return fileTime != null ? new Date(fileTime.toMillis()) : null;
-    }
-
-    /**
-     * Converts {@link Date} to a {@link FileTime}. If the provided Date is {@code null}, the returned FileTime is also {@code null}.
-     *
-     * @param date the date to be converted.
-     * @return a {@link FileTime} which corresponds to the supplied date, or {@code null} if the date is {@code null}.
-     */
-    public static FileTime toFileTime(final Date date) {
-        return date != null ? FileTime.fromMillis(date.getTime()) : null;
-    }
 
     /**
      * Tests whether a FileTime can be safely represented in the standard UNIX time.

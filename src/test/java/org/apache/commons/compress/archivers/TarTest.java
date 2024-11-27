@@ -121,7 +121,7 @@ public final class TarTest extends AbstractTest {
         assertEquals(TarConstants.LF_DIR, out.getLinkFlag());
         assertEquals(0, out.getSize());
         // TAR stores time with a granularity of 1 second
-        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertTrue(out.isDirectory());
     }
 
@@ -158,7 +158,7 @@ public final class TarTest extends AbstractTest {
         assertEquals("foo/", out.getName());
         assertEquals(TarConstants.LF_DIR, in.getLinkFlag());
         assertEquals(0, out.getSize());
-        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertTrue(out.isDirectory());
     }
 
@@ -187,7 +187,7 @@ public final class TarTest extends AbstractTest {
         assertEquals("foo", entryOut.getName());
         assertEquals(TarConstants.LF_NORMAL, entryOut.getLinkFlag());
         assertEquals(tmp.length(), entryOut.getSize());
-        assertEquals(tmp.lastModified() / 1000, entryOut.getLastModifiedDate().getTime() / 1000);
+        assertEquals(tmp.lastModified() / 1000, entryOut.getLastModifiedTime().toMillis() / 1000);
         assertFalse(entryOut.isDirectory());
     }
 
@@ -214,7 +214,7 @@ public final class TarTest extends AbstractTest {
         assertEquals("foo", out.getName());
         assertEquals(TarConstants.LF_NORMAL, out.getLinkFlag());
         assertEquals(tmp.length(), out.getSize());
-        assertEquals(tmp.lastModified() / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(tmp.lastModified() / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertFalse(out.isDirectory());
     }
 
@@ -347,7 +347,7 @@ public final class TarTest extends AbstractTest {
                 assertEquals(TarConstants.LF_DIR, entry.getLinkFlag());
                 assertEquals(0, entry.getSize());
                 // TAR stores time with a granularity of 1 second
-                assertEquals(beforeArchiveWrite / 1000, entry.getLastModifiedDate().getTime() / 1000);
+                assertEquals(beforeArchiveWrite / 1000, entry.getLastModifiedTime().toMillis() / 1000);
                 assertTrue(entry.isDirectory());
             }
         }
@@ -389,7 +389,7 @@ public final class TarTest extends AbstractTest {
                 assertEquals("foo", entry.getName());
                 assertEquals(TarConstants.LF_NORMAL, entry.getLinkFlag());
                 assertEquals(tmp.length(), entry.getSize());
-                assertEquals(tmp.lastModified() / 1000, entry.getLastModifiedDate().getTime() / 1000);
+                assertEquals(tmp.lastModified() / 1000, entry.getLastModifiedTime().toMillis() / 1000);
                 assertFalse(entry.isDirectory());
             }
         }
@@ -411,7 +411,7 @@ public final class TarTest extends AbstractTest {
                 assertEquals("foo/", entry.getName());
                 assertEquals(TarConstants.LF_DIR, entry.getLinkFlag());
                 assertEquals(0, entry.getSize());
-                assertEquals(beforeArchiveWrite / 1000, entry.getLastModifiedDate().getTime() / 1000);
+                assertEquals(beforeArchiveWrite / 1000, entry.getLastModifiedTime().toMillis() / 1000);
                 assertTrue(entry.isDirectory());
             }
         }
@@ -440,7 +440,7 @@ public final class TarTest extends AbstractTest {
                 assertEquals("foo", entry.getName());
                 assertEquals(TarConstants.LF_NORMAL, entry.getLinkFlag());
                 assertEquals(tmp.length(), entry.getSize());
-                assertEquals(tmp.lastModified() / 1000, entry.getLastModifiedDate().getTime() / 1000);
+                assertEquals(tmp.lastModified() / 1000, entry.getLastModifiedTime().toMillis() / 1000);
                 assertFalse(entry.isDirectory());
             }
         }

@@ -54,7 +54,7 @@ public class CLI {
                     System.out.print(" " + entry.getCompressedSize() + "/" + entry.getSize());
                 }
                 if (entry.getHasLastModifiedDate()) {
-                    System.out.print(" " + entry.getLastModifiedDate());
+                    System.out.print(" " + entry.getLastModifiedTime());
                 } else {
                     System.out.print(" no last modified date");
                 }

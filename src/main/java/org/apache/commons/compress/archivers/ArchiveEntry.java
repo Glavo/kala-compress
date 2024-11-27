@@ -21,7 +21,6 @@ package org.apache.commons.compress.archivers;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.util.Date;
 
 /**
  * An entry of an archive.
@@ -32,19 +31,6 @@ public interface ArchiveEntry {
      * Special value ({@value}) indicating that the size is unknown.
      */
     long SIZE_UNKNOWN = -1;
-
-    /**
-     * Gets the last modified date of this entry.
-     *
-     * @return the last modified date of this entry.
-     * @since 1.1
-     * @deprecated Use {@link #getLastModifiedTime()}
-     */
-    @Deprecated
-    default Date getLastModifiedDate() {
-        FileTime lastModifiedTime = getLastModifiedTime();
-        return lastModifiedTime != null ? new Date(lastModifiedTime.toMillis()) : null;
-    }
 
     /**
      * Gets the last modified time of this entry.

@@ -39,10 +39,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -72,7 +72,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             cal.set(1969, 11, 31, 23, 59, 59);
             cal.set(Calendar.MILLISECOND, 0);
-            assertEquals(cal.getTime(), tae.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(cal.getTimeInMillis()), tae.getLastModifiedTime());
             assertTrue(tae.isCheckSumOK());
         }
     }
@@ -502,7 +502,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
             tae = in.getNextEntry();
             assertEquals("sample/link-to-txt-file.lnk", tae.getName());
             assertEquals(TarConstants.LF_SYMLINK, tae.getLinkFlag());
-            assertEquals(new Date(0), tae.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(0), tae.getLastModifiedTime());
             assertTrue(tae.isSymbolicLink());
             assertTrue(tae.isCheckSumOK());
         }

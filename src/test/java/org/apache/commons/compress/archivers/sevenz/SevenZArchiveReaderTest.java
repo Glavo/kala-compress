@@ -39,7 +39,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,25 +64,22 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     }
 
     private void assertDate(final SevenZArchiveEntry entry, final String value, final Function<SevenZArchiveEntry, Boolean> hasValue,
-                            final Function<SevenZArchiveEntry, FileTime> timeFunction, final Function<SevenZArchiveEntry, Date> dateFunction) {
+                            final Function<SevenZArchiveEntry, FileTime> timeFunction) {
         if (value != null) {
             assertTrue(hasValue.apply(entry));
             final Instant parsedInstant = Instant.parse(value);
             final FileTime parsedFileTime = FileTime.from(parsedInstant);
             assertEquals(parsedFileTime, timeFunction.apply(entry));
-            assertEquals(Date.from(parsedInstant), dateFunction.apply(entry));
         } else {
             assertFalse(hasValue.apply(entry));
             assertThrows(UnsupportedOperationException.class, () -> timeFunction.apply(entry));
-            assertThrows(UnsupportedOperationException.class, () -> dateFunction.apply(entry));
         }
     }
 
     private void assertDates(final SevenZArchiveEntry entry, final String modified, final String access, final String creation) {
-        assertDate(entry, modified, SevenZArchiveEntry::getHasLastModifiedDate, SevenZArchiveEntry::getLastModifiedTime,
-                SevenZArchiveEntry::getLastModifiedDate);
-        assertDate(entry, access, SevenZArchiveEntry::getHasAccessDate, SevenZArchiveEntry::getAccessTime, SevenZArchiveEntry::getAccessDate);
-        assertDate(entry, creation, SevenZArchiveEntry::getHasCreationDate, SevenZArchiveEntry::getCreationTime, SevenZArchiveEntry::getCreationDate);
+        assertDate(entry, modified, SevenZArchiveEntry::getHasLastModifiedDate, SevenZArchiveEntry::getLastModifiedTime);
+        assertDate(entry, access, SevenZArchiveEntry::getHasAccessDate, SevenZArchiveEntry::getAccessTime);
+        assertDate(entry, creation, SevenZArchiveEntry::getHasCreationDate, SevenZArchiveEntry::getCreationTime);
     }
 
     private void checkHelloWorld(final String fileName) throws Exception {

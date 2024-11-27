@@ -115,7 +115,7 @@ public class ZipUtilTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         Date testDate = ZipUtil.fromDosTime(testDosTime);
-        assertEquals(testDate.getTime(), cal.getTime().getTime());
+        assertEquals(testDate.getTime(), cal.getTimeInMillis());
 
         testDosTime = ZipUtil.toDosTime(time);
         testDate = ZipUtil.fromDosTime(testDosTime);

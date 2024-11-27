@@ -19,7 +19,6 @@ package org.apache.commons.compress.archivers.sevenz;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -97,18 +96,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Gets the access date. This is equivalent to {@link SevenZArchiveEntry#getAccessTime()}, but precision is truncated to milliseconds.
-     *
-     * @throws UnsupportedOperationException if the entry hasn't got an access date.
-     * @return the access date
-     * @deprecated Use {@link #getAccessTime())
-     */
-    @Deprecated
-    public Date getAccessDate() {
-        return TimeUtils.toDate(getAccessTime());
-    }
-
-    /**
      * Gets the access time.
      *
      * @throws UnsupportedOperationException if the entry hasn't got an access time.
@@ -182,18 +169,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     @Deprecated
     public long getCrcValue() {
         return getCrc();
-    }
-
-    /**
-     * Gets the creation date. This is equivalent to {@link SevenZArchiveEntry#getCreationTime()}, but precision is truncated to milliseconds.
-     *
-     * @throws UnsupportedOperationException if the entry hasn't got a creation date.
-     * @return the new creation date
-     * @see SevenZArchiveEntry#getCreationTime()
-     */
-    @Deprecated
-    public Date getCreationDate() {
-        return TimeUtils.toDate(getCreationTime());
     }
 
     /**
@@ -342,16 +317,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets the access date.
-     *
-     * @param accessDate the new access date
-     * @see SevenZArchiveEntry#setAccessTime(FileTime)
-     */
-    public void setAccessDate(final Date accessDate) {
-        setAccessTime(TimeUtils.toFileTime(accessDate));
-    }
-
-    /**
      * Sets the access date using NTFS time (100 nanosecond units since 1 January 1601)
      *
      * @param ntfsAccessDate the access date
@@ -468,16 +433,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets the creation date.
-     *
-     * @param creationDate the new creation date
-     * @see SevenZArchiveEntry#setCreationTime(FileTime)
-     */
-    public void setCreationDate(final Date creationDate) {
-        setCreationTime(TimeUtils.toFileTime(creationDate));
-    }
-
-    /**
      * Sets the creation date using NTFS time (100 nanosecond units since 1 January 1601)
      *
      * @param ntfsCreationDate the creation date
@@ -560,16 +515,6 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      */
     public void setHasWindowsAttributes(final boolean hasWindowsAttributes) {
         this.hasWindowsAttributes = hasWindowsAttributes;
-    }
-
-    /**
-     * Sets the last modified date.
-     *
-     * @param lastModifiedDate the new last modified date
-     * @see SevenZArchiveEntry#setLastModifiedTime(FileTime)
-     */
-    public void setLastModifiedDate(final Date lastModifiedDate) {
-        setLastModifiedTime(TimeUtils.toFileTime(lastModifiedDate));
     }
 
     /**

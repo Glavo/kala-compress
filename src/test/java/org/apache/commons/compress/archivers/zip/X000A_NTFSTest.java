@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 

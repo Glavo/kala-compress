@@ -189,7 +189,7 @@ public final class ArTest extends AbstractTest {
         assertNotNull(out);
         assertEquals("foo", out.getName());
         assertEquals(file.length(), out.getSize());
-        assertEquals(file.lastModified() / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(file.lastModified() / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertFalse(out.isDirectory());
     }
 
@@ -216,7 +216,7 @@ public final class ArTest extends AbstractTest {
         assertEquals("foo", out.getName());
         assertEquals(file.length(), out.getSize());
         // AR stores time with a granularity of 1 second
-        assertEquals(file.lastModified() / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(file.lastModified() / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertFalse(out.isDirectory());
     }
 
@@ -241,7 +241,7 @@ public final class ArTest extends AbstractTest {
         assertEquals("foo/", out.getName());
         assertEquals(0, out.getSize());
         // AR stores time with a granularity of 1 second
-        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertTrue(out.isDirectory());
     }
 
@@ -265,7 +265,7 @@ public final class ArTest extends AbstractTest {
         assertNotNull(out);
         assertEquals("foo/", out.getName());
         assertEquals(0, out.getSize());
-        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedDate().getTime() / 1000);
+        assertEquals(beforeArchiveWrite / 1000, out.getLastModifiedTime().toMillis() / 1000);
         assertTrue(out.isDirectory());
     }
 }

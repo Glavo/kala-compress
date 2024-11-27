@@ -24,7 +24,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -735,22 +734,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      */
     public int getInternalAttributes() {
         return internalAttributes;
-    }
-
-    /**
-     * Wraps {@link ZipEntry#getTime} with a {@link Date} as the entry's last modified date.
-     *
-     * <p>
-     * Changes to the implementation of {@link ZipEntry#getTime()} leak through and the returned value may depend on your local time zone as well as
-     * your version of Java.
-     * </p>
-     *
-     * @deprecated Use {@link #getTime()}
-     */
-    @Deprecated
-    @Override
-    public Date getLastModifiedDate() {
-        return new Date(getTime());
     }
 
     /**

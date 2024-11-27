@@ -61,7 +61,7 @@ public final class TarLister {
         } else {
             sb.append(ae.getSize());
         }
-        sb.append(" ").append(ae.getLastModifiedDate()).append(" ");
+        sb.append(" ").append(ae.getLastModifiedTime()).append(" ");
         sb.append(ae.getName());
         if (ae.isSymbolicLink() || ae.isLink()) {
             if (ae.isSymbolicLink()) {

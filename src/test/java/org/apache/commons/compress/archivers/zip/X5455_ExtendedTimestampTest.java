@@ -501,7 +501,7 @@ public class X5455_ExtendedTimestampTest {
                 }
 
                 final X5455_ExtendedTimestamp xf = (X5455_ExtendedTimestamp) zae.getExtraField(X5455);
-                final Date rawZ = zae.getLastModifiedDate();
+                final Date rawZ = new Date(zae.getTime());
                 final Date m = xf.getModifyJavaTime();
 
                 /*

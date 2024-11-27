@@ -34,6 +34,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -56,7 +57,7 @@ public class TarFileTest extends AbstractTest {
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             cal.set(1969, 11, 31, 23, 59, 59);
             cal.set(Calendar.MILLISECOND, 0);
-            assertEquals(cal.getTime(), entry.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(cal.getTimeInMillis()), entry.getLastModifiedTime());
             assertTrue(entry.isCheckSumOK());
         }
     }
@@ -355,7 +356,7 @@ public class TarFileTest extends AbstractTest {
             final TarArchiveEntry entry = entries.get(1);
             assertEquals("sample/link-to-txt-file.lnk", entry.getName());
             assertEquals(TarConstants.LF_SYMLINK, entry.getLinkFlag());
-            assertEquals(new Date(0), entry.getLastModifiedDate());
+            assertEquals(FileTime.fromMillis(0), entry.getLastModifiedTime());
             assertTrue(entry.isSymbolicLink());
             assertTrue(entry.isCheckSumOK());
         }
