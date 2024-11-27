@@ -299,7 +299,7 @@ public final class TarTest extends AbstractTest {
     @Test
     public void testTarFileCOMPRESS114() throws Exception {
         final File input = getFile("COMPRESS-114.tar");
-        try (TarFile tarFile = new TarFile(input, StandardCharsets.ISO_8859_1)) {
+        try (TarFile tarFile = new TarFile(input.toPath(), StandardCharsets.ISO_8859_1)) {
             final List<TarArchiveEntry> entries = tarFile.getEntries();
             TarArchiveEntry entry = entries.get(0);
             assertEquals("3\u00b1\u00b1\u00b1F06\u00b1W2345\u00b1ZB\u00b1la\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1\u00b1BLA", entry.getName());
@@ -314,7 +314,7 @@ public final class TarTest extends AbstractTest {
     public void testTarFileCOMPRESS178() throws Exception {
         final File input = getFile("COMPRESS-178-fail.tar");
         final IOException e = assertThrows(IOException.class, () -> {
-            try (TarFile tarFile = new TarFile(input)) {
+            try (TarFile tarFile = new TarFile(input.toPath())) {
                 // Compared to the TarArchiveInputStream all entries are read when instantiating the tar file
             }
         }, "Expected IOException");
@@ -325,7 +325,7 @@ public final class TarTest extends AbstractTest {
     @Test
     public void testTarFileCOMPRESS178Lenient() throws Exception {
         final File input = getFile("COMPRESS-178-fail.tar");
-        try (TarFile tarFile = new TarFile(input, true)) {
+        try (TarFile tarFile = new TarFile(input.toPath(), true)) {
             // Compared to the TarArchiveInputStream all entries are read when instantiating the tar file
         }
     }
@@ -340,7 +340,7 @@ public final class TarTest extends AbstractTest {
             tos.putArchiveEntry(in);
             tos.closeArchiveEntry();
             tos.close();
-            try (TarFile tarFile = new TarFile(archive)) {
+            try (TarFile tarFile = new TarFile(archive.toPath())) {
                 final TarArchiveEntry entry = tarFile.getEntries().get(0);
                 assertNotNull(entry);
                 assertEquals("foo/", entry.getName());
@@ -356,7 +356,7 @@ public final class TarTest extends AbstractTest {
     @Test
     public void testTarFileDirectoryRead() throws IOException {
         final File input = getFile("directory.tar");
-        try (TarFile tarFile = new TarFile(input)) {
+        try (TarFile tarFile = new TarFile(input.toPath())) {
             final TarArchiveEntry directoryEntry = tarFile.getEntries().get(0);
             assertEquals("directory/", directoryEntry.getName());
             assertEquals(TarConstants.LF_DIR, directoryEntry.getLinkFlag());
@@ -383,7 +383,7 @@ public final class TarTest extends AbstractTest {
             }
             tos.closeArchiveEntry();
             tos.close();
-            try (TarFile tarFile = new TarFile(archive)) {
+            try (TarFile tarFile = new TarFile(archive.toPath())) {
                 final TarArchiveEntry entry = tarFile.getEntries().get(0);
                 assertNotNull(entry);
                 assertEquals("foo", entry.getName());
@@ -405,7 +405,7 @@ public final class TarTest extends AbstractTest {
             tos.putArchiveEntry(in);
             tos.closeArchiveEntry();
             tos.close();
-            try (TarFile tarFile = new TarFile(archive)) {
+            try (TarFile tarFile = new TarFile(archive.toPath())) {
                 final TarArchiveEntry entry = tarFile.getEntries().get(0);
                 assertNotNull(entry);
                 assertEquals("foo/", entry.getName());
@@ -434,7 +434,7 @@ public final class TarTest extends AbstractTest {
             }
             tos.closeArchiveEntry();
 
-            try (TarFile tarFile = new TarFile(archive)) {
+            try (TarFile tarFile = new TarFile(archive.toPath())) {
                 final TarArchiveEntry entry = tarFile.getEntries().get(0);
                 assertNotNull(entry);
                 assertEquals("foo", entry.getName());
@@ -465,7 +465,7 @@ public final class TarTest extends AbstractTest {
     @Test
     public void testTarFileUnarchive() throws Exception {
         final File file = getFile("bla.tar");
-        try (TarFile tarFile = new TarFile(file)) {
+        try (TarFile tarFile = new TarFile(file.toPath())) {
             final TarArchiveEntry entry = tarFile.getEntries().get(0);
             try (InputStream inputStream = tarFile.getInputStream(entry)) {
                 Files.copy(inputStream, newTempFile(entry.getName()).toPath());

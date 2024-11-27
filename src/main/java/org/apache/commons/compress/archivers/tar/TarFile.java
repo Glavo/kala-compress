@@ -18,7 +18,6 @@ package org.apache.commons.compress.archivers.tar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -206,40 +205,6 @@ public class TarFile implements Closeable {
      */
     public TarFile(final byte[] content, final Charset encoding) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
-    }
-
-    /**
-     * Constructor for TarFile.
-     *
-     * @param archive the file of the archive to use
-     * @throws IOException when reading the tar archive fails
-     */
-    public TarFile(final File archive) throws IOException {
-        this(archive.toPath());
-    }
-
-    /**
-     * Constructor for TarFile.
-     *
-     * @param archive the file of the archive to use
-     * @param lenient when set to true illegal values for group/userid, mode, device numbers and timestamp will be ignored and the fields set to
-     *                {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an exception instead.
-     * @throws IOException when reading the tar archive fails
-     */
-    public TarFile(final File archive, final boolean lenient) throws IOException {
-        this(archive.toPath(), lenient);
-    }
-
-    /**
-     * Constructor for TarFile.
-     *
-     * @param archive  the file of the archive to use
-     * @param encoding the encoding to use
-     * @throws IOException when reading the tar archive fails
-     * @since 1.27.1-0
-     */
-    public TarFile(final File archive, final Charset encoding) throws IOException {
-        this(archive.toPath(), encoding);
     }
 
     /**

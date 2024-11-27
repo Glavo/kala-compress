@@ -174,7 +174,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testCompress603Tar() throws IOException, ArchiveException {
         setupTarForCompress603();
-        try (TarFile f = new TarFile(archive)) {
+        try (TarFile f = new TarFile(archive.toPath())) {
             new Expander().expand(f, tempResultDir);
         }
         verifyTargetDir();
@@ -261,7 +261,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testTarFileVersion() throws IOException, ArchiveException {
         setupTar();
-        try (TarFile f = new TarFile(archive)) {
+        try (TarFile f = new TarFile(archive.toPath())) {
             new Expander().expand(f, tempResultDir);
         }
         verifyTargetDir();

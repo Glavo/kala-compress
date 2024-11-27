@@ -166,7 +166,7 @@ public class TarFileTest extends AbstractTest {
                 out.flush();
             }
             // untar these tars
-            try (TarFile tarFile = new TarFile(tarF)) {
+            try (TarFile tarFile = new TarFile(tarF.toPath())) {
                 for (final TarArchiveEntry entry : tarFile.getEntries()) {
                     assertTrue(entry.getName().endsWith("/"), "Entry name: " + entry.getName());
                 }
@@ -222,7 +222,7 @@ public class TarFileTest extends AbstractTest {
 
     @Test
     public void testRejectsArchivesWithNegativeSizes() throws Exception {
-        assertThrows(IOException.class, () -> new TarFile(getFile("COMPRESS-569-fail.tar")));
+        assertThrows(IOException.class, () -> new TarFile(getFile("COMPRESS-569-fail.tar").toPath()));
     }
 
     @Test
