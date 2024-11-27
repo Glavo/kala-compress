@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.compress.AbstractTempDirTest;
@@ -35,7 +34,7 @@ public class ZipArchiveOutputStreamTest extends AbstractTempDirTest {
 
     @Test
     public void testFileBasics() throws IOException {
-        try (ZipArchiveOutputStream stream = new ZipArchiveOutputStream(createTempFile())) {
+        try (ZipArchiveOutputStream stream = new ZipArchiveOutputStream(createTempFile().toPath())) {
             assertTrue(stream.isSeekable());
         }
     }
@@ -49,7 +48,7 @@ public class ZipArchiveOutputStreamTest extends AbstractTempDirTest {
 
     @Test
     public void testSetEncoding() throws IOException {
-        try (ZipArchiveOutputStream stream = new ZipArchiveOutputStream(createTempFile())) {
+        try (ZipArchiveOutputStream stream = new ZipArchiveOutputStream(createTempFile().toPath())) {
             stream.setEncoding(StandardCharsets.UTF_8);
             assertEquals(StandardCharsets.UTF_8, stream.getEncoding());
             stream.setEncoding(StandardCharsets.UTF_16LE);

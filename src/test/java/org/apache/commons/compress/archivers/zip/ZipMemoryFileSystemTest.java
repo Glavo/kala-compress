@@ -351,7 +351,7 @@ public class ZipMemoryFileSystemTest {
             Files.write(textFileInMemSys, bytes);
 
             final Path zipInLocalSys = Files.createTempFile(dir, "commons-compress-memoryfs", ".zip");
-            try (ZipArchiveOutputStream zipOut = new ZipArchiveOutputStream(zipInLocalSys.toFile())) {
+            try (ZipArchiveOutputStream zipOut = new ZipArchiveOutputStream(zipInLocalSys.toFile().toPath())) {
                 final ZipArchiveEntry entry = new ZipArchiveEntry(textFileInMemSys, textFileInMemSys.getFileName().toString());
                 entry.setSize(Files.size(textFileInMemSys));
                 zipOut.putArchiveEntry(entry);
@@ -439,7 +439,7 @@ public class ZipMemoryFileSystemTest {
             Files.write(textFileInMemSys, bytes);
 
             final Path zipInLocalSys = Files.createTempFile(dir, "commons-compress-memoryfs", ".zip");
-            try (ZipArchiveOutputStream zipOut = new ZipArchiveOutputStream(zipInLocalSys.toFile(), 64 * 1024L)) {
+            try (ZipArchiveOutputStream zipOut = new ZipArchiveOutputStream(zipInLocalSys.toFile().toPath(), 64 * 1024L)) {
                 final ZipArchiveEntry entry = new ZipArchiveEntry(textFileInMemSys, textFileInMemSys.getFileName().toString());
                 entry.setSize(Files.size(textFileInMemSys));
                 zipOut.putArchiveEntry(entry);

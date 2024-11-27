@@ -159,7 +159,7 @@ public final class ZipTest extends AbstractTest {
 
     private File createReferenceFile(final Zip64Mode zipMode, final String prefix) throws IOException {
         final File reference = createTempFile(prefix, ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(reference)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(reference.toPath())) {
             zos.setUseZip64(zipMode);
             createFirstEntry(zos);
             createSecondEntry(zos);
@@ -176,7 +176,7 @@ public final class ZipTest extends AbstractTest {
         final File directoryToZip = getFilesToZip();
         final File outputZipFile = newTempFile("splitZip.zip");
         final long splitSize = 100 * 1024L; /* 100 KB */
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile, splitSize)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile.toPath(), splitSize)) {
             addFilesToZip(zipArchiveOutputStream, directoryToZip);
         }
     }
@@ -240,7 +240,7 @@ public final class ZipTest extends AbstractTest {
     public void testBuildArtificialSplitZip32Test() throws IOException {
         final File outputZipFile = newTempFile("artificialSplitZip.zip");
         final long splitSize = 64 * 1024L; /* 64 KB */
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile, splitSize)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile.toPath(), splitSize)) {
             zipArchiveOutputStream.setUseZip64(Zip64Mode.Never);
             final ZipArchiveEntry ze1 = new ZipArchiveEntry("file01");
             ze1.setMethod(ZipEntry.STORED);
@@ -272,7 +272,7 @@ public final class ZipTest extends AbstractTest {
         final File outputZipFile = newTempFile("artificialSplitZip.zip");
         final long splitSize = 64 * 1024L; /* 64 KB */
         final byte[] data = createArtificialData(128 * 1024);
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile, splitSize)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile.toPath(), splitSize)) {
             zipArchiveOutputStream.setUseZip64(Zip64Mode.Always);
             final ZipArchiveEntry ze1 = new ZipArchiveEntry("file01");
             ze1.setMethod(ZipEntry.STORED);
@@ -302,7 +302,7 @@ public final class ZipTest extends AbstractTest {
         // 36 is length of central directory entry
         // 1 is remaining byte in first archive, this should be skipped
         final byte[] data1 = createArtificialData(64 * 1024 - 4 - 36 - 52 - 1);
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile, splitSize)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile.toPath(), splitSize)) {
             zipArchiveOutputStream.setUseZip64(Zip64Mode.Never);
             final ZipArchiveEntry ze1 = new ZipArchiveEntry("file01");
             ze1.setMethod(ZipEntry.STORED);
@@ -335,7 +335,7 @@ public final class ZipTest extends AbstractTest {
         // 13 is remaining size of third local file header
         // 1 is to wrap to next part
         final byte[] data4 = createArtificialData(64 * 1024 - 13 + 1);
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile, splitSize)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile.toPath(), splitSize)) {
             zipArchiveOutputStream.setUseZip64(Zip64Mode.Never);
             final ZipArchiveEntry ze1 = new ZipArchiveEntry("file01");
             ze1.setMethod(ZipEntry.STORED);
@@ -396,7 +396,7 @@ public final class ZipTest extends AbstractTest {
         final File directoryToZip = getFilesToZip();
         final File outputZipFile = newTempFile("splitZip.zip");
         final long splitSize = 100 * 1024L; /* 100 KB */
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile, splitSize)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(outputZipFile.toPath(), splitSize)) {
             // create a file that has the same name of one of the created split segments
             final File sameNameFile = newTempFile("splitZip.z01");
             sameNameFile.createNewFile();
@@ -423,26 +423,26 @@ public final class ZipTest extends AbstractTest {
     @Test
     public void testBuildSplitZipWithTooSmallSizeThrowsException() throws IOException {
         createTempFile("temp", "zip").toPath();
-        assertThrows(IllegalArgumentException.class, () -> new ZipArchiveOutputStream(createTempFile("temp", "zip"), 64 * 1024 - 1));
+        assertThrows(IllegalArgumentException.class, () -> new ZipArchiveOutputStream(createTempFile("temp", "zip").toPath(), 64 * 1024 - 1));
     }
 
     @Test
     public void testCopyRawEntriesFromFile() throws IOException {
         final File reference = createReferenceFile(Zip64Mode.Never, "expected.");
         final File file1 = createTempFile("src1.", ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1.toPath())) {
             zos.setUseZip64(Zip64Mode.Never);
             createFirstEntry(zos).close();
         }
         final File file2 = createTempFile("src2.", ".zip");
-        try (ZipArchiveOutputStream zos1 = new ZipArchiveOutputStream(file2)) {
+        try (ZipArchiveOutputStream zos1 = new ZipArchiveOutputStream(file2.toPath())) {
             zos1.setUseZip64(Zip64Mode.Never);
             createSecondEntry(zos1).close();
         }
         try (ZipArchiveReader zipFile1 = newZipFile(file1);
              ZipArchiveReader zipFile2 = newZipFile(file2)) {
             final File fileResult = createTempFile("file-actual.", ".zip");
-            try (ZipArchiveOutputStream zos2 = new ZipArchiveOutputStream(fileResult)) {
+            try (ZipArchiveOutputStream zos2 = new ZipArchiveOutputStream(fileResult.toPath())) {
                 zipFile1.copyRawEntries(zos2, allFilesPredicate);
                 zipFile2.copyRawEntries(zos2, allFilesPredicate);
             }
@@ -456,18 +456,18 @@ public final class ZipTest extends AbstractTest {
     @Test
     public void testCopyRawZip64EntryFromFile() throws IOException {
         final File reference = createTempFile("z64reference.", ".zip");
-        try (ZipArchiveOutputStream zos1 = new ZipArchiveOutputStream(reference)) {
+        try (ZipArchiveOutputStream zos1 = new ZipArchiveOutputStream(reference.toPath())) {
             zos1.setUseZip64(Zip64Mode.Always);
             createFirstEntry(zos1);
         }
         final File file1 = createTempFile("zip64src.", ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1.toPath())) {
             zos.setUseZip64(Zip64Mode.Always);
             createFirstEntry(zos).close();
         }
         final File fileResult = createTempFile("file-actual.", ".zip");
         try (ZipArchiveReader zipFile1 = newZipFile(file1)) {
-            try (ZipArchiveOutputStream zos2 = new ZipArchiveOutputStream(fileResult)) {
+            try (ZipArchiveOutputStream zos2 = new ZipArchiveOutputStream(fileResult.toPath())) {
                 zos2.setUseZip64(Zip64Mode.Always);
                 zipFile1.copyRawEntries(zos2, allFilesPredicate);
             }
@@ -480,7 +480,7 @@ public final class ZipTest extends AbstractTest {
         final File tmp = getTempDirFile();
         final File archive = createTempFile("test.", ".zip");
         final long beforeArchiveWrite;
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive.toPath())) {
             beforeArchiveWrite = tmp.lastModified();
             final ZipArchiveEntry in = new ZipArchiveEntry(tmp, "foo");
             zos.putArchiveEntry(in);
@@ -501,7 +501,7 @@ public final class ZipTest extends AbstractTest {
     public void testExplicitDirectoryEntry() throws Exception {
         final File archive = createTempFile("test.", ".zip");
         final long beforeArchiveWrite;
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive.toPath())) {
             beforeArchiveWrite = getTempDirFile().lastModified();
             final ZipArchiveEntry in = new ZipArchiveEntry("foo/");
             in.setTime(beforeArchiveWrite);
@@ -522,7 +522,7 @@ public final class ZipTest extends AbstractTest {
     public void testExplicitFileEntry() throws Exception {
         final File tmp = createTempFile();
         final File archive = createTempFile("test.", ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive.toPath())) {
             final ZipArchiveEntry in = new ZipArchiveEntry("foo");
             in.setTime(tmp.lastModified());
             in.setSize(tmp.length());
@@ -549,7 +549,7 @@ public final class ZipTest extends AbstractTest {
     public void testFileEntryFromFile() throws Exception {
         final File tmpFile = createTempFile();
         final File archive = createTempFile("test.", ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive.toPath())) {
             final ZipArchiveEntry in = new ZipArchiveEntry(tmpFile, "foo");
             zos.putArchiveEntry(in);
             final byte[] b = new byte[(int) tmpFile.length()];
@@ -724,7 +724,7 @@ public final class ZipTest extends AbstractTest {
     @Test
     public void testUnixModeInAddRaw() throws IOException {
         final File file1 = createTempFile("unixModeBits.", ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1.toPath())) {
             final ZipArchiveEntry archiveEntry = new ZipArchiveEntry("fred");
             archiveEntry.setUnixMode(0664);
             archiveEntry.setMethod(ZipEntry.STORED);
@@ -741,7 +741,7 @@ public final class ZipTest extends AbstractTest {
     @Test
     public void testUnsupportedCompressionMethodInAddRaw() throws IOException {
         final File file1 = createTempFile("unsupportedCompressionMethod.", ".zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file1.toPath())) {
             final ZipArchiveEntry archiveEntry = new ZipArchiveEntry("fred");
             archiveEntry.setMethod(Integer.MAX_VALUE);
             archiveEntry.setSize(3);

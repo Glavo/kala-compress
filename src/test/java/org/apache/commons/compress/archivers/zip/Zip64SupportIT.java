@@ -253,10 +253,10 @@ public class Zip64SupportIT {
             f = new File(dir, "commons-compress-" + testName + ".zip");
         }
         BufferedOutputStream os = null;
-        ZipArchiveOutputStream zos = useRandomAccessFile ? new ZipArchiveOutputStream(f)
+        ZipArchiveOutputStream zos = useRandomAccessFile ? new ZipArchiveOutputStream(f.toPath())
                 : new ZipArchiveOutputStream(os = new BufferedOutputStream(Files.newOutputStream(f.toPath())));
         if (splitSize != null) {
-            zos = new ZipArchiveOutputStream(f, splitSize);
+            zos = new ZipArchiveOutputStream(f.toPath(), splitSize);
         }
 
         try {
@@ -510,7 +510,7 @@ public class Zip64SupportIT {
 
     private static File write5GBZerosFile(final String testName) throws Throwable {
         final File f = getTempFile(testName);
-        final ZipArchiveOutputStream zos = new ZipArchiveOutputStream(f);
+        final ZipArchiveOutputStream zos = new ZipArchiveOutputStream(f.toPath());
         try {
             zos.setUseZip64(Zip64Mode.Always);
             final byte[] buf = new byte[ONE_MILLION];

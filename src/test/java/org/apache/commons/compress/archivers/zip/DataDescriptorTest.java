@@ -45,7 +45,7 @@ public class DataDescriptorTest {
     @Test
     public void testDoesntWriteDataDescriptorForDeflatedEntryOnSeekableOutput() throws IOException {
         final File file = new File(dir, "test.zip");
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file.toPath())) {
             zos.putArchiveEntry(new ZipArchiveEntry("test1.txt"));
             zos.write("foo".getBytes(UTF_8));
             zos.closeArchiveEntry();

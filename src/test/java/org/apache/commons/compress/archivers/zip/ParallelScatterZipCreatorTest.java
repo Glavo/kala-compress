@@ -75,7 +75,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
     private void callableApi(final CallableConsumerSupplier consumerSupplier, final int compressionLevel, final File result) throws Exception {
         final Map<String, byte[]> entries;
         final ParallelScatterZipCreator zipCreator;
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result.toPath())) {
             zos.setEncoding(StandardCharsets.UTF_8);
             final ExecutorService es = Executors.newFixedThreadPool(1);
 
@@ -94,7 +94,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
     private void callableApiWithTestFiles(final CallableConsumerSupplier consumerSupplier, final int compressionLevel, final File result) throws Exception {
         final ParallelScatterZipCreator zipCreator;
         final Map<String, byte[]> entries;
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result.toPath())) {
             zos.setEncoding(StandardCharsets.UTF_8);
             final ExecutorService es = Executors.newFixedThreadPool(1);
 
@@ -201,7 +201,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
         final File result = createTempFile("parallelScatterGather1", "");
         final ParallelScatterZipCreator zipCreator;
         final Map<String, byte[]> entries;
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result.toPath())) {
             zos.setEncoding(StandardCharsets.UTF_8);
 
             // Formatter:off
@@ -224,7 +224,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
         final File result = createTempFile("parallelScatterGather1", "");
         final ParallelScatterZipCreator zipCreator;
         final Map<String, byte[]> entries;
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(result.toPath())) {
             zos.setEncoding(StandardCharsets.UTF_8);
             zipCreator = new ParallelScatterZipCreator();
 

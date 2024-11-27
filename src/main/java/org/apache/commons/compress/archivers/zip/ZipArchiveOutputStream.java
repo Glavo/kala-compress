@@ -365,40 +365,6 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
     private final Map<Integer, Integer> numberOfCDInDiskData = new HashMap<>();
 
     /**
-     * Creates a new ZIP OutputStream writing to a File. Will use random access if possible.
-     *
-     * @param file the file to ZIP to
-     * @throws IOException on error
-     */
-    public ZipArchiveOutputStream(final File file) throws IOException {
-        this(file.toPath());
-    }
-
-    /**
-     * Creates a split ZIP Archive.
-     *
-     * <p>
-     * The files making up the archive will use Z01, Z02, ... extensions and the last part of it will be the given {@code
-     * file}.
-     * </p>
-     *
-     * <p>
-     * Even though the stream writes to a file this stream will behave as if no random access was possible. This means the sizes of stored entries need to be
-     * known before the actual entry data is written.
-     * </p>
-     *
-     * @param file         the file that will become the last part of the split archive
-     * @param zipSplitSize maximum size of a single part of the split archive created by this stream. Must be between 64kB and about 4GB.
-     *
-     * @throws IOException              on error
-     * @throws IllegalArgumentException if zipSplitSize is not in the required range
-     * @since 1.20
-     */
-    public ZipArchiveOutputStream(final File file, final long zipSplitSize) throws IOException {
-        this(file.toPath(), zipSplitSize);
-    }
-
-    /**
      * Creates a new ZIP OutputStream filtering the underlying stream.
      *
      * @param out the outputstream to zip
@@ -1396,7 +1362,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      * <p>
      * When setting the mode to {@link Zip64Mode#AsNeeded AsNeeded}, Zip64 extensions will transparently be used for those entries that require them. This mode
      * can only be used if the uncompressed size of the {@link ZipArchiveEntry} is known when calling {@link #putArchiveEntry} or the archive is written to a
-     * seekable output (i.e. you have used the {@link #ZipArchiveOutputStream(java.io.File) File-arg constructor}) - this mode is not valid when the output
+     * seekable output (i.e. you have used the {@link #ZipArchiveOutputStream) File-arg constructor}) - this mode is not valid when the output
      * stream is not seekable and the uncompressed size is unknown when {@link #putArchiveEntry} is called.
      * </p>
      * <p>

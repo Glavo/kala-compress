@@ -74,7 +74,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     private static void createTestFile(final File file, final Charset encoding, final boolean withEFS, final boolean withExplicitUnicodeExtra)
             throws IOException {
 
-        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file)) {
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(file.toPath())) {
             zos.setEncoding(encoding);
             zos.setUseLanguageEncodingFlag(withEFS);
             zos.setCreateUnicodeExtraFields(

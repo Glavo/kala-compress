@@ -55,7 +55,7 @@ public class ScatterSampleTest extends AbstractTempDirTest {
         final InputStreamSupplier supp = () -> new ByteArrayInputStream("Hello".getBytes());
 
         scatterSample.addEntry(archiveEntry, supp);
-        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(result)) {
+        try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(result.toPath())) {
             scatterSample.writeTo(zipArchiveOutputStream);
         }
     }

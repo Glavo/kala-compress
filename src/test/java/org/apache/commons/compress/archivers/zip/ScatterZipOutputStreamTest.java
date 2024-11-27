@@ -54,7 +54,7 @@ public class ScatterZipOutputStreamTest extends AbstractTempDirTest {
             final ByteArrayInputStream payload1 = new ByteArrayInputStream(A_PAYLOAD);
             scatterZipOutputStream.addArchiveEntry(createZipArchiveEntryRequest(zae, createPayloadSupplier(payload1)));
 
-            try (ZipArchiveOutputStream outputStream = new ZipArchiveOutputStream(target)) {
+            try (ZipArchiveOutputStream outputStream = new ZipArchiveOutputStream(target.toPath())) {
                 scatterZipOutputStream.writeTo(outputStream);
             }
         }
