@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -235,25 +234,6 @@ public class SevenZOutputFile implements Closeable {
         crc32.reset();
         compressedCrc32.reset();
         fileBytesWritten = 0;
-    }
-
-    /**
-     * Creates an archive entry using the inputFile and entryName provided.
-     *
-     * @param inputFile file to create an entry from
-     * @param entryName the name to use
-     * @return the ArchiveEntry set up with details from the file
-     */
-    public SevenZArchiveEntry createArchiveEntry(final File inputFile, final String entryName) {
-        final SevenZArchiveEntry entry = new SevenZArchiveEntry();
-        entry.setDirectory(inputFile.isDirectory());
-        entry.setName(entryName);
-        try {
-            fillTimes(inputFile.toPath(), entry);
-        } catch (final IOException e) { // NOSONAR
-            entry.setLastModifiedTime(inputFile.lastModified());
-        }
-        return entry;
     }
 
     /**

@@ -69,12 +69,12 @@ public class SevenZTest extends AbstractTest {
             outArchive.setContentCompression(method);
             SevenZArchiveEntry entry;
 
-            entry = outArchive.createArchiveEntry(file1, file1.getName());
+            entry = outArchive.createArchiveEntry(file1.toPath(), file1.getName());
             outArchive.putArchiveEntry(entry);
             copy(file1, outArchive);
             outArchive.closeArchiveEntry();
 
-            entry = outArchive.createArchiveEntry(file2, file2.getName());
+            entry = outArchive.createArchiveEntry(file2.toPath(), file2.getName());
             outArchive.putArchiveEntry(entry);
             copy(file2, outArchive);
             outArchive.closeArchiveEntry();

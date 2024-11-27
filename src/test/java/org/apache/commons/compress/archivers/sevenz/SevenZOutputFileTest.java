@@ -72,7 +72,8 @@ public class SevenZOutputFileTest extends AbstractTest {
     }
 
     private void addDir(final SevenZOutputFile archive) throws Exception {
-        final SevenZArchiveEntry entry = archive.createArchiveEntry(getTempDirFile(), "foo/");
+        final File inputFile = getTempDirFile();
+        final SevenZArchiveEntry entry = archive.createArchiveEntry(inputFile.toPath(), "foo/");
         archive.putArchiveEntry(entry);
         archive.closeArchiveEntry();
     }
@@ -263,7 +264,8 @@ public class SevenZOutputFileTest extends AbstractTest {
         final FileTime creationTime = FileTime.fromMillis(cal.getTimeInMillis());
 
         try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
-            SevenZArchiveEntry entry = outArchive.createArchiveEntry(getTempDirFile(), "foo/");
+            final File inputFile1 = getTempDirFile();
+            SevenZArchiveEntry entry = outArchive.createArchiveEntry(inputFile1.toPath(), "foo/");
             outArchive.putArchiveEntry(entry);
             outArchive.closeArchiveEntry();
 
@@ -313,7 +315,8 @@ public class SevenZOutputFileTest extends AbstractTest {
             outArchive.write(0);
             outArchive.closeArchiveEntry();
 
-            entry = outArchive.createArchiveEntry(getTempDirFile(), "baz/");
+            final File inputFile = getTempDirFile();
+            entry = outArchive.createArchiveEntry(inputFile.toPath(), "baz/");
             entry.setAntiItem(true);
             outArchive.putArchiveEntry(entry);
             outArchive.closeArchiveEntry();

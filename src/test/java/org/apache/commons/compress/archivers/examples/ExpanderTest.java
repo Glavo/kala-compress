@@ -66,16 +66,19 @@ public class ExpanderTest extends AbstractTest {
             o.write(new byte[14]);
         }
         try (SevenZOutputFile aos = new SevenZOutputFile(archive.toPath())) {
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a"));
+            final File inputFile2 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile2.toPath(), "a"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b"));
+            final File inputFile1 = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile1.toPath(), "a/b"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b/c"));
+            final File inputFile = getTempDirFile();
+            aos.putArchiveEntry(aos.createArchiveEntry(inputFile.toPath(), "a/b/c"));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/d.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/d.txt"));
             aos.write("Hello, world 1".getBytes(UTF_8));
             aos.closeArchiveEntry();
-            aos.putArchiveEntry(aos.createArchiveEntry(dummy, "a/b/c/e.txt"));
+            aos.putArchiveEntry(aos.createArchiveEntry(dummy.toPath(), "a/b/c/e.txt"));
             aos.write("Hello, world 2".getBytes(UTF_8));
             aos.closeArchiveEntry();
             aos.finish();

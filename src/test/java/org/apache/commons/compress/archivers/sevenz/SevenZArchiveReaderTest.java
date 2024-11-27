@@ -871,7 +871,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
         try (SevenZOutputFile out = new SevenZOutputFile(newTempFile("test.7z").toPath())) {
             final Path inputFile = Files.createTempFile("SevenZTestTemp", "");
 
-            final SevenZArchiveEntry entry = out.createArchiveEntry(inputFile.toFile(), "test.txt");
+            final SevenZArchiveEntry entry = out.createArchiveEntry(inputFile.toFile().toPath(), "test.txt");
             out.putArchiveEntry(entry);
             out.write("Test".getBytes(UTF_8));
             out.closeArchiveEntry();

@@ -127,7 +127,6 @@ public class TarArchiveEntryTest implements TarConstants {
     @Test
     public void testGetFileFromNonFileEntry() {
         final TarArchiveEntry entry = new TarArchiveEntry("test.txt");
-        assertNull(entry.getFile());
         assertNull(entry.getPath());
     }
 

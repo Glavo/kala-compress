@@ -785,22 +785,6 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     }
 
     /**
-     * Gets this entry's file.
-     * <p>
-     * This method is only useful for entries created from a {@code
-     * File} or {@code Path} but not for entries read from an archive.
-     * </p>
-     *
-     * @return this entry's file or null if the entry was not created from a file.
-     */
-    public File getFile() {
-        if (file == null) {
-            return null;
-        }
-        return file.toFile();
-    }
-
-    /**
      * Gets this entry's group name.
      *
      * @return This entry's group name.
