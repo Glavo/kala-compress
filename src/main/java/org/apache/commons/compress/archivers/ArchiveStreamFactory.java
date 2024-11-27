@@ -46,6 +46,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.compress.utils.Sets;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Creates an Archive[In|Out]putStreams from names or the first bytes of the InputStream. In order to add other implementations, you should extend
@@ -379,7 +381,7 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      *
      * @since 1.27.1-0
      */
-    public ArchiveStreamFactory(final Charset entryEncoding) {
+    public ArchiveStreamFactory(final @Nullable Charset entryEncoding) {
         this.entryEncoding = entryEncoding;
     }
 
@@ -593,4 +595,55 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
         return Sets.newHashSet(AR, ZIP, TAR, JAR, CPIO, SEVEN_Z);
     }
 
+    /**
+     * This is an internal class and should not be used directly.
+     *
+     * @author Glavo
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Internal
+    public static abstract class BuiltinArchiver {
+        private final String name;
+
+        protected BuiltinArchiver(String name) {
+            this.name = name;
+        }
+
+        public final String getName() {
+            return name;
+        }
+
+        public boolean matches(final byte[] signature, final int length) {
+            return false;
+        }
+
+        // For verify tar file
+        // COMPRESS-191 - verify the header checksum
+        public boolean checkChecksum(ArchiveInputStream<?> input) {
+            return false;
+        }
+
+        public boolean isOutputAvailable() {
+            return false;
+        }
+
+        public final ArchiveInputStream<?> createArchiveInputStream(final InputStream in) throws ArchiveException {
+            return createArchiveInputStream(in, null);
+        }
+
+        public abstract ArchiveInputStream<?> createArchiveInputStream(final InputStream in, final Charset charset);
+
+        public final ArchiveOutputStream<?> createArchiveOutputStream(final OutputStream out) throws ArchiveException {
+            return createArchiveOutputStream(out, null);
+        }
+
+        public ArchiveOutputStream<?> createArchiveOutputStream(final OutputStream out, final Charset charset) throws ArchiveException {
+            throw new StreamingNotSupportedException(name);
+        }
+
+        @Override
+        public String toString() {
+            return name + " archiver";
+        }
+    }
 }

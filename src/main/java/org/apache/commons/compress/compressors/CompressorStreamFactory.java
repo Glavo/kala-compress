@@ -490,6 +490,7 @@ public class CompressorStreamFactory implements CompressorStreamProvider {
      * @author Glavo
      * @since 1.27.1-0
      */
+    @ApiStatus.Internal
     public abstract static class BuiltinCompressor {
 
         private final String name;
