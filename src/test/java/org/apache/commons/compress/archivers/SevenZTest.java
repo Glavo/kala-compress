@@ -65,7 +65,7 @@ public class SevenZTest extends AbstractTest {
     }
 
     private void createArchive(final SevenZMethod method) throws Exception {
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
             outArchive.setContentCompression(method);
             SevenZArchiveEntry entry;
 

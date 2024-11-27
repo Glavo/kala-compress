@@ -65,7 +65,7 @@ public class ExpanderTest extends AbstractTest {
         try (OutputStream o = Files.newOutputStream(dummy.toPath())) {
             o.write(new byte[14]);
         }
-        try (SevenZOutputFile aos = new SevenZOutputFile(archive)) {
+        try (SevenZOutputFile aos = new SevenZOutputFile(archive.toPath())) {
             aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a"));
             aos.closeArchiveEntry();
             aos.putArchiveEntry(aos.createArchiveEntry(getTempDirFile(), "a/b"));

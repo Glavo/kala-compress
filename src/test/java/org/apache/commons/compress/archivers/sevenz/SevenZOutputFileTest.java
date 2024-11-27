@@ -96,7 +96,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     }
 
     private void createAndReadBack(final File output, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
             outArchive.setContentMethods(methods);
             addFile(outArchive, 0, true);
         }
@@ -137,7 +137,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testArchiveWithMixedMethods() throws Exception {
         final File output = newTempFile("mixed-methods.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
             addFile(outArchive, 0, true);
             addFile(outArchive, 1, true, Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.BZIP2)));
         }
@@ -211,7 +211,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testCantFinishTwice() throws IOException {
         final File output = newTempFile("finish.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
             outArchive.finish();
             final IOException ex = assertThrows(IOException.class, outArchive::finish, "shouldn't be able to call finish twice");
             assertEquals("This archive has already been finished", ex.getMessage());
@@ -222,7 +222,7 @@ public class SevenZOutputFileTest extends AbstractTest {
         final int nonEmptyModulus = numberOfNonEmptyFiles != 0 ? numberOfFiles / numberOfNonEmptyFiles : numberOfFiles + 1;
         int nonEmptyFilesAdded = 0;
         final File output = newTempFile("COMPRESS252-" + numberOfFiles + "-" + numberOfNonEmptyFiles + ".7z");
-        try (SevenZOutputFile archive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile archive = new SevenZOutputFile(output.toPath())) {
             addDir(archive);
             for (int i = 0; i < numberOfFiles; i++) {
                 addFile(archive, i, (i + 1) % nonEmptyModulus == 0 && nonEmptyFilesAdded++ < numberOfNonEmptyFiles);
@@ -262,7 +262,7 @@ public class SevenZOutputFileTest extends AbstractTest {
         cal.add(Calendar.HOUR, -1);
         final FileTime creationTime = FileTime.fromMillis(cal.getTimeInMillis());
 
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
             SevenZArchiveEntry entry = outArchive.createArchiveEntry(getTempDirFile(), "foo/");
             outArchive.putArchiveEntry(entry);
             outArchive.closeArchiveEntry();
@@ -430,7 +430,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testDirectoriesOnly() throws Exception {
         final File output = newTempFile("dirs.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
             final SevenZArchiveEntry entry = new SevenZArchiveEntry();
             entry.setName("foo/");
             entry.setDirectory(true);
@@ -471,7 +471,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testEncrypt() throws Exception {
         final File output = newTempFile("encrypted.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output, "foo".toCharArray())) {
+        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath(), "foo".toCharArray())) {
             addFile(outArchive, 0, 1, null);
             addFile(outArchive, 1, 16, null);
             addFile(outArchive, 2, 32, null);

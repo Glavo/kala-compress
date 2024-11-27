@@ -127,23 +127,24 @@ public class SevenZOutputFile implements Closeable {
     /**
      * Opens file to write a 7z archive to.
      *
-     * @param fileName the file to write to
+     * @param file the file to write to
      * @throws IOException if opening the file fails
+     * @since 1.27.1-0
      */
-    public SevenZOutputFile(final File fileName) throws IOException {
-        this(fileName, null);
+    public SevenZOutputFile(final Path file) throws IOException {
+        this(file, null);
     }
 
     /**
      * Opens file to write a 7z archive to.
      *
-     * @param fileName the file to write to
+     * @param file the file to write to
      * @param password optional password if the archive has to be encrypted
      * @throws IOException if opening the file fails
-     * @since 1.23
+     * @since 1.27.1-0
      */
-    public SevenZOutputFile(final File fileName, final char[] password) throws IOException {
-        this(Files.newByteChannel(fileName.toPath(), EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)),
+    public SevenZOutputFile(final Path file, final char[] password) throws IOException {
+        this(Files.newByteChannel(file, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)),
                 password);
     }
 
