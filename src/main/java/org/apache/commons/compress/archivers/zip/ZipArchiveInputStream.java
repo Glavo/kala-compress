@@ -252,9 +252,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
                 || checksig(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER.getBytes(), signature);
     }
 
-    /** The encoding to use for file names and the file comment. */
-    private final Charset encoding;
-
     /** Whether to look for and use Unicode extra fields. */
     private final boolean useUnicodeExtraFields;
 
@@ -340,7 +337,6 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         this(inputStream, encoding, useUnicodeExtraFields, false);
     }
 
-
     /**
      * Constructs an instance using the specified encoding
      *
@@ -369,9 +365,8 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
      */
     public ZipArchiveInputStream(final InputStream inputStream, final Charset encoding, final boolean useUnicodeExtraFields,
                                  final boolean allowStoredEntriesWithDataDescriptor, final boolean skipSplitSig) {
-        super(inputStream, encoding);
+        super(inputStream, Charsets.toCharset(encoding));
         this.in = new PushbackInputStream(inputStream, buf.capacity());
-        this.encoding = Charsets.toCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         this.allowStoredEntriesWithDataDescriptor = allowStoredEntriesWithDataDescriptor;
         this.skipSplitSig = skipSplitSig;

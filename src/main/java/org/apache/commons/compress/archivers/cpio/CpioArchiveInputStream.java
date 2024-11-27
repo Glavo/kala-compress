@@ -145,11 +145,6 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
     private final int blockSize;
 
     /**
-     * The encoding to use for file names and labels.
-     */
-    private final Charset encoding;
-
-    /**
      * Constructs the cpio input stream with a blocksize of {@link CpioConstants#BLOCK_SIZE BLOCK_SIZE} and expecting ASCII file names.
      *
      * @param in The cpio stream
@@ -174,25 +169,24 @@ public class CpioArchiveInputStream extends ArchiveInputStream<CpioArchiveEntry>
      *
      * @param in        The cpio stream
      * @param blockSize The block size of the archive.
-     * @param encoding  The encoding of file names to expect - use null for the UTF-8
+     * @param encoding  The encoding of file names to expect - use null for the US-ASCII
      * @throws IllegalArgumentException if {@code blockSize} is not bigger than 0
      * @since 1.27.1-0
      */
     public CpioArchiveInputStream(final InputStream in, final int blockSize, final Charset encoding) {
-        super(in, encoding);
+        super(in, encoding != null ? encoding : CpioUtil.DEFAULT_CHARSET);
         this.in = in;
         if (blockSize <= 0) {
             throw new IllegalArgumentException("blockSize must be bigger than 0");
         }
         this.blockSize = blockSize;
-        this.encoding = Charsets.toCharset(encoding);
     }
 
     /**
      * Constructs the cpio input stream with a blocksize of {@link CpioConstants#BLOCK_SIZE BLOCK_SIZE}.
      *
      * @param in       The cpio stream
-     * @param encoding The encoding of file names to expect - use null for the UTF-8
+     * @param encoding The encoding of file names to expect - use null for the US-ASCII
      * @since 1.27.1-0
      */
     public CpioArchiveInputStream(final InputStream in, final Charset encoding) {

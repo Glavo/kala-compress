@@ -98,11 +98,6 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
     private final Queue<DumpArchiveEntry> queue;
 
     /**
-     * The encoding to use for file names and labels.
-     */
-    private final Charset encoding;
-
-    /**
      * Constructor using the UTF-8 for file names.
      *
      * @param is stream to read from
@@ -121,10 +116,9 @@ public class DumpArchiveInputStream extends ArchiveInputStream<DumpArchiveEntry>
      * @throws ArchiveException on error
      */
     public DumpArchiveInputStream(final InputStream is, final Charset encoding) throws ArchiveException {
-        super(is, encoding);
+        super(is, Charsets.toCharset(encoding));
         this.raw = new TapeInputStream(is);
         this.hasHitEOF = false;
-        this.encoding = Charsets.toCharset(encoding);
 
         try {
             // read header, verify it's a dump archive.

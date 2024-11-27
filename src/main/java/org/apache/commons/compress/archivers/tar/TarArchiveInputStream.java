@@ -106,9 +106,6 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
     /** The meta-data about the current entry. */
     private TarArchiveEntry currEntry;
 
-    /** The encoding of the file. */
-    private final Charset encoding;
-
     /** The global PAX header. */
     private Map<String, String> globalPaxHeaders = new HashMap<>();
 
@@ -184,8 +181,7 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
      * @since 1.27.1-0
      */
     public TarArchiveInputStream(final InputStream inputStream, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient) {
-        super(inputStream, encoding);
-        this.encoding = Charsets.toCharset(encoding);
+        super(inputStream, Charsets.toCharset(encoding));
         this.recordBuffer = new byte[recordSize];
         this.blockSize = blockSize;
         this.lenient = lenient;

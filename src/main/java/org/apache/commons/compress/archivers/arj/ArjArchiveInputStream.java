@@ -72,19 +72,19 @@ public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
      * @throws java.nio.charset.UnsupportedCharsetException if the current operating environment does not support CP437
      */
     public ArjArchiveInputStream(final InputStream inputStream) throws ArchiveException {
-        this(inputStream, Charset.forName("CP437"));
+        this(inputStream, null);
     }
 
     /**
      * Constructs the ArjInputStream, taking ownership of the inputStream that is passed in.
      *
      * @param inputStream the underlying stream, whose ownership is taken
-     * @param charset the charset used for file names and comments in the archive. May be {@code null} to use the UTF-8.
+     * @param charset the charset used for file names and comments in the archive. May be {@code null} to use the CP437.
      * @throws ArchiveException if an exception occurs while reading
      * @since 1.27.1-0
      */
     public ArjArchiveInputStream(final InputStream inputStream, final Charset charset) throws ArchiveException {
-        super(inputStream, charset);
+        super(inputStream, charset != null ? charset : Charset.forName("CP437"));
         in = dis = new DataInputStream(inputStream);
         try {
             mainHeader = readMainHeader();
@@ -348,7 +348,7 @@ public class ArjArchiveInputStream extends ArchiveInputStream<ArjArchiveEntry> {
             while ((nextByte = dataIn.readUnsignedByte()) != 0) {
                 buffer.write(nextByte);
             }
-            return buffer.toString(getCharset().name());
+            return buffer.toString(getEncoding().name());
         }
     }
 }

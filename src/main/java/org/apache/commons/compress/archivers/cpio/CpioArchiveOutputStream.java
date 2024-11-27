@@ -130,7 +130,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      * @param out       The cpio stream
      * @param format    The format of the stream
      * @param blockSize The block size of the archive.
-     * @param encoding  The encoding of file names to write - use null for the platform's default.
+     * @param encoding  The encoding of file names to write - use null for the ASCII.
      *
      * @since 1.27.1-0
      */
@@ -147,14 +147,14 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
         }
         this.entryFormat = format;
         this.blockSize = blockSize;
-        this.encoding = Charsets.toCharset(encoding);
+        this.encoding = encoding != null ? encoding : CpioUtil.DEFAULT_CHARSET;
     }
 
     /**
      * Constructs the cpio output stream. The format for this CPIO stream is the "new" format.
      *
      * @param out      The cpio stream
-     * @param encoding The encoding of file names to write - use null for the platform's default.
+     * @param encoding The encoding of file names to write - use null for the ASCII.
      * @since 1.27.1-0
      */
     public CpioArchiveOutputStream(final OutputStream out, final Charset encoding) {
@@ -233,7 +233,7 @@ public class CpioArchiveOutputStream extends ArchiveOutputStream<CpioArchiveEntr
      * @throws IOException if the string couldn't be written
      * @return result of encoding the string
      */
-    private byte[] encode(final String str) throws IOException {
+    private byte[] encode(final String str) {
         final ByteBuffer buf = Charsets.encode(encoding, str);
         final int len = buf.limit() - buf.position();
         return Arrays.copyOfRange(buf.array(), buf.arrayOffset(), buf.arrayOffset() + len);

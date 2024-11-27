@@ -149,7 +149,7 @@ public class ArchiveStreamFactoryTest extends AbstractTest {
     }
 
     private static String getCharsetName(final ArchiveInputStream<?> instance) {
-        return instance.getCharset().name();
+        return instance.getEncoding().name();
     }
 
     @Deprecated

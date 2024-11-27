@@ -84,18 +84,18 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
     /** The number of bytes read in this stream. */
     private long bytesRead;
 
-    private final Charset charset;
+    protected final Charset encoding;
 
     /**
      * Constructs a new instance.
      *
      * @param inputStream the underlying input stream, or {@code null} if this instance is to be created without an underlying stream.
-     * @param charset charset.
+     * @param encoding charset.
      * @since 1.26.0
      */
-    protected ArchiveInputStream(final InputStream inputStream, final Charset charset) {
+    protected ArchiveInputStream(final InputStream inputStream, final Charset encoding) {
         super(inputStream);
-        this.charset = Charsets.toCharset(charset);
+        this.encoding = Charsets.toCharset(encoding);
     }
 
     /**
@@ -165,8 +165,8 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
      *
      * @return the Charset.
      */
-    public Charset getCharset() {
-        return charset;
+    public Charset getEncoding() {
+        return encoding;
     }
 
     /**

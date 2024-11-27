@@ -29,7 +29,6 @@ import java.util.Arrays;
  */
 final class CpioUtil {
 
-    static final String DEFAULT_CHARSET_NAME = StandardCharsets.US_ASCII.name();
     static final Charset DEFAULT_CHARSET = StandardCharsets.US_ASCII;
 
     /**

@@ -62,7 +62,7 @@ public class ArjArchiveInputStreamTest extends AbstractTest {
         assertDoesNotThrow(archive::getArchiveComment);
         assertDoesNotThrow(archive::getArchiveName);
         assertDoesNotThrow(archive::getBytesRead);
-        assertDoesNotThrow(archive::getCharset);
+        assertDoesNotThrow(archive::getEncoding);
         assertDoesNotThrow(archive::hashCode);
         assertDoesNotThrow(archive::markSupported);
     }
