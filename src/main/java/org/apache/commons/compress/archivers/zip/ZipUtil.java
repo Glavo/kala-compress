@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
@@ -47,7 +46,7 @@ public abstract class ZipUtil {
      * <li>5-8: Month (1 = January, 2 = February, and so on).</li>
      * <li>9-15: Year offset from 1980 (add 1980 to get the actual year).</li>
      * </ul>
-     *
+     * <p>
      * An MS-DOS time has the following format.
      * <p>
      * Bits Contents
@@ -57,7 +56,7 @@ public abstract class ZipUtil {
      * <li>5-10: Minute (0-59).</li>
      * <li>11-15: Hour (0-23 on a 24-hour clock).</li>
      * </ul>
-     *
+     * <p>
      * This constant expresses the minimum DOS date of January 1st 1980 at 00:00:00 or, bit-by-bit:
      * <ul>
      * <li>Year: 0000000</li>
@@ -164,20 +163,6 @@ public abstract class ZipUtil {
         }
     }
 
-    private static Date dosToJavaDate(final long dosTime) {
-        final Calendar cal = Calendar.getInstance();
-        // CheckStyle:MagicNumberCheck OFF - no point
-        cal.set(Calendar.YEAR, (int) (dosTime >> 25 & 0x7f) + 1980);
-        cal.set(Calendar.MONTH, (int) (dosTime >> 21 & 0x0f) - 1);
-        cal.set(Calendar.DATE, (int) (dosTime >> 16) & 0x1f);
-        cal.set(Calendar.HOUR_OF_DAY, (int) (dosTime >> 11) & 0x1f);
-        cal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);
-        cal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);
-        cal.set(Calendar.MILLISECOND, 0);
-        // CheckStyle:MagicNumberCheck ON
-        return cal.getTime();
-    }
-
     /**
      * Converts DOS time to Java time (number of milliseconds since epoch).
      *
@@ -185,18 +170,15 @@ public abstract class ZipUtil {
      * @return converted time
      */
     public static long dosToJavaTime(final long dosTime) {
-        return dosToJavaDate(dosTime).getTime();
-    }
-
-    /**
-     * Converts a DOS date/time field to a Date object.
-     *
-     * @param zipDosTime contains the stored DOS time.
-     * @return a Date instance corresponding to the given time.
-     */
-    public static Date fromDosTime(final ZipLong zipDosTime) {
-        final long dosTime = zipDosTime.getValue();
-        return dosToJavaDate(dosTime);
+        final Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, (int) (dosTime >> 25 & 0x7f) + 1980);
+        cal.set(Calendar.MONTH, (int) (dosTime >> 21 & 0x0f) - 1);
+        cal.set(Calendar.DATE, (int) (dosTime >> 16) & 0x1f);
+        cal.set(Calendar.HOUR_OF_DAY, (int) (dosTime >> 11) & 0x1f);
+        cal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);
+        cal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
     }
 
     /**
@@ -229,7 +211,7 @@ public abstract class ZipUtil {
      */
     public static boolean isDosTime(final long time) {
         return time <= UPPER_DOSTIME_BOUND &&
-                (time == DOSTIME_BEFORE_1980_AS_JAVA_TIME || javaToDosTime(time) != DOSTIME_BEFORE_1980);
+               (time == DOSTIME_BEFORE_1980_AS_JAVA_TIME || javaToDosTime(time) != DOSTIME_BEFORE_1980);
     }
 
     private static LocalDateTime javaEpochToLocalDateTime(final long time) {
@@ -272,7 +254,6 @@ public abstract class ZipUtil {
      * Reverses a byte[] array. Reverses in-place (thus provided array is mutated), but also returns same for convenience.
      *
      * @param array to reverse (mutated in-place, but also returned for convenience).
-     *
      * @return the reversed array (mutated in-place, but also returned for convenience).
      * @since 1.5
      */
@@ -340,18 +321,8 @@ public abstract class ZipUtil {
      */
     private static boolean supportsMethodOf(final ZipArchiveEntry entry) {
         return entry.getMethod() == ZipEntry.STORED || entry.getMethod() == ZipMethod.UNSHRINKING.getCode()
-                || entry.getMethod() == ZipMethod.IMPLODING.getCode() || entry.getMethod() == ZipEntry.DEFLATED
-                || entry.getMethod() == ZipMethod.ENHANCED_DEFLATED.getCode() || entry.getMethod() == ZipMethod.BZIP2.getCode();
-    }
-
-    /**
-     * Converts a Date object to a DOS date/time field.
-     *
-     * @param time the {@code Date} to convert
-     * @return the date as a {@code ZipLong}
-     */
-    public static ZipLong toDosTime(final Date time) {
-        return new ZipLong(toDosTime(time.getTime()));
+               || entry.getMethod() == ZipMethod.IMPLODING.getCode() || entry.getMethod() == ZipEntry.DEFLATED
+               || entry.getMethod() == ZipMethod.ENHANCED_DEFLATED.getCode() || entry.getMethod() == ZipMethod.BZIP2.getCode();
     }
 
     /**

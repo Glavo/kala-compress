@@ -105,7 +105,7 @@ public class ZipUtilTest {
 
     @Test
     public void testFromDosTime() {
-        ZipLong testDosTime = new ZipLong(1 << 21);
+        long testDosTime = 1 << 21;
         final Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, 1980);
         cal.set(Calendar.MONTH, 0);
@@ -114,13 +114,13 @@ public class ZipUtilTest {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        Date testDate = ZipUtil.fromDosTime(testDosTime);
-        assertEquals(testDate.getTime(), cal.getTimeInMillis());
+        long testDate = ZipUtil.dosToJavaTime(testDosTime);
+        assertEquals(testDate, cal.getTimeInMillis());
 
-        testDosTime = ZipUtil.toDosTime(time);
-        testDate = ZipUtil.fromDosTime(testDosTime);
+        testDosTime = new ZipLong(ZipUtil.toDosTime(time.getTime())).getValue();
+        testDate = ZipUtil.dosToJavaTime(testDosTime);
         // the minimal time unit for dos time is 2 seconds
-        assertEquals(testDate.getTime() / 2000, time.getTime() / 2000);
+        assertEquals(testDate / 2000, time.getTime() / 2000);
     }
 
     @Test
@@ -291,7 +291,7 @@ public class ZipUtilTest {
 
     @Test
     public void testZipLong() {
-        final ZipLong test = ZipUtil.toDosTime(time);
+        final ZipLong test = new ZipLong(ZipUtil.toDosTime(time.getTime()));
         assertEquals(test.getValue(), zl.getValue());
     }
 }
