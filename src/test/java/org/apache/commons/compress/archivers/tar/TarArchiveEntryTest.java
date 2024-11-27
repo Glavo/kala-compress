@@ -98,7 +98,7 @@ public class TarArchiveEntryTest implements TarConstants {
         entry.clearExtraPaxHeaders();
         assertEquals(0, entry.getExtraPaxHeaders().size(), "extra headers should be empty after clear");
         try (TarArchiveInputStream tis = new TarArchiveInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            entry = tis.getNextTarEntry();
+            entry = tis.getNextEntry();
             assertNotNull(entry, "couldn't get entry");
 
             assertEquals(2, entry.getExtraPaxHeaders().size(), "extra header count");
@@ -108,7 +108,7 @@ public class TarArchiveEntryTest implements TarConstants {
             assertEquals('W', tis.read());
             assertTrue(tis.read() < 0, "should be at end of entry");
 
-            assertNull(tis.getNextTarEntry(), "should be at end of file");
+            assertNull(tis.getNextEntry(), "should be at end of file");
         }
     }
 
@@ -302,7 +302,7 @@ public class TarArchiveEntryTest implements TarConstants {
             tos.closeArchiveEntry();
         }
         try (TarArchiveInputStream tis = new TarArchiveInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            final TarArchiveEntry entry = tis.getNextTarEntry();
+            final TarArchiveEntry entry = tis.getNextEntry();
             assertNotNull(entry, "couldn't get entry");
 
             assertEquals(0, entry.getExtraPaxHeaders().size(), "extra header count");
@@ -318,7 +318,7 @@ public class TarArchiveEntryTest implements TarConstants {
             assertEquals('W', tis.read());
             assertTrue(tis.read() < 0, "should be at end of entry");
 
-            assertNull(tis.getNextTarEntry(), "should be at end of file");
+            assertNull(tis.getNextEntry(), "should be at end of file");
         }
     }
 
@@ -349,7 +349,7 @@ public class TarArchiveEntryTest implements TarConstants {
             tos.closeArchiveEntry();
         }
         try (TarArchiveInputStream tis = new TarArchiveInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            final TarArchiveEntry entry = tis.getNextTarEntry();
+            final TarArchiveEntry entry = tis.getNextEntry();
             assertNotNull(entry, "couldn't get entry");
 
             assertEquals(0, entry.getExtraPaxHeaders().size(), "extra header count");
@@ -365,7 +365,7 @@ public class TarArchiveEntryTest implements TarConstants {
             assertEquals('W', tis.read());
             assertTrue(tis.read() < 0, "should be at end of entry");
 
-            assertNull(tis.getNextTarEntry(), "should be at end of file");
+            assertNull(tis.getNextEntry(), "should be at end of file");
         }
     }
 
@@ -381,7 +381,7 @@ public class TarArchiveEntryTest implements TarConstants {
             tos.closeArchiveEntry();
         }
         try (TarArchiveInputStream tis = new TarArchiveInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            final TarArchiveEntry entry = tis.getNextTarEntry();
+            final TarArchiveEntry entry = tis.getNextEntry();
             assertNotNull(entry, "couldn't get entry");
 
             assertEquals(0, entry.getExtraPaxHeaders().size(), "extra header count");
@@ -397,7 +397,7 @@ public class TarArchiveEntryTest implements TarConstants {
             assertEquals('W', tis.read());
             assertTrue(tis.read() < 0, "should be at end of entry");
 
-            assertNull(tis.getNextTarEntry(), "should be at end of file");
+            assertNull(tis.getNextEntry(), "should be at end of file");
         }
     }
 
@@ -412,7 +412,7 @@ public class TarArchiveEntryTest implements TarConstants {
             tos.closeArchiveEntry();
         }
         try (TarArchiveInputStream tis = new TarArchiveInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-            final TarArchiveEntry entry = tis.getNextTarEntry();
+            final TarArchiveEntry entry = tis.getNextEntry();
             assertNotNull(entry, "couldn't get entry");
 
             assertEquals(0, entry.getExtraPaxHeaders().size(), "extra header count");
@@ -428,7 +428,7 @@ public class TarArchiveEntryTest implements TarConstants {
             assertEquals('W', tis.read());
             assertTrue(tis.read() < 0, "should be at end of entry");
 
-            assertNull(tis.getNextTarEntry(), "should be at end of file");
+            assertNull(tis.getNextEntry(), "should be at end of file");
         }
     }
 
@@ -459,22 +459,22 @@ public class TarArchiveEntryTest implements TarConstants {
             }
             try (TarArchiveInputStream tin = new TarArchiveInputStream(Files.newInputStream(f.toPath()))) {
                 // tin.setDebug(true);
-                t = tin.getNextTarEntry();
+                t = tin.getNextEntry();
                 assertNotNull(t);
                 assertEquals("/", t.getName());
                 assertEquals(TarConstants.LF_DIR, t.getLinkFlag());
                 assertTrue(t.isCheckSumOK());
-                t = tin.getNextTarEntry();
+                t = tin.getNextEntry();
                 assertNotNull(t);
                 assertEquals("foo.txt", t.getName());
                 assertEquals(TarConstants.LF_NORMAL, t.getLinkFlag());
                 assertTrue(t.isCheckSumOK());
-                t = tin.getNextTarEntry();
+                t = tin.getNextEntry();
                 assertNotNull(t);
                 assertEquals("bar.txt", t.getName());
                 assertEquals(TarConstants.LF_NORMAL, t.getLinkFlag());
                 assertTrue(t.isCheckSumOK());
-                t = tin.getNextTarEntry();
+                t = tin.getNextEntry();
                 assertNotNull(t);
                 assertEquals("baz.txt", t.getName());
                 assertEquals(TarConstants.LF_NORMAL, t.getLinkFlag());

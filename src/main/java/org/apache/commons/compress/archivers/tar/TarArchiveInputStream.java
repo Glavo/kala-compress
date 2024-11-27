@@ -375,27 +375,15 @@ public class TarArchiveInputStream extends ArchiveInputStream<TarArchiveEntry> {
     }
 
     /**
-     * Gets the next TarArchiveEntry in this stream.
-     *
-     * @return the next entry, or {@code null} if there are no more entries
-     * @throws IOException if the next entry could not be read
-     */
-    @Override
-    public TarArchiveEntry getNextEntry() throws IOException {
-        return getNextTarEntry();
-    }
-
-    /**
      * Gets the next entry in this tar archive. This will skip over any remaining data in the current entry, if there is one, and place the input stream at the
      * header of the next entry, and read the header and instantiate a new TarEntry from the header bytes and return that entry. If there are no more entries in
      * the archive, null will be returned to indicate that the end of the archive has been reached.
      *
      * @return The next TarEntry in the archive, or null.
      * @throws IOException on error
-     * @deprecated Use {@link #getNextEntry()}.
      */
-    @Deprecated
-    public TarArchiveEntry getNextTarEntry() throws IOException {
+    @Override
+    public TarArchiveEntry getNextEntry() throws IOException {
         if (isAtEOF()) {
             return null;
         }

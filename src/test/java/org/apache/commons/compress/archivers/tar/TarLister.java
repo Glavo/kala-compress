@@ -22,7 +22,6 @@ import org.apache.commons.compress.utils.Charsets;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 /**
@@ -92,7 +91,7 @@ public final class TarLister {
                 TarArchiveInputStream ais = args.length > 1 ? new TarArchiveInputStream(fis, Charsets.toCharset(args[1])) : new TarArchiveInputStream(fis)) {
             System.out.println("Created " + ais);
             TarArchiveEntry ae;
-            while ((ae = ais.getNextTarEntry()) != null) {
+            while ((ae = ais.getNextEntry()) != null) {
                 log(ae);
             }
         }

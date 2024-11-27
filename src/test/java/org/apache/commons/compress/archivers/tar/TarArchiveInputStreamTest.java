@@ -66,7 +66,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
 
     private void datePriorToEpoch(final String archive) throws Exception {
         try (TarArchiveInputStream in = new TarArchiveInputStream(Files.newInputStream(getFile(archive).toPath()))) {
-            final TarArchiveEntry tae = in.getNextTarEntry();
+            final TarArchiveEntry tae = in.getNextEntry();
             assertEquals("foo", tae.getName());
             assertEquals(TarConstants.LF_NORMAL, tae.getLinkFlag());
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
@@ -89,9 +89,9 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testCompress197() throws IOException {
         try (TarArchiveInputStream tar = getTestStream("/COMPRESS-197.tar")) {
-            TarArchiveEntry entry = tar.getNextTarEntry();
+            TarArchiveEntry entry = tar.getNextEntry();
             while (entry != null) {
-                entry = tar.getNextTarEntry();
+                entry = tar.getNextEntry();
             }
         }
     }
@@ -127,11 +127,11 @@ public class TarArchiveInputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
                 TarArchiveInputStream tis = new TarArchiveInputStream(bis)) {
-            assertEquals(folderName, tis.getNextTarEntry().getName());
+            assertEquals(folderName, tis.getNextEntry().getName());
             assertEquals(TarConstants.LF_DIR, tis.getCurrentEntry().getLinkFlag());
-            assertEquals(consumerJavaName, tis.getNextTarEntry().getName());
+            assertEquals(consumerJavaName, tis.getNextEntry().getName());
             assertEquals(TarConstants.LF_NORMAL, tis.getCurrentEntry().getLinkFlag());
-            assertEquals(producerJavaName, tis.getNextTarEntry().getName());
+            assertEquals(producerJavaName, tis.getNextEntry().getName());
             assertEquals(TarConstants.LF_NORMAL, tis.getCurrentEntry().getLinkFlag());
         }
     }
@@ -249,7 +249,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testGetAndSetOfPaxEntry() throws Exception {
         try (TarArchiveInputStream is = getTestStream("/COMPRESS-356.tar")) {
-            final TarArchiveEntry entry = is.getNextTarEntry();
+            final TarArchiveEntry entry = is.getNextEntry();
             assertEquals("package/package.json", entry.getName());
             assertEquals(TarConstants.LF_NORMAL, entry.getLinkFlag());
             assertEquals(is.getCurrentEntry(), entry);
@@ -319,10 +319,10 @@ public class TarArchiveInputStreamTest extends AbstractTest {
             final InputStream gin = new GZIPInputStream(is);
             try (TarArchiveInputStream tar = new TarArchiveInputStream(gin)) {
                 int count = 0;
-                TarArchiveEntry entry = tar.getNextTarEntry();
+                TarArchiveEntry entry = tar.getNextEntry();
                 while (entry != null) {
                     count++;
-                    entry = tar.getNextTarEntry();
+                    entry = tar.getNextEntry();
                 }
                 assertEquals(31, count);
             }
@@ -346,7 +346,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     public void testShouldConsumeArchiveCompletely() throws Exception {
         try (InputStream is = TarArchiveInputStreamTest.class.getResourceAsStream("/archive_with_trailer.tar");
                 TarArchiveInputStream tar = new TarArchiveInputStream(is)) {
-            while (tar.getNextTarEntry() != null) {
+            while (tar.getNextEntry() != null) {
                 // just consume the archive
             }
             final byte[] expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!', '\n' };
@@ -371,7 +371,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         final ByteArrayInputStream bis = new ByteArrayInputStream(data);
         try (TarArchiveInputStream tis = new TarArchiveInputStream(bis)) {
-            final TarArchiveEntry t = tis.getNextTarEntry();
+            final TarArchiveEntry t = tis.getNextEntry();
             assertEquals(4294967294L, t.getGroupId());
         }
     }
@@ -382,7 +382,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testShouldReadGNULongNameEntryWithWrongName() throws Exception {
         try (TarArchiveInputStream is = getTestStream("/COMPRESS-324.tar")) {
-            final TarArchiveEntry entry = is.getNextTarEntry();
+            final TarArchiveEntry entry = is.getNextEntry();
             assertEquals(
                     "1234567890123456789012345678901234567890123456789012345678901234567890"
                             + "1234567890123456789012345678901234567890123456789012345678901234567890"
@@ -396,12 +396,12 @@ public class TarArchiveInputStreamTest extends AbstractTest {
         final Path dir = createTempDirectory("COMPRESS-279");
         try (TarArchiveInputStream is = getTestStream("/COMPRESS-279-fail.tar")) {
             assertThrows(IOException.class, () -> {
-                TarArchiveEntry entry = is.getNextTarEntry();
+                TarArchiveEntry entry = is.getNextEntry();
                 int count = 0;
                 while (entry != null) {
                     Files.copy(is, dir.resolve(String.valueOf(count)));
                     count++;
-                    entry = is.getNextTarEntry();
+                    entry = is.getNextEntry();
                 }
             });
         }
@@ -423,7 +423,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         final ByteArrayInputStream bis = new ByteArrayInputStream(data);
         try (TarArchiveInputStream tis = new TarArchiveInputStream(bis, encoding)) {
-            final TarArchiveEntry t = tis.getNextTarEntry();
+            final TarArchiveEntry t = tis.getNextEntry();
             assertEquals(name, t.getName());
         }
     }
@@ -445,11 +445,11 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testSkipsDevNumbersWhenEntryIsNoDevice() throws Exception {
         try (TarArchiveInputStream is = getTestStream("/COMPRESS-417.tar")) {
-            assertEquals("test1.xml", is.getNextTarEntry().getName());
+            assertEquals("test1.xml", is.getNextEntry().getName());
             assertEquals(TarConstants.LF_NORMAL, is.getCurrentEntry().getLinkFlag());
-            assertEquals("test2.xml", is.getNextTarEntry().getName());
+            assertEquals("test2.xml", is.getNextEntry().getName());
             assertEquals(TarConstants.LF_NORMAL, is.getCurrentEntry().getLinkFlag());
-            assertNull(is.getNextTarEntry());
+            assertNull(is.getNextEntry());
         }
     }
 
@@ -459,10 +459,10 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testSurvivesBlankLinesInPaxHeader() throws Exception {
         try (TarArchiveInputStream is = getTestStream("/COMPRESS-355.tar")) {
-            final TarArchiveEntry entry = is.getNextTarEntry();
+            final TarArchiveEntry entry = is.getNextEntry();
             assertEquals("package/package.json", entry.getName());
             assertEquals(TarConstants.LF_NORMAL, entry.getLinkFlag());
-            assertNull(is.getNextTarEntry());
+            assertNull(is.getNextEntry());
         }
     }
 
@@ -472,10 +472,10 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testSurvivesPaxHeaderWithNameEndingInSlash() throws Exception {
         try (TarArchiveInputStream is = getTestStream("/COMPRESS-356.tar")) {
-            final TarArchiveEntry entry = is.getNextTarEntry();
+            final TarArchiveEntry entry = is.getNextEntry();
             assertEquals("package/package.json", entry.getName());
             assertEquals(TarConstants.LF_NORMAL, entry.getLinkFlag());
-            assertNull(is.getNextTarEntry());
+            assertNull(is.getNextEntry());
         }
     }
 
@@ -498,8 +498,8 @@ public class TarArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testWorkaroundForBrokenTimeHeader() throws Exception {
         try (TarArchiveInputStream in = new TarArchiveInputStream(newInputStream("simple-aix-native-tar.tar"))) {
-            TarArchiveEntry tae = in.getNextTarEntry();
-            tae = in.getNextTarEntry();
+            TarArchiveEntry tae = in.getNextEntry();
+            tae = in.getNextEntry();
             assertEquals("sample/link-to-txt-file.lnk", tae.getName());
             assertEquals(TarConstants.LF_SYMLINK, tae.getLinkFlag());
             assertEquals(new Date(0), tae.getLastModifiedDate());

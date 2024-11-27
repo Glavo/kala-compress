@@ -104,7 +104,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         assertEquals("00000000000 ",
                 new String(data, 1024 + TarConstants.NAMELEN + TarConstants.MODELEN + TarConstants.UIDLEN + TarConstants.GIDLEN, 12, UTF_8));
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(0100000000000L, e.getSize());
         }
         // generates IOE because of unclosed entries.
@@ -125,7 +125,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         assertEquals(0x80, data[TarConstants.NAMELEN + TarConstants.MODELEN + TarConstants.UIDLEN + TarConstants.GIDLEN] & 0x80);
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(0100000000000L, e.getSize());
         }
         // generates IOE because of unclosed entries.
@@ -247,7 +247,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         assertEquals("00000000000 ", new String(data,
                 1024 + TarConstants.NAMELEN + TarConstants.MODELEN + TarConstants.UIDLEN + TarConstants.GIDLEN + TarConstants.SIZELEN, 12, UTF_8));
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             cal.set(1969, 11, 31, 23, 59, 59);
             cal.set(Calendar.MILLISECOND, 0);
@@ -272,7 +272,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         assertEquals((byte) 0xff, data[TarConstants.NAMELEN + TarConstants.MODELEN + TarConstants.UIDLEN + TarConstants.GIDLEN + TarConstants.SIZELEN]);
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
             cal.set(1969, 11, 31, 23, 59, 59);
             cal.set(Calendar.MILLISECOND, 0);
@@ -354,7 +354,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
             tos.closeArchiveEntry();
         }
         final TarArchiveInputStream in = new TarArchiveInputStream(new ByteArrayInputStream(bos.toByteArray()));
-        TarArchiveEntry entryIn = in.getNextTarEntry();
+        TarArchiveEntry entryIn = in.getNextEntry();
         assertNotNull(entryIn);
         assertEquals("message", entryIn.getName());
         assertEquals(TarConstants.LF_NORMAL, entryIn.getLinkFlag());
@@ -364,11 +364,11 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
             assertEquals(x.charAt(i), reader.read());
         }
         assertEquals(-1, reader.read());
-        entryIn = in.getNextTarEntry();
+        entryIn = in.getNextEntry();
         assertEquals("counter-message", entryIn.getName());
         assertEquals("global-weasels", entryIn.getExtraPaxHeader("SCHILLY.xattr.user.org.apache.weasels"));
         assertEquals("unknown", entryIn.getExtraPaxHeader("SCHILLY.xattr.user.org.apache.weasels.species"));
-        assertNull(in.getNextTarEntry());
+        assertNull(in.getNextEntry());
     }
 
     private void testRoundtripWith67CharFileName(final int mode) throws Exception {
@@ -385,7 +385,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         }
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            assertEquals(n, tin.getNextTarEntry().getName());
+            assertEquals(n, tin.getNextEntry().getName());
         }
     }
 
@@ -417,7 +417,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         }
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(n, e.getName());
             assertTrue(e.isDirectory());
         }
@@ -468,7 +468,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         }
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(n.substring(0, TarConstants.NAMELEN) + "/", e.getName(), "Entry name");
             assertEquals(TarConstants.LF_DIR, e.getLinkFlag());
             assertTrue(e.isDirectory(), "The entry is not a directory");
@@ -493,7 +493,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
             final byte[] data = bos.toByteArray();
             assertEquals("160 path=" + n + "\n", new String(data, 512, 160, UTF_8));
             try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-                assertEquals(n, tin.getNextTarEntry().getName());
+                assertEquals(n, tin.getNextEntry().getName());
                 assertEquals(TarConstants.LF_NORMAL, tin.getCurrentEntry().getLinkFlag());
             }
         }
@@ -526,7 +526,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
 
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals("test", e.getName(), "Entry name");
             assertEquals(linkName, e.getLinkName(), "Link name");
             assertTrue(e.isSymbolicLink(), "The entry is not a symbolic link");
@@ -586,7 +586,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
 
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(linkName.substring(0, TarConstants.NAMELEN), e.getLinkName(), "Link name");
             assertEquals(TarConstants.LF_SYMLINK, e.getLinkFlag(), "Link flag");
         }
@@ -607,7 +607,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         }
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(n, e.getName());
             assertEquals(TarConstants.LF_DIR, e.getLinkFlag());
             assertTrue(e.isDirectory());
@@ -630,7 +630,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         assertEquals("15 linkpath=" + n + "\n", new String(data, 512, 15, UTF_8));
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(n, e.getLinkName());
             assertEquals(TarConstants.LF_LINK, e.getLinkFlag(), "Link flag");
         }
@@ -651,7 +651,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         }
         final byte[] data = bos.toByteArray();
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(n, e.getName());
             assertEquals(TarConstants.LF_NORMAL, e.getLinkFlag());
             assertFalse(e.isDirectory());
@@ -673,7 +673,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         final byte[] data = bos.toByteArray();
         assertEquals("11 path=" + n + "\n", new String(data, 512, 11, UTF_8));
         try (TarArchiveInputStream tin = new TarArchiveInputStream(new ByteArrayInputStream(data))) {
-            final TarArchiveEntry e = tin.getNextTarEntry();
+            final TarArchiveEntry e = tin.getNextEntry();
             assertEquals(n, e.getName());
             assertEquals(TarConstants.LF_NORMAL, e.getLinkFlag());
         }

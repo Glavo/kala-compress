@@ -114,7 +114,7 @@ public final class TarTest extends AbstractTest {
         }
         final TarArchiveEntry out;
         try (TarArchiveInputStream tis = new TarArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = tis.getNextTarEntry();
+            out = tis.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo/", out.getName());
@@ -130,7 +130,7 @@ public final class TarTest extends AbstractTest {
         final File input = getFile("directory.tar");
         try (InputStream is = Files.newInputStream(input.toPath());
                 TarArchiveInputStream in = new TarArchiveInputStream(is)) {
-            final TarArchiveEntry directoryEntry = in.getNextTarEntry();
+            final TarArchiveEntry directoryEntry = in.getNextEntry();
             assertEquals("directory/", directoryEntry.getName());
             assertEquals(TarConstants.LF_DIR, directoryEntry.getLinkFlag());
             assertTrue(directoryEntry.isDirectory());
@@ -152,7 +152,7 @@ public final class TarTest extends AbstractTest {
         }
         final TarArchiveEntry out;
         try (TarArchiveInputStream tis = new TarArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = tis.getNextTarEntry();
+            out = tis.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo/", out.getName());
@@ -181,7 +181,7 @@ public final class TarTest extends AbstractTest {
         }
         final TarArchiveEntry entryOut;
         try (TarArchiveInputStream tis = new TarArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            entryOut = tis.getNextTarEntry();
+            entryOut = tis.getNextEntry();
         }
         assertNotNull(entryOut);
         assertEquals("foo", entryOut.getName());
@@ -208,7 +208,7 @@ public final class TarTest extends AbstractTest {
         }
         final TarArchiveEntry out;
         try (TarArchiveInputStream tis = new TarArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = tis.getNextTarEntry();
+            out = tis.getNextEntry();
         }
         assertNotNull(out);
         assertEquals("foo", out.getName());
@@ -228,7 +228,7 @@ public final class TarTest extends AbstractTest {
             final byte[] data = createTarWithOneLongNameEntry(fileName);
             try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
                     TarArchiveInputStream tis = new TarArchiveInputStream(bis)) {
-                assertEquals(fileName, tis.getNextTarEntry().getName());
+                assertEquals(fileName, tis.getNextEntry().getName());
             }
         }
     }

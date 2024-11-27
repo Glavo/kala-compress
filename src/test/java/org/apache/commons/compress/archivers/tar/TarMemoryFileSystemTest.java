@@ -64,7 +64,7 @@ public class TarMemoryFileSystemTest {
 
             try (InputStream input = Files.newInputStream(target);
                     TarArchiveInputStream tarIn = new TarArchiveInputStream(input)) {
-                final TarArchiveEntry nextTarEntry = tarIn.getNextTarEntry();
+                final TarArchiveEntry nextTarEntry = tarIn.getNextEntry();
 
                 assertEquals(user, nextTarEntry.getUserName());
                 assertEquals(group, nextTarEntry.getGroupName());
