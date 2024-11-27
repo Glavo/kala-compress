@@ -348,7 +348,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             assertFalse(entry.isDirectory());
             assertFalse(entry.isAntiItem());
             assertEquals(0, entry.getSize());
-            assertFalse(entry.getHasLastModifiedDate());
+            assertFalse(entry.getHasLastModifiedTime());
             assertEquals(accessTime, entry.getAccessTime());
             assertEquals(creationTime, entry.getCreationTime());
 
@@ -358,7 +358,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             assertFalse(entry.isDirectory());
             assertFalse(entry.isAntiItem());
             assertEquals(0, entry.getSize());
-            assertFalse(entry.getHasLastModifiedDate());
+            assertFalse(entry.getHasLastModifiedTime());
             assertEquals(accessTime, entry.getAccessTime());
             assertEquals(creationTime, entry.getCreationTime());
 
@@ -368,7 +368,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             assertFalse(entry.isDirectory());
             assertFalse(entry.isAntiItem());
             assertEquals(1, entry.getSize());
-            assertFalse(entry.getHasLastModifiedDate());
+            assertFalse(entry.getHasLastModifiedTime());
             assertEquals(accessTime, entry.getAccessTime());
             assertEquals(creationTime, entry.getCreationTime());
 
@@ -378,7 +378,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             assertFalse(entry.isDirectory());
             assertFalse(entry.isAntiItem());
             assertEquals(10000, entry.getSize());
-            assertFalse(entry.getHasLastModifiedDate());
+            assertFalse(entry.getHasLastModifiedTime());
             assertEquals(accessTime, entry.getAccessTime());
             assertEquals(creationTime, entry.getCreationTime());
 
@@ -388,7 +388,7 @@ public class SevenZOutputFileTest extends AbstractTest {
             assertFalse(entry.isDirectory());
             assertFalse(entry.isAntiItem());
             assertEquals(Files.size(Paths.get("src/test/resources/test.txt")), entry.getSize());
-            assertFalse(entry.getHasLastModifiedDate());
+            assertFalse(entry.getHasLastModifiedTime());
             assertEquals(accessTime, entry.getAccessTime());
             assertEquals(creationTime, entry.getCreationTime());
 
@@ -396,8 +396,8 @@ public class SevenZOutputFileTest extends AbstractTest {
             assertNotNull(entry, "Entry should not be null");
             assertEquals("xyzzy", entry.getName());
             assertEquals(1, entry.getSize());
-            assertFalse(entry.getHasAccessDate());
-            assertFalse(entry.getHasCreationDate());
+            assertFalse(entry.getHasAccessTime());
+            assertFalse(entry.getHasCreationTime());
             assertEquals(0, archive.read());
 
             entry = archive.getNextEntry();

@@ -250,7 +250,7 @@ public class SevenZOutputFile implements Closeable {
         try {
             fillDates(inputFile.toPath(), entry);
         } catch (final IOException e) { // NOSONAR
-            entry.setLastModifiedDate(inputFile.lastModified());
+            entry.setLastModifiedTime(inputFile.lastModified());
         }
         return entry;
     }
@@ -546,7 +546,7 @@ public class SevenZOutputFile implements Closeable {
     private void writeFileATimes(final DataOutput header) throws IOException {
         int numAccessDates = 0;
         for (final SevenZArchiveEntry entry : files) {
-            if (entry.getHasAccessDate()) {
+            if (entry.getHasAccessTime()) {
                 ++numAccessDates;
             }
         }
@@ -559,7 +559,7 @@ public class SevenZOutputFile implements Closeable {
                 out.write(0);
                 final BitSet aTimes = new BitSet(files.size());
                 for (int i = 0; i < files.size(); i++) {
-                    aTimes.set(i, files.get(i).getHasAccessDate());
+                    aTimes.set(i, files.get(i).getHasAccessTime());
                 }
                 writeBits(out, aTimes, files.size());
             } else {
@@ -567,7 +567,7 @@ public class SevenZOutputFile implements Closeable {
             }
             out.write(0);
             for (final SevenZArchiveEntry entry : files) {
-                if (entry.getHasAccessDate()) {
+                if (entry.getHasAccessTime()) {
                     final long ntfsTime = TimeUtils.toNtfsTime(entry.getAccessTime());
                     out.writeLong(Long.reverseBytes(ntfsTime));
                 }
@@ -582,7 +582,7 @@ public class SevenZOutputFile implements Closeable {
     private void writeFileCTimes(final DataOutput header) throws IOException {
         int numCreationDates = 0;
         for (final SevenZArchiveEntry entry : files) {
-            if (entry.getHasCreationDate()) {
+            if (entry.getHasCreationTime()) {
                 ++numCreationDates;
             }
         }
@@ -595,7 +595,7 @@ public class SevenZOutputFile implements Closeable {
                 out.write(0);
                 final BitSet cTimes = new BitSet(files.size());
                 for (int i = 0; i < files.size(); i++) {
-                    cTimes.set(i, files.get(i).getHasCreationDate());
+                    cTimes.set(i, files.get(i).getHasCreationTime());
                 }
                 writeBits(out, cTimes, files.size());
             } else {
@@ -603,7 +603,7 @@ public class SevenZOutputFile implements Closeable {
             }
             out.write(0);
             for (final SevenZArchiveEntry entry : files) {
-                if (entry.getHasCreationDate()) {
+                if (entry.getHasCreationTime()) {
                     final long ntfsTime = TimeUtils.toNtfsTime(entry.getCreationTime());
                     out.writeLong(Long.reverseBytes(ntfsTime));
                 }
@@ -659,7 +659,7 @@ public class SevenZOutputFile implements Closeable {
     private void writeFileMTimes(final DataOutput header) throws IOException {
         int numLastModifiedDates = 0;
         for (final SevenZArchiveEntry entry : files) {
-            if (entry.getHasLastModifiedDate()) {
+            if (entry.getHasLastModifiedTime()) {
                 ++numLastModifiedDates;
             }
         }
@@ -672,7 +672,7 @@ public class SevenZOutputFile implements Closeable {
                 out.write(0);
                 final BitSet mTimes = new BitSet(files.size());
                 for (int i = 0; i < files.size(); i++) {
-                    mTimes.set(i, files.get(i).getHasLastModifiedDate());
+                    mTimes.set(i, files.get(i).getHasLastModifiedTime());
                 }
                 writeBits(out, mTimes, files.size());
             } else {
@@ -680,7 +680,7 @@ public class SevenZOutputFile implements Closeable {
             }
             out.write(0);
             for (final SevenZArchiveEntry entry : files) {
-                if (entry.getHasLastModifiedDate()) {
+                if (entry.getHasLastModifiedTime()) {
                     final long ntfsTime = TimeUtils.toNtfsTime(entry.getLastModifiedTime());
                     out.writeLong(Long.reverseBytes(ntfsTime));
                 }

@@ -53,7 +53,7 @@ public class CLI {
                 } else {
                     System.out.print(" " + entry.getCompressedSize() + "/" + entry.getSize());
                 }
-                if (entry.getHasLastModifiedDate()) {
+                if (entry.getHasLastModifiedTime()) {
                     System.out.print(" " + entry.getLastModifiedTime());
                 } else {
                     System.out.print(" no last modified date");

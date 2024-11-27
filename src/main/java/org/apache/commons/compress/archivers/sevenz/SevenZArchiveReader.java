@@ -1246,9 +1246,9 @@ public class SevenZArchiveReader implements Closeable {
                 for (int i = 0; i < numFilesInt; i++) {
                     checkEntryIsInitialized(fileMap, i);
                     final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasCreationDate(timesDefined.get(i));
-                    if (entryAtIndex.getHasCreationDate()) {
-                        entryAtIndex.setCreationDate(getLong(header));
+                    entryAtIndex.setHasCreationTime(timesDefined.get(i));
+                    if (entryAtIndex.getHasCreationTime()) {
+                        entryAtIndex.setCreationTime(getLong(header));
                     }
                 }
                 break;
@@ -1259,9 +1259,9 @@ public class SevenZArchiveReader implements Closeable {
                 for (int i = 0; i < numFilesInt; i++) {
                     checkEntryIsInitialized(fileMap, i);
                     final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasAccessDate(timesDefined.get(i));
-                    if (entryAtIndex.getHasAccessDate()) {
-                        entryAtIndex.setAccessDate(getLong(header));
+                    entryAtIndex.setHasAccessTime(timesDefined.get(i));
+                    if (entryAtIndex.getHasAccessTime()) {
+                        entryAtIndex.setAccessTime(getLong(header));
                     }
                 }
                 break;
@@ -1272,9 +1272,9 @@ public class SevenZArchiveReader implements Closeable {
                 for (int i = 0; i < numFilesInt; i++) {
                     checkEntryIsInitialized(fileMap, i);
                     final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasLastModifiedDate(timesDefined.get(i));
-                    if (entryAtIndex.getHasLastModifiedDate()) {
-                        entryAtIndex.setLastModifiedDate(getLong(header));
+                    entryAtIndex.setHasLastModifiedTime(timesDefined.get(i));
+                    if (entryAtIndex.getHasLastModifiedTime()) {
+                        entryAtIndex.setLastModifiedTime(getLong(header));
                     }
                 }
                 break;

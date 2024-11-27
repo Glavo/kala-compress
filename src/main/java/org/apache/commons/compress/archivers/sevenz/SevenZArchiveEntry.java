@@ -40,12 +40,12 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     private boolean hasStream;
     private boolean isDirectory;
     private boolean isAntiItem;
-    private boolean hasCreationDate;
-    private boolean hasLastModifiedDate;
-    private boolean hasAccessDate;
-    private FileTime creationDate;
-    private FileTime lastModifiedDate;
-    private FileTime accessDate;
+    private boolean hasCreationTime;
+    private boolean hasLastModifiedTime;
+    private boolean hasAccessTime;
+    private FileTime creationTime;
+    private FileTime lastModifiedTime;
+    private FileTime accessTime;
     private boolean hasWindowsAttributes;
     private int windowsAttributes;
     private boolean hasCrc;
@@ -69,11 +69,11 @@ public class SevenZArchiveEntry implements ArchiveEntry {
         }
         final SevenZArchiveEntry other = (SevenZArchiveEntry) obj;
         return Objects.equals(name, other.name) && hasStream == other.hasStream && isDirectory == other.isDirectory && isAntiItem == other.isAntiItem
-                && hasCreationDate == other.hasCreationDate && hasLastModifiedDate == other.hasLastModifiedDate && hasAccessDate == other.hasAccessDate
-                && Objects.equals(creationDate, other.creationDate) && Objects.equals(lastModifiedDate, other.lastModifiedDate)
-                && Objects.equals(accessDate, other.accessDate) && hasWindowsAttributes == other.hasWindowsAttributes
-                && windowsAttributes == other.windowsAttributes && hasCrc == other.hasCrc && crc == other.crc && compressedCrc == other.compressedCrc
-                && size == other.size && compressedSize == other.compressedSize && equalSevenZMethods(contentMethods, other.contentMethods);
+               && hasCreationTime == other.hasCreationTime && hasLastModifiedTime == other.hasLastModifiedTime && hasAccessTime == other.hasAccessTime
+               && Objects.equals(creationTime, other.creationTime) && Objects.equals(lastModifiedTime, other.lastModifiedTime)
+               && Objects.equals(accessTime, other.accessTime) && hasWindowsAttributes == other.hasWindowsAttributes
+               && windowsAttributes == other.windowsAttributes && hasCrc == other.hasCrc && crc == other.crc && compressedCrc == other.compressedCrc
+               && size == other.size && compressedSize == other.compressedSize && equalSevenZMethods(contentMethods, other.contentMethods);
     }
 
     private boolean equalSevenZMethods(final Iterable<? extends SevenZMethodConfiguration> c1, final Iterable<? extends SevenZMethodConfiguration> c2) {
@@ -103,8 +103,8 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @since 1.23
      */
     public FileTime getAccessTime() {
-        if (hasAccessDate) {
-            return accessDate;
+        if (hasAccessTime) {
+            return accessTime;
         }
         throw new UnsupportedOperationException("The entry doesn't have this timestamp");
     }
@@ -179,19 +179,19 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @since 1.23
      */
     public FileTime getCreationTime() {
-        if (hasCreationDate) {
-            return creationDate;
+        if (hasCreationTime) {
+            return creationTime;
         }
         throw new UnsupportedOperationException("The entry doesn't have this timestamp");
     }
 
     /**
-     * Gets whether this entry has got an access date at all.
+     * Gets whether this entry has got an access time at all.
      *
-     * @return whether this entry has got an access date at all.
+     * @return whether this entry has got an access time at all.
      */
-    public boolean getHasAccessDate() {
-        return hasAccessDate;
+    public boolean getHasAccessTime() {
+        return hasAccessTime;
     }
 
     /**
@@ -208,21 +208,21 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Gets whether this entry has got a creation date at all.
+     * Gets whether this entry has got a creation time at all.
      *
-     * @return whether the entry has got a creation date
+     * @return whether the entry has got a creation time
      */
-    public boolean getHasCreationDate() {
-        return hasCreationDate;
+    public boolean getHasCreationTime() {
+        return hasCreationTime;
     }
 
     /**
-     * Gets whether this entry has got a last modified date at all.
+     * Gets whether this entry has got a last modified time at all.
      *
-     * @return whether this entry has got a last modified date at all
+     * @return whether this entry has got a last modified time at all
      */
-    public boolean getHasLastModifiedDate() {
-        return hasLastModifiedDate;
+    public boolean getHasLastModifiedTime() {
+        return hasLastModifiedTime;
     }
 
     /**
@@ -243,8 +243,8 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      */
     @Override
     public FileTime getLastModifiedTime() {
-        if (hasLastModifiedDate) {
-            return lastModifiedDate;
+        if (hasLastModifiedTime) {
+            return lastModifiedTime;
         }
         throw new UnsupportedOperationException("The entry doesn't have this timestamp");
     }
@@ -317,12 +317,12 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets the access date using NTFS time (100 nanosecond units since 1 January 1601)
+     * Sets the access time using NTFS time (100 nanosecond units since 1 January 1601)
      *
-     * @param ntfsAccessDate the access date
+     * @param ntfsAccessTime the access time
      */
-    public void setAccessDate(final long ntfsAccessDate) {
-        this.accessDate = TimeUtils.ntfsTimeToFileTime(ntfsAccessDate);
+    public void setAccessTime(final long ntfsAccessTime) {
+        this.accessTime = TimeUtils.ntfsTimeToFileTime(ntfsAccessTime);
     }
 
     /**
@@ -332,9 +332,9 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @since 1.23
      */
     public void setAccessTime(final FileTime time) {
-        hasAccessDate = time != null;
-        if (hasAccessDate) {
-            this.accessDate = time;
+        hasAccessTime = time != null;
+        if (hasAccessTime) {
+            this.accessTime = time;
         }
     }
 
@@ -433,12 +433,13 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets the creation date using NTFS time (100 nanosecond units since 1 January 1601)
+     * Sets the creation time using NTFS time (100 nanosecond units since 1 January 1601)
      *
-     * @param ntfsCreationDate the creation date
+     * @param ntfsCreationTime the creation time
+     * @since 1.27.1-0
      */
-    public void setCreationDate(final long ntfsCreationDate) {
-        this.creationDate = TimeUtils.ntfsTimeToFileTime(ntfsCreationDate);
+    public void setCreationTime(final long ntfsCreationTime) {
+        this.creationTime = TimeUtils.ntfsTimeToFileTime(ntfsCreationTime);
     }
 
     /**
@@ -448,9 +449,9 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @since 1.23
      */
     public void setCreationTime(final FileTime time) {
-        hasCreationDate = time != null;
-        if (hasCreationDate) {
-            this.creationDate = time;
+        hasCreationTime = time != null;
+        if (hasCreationTime) {
+            this.creationTime = time;
         }
     }
 
@@ -464,12 +465,13 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets whether this entry has got an access date at all.
+     * Sets whether this entry has got an access time at all.
      *
-     * @param hasAcessDate whether this entry has got an access date at all.
+     * @param hasAcessTime whether this entry has got an access time at all.
+     * @since 1.27.1-0
      */
-    public void setHasAccessDate(final boolean hasAcessDate) {
-        this.hasAccessDate = hasAcessDate;
+    public void setHasAccessTime(final boolean hasAcessTime) {
+        this.hasAccessTime = hasAcessTime;
     }
 
     /**
@@ -482,21 +484,23 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets whether this entry has got a creation date at all.
+     * Sets whether this entry has got a creation time at all.
      *
-     * @param hasCreationDate whether the entry has got a creation date
+     * @param hasCreationTime whether the entry has got a creation time
+     * @since 1.27.1-0
      */
-    public void setHasCreationDate(final boolean hasCreationDate) {
-        this.hasCreationDate = hasCreationDate;
+    public void setHasCreationTime(final boolean hasCreationTime) {
+        this.hasCreationTime = hasCreationTime;
     }
 
     /**
-     * Sets whether this entry has got a last modified date at all.
+     * Sets whether this entry has got a last modified time at all.
      *
-     * @param hasLastModifiedDate whether this entry has got a last modified date at all
+     * @param hasLastModifiedTime whether this entry has got a last modified time at all
+     * @since 1.27.1-0
      */
-    public void setHasLastModifiedDate(final boolean hasLastModifiedDate) {
-        this.hasLastModifiedDate = hasLastModifiedDate;
+    public void setHasLastModifiedTime(final boolean hasLastModifiedTime) {
+        this.hasLastModifiedTime = hasLastModifiedTime;
     }
 
     /**
@@ -518,12 +522,12 @@ public class SevenZArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * Sets the last modified date using NTFS time (100 nanosecond units since 1 January 1601)
+     * Sets the last modified time using NTFS time (100 nanosecond units since 1 January 1601)
      *
-     * @param ntfsLastModifiedDate the last modified date
+     * @param ntfsLastModifiedTime the last modified time
      */
-    public void setLastModifiedDate(final long ntfsLastModifiedDate) {
-        this.lastModifiedDate = TimeUtils.ntfsTimeToFileTime(ntfsLastModifiedDate);
+    public void setLastModifiedTime(final long ntfsLastModifiedTime) {
+        this.lastModifiedTime = TimeUtils.ntfsTimeToFileTime(ntfsLastModifiedTime);
     }
 
     /**
@@ -533,9 +537,9 @@ public class SevenZArchiveEntry implements ArchiveEntry {
      * @since 1.23
      */
     public void setLastModifiedTime(final FileTime time) {
-        hasLastModifiedDate = time != null;
-        if (hasLastModifiedDate) {
-            this.lastModifiedDate = time;
+        hasLastModifiedTime = time != null;
+        if (hasLastModifiedTime) {
+            this.lastModifiedTime = time;
         }
     }
 

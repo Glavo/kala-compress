@@ -77,9 +77,9 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     }
 
     private void assertDates(final SevenZArchiveEntry entry, final String modified, final String access, final String creation) {
-        assertDate(entry, modified, SevenZArchiveEntry::getHasLastModifiedDate, SevenZArchiveEntry::getLastModifiedTime);
-        assertDate(entry, access, SevenZArchiveEntry::getHasAccessDate, SevenZArchiveEntry::getAccessTime);
-        assertDate(entry, creation, SevenZArchiveEntry::getHasCreationDate, SevenZArchiveEntry::getCreationTime);
+        assertDate(entry, modified, SevenZArchiveEntry::getHasLastModifiedTime, SevenZArchiveEntry::getLastModifiedTime);
+        assertDate(entry, access, SevenZArchiveEntry::getHasAccessTime, SevenZArchiveEntry::getAccessTime);
+        assertDate(entry, creation, SevenZArchiveEntry::getHasCreationTime, SevenZArchiveEntry::getCreationTime);
     }
 
     private void checkHelloWorld(final String fileName) throws Exception {
