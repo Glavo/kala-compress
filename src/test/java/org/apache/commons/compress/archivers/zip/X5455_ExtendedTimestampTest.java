@@ -34,8 +34,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -54,7 +52,6 @@ public class X5455_ExtendedTimestampTest {
     private static final ZipLong ZERO_TIME = new ZipLong(0);
     private static final ZipLong MAX_TIME_SECONDS = new ZipLong(Integer.MAX_VALUE);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd/HH:mm:ss Z");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd/HH:mm:ss Z").withZone(ZoneOffset.UTC);
 
     static {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
