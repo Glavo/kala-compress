@@ -322,12 +322,10 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      */
     protected final Deflater def;
 
-    private boolean useLanguageEncodingFlag = true;
-
     /**
-     * whether to use the general purpose bit flag when writing UTF-8 file names or not.
+     * Whether to set the language encoding flag if the file name encoding is UTF-8.
      */
-    private boolean useUTF8Flag = true;
+    private boolean useLanguageEncodingFlag = true;
 
     /**
      * Whether to encode non-encodable file names as UTF-8.
@@ -987,9 +985,13 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
         return !encodable && fallbackToUTF8 ? StandardCharsets.UTF_8 : encoding;
     }
 
+    private boolean usesUTF8ForNames() {
+        return useLanguageEncodingFlag && encoding == StandardCharsets.UTF_8;
+    }
+
     private GeneralPurposeBit getGeneralPurposeBits(final boolean utfFallback, final boolean usesDataDescriptor) {
         final GeneralPurposeBit b = new GeneralPurposeBit();
-        b.useUTF8ForNames(useUTF8Flag || utfFallback);
+        b.useUTF8ForNames(usesUTF8ForNames() || utfFallback);
         if (usesDataDescriptor) {
             b.useDataDescriptor(true);
         }
@@ -1303,9 +1305,6 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      */
     public void setEncoding(final Charset encoding) {
         this.encoding = Charsets.toCharset(encoding);
-        if (useUTF8Flag && !Charsets.isUTF8(encoding)) {
-            useUTF8Flag = false;
-        }
     }
 
     /**
@@ -1361,7 +1360,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
      * @param b whether to set the language encoding flag if the file name encoding is UTF-8
      */
     public void setUseLanguageEncodingFlag(final boolean b) {
-        useUTF8Flag = b && Charsets.isUTF8(encoding);
+        useLanguageEncodingFlag = b;
     }
 
     /**
