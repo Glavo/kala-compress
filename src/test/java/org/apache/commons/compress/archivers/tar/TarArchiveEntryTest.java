@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Arrays;
@@ -117,8 +118,8 @@ public class TarArchiveEntryTest implements TarConstants {
      * @see "https://issues.apache.org/jira/browse/SANDBOX-284"
      */
     @Test
-    public void testFileSystemRoot() {
-        final TarArchiveEntry t = new TarArchiveEntry(new File(ROOT).toPath());
+    public void testFileSystemRoot() throws IOException {
+        final TarArchiveEntry t = new TarArchiveEntry(Paths.get(ROOT));
         assertEquals("/", t.getName());
         assertEquals(TarConstants.LF_DIR, t.getLinkFlag());
     }
@@ -439,12 +440,12 @@ public class TarArchiveEntryTest implements TarConstants {
             try (TarArchiveOutputStream tout = new TarArchiveOutputStream(Files.newOutputStream(f.toPath()))) {
                 tout.putArchiveEntry(t);
                 tout.closeArchiveEntry();
-                t = new TarArchiveEntry(new File(new File(ROOT), "foo.txt").toPath());
+                t = new TarArchiveEntry(Paths.get(ROOT, "foo.txt").toAbsolutePath().toString());
                 t.setSize(6);
                 tout.putArchiveEntry(t);
                 tout.write(new byte[] { 'h', 'e', 'l', 'l', 'o', ' ' });
                 tout.closeArchiveEntry();
-                t = new TarArchiveEntry(new File(new File(ROOT), "bar.txt").getAbsolutePath());
+                t = new TarArchiveEntry(Paths.get(ROOT, "bar.txt").toAbsolutePath().toString());
                 t.setSize(5);
                 tout.putArchiveEntry(t);
                 tout.write(new byte[] { 'w', 'o', 'r', 'l', 'd' });
