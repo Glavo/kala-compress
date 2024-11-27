@@ -152,7 +152,7 @@ public class ArArchiveEntry implements ArchiveEntry {
     /**
      * Gets the last modified time in seconds since the epoch.
      *
-     * @return the last modified date.
+     * @return the last modified time.
      */
     public long getLastModified() {
         return lastModified;

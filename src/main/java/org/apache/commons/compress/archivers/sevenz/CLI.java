@@ -56,7 +56,7 @@ public class CLI {
                 if (entry.getHasLastModifiedTime()) {
                     System.out.print(" " + entry.getLastModifiedTime());
                 } else {
-                    System.out.print(" no last modified date");
+                    System.out.print(" no last modified time");
                 }
                 if (!entry.isDirectory()) {
                     System.out.println(" " + getContentMethods(entry));

@@ -1792,7 +1792,7 @@ public class SevenZArchiveReader implements Closeable {
                     throw new IOException("Not implemented");
                 }
                 if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
-                    throw new IOException("invalid creation dates size");
+                    throw new IOException("invalid creation times size");
                 }
                 break;
             }
@@ -1803,7 +1803,7 @@ public class SevenZArchiveReader implements Closeable {
                     throw new IOException("Not implemented");
                 }
                 if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
-                    throw new IOException("invalid access dates size");
+                    throw new IOException("invalid access times size");
                 }
                 break;
             }
@@ -1814,7 +1814,7 @@ public class SevenZArchiveReader implements Closeable {
                     throw new IOException("Not implemented");
                 }
                 if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
-                    throw new IOException("invalid modification dates size");
+                    throw new IOException("invalid modification times size");
                 }
                 break;
             }

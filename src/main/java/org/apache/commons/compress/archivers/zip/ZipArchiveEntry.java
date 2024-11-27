@@ -287,7 +287,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
 
     private long diskNumberStart;
 
-    private boolean lastModifiedDateSet;
+    private boolean lastModifiedTimeSet;
 
     private long time = -1;
 
@@ -873,7 +873,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      */
     @Override
     public long getTime() {
-        if (lastModifiedDateSet) {
+        if (lastModifiedTimeSet) {
             return getLastModifiedTime().toMillis();
         }
         return time != -1 ? time : super.getTime();
@@ -970,7 +970,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     private void internalSetLastModifiedTime(final FileTime time) {
         super.setLastModifiedTime(time);
         this.time = time.toMillis();
-        lastModifiedDateSet = true;
+        lastModifiedTimeSet = true;
     }
 
     /**
@@ -1100,7 +1100,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         if (getLastAccessTime() != null || getCreationTime() != null) {
             return true;
         }
-        return lastModifiedDateSet;
+        return lastModifiedTimeSet;
     }
 
     /**
@@ -1408,7 +1408,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         if (ZipUtil.isDosTime(timeEpochMillis)) {
             super.setTime(timeEpochMillis);
             this.time = timeEpochMillis;
-            lastModifiedDateSet = false;
+            lastModifiedTimeSet = false;
             setExtraTimeFields();
         } else {
             setLastModifiedTime(FileTime.fromMillis(timeEpochMillis));

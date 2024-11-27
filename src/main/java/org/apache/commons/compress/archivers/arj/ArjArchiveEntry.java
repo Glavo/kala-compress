@@ -129,7 +129,7 @@ public class ArjArchiveEntry implements ArchiveEntry {
     }
 
     /**
-     * The last modified date of the entry.
+     * The last modified time of the entry.
      *
      * <p>
      * Note the interpretation of time is different depending on the HostOS that has created the archive. While an OS that is {@link #isHostOsUnix considered to
@@ -138,7 +138,7 @@ public class ArjArchiveEntry implements ArchiveEntry {
      * the current time zone into account if the archive has been created on Unix.
      * </p>
      *
-     * @return the last modified date
+     * @return the last modified time
      * @see 1.27.1-0
      */
     @Override

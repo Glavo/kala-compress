@@ -32,8 +32,8 @@ import java.util.Objects;
  */
 public class DumpArchiveSummary {
 
-    private long dumpDate;
-    private long previousDumpDate;
+    private long dumpTime;
+    private long previousDumpTime;
     private int volume;
     private String label;
     private int level;
@@ -45,8 +45,8 @@ public class DumpArchiveSummary {
     private int ntrec;
 
     DumpArchiveSummary(final byte[] buffer, final Charset encoding) throws IOException {
-        dumpDate = 1000L * DumpArchiveUtil.convert32(buffer, 4);
-        previousDumpDate = 1000L * DumpArchiveUtil.convert32(buffer, 8);
+        dumpTime = 1000L * DumpArchiveUtil.convert32(buffer, 4);
+        previousDumpTime = 1000L * DumpArchiveUtil.convert32(buffer, 8);
         volume = DumpArchiveUtil.convert32(buffer, 12);
         label = DumpArchiveUtil.decode(encoding, buffer, 676, DumpArchiveConstants.LBLSIZE).trim();
         level = DumpArchiveUtil.convert32(buffer, 692);
@@ -72,7 +72,7 @@ public class DumpArchiveSummary {
             return false;
         }
         final DumpArchiveSummary other = (DumpArchiveSummary) obj;
-        return Objects.equals(devname, other.devname) && dumpDate == other.dumpDate && Objects.equals(hostname, other.hostname);
+        return Objects.equals(devname, other.devname) && dumpTime == other.dumpTime && Objects.equals(hostname, other.hostname);
     }
 
     /**
@@ -91,7 +91,7 @@ public class DumpArchiveSummary {
      * @since 1.27.1-0
      */
     public FileTime getDumpTime() {
-        return FileTime.fromMillis(dumpDate);
+        return FileTime.fromMillis(dumpTime);
     }
 
     /**
@@ -166,7 +166,7 @@ public class DumpArchiveSummary {
      * @since 1.27.1-0
      */
     public FileTime getPreviousDumpTime() {
-        return FileTime.fromMillis(previousDumpDate);
+        return FileTime.fromMillis(previousDumpTime);
     }
 
     /**
@@ -180,7 +180,7 @@ public class DumpArchiveSummary {
 
     @Override
     public int hashCode() {
-        return Objects.hash(devname, dumpDate, hostname);
+        return Objects.hash(devname, dumpTime, hostname);
     }
 
     /**
@@ -244,7 +244,7 @@ public class DumpArchiveSummary {
      * @since 1.27.1-0
      */
     public void setDumpTime(final FileTime dumpTime) {
-        this.dumpDate = dumpTime.toMillis();
+        this.dumpTime = dumpTime.toMillis();
     }
 
     /**
@@ -317,7 +317,7 @@ public class DumpArchiveSummary {
      * @since 1.27.1-0
      */
     public void setPreviousDumpTime(final FileTime previousDumpTime) {
-        this.previousDumpDate = previousDumpTime.toMillis();
+        this.previousDumpTime = previousDumpTime.toMillis();
     }
 
     /**

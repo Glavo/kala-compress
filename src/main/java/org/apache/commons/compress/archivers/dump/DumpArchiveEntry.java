@@ -310,7 +310,7 @@ public class DumpArchiveEntry implements ArchiveEntry {
         long t = 1000L * DumpArchiveUtil.convert32(buffer, 48) + DumpArchiveUtil.convert32(buffer, 52) / 1000;
         entry.setAccessTime(FileTime.fromMillis(t));
         t = 1000L * DumpArchiveUtil.convert32(buffer, 56) + DumpArchiveUtil.convert32(buffer, 60) / 1000;
-        entry.setLastModifiedDate(FileTime.fromMillis(t));
+        entry.setLastModifiedTime(FileTime.fromMillis(t));
         t = 1000L * DumpArchiveUtil.convert32(buffer, 64) + DumpArchiveUtil.convert32(buffer, 68) / 1000;
         entry.ctime = t;
 
@@ -761,7 +761,7 @@ public class DumpArchiveEntry implements ArchiveEntry {
      * @param mtime the last modified time
      * @since 1.27.1-0
      */
-    public void setLastModifiedDate(final FileTime mtime) {
+    public void setLastModifiedTime(final FileTime mtime) {
         this.mtime = mtime.toMillis();
     }
 

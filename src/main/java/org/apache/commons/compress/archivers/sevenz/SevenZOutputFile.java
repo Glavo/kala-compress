@@ -248,7 +248,7 @@ public class SevenZOutputFile implements Closeable {
         entry.setDirectory(inputFile.isDirectory());
         entry.setName(entryName);
         try {
-            fillDates(inputFile.toPath(), entry);
+            fillTimes(inputFile.toPath(), entry);
         } catch (final IOException e) { // NOSONAR
             entry.setLastModifiedTime(inputFile.lastModified());
         }
@@ -270,11 +270,11 @@ public class SevenZOutputFile implements Closeable {
         final SevenZArchiveEntry entry = new SevenZArchiveEntry();
         entry.setDirectory(Files.isDirectory(inputPath, options));
         entry.setName(entryName);
-        fillDates(inputPath, entry, options);
+        fillTimes(inputPath, entry, options);
         return entry;
     }
 
-    private void fillDates(final Path inputPath, final SevenZArchiveEntry entry, final LinkOption... options) throws IOException {
+    private void fillTimes(final Path inputPath, final SevenZArchiveEntry entry, final LinkOption... options) throws IOException {
         final BasicFileAttributes attributes = Files.readAttributes(inputPath, BasicFileAttributes.class, options);
         entry.setLastModifiedTime(attributes.lastModifiedTime());
         entry.setCreationTime(attributes.creationTime());
@@ -544,18 +544,18 @@ public class SevenZOutputFile implements Closeable {
     }
 
     private void writeFileATimes(final DataOutput header) throws IOException {
-        int numAccessDates = 0;
+        int numAccessTimes = 0;
         for (final SevenZArchiveEntry entry : files) {
             if (entry.getHasAccessTime()) {
-                ++numAccessDates;
+                ++numAccessTimes;
             }
         }
-        if (numAccessDates > 0) {
+        if (numAccessTimes > 0) {
             header.write(NID.kATime);
 
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             final DataOutputStream out = new DataOutputStream(baos);
-            if (numAccessDates != files.size()) {
+            if (numAccessTimes != files.size()) {
                 out.write(0);
                 final BitSet aTimes = new BitSet(files.size());
                 for (int i = 0; i < files.size(); i++) {
@@ -580,18 +580,18 @@ public class SevenZOutputFile implements Closeable {
     }
 
     private void writeFileCTimes(final DataOutput header) throws IOException {
-        int numCreationDates = 0;
+        int numCreationTimes = 0;
         for (final SevenZArchiveEntry entry : files) {
             if (entry.getHasCreationTime()) {
-                ++numCreationDates;
+                ++numCreationTimes;
             }
         }
-        if (numCreationDates > 0) {
+        if (numCreationTimes > 0) {
             header.write(NID.kCTime);
 
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             final DataOutputStream out = new DataOutputStream(baos);
-            if (numCreationDates != files.size()) {
+            if (numCreationTimes != files.size()) {
                 out.write(0);
                 final BitSet cTimes = new BitSet(files.size());
                 for (int i = 0; i < files.size(); i++) {
@@ -657,18 +657,18 @@ public class SevenZOutputFile implements Closeable {
     }
 
     private void writeFileMTimes(final DataOutput header) throws IOException {
-        int numLastModifiedDates = 0;
+        int numLastModifiedTimes = 0;
         for (final SevenZArchiveEntry entry : files) {
             if (entry.getHasLastModifiedTime()) {
-                ++numLastModifiedDates;
+                ++numLastModifiedTimes;
             }
         }
-        if (numLastModifiedDates > 0) {
+        if (numLastModifiedTimes > 0) {
             header.write(NID.kMTime);
 
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
             final DataOutputStream out = new DataOutputStream(baos);
-            if (numLastModifiedDates != files.size()) {
+            if (numLastModifiedTimes != files.size()) {
                 out.write(0);
                 final BitSet mTimes = new BitSet(files.size());
                 for (int i = 0; i < files.size(); i++) {
