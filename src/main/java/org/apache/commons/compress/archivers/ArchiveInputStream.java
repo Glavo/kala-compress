@@ -26,7 +26,6 @@ import java.util.Objects;
 
 import org.apache.commons.compress.function.IOConsumer;
 import org.apache.commons.compress.function.IOIterator;
-import org.apache.commons.compress.utils.Charsets;
 
 /**
  * Archive input streams <strong>MUST</strong> override the {@link #read(byte[], int, int)} - or {@link #read()} - method so that reading from the stream
