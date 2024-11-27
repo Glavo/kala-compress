@@ -90,12 +90,12 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
      * Constructs a new instance.
      *
      * @param inputStream the underlying input stream, or {@code null} if this instance is to be created without an underlying stream.
-     * @param encoding charset.
+     * @param encoding the encoding.
      * @since 1.26.0
      */
     protected ArchiveInputStream(final InputStream inputStream, final Charset encoding) {
         super(inputStream);
-        this.encoding = Charsets.toCharset(encoding);
+        this.encoding = encoding;
     }
 
     /**
@@ -161,9 +161,10 @@ public abstract class ArchiveInputStream<E extends ArchiveEntry> extends FilterI
     }
 
     /**
-     * Gets the Charset.
+     * Gets the encoding.
      *
-     * @return the Charset.
+     * @return the encoding.
+     * @since 1.27.1-0
      */
     public Charset getEncoding() {
         return encoding;
