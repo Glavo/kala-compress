@@ -23,7 +23,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -646,63 +645,7 @@ public class ZipArchiveReader implements Closeable {
 
     private long firstLocalFileHeaderOffset;
 
-    /**
-     * Opens the given file for reading, assuming "UTF8" for file names.
-     *
-     * @param file the archive.
-     *
-     * @throws IOException if an error occurs while reading the file.
-     */
-    public ZipArchiveReader(final File file) throws IOException {
-        this(file, DEFAULT_CHARSET);
-    }
-
-    /**
-     * Opens the given file for reading, assuming the specified encoding for file names and scanning for Unicode extra fields.
-     *
-     * @param file     the archive.
-     * @param encoding the encoding to use for file names, use null for the UTF-8
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
-    public ZipArchiveReader(final File file, final Charset encoding) throws IOException {
-        this(file.toPath(), encoding, true);
-    }
-
-    /**
-     * Opens the given file for reading, assuming the specified encoding for file names.
-     *
-     * @param file                  the archive.
-     * @param encoding              the encoding to use for file names, use null for the UTF-8
-     * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
-    public ZipArchiveReader(final File file, final Charset encoding, final boolean useUnicodeExtraFields) throws IOException {
-        this(file.toPath(), encoding, useUnicodeExtraFields, false);
-    }
-
-    /**
-     * Opens the given file for reading, assuming the specified encoding for file names.
-     * <p>
-     * By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
-     * when the archive is big. The {@code ignoreLocalFileHeader} parameter can be set to {@code true} which restricts parsing to the central directory.
-     * Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-     * set to {@code true}. This includes the content of the Unicode extra field, so setting {@code
-     * ignoreLocalFileHeader} to {@code true} means {@code useUnicodeExtraFields} will be ignored effectively.
-     * </p>
-     *
-     * @param file                  the archive.
-     * @param encoding              the encoding to use for file names, use null for the UTF-8
-     * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @param ignoreLocalFileHeader whether to ignore information stored inside the local file header (see the notes in this method's Javadoc)
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
-    @SuppressWarnings("resource") // Caller closes
-    public ZipArchiveReader(final File file, final Charset encoding, final boolean useUnicodeExtraFields, final boolean ignoreLocalFileHeader) throws IOException {
-        this(newReadByteChannel(file.toPath()), file.getAbsolutePath(), encoding, useUnicodeExtraFields, true, ignoreLocalFileHeader);
-    }
+    // Caller closes
 
     /**
      * Opens the given path for reading, assuming "UTF-8" for file names.

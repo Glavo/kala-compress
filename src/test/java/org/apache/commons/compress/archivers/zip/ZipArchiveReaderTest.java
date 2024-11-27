@@ -254,7 +254,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     public void testConcurrentReadFile() throws Exception {
         // mixed.zip contains both inflated and stored files
         final File archive = getFile("mixed.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
 
         final Map<String, byte[]> content = new HashMap<>();
         for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
@@ -366,7 +366,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testDuplicateEntry() throws Exception {
         final File archive = getFile("COMPRESS-227.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
 
         final ZipArchiveEntry ze = zf.getEntry("test1.txt");
         assertNotNull(ze);
@@ -493,7 +493,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testExcessDataInZip64ExtraField() throws Exception {
         final File archive = getFile("COMPRESS-228.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
         // actually, if we get here, the test already has passed
 
         final ZipArchiveEntry ze = zf.getEntry("src/main/java/org/apache/commons/compress/archivers/zip/ZipFile.java");
@@ -611,7 +611,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     public void testOffsets() throws Exception {
         // mixed.zip contains both inflated and stored files
         final File archive = getFile("mixed.zip");
-        try (ZipArchiveReader zf = new ZipArchiveReader(archive)) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(archive.toPath())) {
             final ZipArchiveEntry inflatedEntry = zf.getEntry("inflated.txt");
             assertEquals(0x0000, inflatedEntry.getLocalHeaderOffset());
             assertEquals(0x0046, inflatedEntry.getDataOffset());
@@ -672,7 +672,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
         final File input = getFile("COMPRESS-380/COMPRESS-380-input");
         final File archive = getFile("COMPRESS-380/COMPRESS-380.zip");
         try (InputStream in = Files.newInputStream(input.toPath());
-                ZipArchiveReader zf = new ZipArchiveReader(archive)) {
+                ZipArchiveReader zf = new ZipArchiveReader(archive.toPath())) {
             final byte[] orig = IOUtils.toByteArray(in);
             final ZipArchiveEntry e = zf.getEntry("input2");
             try (InputStream s = zf.getInputStream(e)) {
@@ -690,7 +690,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
         final byte[] fileHeader = "Before Zip file".getBytes(UTF_8);
         final String entryName = "COMPRESS-621.txt";
         final byte[] entryContent = "https://issues.apache.org/jira/browse/COMPRESS-621".getBytes(UTF_8);
-        try (ZipArchiveReader archive = new ZipArchiveReader(getFile("COMPRESS-621.zip"))) {
+        try (ZipArchiveReader archive = new ZipArchiveReader(getFile("COMPRESS-621.zip").toPath())) {
             assertEquals(fileHeader.length, archive.getFirstLocalFileHeaderOffset());
             try (InputStream input = archive.getContentBeforeFirstLocalFileHeader()) {
                 assertArrayEquals(fileHeader, IOUtils.toByteArray(input));
@@ -710,7 +710,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testReadingOfFirstStoredEntry() throws Exception {
         final File archive = getFile("COMPRESS-264.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
         final ZipArchiveEntry ze = zf.getEntry("test.txt");
         assertEquals(5, ze.getSize());
         try (InputStream inputStream = zf.getInputStream(ze)) {
@@ -733,7 +733,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
             zo.closeArchiveEntry();
         }
 
-        zf = new ZipArchiveReader(file);
+        zf = new ZipArchiveReader(file.toPath());
         ze = zf.getEntry("foo");
         assertNotNull(ze);
         try (InputStream i = zf.getInputStream(ze)) {
@@ -860,7 +860,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testSkipsPK00Prefix() throws Exception {
         final File archive = getFile("COMPRESS-208.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
         assertNotNull(zf.getEntry("test1.xml"));
         assertNotNull(zf.getEntry("test2.xml"));
     }
@@ -898,7 +898,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
 
         final File archive = getFile("COMPRESS-214_unix_symlinks.zip");
 
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
         final Enumeration<ZipArchiveEntry> en = zf.getEntries();
         while (en.hasMoreElements()) {
             final ZipArchiveEntry zae = en.nextElement();
@@ -916,7 +916,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
 
     @Test
     public void testUnshrinking() throws Exception {
-        zf = new ZipArchiveReader(getFile("SHRUNK.ZIP"));
+        zf = new ZipArchiveReader(getFile("SHRUNK.ZIP").toPath());
         ZipArchiveEntry test = zf.getEntry("TEST1.XML");
         try (InputStream original = newInputStream("test1.xml");
                 InputStream inputStream = zf.getInputStream(test)) {
@@ -932,7 +932,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testUnzipBZip2CompressedEntry() throws Exception {
         final File archive = getFile("bzip2-zip.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
         final ZipArchiveEntry ze = zf.getEntry("lots-of-as");
         assertEquals(42, ze.getSize());
         final byte[] expected = ArrayFill.fill(new byte[42], (byte) 'a');
@@ -947,7 +947,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testWinzipBackSlashWorkaround() throws Exception {
         final File archive = getFile("test-winzip.zip");
-        zf = new ZipArchiveReader(archive);
+        zf = new ZipArchiveReader(archive.toPath());
         assertNull(zf.getEntry("\u00e4\\\u00fc.txt"));
         assertNotNull(zf.getEntry("\u00e4/\u00fc.txt"));
     }

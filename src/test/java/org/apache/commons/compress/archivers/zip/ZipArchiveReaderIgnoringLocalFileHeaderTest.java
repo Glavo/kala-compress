@@ -45,7 +45,7 @@ public class ZipArchiveReaderIgnoringLocalFileHeaderTest {
     }
 
     private static ZipArchiveReader openZipWithoutLocalFileHeaderDeprecated(final String fileName) throws IOException {
-        return new ZipArchiveReader(AbstractTest.getFile(fileName), StandardCharsets.UTF_8, true, true);
+        return new ZipArchiveReader(AbstractTest.getFile(fileName).toPath(), StandardCharsets.UTF_8, true, true);
     }
 
     @TempDir

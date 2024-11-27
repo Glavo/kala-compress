@@ -199,7 +199,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
     @Test
     public void testRead7ZipArchive() throws IOException {
         final File archive = getFile("utf8-7zip-test.zip");
-        try (ZipArchiveReader zf = new ZipArchiveReader(archive, CP437, false)) {
+        try (ZipArchiveReader zf = new ZipArchiveReader(archive.toPath(), CP437, false)) {
             assertNotNull(zf.getEntry(ASCII_TXT));
             assertNotNull(zf.getEntry(EURO_FOR_DOLLAR_TXT));
             assertNotNull(zf.getEntry(OIL_BARREL_TXT));
