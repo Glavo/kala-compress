@@ -63,8 +63,8 @@ import org.apache.commons.compress.utils.TimeUtils;
  * also set the File to null, since they reference an archive entry not a file.
  * </p>
  * <p>
- * TarEntries that are created from Files that are to be written into an archive are instantiated with the {@link TarArchiveEntry#TarArchiveEntry(File)} or
- * {@link TarArchiveEntry#TarArchiveEntry(Path)} constructor. These entries have their header filled in using the File's information. They also keep a reference
+ * TarEntries that are created from Files that are to be written into an archive are instantiated with the {@link TarArchiveEntry#TarArchiveEntry(Path)} constructor.
+ * These entries have their header filled in using the File's information. They also keep a reference
  * to the File for convenience when writing entries.
  * </p>
  * <p>
@@ -443,62 +443,6 @@ public class TarArchiveEntry implements ArchiveEntry, TarConstants, EntryStreamO
     public TarArchiveEntry(final byte[] headerBuf, final Charset encoding, final boolean lenient, final long dataOffset) throws IOException {
         this(headerBuf, encoding, lenient);
         setDataOffset(dataOffset);
-    }
-
-    /**
-     * Constructs an entry for a file. File is set to file, and the header is constructed from information from the file. The name is set from the normalized
-     * file path.
-     * <p>
-     * The entry's name will be the value of the {@code file}'s path with all file separators replaced by forward slashes and leading slashes as well as Windows
-     * drive letters stripped. The name will end in a slash if the {@code file} represents a directory.
-     * </p>
-     * <p>
-     * Note: Since 1.21 this internally uses the same code as the TarArchiveEntry constructors with a {@link Path} as parameter. But all thrown exceptions are
-     * ignored. If handling those exceptions is needed consider switching to the path constructors.
-     * </p>
-     *
-     * @param file The file that the entry represents.
-     */
-    public TarArchiveEntry(final File file) {
-        this(file, file.getPath());
-    }
-
-    /**
-     * Constructs an entry for a file. File is set to file, and the header is constructed from information from the file.
-     * <p>
-     * The entry's name will be the value of the {@code fileName} argument with all file separators replaced by forward slashes and leading slashes as well as
-     * Windows drive letters stripped. The name will end in a slash if the {@code file} represents a directory.
-     * </p>
-     * <p>
-     * Note: Since 1.21 this internally uses the same code as the TarArchiveEntry constructors with a {@link Path} as parameter. But all thrown exceptions are
-     * ignored. If handling those exceptions is needed consider switching to the path constructors.
-     * </p>
-     *
-     * @param file     The file that the entry represents.
-     * @param fileName the name to be used for the entry.
-     */
-    public TarArchiveEntry(final File file, final String fileName) {
-        final String normalizedName = normalizeFileName(fileName, false);
-        this.file = file.toPath();
-        this.linkOptions = IOUtils.EMPTY_LINK_OPTIONS;
-        try {
-            readFileMode(this.file, normalizedName);
-        } catch (final IOException e) {
-            // Ignore exceptions from NIO for backwards compatibility
-            // Fallback to get size of file if it's no directory to the old file api
-            if (!file.isDirectory()) {
-                this.size = file.length();
-            }
-        }
-        this.userName = "";
-        try {
-            readOsSpecificProperties(this.file);
-        } catch (final IOException e) {
-            // Ignore exceptions from NIO for backwards compatibility
-            // Fallback to get the last modified date of the file from the old file api
-            this.mTime = FileTime.fromMillis(file.lastModified());
-        }
-        preserveAbsolutePath = false;
     }
 
     /**

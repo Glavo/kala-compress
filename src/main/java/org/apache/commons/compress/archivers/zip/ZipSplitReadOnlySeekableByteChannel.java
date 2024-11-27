@@ -76,18 +76,6 @@ public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableBy
     private static final int ZIP_SPLIT_SIGNATURE_LENGTH = 4;
 
     /**
-     * Concatenates ZIP split files from the last segment(the extension SHOULD be .zip)
-     *
-     * @param lastSegmentFile the last segment of ZIP split files, note that the extension SHOULD be .zip
-     * @return SeekableByteChannel that concatenates all ZIP split files
-     * @throws IllegalArgumentException if the lastSegmentFile's extension is NOT .zip
-     * @throws IOException              if the first channel doesn't seem to hold the beginning of a split archive
-     */
-    public static SeekableByteChannel buildFromLastSplitSegment(final File lastSegmentFile) throws IOException {
-        return buildFromLastSplitSegment(lastSegmentFile.toPath());
-    }
-
-    /**
      * Concatenates ZIP split files from the last segment (the extension MUST be .zip)
      *
      * @param lastSegmentPath the last segment of ZIP split files, note that the extension MUST be .zip

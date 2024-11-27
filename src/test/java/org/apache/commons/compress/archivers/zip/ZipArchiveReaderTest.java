@@ -503,7 +503,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testExtractFileLiesAcrossSplitZipSegmentsCreatedByWinrar() throws Exception {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_winrar/split_zip_created_by_winrar.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath())) {
             zf = ZipArchiveReader.builder().setSeekableByteChannel(channel).get();
 
             // the compressed content of ZipArchiveInputStream.java lies between .z01 and .z02
@@ -516,7 +516,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testExtractFileLiesAcrossSplitZipSegmentsCreatedByZip() throws Exception {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath())) {
             zf = new ZipArchiveReader(channel);
 
             // the compressed content of UnsupportedCompressionAlgorithmException.java lies between .z01 and .z02
@@ -535,7 +535,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testExtractFileLiesAcrossSplitZipSegmentsCreatedByZipOfZip64() throws Exception {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip_zip64.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath())) {
             zf = new ZipArchiveReader(channel);
 
             // the compressed content of UnsupportedCompressionAlgorithmException.java lies between .z01 and .z02

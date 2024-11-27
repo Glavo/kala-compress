@@ -194,33 +194,6 @@ public final class ArTest extends AbstractTest {
     }
 
     @Test
-    public void testFileEntryFromFile() throws Exception {
-        final File file = createTempFile();
-        final File archive = createTempFile("test.", ".ar");
-        try (ArArchiveOutputStream aos = new ArArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
-            final ArArchiveEntry in = new ArArchiveEntry(file, "foo");
-            aos.putArchiveEntry(in);
-            final byte[] b = new byte[(int) file.length()];
-            try (InputStream fis = Files.newInputStream(file.toPath())) {
-                while (fis.read(b) > 0) {
-                    aos.write(b);
-                }
-            }
-            aos.closeArchiveEntry();
-        }
-        final ArArchiveEntry out;
-        try (ArArchiveInputStream ais = new ArArchiveInputStream(Files.newInputStream(archive.toPath()))) {
-            out = ais.getNextEntry();
-        }
-        assertNotNull(out);
-        assertEquals("foo", out.getName());
-        assertEquals(file.length(), out.getSize());
-        // AR stores time with a granularity of 1 second
-        assertEquals(file.lastModified() / 1000, out.getLastModifiedDate().getTime() / 1000);
-        assertFalse(out.isDirectory());
-    }
-
-    @Test
     public void testFileEntryFromPath() throws Exception {
         final File file = createTempFile();
         final File archive = createTempFile("test.", ".ar");
@@ -256,7 +229,7 @@ public final class ArTest extends AbstractTest {
         final long beforeArchiveWrite;
         try (ArArchiveOutputStream aos = new ArArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
             beforeArchiveWrite = tmp.lastModified();
-            final ArArchiveEntry in = new ArArchiveEntry(tmp, "foo");
+            final ArArchiveEntry in = new ArArchiveEntry(tmp.toPath(), "foo");
             aos.putArchiveEntry(in);
             aos.closeArchiveEntry();
         }

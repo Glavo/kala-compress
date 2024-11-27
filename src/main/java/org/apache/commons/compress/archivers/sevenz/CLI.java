@@ -16,8 +16,10 @@
  */
 package org.apache.commons.compress.archivers.sevenz;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 /**
@@ -91,11 +93,11 @@ public class CLI {
         }
         final Mode mode = grabMode(args);
         System.out.println(mode.getMessage() + " " + args[0]);
-        final File file = new File(args[0]);
-        if (!file.isFile()) {
+        final Path file = Paths.get(args[0]);
+        if (!Files.isRegularFile(file)) {
             System.err.println(file + " doesn't exist or is a directory");
         }
-        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setFile(file).get()) {
+        try (SevenZArchiveReader archive = SevenZArchiveReader.builder().setPath(file).get()) {
             SevenZArchiveEntry ae;
             while ((ae = archive.getNextEntry()) != null) {
                 mode.takeAction(archive, ae);

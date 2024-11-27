@@ -109,7 +109,7 @@ public final class CpioTest extends AbstractTest {
         final File archive = createTempFile("test.", ".cpio");
         final File dir = getTempDirFile();
         final long beforeArchiveWrite = dir.lastModified();
-        final CpioArchiveEntry entryIn = new CpioArchiveEntry(dir, "foo");
+        final CpioArchiveEntry entryIn = new CpioArchiveEntry(dir.toPath(), "foo");
         try (CpioArchiveOutputStream tos = new CpioArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
             tos.putArchiveEntry(entryIn);
             tos.closeArchiveEntry();
@@ -183,7 +183,7 @@ public final class CpioTest extends AbstractTest {
         final File tmp = createTempFile();
         final File archive = createTempFile("test.", ".cpio");
         try (CpioArchiveOutputStream tos = new CpioArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
-            final CpioArchiveEntry in = new CpioArchiveEntry(tmp, "foo");
+            final CpioArchiveEntry in = new CpioArchiveEntry(tmp.toPath(), "foo");
             tos.putArchiveEntry(in);
             final byte[] b = new byte[(int) tmp.length()];
             try (InputStream fis = Files.newInputStream(tmp.toPath())) {

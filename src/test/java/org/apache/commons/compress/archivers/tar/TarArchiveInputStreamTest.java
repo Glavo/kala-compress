@@ -228,7 +228,7 @@ public class TarArchiveInputStreamTest extends AbstractTest {
                 out.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
                 final File file = new File(rootPath, fileName);
-                final TarArchiveEntry entry = new TarArchiveEntry(file);
+                final TarArchiveEntry entry = new TarArchiveEntry(file.toPath());
                 entry.setName(fileName);
                 out.putArchiveEntry(entry);
                 out.closeArchiveEntry();

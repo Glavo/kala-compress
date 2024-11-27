@@ -36,7 +36,7 @@ public class CpioArchiveOutputStreamTest extends AbstractTest {
         final File output = newTempFile("test.cpio");
         try (OutputStream out = Files.newOutputStream(output.toPath());
                 CpioArchiveOutputStream os = new CpioArchiveOutputStream(out, CpioConstants.FORMAT_OLD_BINARY)) {
-            os.putArchiveEntry(new CpioArchiveEntry(CpioConstants.FORMAT_OLD_BINARY, f, "test1.xml"));
+            os.putArchiveEntry(new CpioArchiveEntry(CpioConstants.FORMAT_OLD_BINARY, f.toPath(), "test1.xml"));
             Files.copy(f.toPath(), os);
             os.closeArchiveEntry();
         }

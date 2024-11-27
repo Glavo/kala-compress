@@ -16,7 +16,6 @@
  */
 package org.apache.commons.compress.archivers.zip;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -242,10 +241,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         return isDirectoryEntryName(entryName) ? entryName : entryName + ZIP_DIR_SEP;
     }
 
-    private static String toEntryName(final File inputFile, final String entryName) {
-        return inputFile.isDirectory() ? toDirectoryEntryName(entryName) : entryName;
-    }
-
     private static String toEntryName(final Path inputPath, final String entryName, final LinkOption... options) {
         return Files.isDirectory(inputPath, options) ? toDirectoryEntryName(entryName) : entryName;
     }
@@ -302,45 +297,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      */
     protected ZipArchiveEntry() {
         this("");
-    }
-
-    /**
-     * Creates a new ZIP entry taking some information from the given file and using the provided name.
-     *
-     * <p>
-     * The name will be adjusted to end with a forward slash "/" if the file is a directory. If the file is not a directory a potential trailing forward slash
-     * will be stripped from the entry name.
-     * </p>
-     *
-     * @param inputFile file to create the entry from
-     * @param entryName name of the entry
-     */
-    public ZipArchiveEntry(final File inputFile, final String entryName) {
-        this(null, inputFile, entryName);
-    }
-
-    /**
-     * Creates a new ZIP entry taking some information from the given file and using the provided name.
-     *
-     * <p>
-     * The name will be adjusted to end with a forward slash "/" if the file is a directory. If the file is not a directory a potential trailing forward slash
-     * will be stripped from the entry name.
-     * </p>
-     *
-     * @param extraFieldFactory custom lookup factory for extra fields or null
-     * @param inputFile         file to create the entry from
-     * @param entryName         name of the entry
-     */
-    private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final File inputFile, final String entryName) {
-        this(extraFieldFactory, toEntryName(inputFile, entryName));
-        try {
-            setAttributes(inputFile.toPath());
-        } catch (final IOException e) { // NOSONAR
-            if (inputFile.isFile()) {
-                setSize(inputFile.length());
-            }
-            setTime(inputFile.lastModified());
-        }
     }
 
     /**

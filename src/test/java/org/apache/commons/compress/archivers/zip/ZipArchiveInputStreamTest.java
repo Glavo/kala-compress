@@ -494,9 +494,9 @@ public class ZipArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testSplitZipCreatedByWinrar() throws IOException {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_winrar/split_zip_created_by_winrar.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile);
-                InputStream inputStream = Channels.newInputStream(channel);
-                ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, StandardCharsets.UTF_8, true, false, true)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath());
+             InputStream inputStream = Channels.newInputStream(channel);
+             ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, StandardCharsets.UTF_8, true, false, true)) {
 
             final File fileToCompare = getFile("COMPRESS-477/split_zip_created_by_winrar/zip_to_compare_created_by_winrar.zip");
             try (ZipArchiveInputStream inputStreamToCompare = new ZipArchiveInputStream(Files.newInputStream(fileToCompare.toPath()),
@@ -516,9 +516,9 @@ public class ZipArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testSplitZipCreatedByZip() throws IOException {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile);
-                InputStream inputStream = Channels.newInputStream(channel);
-                ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, StandardCharsets.UTF_8, true, false, true)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath());
+             InputStream inputStream = Channels.newInputStream(channel);
+             ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, StandardCharsets.UTF_8, true, false, true)) {
 
             final Path fileToCompare = getPath("COMPRESS-477/split_zip_created_by_zip/zip_to_compare_created_by_zip.zip");
             try (ZipArchiveInputStream inputStreamToCompare = new ZipArchiveInputStream(Files.newInputStream(fileToCompare), StandardCharsets.UTF_8,
@@ -538,9 +538,9 @@ public class ZipArchiveInputStreamTest extends AbstractTest {
     @Test
     public void testSplitZipCreatedByZipOfZip64() throws IOException {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip_zip64.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile);
-                InputStream inputStream = Channels.newInputStream(channel);
-                ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, StandardCharsets.UTF_8, true, false, true)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath());
+             InputStream inputStream = Channels.newInputStream(channel);
+             ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, StandardCharsets.UTF_8, true, false, true)) {
 
             final Path fileToCompare = getPath("COMPRESS-477/split_zip_created_by_zip/zip_to_compare_created_by_zip_zip64.zip");
             try (ZipArchiveInputStream inputStreamToCompare = new ZipArchiveInputStream(Files.newInputStream(fileToCompare), StandardCharsets.UTF_8,

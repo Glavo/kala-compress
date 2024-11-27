@@ -56,7 +56,7 @@ public class ZipSplitReadOnlySeekableByteChannelTest {
     @Test
     public void testBuildFromLastSplitSegmentThrowsOnNotZipFile() throws IOException {
         final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
-        assertThrows(IllegalArgumentException.class, () -> ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile));
+        assertThrows(IllegalArgumentException.class, () -> ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath()));
     }
 
     @Test
@@ -199,8 +199,7 @@ public class ZipSplitReadOnlySeekableByteChannelTest {
         final int randomDiskNumber = random.nextInt(3);
         final int randomOffset = randomDiskNumber < 2 ? random.nextInt(firstFileSize) : random.nextInt(lastFileSize);
 
-        try (ZipSplitReadOnlySeekableByteChannel channel = (ZipSplitReadOnlySeekableByteChannel) ZipSplitReadOnlySeekableByteChannel
-                .buildFromLastSplitSegment(lastFile)) {
+        try (ZipSplitReadOnlySeekableByteChannel channel = (ZipSplitReadOnlySeekableByteChannel) ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath())) {
             channel.position(randomDiskNumber, randomOffset);
             long expectedPosition = randomOffset;
 

@@ -79,7 +79,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
             zos.setEncoding(StandardCharsets.UTF_8);
             final ExecutorService es = Executors.newFixedThreadPool(1);
 
-            final ScatterGatherBackingStoreSupplier supp = () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1"));
+            final ScatterGatherBackingStoreSupplier supp = () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1").toPath());
 
             zipCreator = new ParallelScatterZipCreator(es, supp, compressionLevel);
             entries = writeEntriesAsCallable(zipCreator, consumerSupplier.apply(zipCreator));
@@ -98,7 +98,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
             zos.setEncoding(StandardCharsets.UTF_8);
             final ExecutorService es = Executors.newFixedThreadPool(1);
 
-            final ScatterGatherBackingStoreSupplier supp = () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1"));
+            final ScatterGatherBackingStoreSupplier supp = () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1").toPath());
 
             zipCreator = new ParallelScatterZipCreator(es, supp, compressionLevel);
             entries = writeTestFilesAsCallable(zipCreator, consumerSupplier.apply(zipCreator));
@@ -241,7 +241,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
         final int compressLevelTooBig = Deflater.BEST_COMPRESSION + 1;
         final ExecutorService es = Executors.newFixedThreadPool(1);
         assertThrows(IllegalArgumentException.class, () -> new ParallelScatterZipCreator(es,
-                () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1")), compressLevelTooBig));
+                () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1").toPath()), compressLevelTooBig));
         es.shutdownNow();
     }
 
@@ -250,7 +250,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
         final int compressLevelTooSmall = Deflater.DEFAULT_COMPRESSION - 1;
         final ExecutorService es = Executors.newFixedThreadPool(1);
         assertThrows(IllegalArgumentException.class, () -> new ParallelScatterZipCreator(es,
-                () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1")), compressLevelTooSmall));
+                () -> new FileBasedScatterGatherBackingStore(createTempFile("parallelscatter", "n1").toPath()), compressLevelTooSmall));
         es.shutdownNow();
     }
 

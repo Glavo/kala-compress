@@ -16,7 +16,6 @@
  */
 package org.apache.commons.compress.parallel;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,10 +33,6 @@ public class FileBasedScatterGatherBackingStore implements ScatterGatherBackingS
     private final Path target;
     private final OutputStream outputStream;
     private boolean closed;
-
-    public FileBasedScatterGatherBackingStore(final File target) throws FileNotFoundException {
-        this(target.toPath());
-    }
 
     /**
      * Constructs a new instance for the given path.

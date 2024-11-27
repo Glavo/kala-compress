@@ -18,7 +18,6 @@
  */
 package org.apache.commons.compress.archivers.cpio;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -208,16 +207,6 @@ public class CpioArchiveEntry implements CpioConstants, ArchiveEntry {
     /**
      * Creates a CpioArchiveEntry with a specified name for a specified file. The format of this entry will be the new format.
      *
-     * @param inputFile The file to gather information from.
-     * @param entryName The name of this entry.
-     */
-    public CpioArchiveEntry(final File inputFile, final String entryName) {
-        this(FORMAT_NEW, inputFile, entryName);
-    }
-
-    /**
-     * Creates a CpioArchiveEntry with a specified name for a specified file. The format of this entry will be the new format.
-     *
      * @param inputPath The file to gather information from.
      * @param entryName The name of this entry.
      * @param options   options indicating how symbolic links are handled.
@@ -264,37 +253,6 @@ public class CpioArchiveEntry implements CpioConstants, ArchiveEntry {
             throw new IllegalArgumentException("Unknown header type " + format);
         }
         this.fileFormat = format;
-    }
-
-    /**
-     * Creates a CpioArchiveEntry with a specified name for a specified file.
-     *
-     * @param format    The cpio format for this entry.
-     * @param inputFile The file to gather information from.
-     * @param entryName The name of this entry.
-     *                  <p>
-     *                  Possible format values are:
-     *
-     *                  <pre>
-     * CpioConstants.FORMAT_NEW
-     * CpioConstants.FORMAT_NEW_CRC
-     * CpioConstants.FORMAT_OLD_BINARY
-     * CpioConstants.FORMAT_OLD_ASCII
-     *                  </pre>
-     *
-     * @since 1.1
-     */
-    public CpioArchiveEntry(final short format, final File inputFile, final String entryName) {
-        this(format, entryName, inputFile.isFile() ? inputFile.length() : 0);
-        if (inputFile.isDirectory()) {
-            setMode(C_ISDIR);
-        } else if (inputFile.isFile()) {
-            setMode(C_ISREG);
-        } else {
-            throw new IllegalArgumentException("Cannot determine type of file " + inputFile.getName());
-        }
-        // TODO set other fields as needed
-        setTime(inputFile.lastModified() / 1000);
     }
 
     /**

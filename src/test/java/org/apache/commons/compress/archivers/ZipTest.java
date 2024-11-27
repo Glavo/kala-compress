@@ -371,9 +371,9 @@ public final class ZipTest extends AbstractTest {
         final File directoryToZip = getFilesToZip();
         createTestSplitZipSegments();
         final File lastFile = newTempFile("splitZip.zip");
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile);
-                InputStream inputStream = Channels.newInputStream(channel);
-                ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, UTF_8, true, false, true)) {
+        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.buildFromLastSplitSegment(lastFile.toPath());
+             InputStream inputStream = Channels.newInputStream(channel);
+             ZipArchiveInputStream splitInputStream = new ZipArchiveInputStream(inputStream, UTF_8, true, false, true)) {
 
             ArchiveEntry entry;
             final int filesNum = countNonDirectories(directoryToZip);
@@ -482,7 +482,7 @@ public final class ZipTest extends AbstractTest {
         final long beforeArchiveWrite;
         try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive.toPath())) {
             beforeArchiveWrite = tmp.lastModified();
-            final ZipArchiveEntry in = new ZipArchiveEntry(tmp, "foo");
+            final ZipArchiveEntry in = new ZipArchiveEntry(tmp.toPath(), "foo");
             zos.putArchiveEntry(in);
             zos.closeArchiveEntry();
         }
@@ -550,7 +550,7 @@ public final class ZipTest extends AbstractTest {
         final File tmpFile = createTempFile();
         final File archive = createTempFile("test.", ".zip");
         try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(archive.toPath())) {
-            final ZipArchiveEntry in = new ZipArchiveEntry(tmpFile, "foo");
+            final ZipArchiveEntry in = new ZipArchiveEntry(tmpFile.toPath(), "foo");
             zos.putArchiveEntry(in);
             final byte[] b = new byte[(int) tmpFile.length()];
             try (InputStream fis = Files.newInputStream(tmpFile.toPath())) {

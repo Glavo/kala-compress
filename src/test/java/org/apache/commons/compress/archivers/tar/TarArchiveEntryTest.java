@@ -118,7 +118,7 @@ public class TarArchiveEntryTest implements TarConstants {
      */
     @Test
     public void testFileSystemRoot() {
-        final TarArchiveEntry t = new TarArchiveEntry(new File(ROOT));
+        final TarArchiveEntry t = new TarArchiveEntry(new File(ROOT).toPath());
         assertEquals("/", t.getName());
         assertEquals(TarConstants.LF_DIR, t.getLinkFlag());
     }
@@ -195,7 +195,7 @@ public class TarArchiveEntryTest implements TarConstants {
     @Test
     @EnabledOnOs(org.junit.jupiter.api.condition.OS.LINUX)
     public void testLinuxFileInformationFromFile() throws IOException {
-        final TarArchiveEntry entry = new TarArchiveEntry(getFile("test1.xml"));
+        final TarArchiveEntry entry = new TarArchiveEntry(getFile("test1.xml").toPath());
         assertNotEquals(0, entry.getUserId());
         assertNotEquals(0, entry.getGroupId());
         assertNotEquals("", entry.getUserName());
@@ -434,12 +434,12 @@ public class TarArchiveEntryTest implements TarConstants {
     @Test
     public void testTarFileWithFSRoot() throws IOException {
         final File f = File.createTempFile("taetest", ".tar");
-        TarArchiveEntry t = new TarArchiveEntry(new File(ROOT));
+        TarArchiveEntry t = new TarArchiveEntry(new File(ROOT).toPath());
         try {
             try (TarArchiveOutputStream tout = new TarArchiveOutputStream(Files.newOutputStream(f.toPath()))) {
                 tout.putArchiveEntry(t);
                 tout.closeArchiveEntry();
-                t = new TarArchiveEntry(new File(new File(ROOT), "foo.txt"));
+                t = new TarArchiveEntry(new File(new File(ROOT), "foo.txt").toPath());
                 t.setSize(6);
                 tout.putArchiveEntry(t);
                 tout.write(new byte[] { 'h', 'e', 'l', 'l', 'o', ' ' });
@@ -487,7 +487,7 @@ public class TarArchiveEntryTest implements TarConstants {
     @Test
     @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
     public void testWindowsFileInformationFromFile() throws IOException {
-        final TarArchiveEntry entry = new TarArchiveEntry(getFile("test1.xml"));
+        final TarArchiveEntry entry = new TarArchiveEntry(getFile("test1.xml").toPath());
         assertNotEquals("", entry.getUserName());
     }
 

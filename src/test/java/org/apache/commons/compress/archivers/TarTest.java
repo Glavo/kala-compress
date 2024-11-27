@@ -108,7 +108,7 @@ public final class TarTest extends AbstractTest {
         try (TarArchiveOutputStream tos = new TarArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
             final File dir = getTempDirFile();
             beforeArchiveWrite = dir.lastModified();
-            final TarArchiveEntry in = new TarArchiveEntry(dir, "foo");
+            final TarArchiveEntry in = new TarArchiveEntry(dir.toPath(), "foo");
             tos.putArchiveEntry(in);
             tos.closeArchiveEntry();
         }
@@ -195,7 +195,7 @@ public final class TarTest extends AbstractTest {
     public void testFileEntryFromFile() throws Exception {
         final File tmp = createTempFile();
         final File archive = createTempFile("test.", ".tar");
-        final TarArchiveEntry in = new TarArchiveEntry(tmp, "foo");
+        final TarArchiveEntry in = new TarArchiveEntry(tmp.toPath(), "foo");
         try (TarArchiveOutputStream tos = new TarArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
             tos.putArchiveEntry(in);
             final byte[] b = new byte[(int) tmp.length()];
@@ -336,7 +336,7 @@ public final class TarTest extends AbstractTest {
         final File dir = getTempDirFile();
         try (TarArchiveOutputStream tos = new TarArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
             final long beforeArchiveWrite = dir.lastModified();
-            final TarArchiveEntry in = new TarArchiveEntry(dir, "foo");
+            final TarArchiveEntry in = new TarArchiveEntry(dir.toPath(), "foo");
             tos.putArchiveEntry(in);
             tos.closeArchiveEntry();
             tos.close();
@@ -373,7 +373,7 @@ public final class TarTest extends AbstractTest {
         final File tmp = createTempFile();
         final File archive = createTempFile("test.", ".tar");
         try (TarArchiveOutputStream tos = new TarArchiveOutputStream(Files.newOutputStream(archive.toPath()))) {
-            final TarArchiveEntry in = new TarArchiveEntry(tmp, "foo");
+            final TarArchiveEntry in = new TarArchiveEntry(tmp.toPath(), "foo");
             tos.putArchiveEntry(in);
             final byte[] b = new byte[(int) tmp.length()];
             try (InputStream fis = Files.newInputStream(tmp.toPath())) {

@@ -159,7 +159,7 @@ public class TarArchiveOutputStreamTest extends AbstractTest {
         try (OutputStream fos = Files.newOutputStream(f.toPath());
                 ArchiveOutputStream<ArchiveEntry> tarOut = ArchiveStreamFactory.DEFAULT.createArchiveOutputStream(ArchiveStreamFactory.TAR, fos)) {
             final File file1 = getFile("test1.xml");
-            final TarArchiveEntry sEntry = new TarArchiveEntry(file1, file1.getName());
+            final TarArchiveEntry sEntry = new TarArchiveEntry(file1.toPath(), file1.getName());
             tarOut.putArchiveEntry(sEntry);
             try (InputStream in = Files.newInputStream(file1.toPath())) {
                 final byte[] buf = new byte[8192];
