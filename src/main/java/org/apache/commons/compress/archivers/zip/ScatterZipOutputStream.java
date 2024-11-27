@@ -17,7 +17,6 @@
 package org.apache.commons.compress.archivers.zip;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,29 +100,6 @@ public class ScatterZipOutputStream implements Closeable {
                 target.addRawArchiveEntry(compressedEntry.transferToArchiveEntry(), rawStream);
             }
         }
-    }
-
-    /**
-     * Creates a {@link ScatterZipOutputStream} with default compression level that is backed by a file
-     *
-     * @param file The file to offload compressed data into.
-     * @return A ScatterZipOutputStream that is ready for use.
-     * @throws FileNotFoundException if the file cannot be found
-     */
-    public static ScatterZipOutputStream fileBased(final File file) throws FileNotFoundException {
-        return pathBased(file.toPath(), Deflater.DEFAULT_COMPRESSION);
-    }
-
-    /**
-     * Creates a {@link ScatterZipOutputStream} that is backed by a file
-     *
-     * @param file             The file to offload compressed data into.
-     * @param compressionLevel The compression level to use, @see #Deflater
-     * @return A ScatterZipOutputStream that is ready for use.
-     * @throws FileNotFoundException if the file cannot be found
-     */
-    public static ScatterZipOutputStream fileBased(final File file, final int compressionLevel) throws FileNotFoundException {
-        return pathBased(file.toPath(), compressionLevel);
     }
 
     /**

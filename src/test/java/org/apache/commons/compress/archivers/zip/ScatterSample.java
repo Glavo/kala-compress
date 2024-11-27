@@ -27,7 +27,7 @@ public class ScatterSample {
     final ScatterZipOutputStream dirs;
 
     ScatterSample(final ScatterSampleTest scatterSampleTest) throws IOException {
-        this.dirs = ScatterZipOutputStream.fileBased(scatterSampleTest.createTempFile("scatter-dirs", "tmp"));
+        this.dirs = ScatterZipOutputStream.pathBased(scatterSampleTest.createTempPath("scatter-dirs", "tmp"));
     }
 
     public void addEntry(final ZipArchiveEntry zipArchiveEntry, final InputStreamSupplier streamSupplier) throws IOException {

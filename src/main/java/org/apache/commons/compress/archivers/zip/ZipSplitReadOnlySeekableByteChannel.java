@@ -17,7 +17,6 @@
 
 package org.apache.commons.compress.archivers.zip;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -102,44 +101,6 @@ public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableBy
         }
 
         return forPaths(lastSegmentPath, splitZipSegments);
-    }
-
-    /**
-     * Concatenates the given files.
-     *
-     * @param files the files to concatenate, note that the LAST FILE of files should be the LAST SEGMENT(.zip) and these files should be added in correct order
-     *              (e.g. .z01, .z02... .z99, .zip)
-     * @return SeekableByteChannel that concatenates all provided files
-     * @throws NullPointerException if files is null
-     * @throws IOException          if opening a channel for one of the files fails
-     * @throws IOException          if the first channel doesn't seem to hold the beginning of a split archive
-     */
-    public static SeekableByteChannel forFiles(final File... files) throws IOException {
-        final List<Path> paths = new ArrayList<>();
-        for (final File f : Objects.requireNonNull(files, "files")) {
-            paths.add(f.toPath());
-        }
-
-        return forPaths(paths.toArray(EMPTY_PATH_ARRAY));
-    }
-
-    /**
-     * Concatenates the given files.
-     *
-     * @param lastSegmentFile the last segment of split ZIP segments, its extension should be .zip
-     * @param files           the files to concatenate except for the last segment, note these files should be added in correct order (e.g. .z01, .z02... .z99)
-     * @return SeekableByteChannel that concatenates all provided files
-     * @throws IOException          if the first channel doesn't seem to hold the beginning of a split archive
-     * @throws NullPointerException if files or lastSegmentFile is null
-     */
-    public static SeekableByteChannel forFiles(final File lastSegmentFile, final Iterable<File> files) throws IOException {
-        Objects.requireNonNull(files, "files");
-        Objects.requireNonNull(lastSegmentFile, "lastSegmentFile");
-
-        final List<Path> filesList = new ArrayList<>();
-        files.forEach(f -> filesList.add(f.toPath()));
-
-        return forPaths(lastSegmentFile.toPath(), filesList);
     }
 
     /**

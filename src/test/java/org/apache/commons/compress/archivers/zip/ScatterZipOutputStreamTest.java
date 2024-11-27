@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 
 import org.apache.commons.compress.AbstractTempDirTest;
@@ -38,11 +39,11 @@ public class ScatterZipOutputStreamTest extends AbstractTempDirTest {
 
     @Test
     public void testPutArchiveEntry() throws Exception {
-        final File scatterFile = createTempFile("scattertest", ".notzip");
-        final File target = createTempFile("scattertest", ".zip");
+        final Path scatterFile = createTempPath("scattertest", ".notzip");
+        final Path target = createTempPath("scattertest", ".zip");
         final byte[] B_PAYLOAD = "RBBBBBBS".getBytes();
         final byte[] A_PAYLOAD = "XAAY".getBytes();
-        try (ScatterZipOutputStream scatterZipOutputStream = ScatterZipOutputStream.fileBased(scatterFile)) {
+        try (ScatterZipOutputStream scatterZipOutputStream = ScatterZipOutputStream.pathBased(scatterFile)) {
 
             final ZipArchiveEntry zab = new ZipArchiveEntry("b.txt");
             zab.setMethod(ZipEntry.DEFLATED);
@@ -54,12 +55,12 @@ public class ScatterZipOutputStreamTest extends AbstractTempDirTest {
             final ByteArrayInputStream payload1 = new ByteArrayInputStream(A_PAYLOAD);
             scatterZipOutputStream.addArchiveEntry(createZipArchiveEntryRequest(zae, createPayloadSupplier(payload1)));
 
-            try (ZipArchiveOutputStream outputStream = new ZipArchiveOutputStream(target.toPath())) {
+            try (ZipArchiveOutputStream outputStream = new ZipArchiveOutputStream(target)) {
                 scatterZipOutputStream.writeTo(outputStream);
             }
         }
 
-        try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(target).get()) {
+        try (ZipArchiveReader zf = ZipArchiveReader.builder().setPath(target).get()) {
             final ZipArchiveEntry bEntry = zf.getEntries("b.txt").iterator().next();
             assertEquals(8, bEntry.getSize());
             try (InputStream inputStream = zf.getInputStream(bEntry)) {

@@ -85,35 +85,6 @@ public class ZipSplitReadOnlySeekableByteChannelTest {
     }
 
     @Test
-    public void testForFilesOfTwoParametersThrowsOnNullArg() {
-        assertThrows(NullPointerException.class, () -> ZipSplitReadOnlySeekableByteChannel.forFiles(null, null));
-    }
-
-    @Test
-    public void testForFilesReturnCorrectClass() throws IOException {
-        final File firstFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
-        final File secondFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z02");
-        final File lastFile = getFile("COMPRESS-477/split_zip_created_by_zip/split_zip_created_by_zip.z01");
-
-        final ArrayList<File> list = new ArrayList<>();
-        list.add(firstFile);
-        list.add(secondFile);
-
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.forFiles(lastFile, list)) {
-            assertInstanceOf(ZipSplitReadOnlySeekableByteChannel.class, channel);
-        }
-
-        try (SeekableByteChannel channel = ZipSplitReadOnlySeekableByteChannel.forFiles(firstFile, secondFile, lastFile)) {
-            assertInstanceOf(ZipSplitReadOnlySeekableByteChannel.class, channel);
-        }
-    }
-
-    @Test
-    public void testForFilesThrowsOnNullArg() {
-        assertThrows(NullPointerException.class, () -> ZipSplitReadOnlySeekableByteChannel.forFiles((File[]) null));
-    }
-
-    @Test
     public void testForOrderedSeekableByteChannelsOfTwoParametersThrowsOnNullArg() {
         assertThrows(NullPointerException.class, () -> ZipSplitReadOnlySeekableByteChannel.forOrderedSeekableByteChannels(null, null));
     }
