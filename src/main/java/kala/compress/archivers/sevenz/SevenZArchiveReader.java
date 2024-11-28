@@ -112,8 +112,8 @@ public class SevenZArchiveReader implements Closeable {
 
         private long coderSize() {
             return 2 /* methodId is between 1 and four bytes currently, COPY and LZMA2 are the most common with 1 */
-                    + 16 + 4 /* properties, guess */
-            ;
+                   + 16 + 4 /* properties, guess */
+                    ;
         }
 
         private long entrySize() {
@@ -122,14 +122,14 @@ public class SevenZArchiveReader implements Closeable {
 
         long estimateSize() {
             final long lowerBound = 16L * numberOfPackedStreams /* packSizes, packCrcs in Archive */
-                    + numberOfPackedStreams / 8 /* packCrcsDefined in Archive */
-                    + numberOfFolders * folderSize() /* folders in Archive */
-                    + numberOfCoders * coderSize() /* coders in Folder */
-                    + (numberOfOutStreams - numberOfFolders) * bindPairSize() /* bindPairs in Folder */
-                    + 8L * (numberOfInStreams - numberOfOutStreams + numberOfFolders) /* packedStreams in Folder */
-                    + 8L * numberOfOutStreams /* unpackSizes in Folder */
-                    + numberOfEntries * entrySize() /* files in Archive */
-                    + streamMapSize();
+                                    + numberOfPackedStreams / 8 /* packCrcsDefined in Archive */
+                                    + numberOfFolders * folderSize() /* folders in Archive */
+                                    + numberOfCoders * coderSize() /* coders in Folder */
+                                    + (numberOfOutStreams - numberOfFolders) * bindPairSize() /* bindPairs in Folder */
+                                    + 8L * (numberOfInStreams - numberOfOutStreams + numberOfFolders) /* packedStreams in Folder */
+                                    + 8L * numberOfOutStreams /* unpackSizes in Folder */
+                                    + numberOfEntries * entrySize() /* files in Archive */
+                                    + streamMapSize();
             return 2 * lowerBound /* conservative guess */;
         }
 
@@ -139,9 +139,9 @@ public class SevenZArchiveReader implements Closeable {
 
         private long streamMapSize() {
             return 8 * numberOfFolders /* folderFirstPackStreamIndex, folderFirstFileIndex */
-                    + 8 * numberOfPackedStreams /* packStreamOffsets */
-                    + 4 * numberOfEntries /* fileFolderIndex */
-            ;
+                   + 8 * numberOfPackedStreams /* packStreamOffsets */
+                   + 4 * numberOfEntries /* fileFolderIndex */
+                    ;
         }
 
         @Override
@@ -156,10 +156,6 @@ public class SevenZArchiveReader implements Closeable {
      * @since 1.26.0
      */
     public static class Builder extends ArchiveReaderBuilder<SevenZArchiveReader, Builder> {
-
-        static final int MEMORY_LIMIT_IN_KB = Integer.MAX_VALUE;
-        static final boolean USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES = false;
-        static final boolean TRY_TO_RECOVER_BROKEN_ARCHIVES = false;
 
         private byte[] password;
         private int maxMemoryLimitKb = MEMORY_LIMIT_IN_KB;
@@ -176,7 +172,7 @@ public class SevenZArchiveReader implements Closeable {
                 if (actualDescription == null) {
                     actualDescription = DEFAULT_FILE_NAME;
                 }
-            }  else {
+            } else {
                 final Path path = checkPath();
                 OpenOption[] openOptions = this.openOptions;
                 if (openOptions.length == 0) {
@@ -282,10 +278,15 @@ public class SevenZArchiveReader implements Closeable {
     static final int SIGNATURE_HEADER_SIZE = 32;
 
     private static final String DEFAULT_FILE_NAME = "unknown archive";
+    private static final int MEMORY_LIMIT_IN_KB = Integer.MAX_VALUE;
+    private static final boolean USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES = false;
+    private static final boolean TRY_TO_RECOVER_BROKEN_ARCHIVES = false;
 
-    /** Shared with SevenZOutputFile and tests, neither mutates it. */
+    /**
+     * Shared with SevenZOutputFile and tests, neither mutates it.
+     */
     static final byte[] sevenZSignature = { // NOSONAR
-            (byte) '7', (byte) 'z', (byte) 0xBC, (byte) 0xAF, (byte) 0x27, (byte) 0x1C };
+            (byte) '7', (byte) 'z', (byte) 0xBC, (byte) 0xAF, (byte) 0x27, (byte) 0x1C};
 
     private static int assertFitsIntoNonNegativeInt(final String what, final long value) throws IOException {
         if (value > Integer.MAX_VALUE || value < 0) {
@@ -412,7 +413,7 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final File fileName) throws IOException {
-        this(fileName, SevenZFileOptions.DEFAULT);
+        this(fileName, (byte[]) null);
     }
 
     /**
@@ -426,7 +427,11 @@ public class SevenZArchiveReader implements Closeable {
     @SuppressWarnings("resource") // caller closes
     @Deprecated
     public SevenZArchiveReader(final File file, final byte[] password) throws IOException {
-        this(newByteChannel(file), file.getAbsolutePath(), password, true, SevenZFileOptions.DEFAULT);
+        this(newByteChannel(file), file.getAbsolutePath(), password, true,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES
+        );
     }
 
     /**
@@ -440,38 +445,11 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final File file, final char[] password) throws IOException {
-        this(file, password, SevenZFileOptions.DEFAULT);
-    }
-
-    /**
-     * Reads a file as 7z archive with additional options.
-     *
-     * @param file     the file to read
-     * @param password optional password if the archive is encrypted
-     * @param options  the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @SuppressWarnings("resource") // caller closes
-    @Deprecated
-    public SevenZArchiveReader(final File file, final char[] password, final SevenZFileOptions options) throws IOException {
-        this(newByteChannel(file), // NOSONAR
-                file.getAbsolutePath(), AES256SHA256Decoder.utf16Decode(password), true, options);
-    }
-
-    /**
-     * Reads a file as unencrypted 7z archive
-     *
-     * @param file    the file to read
-     * @param options the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    public SevenZArchiveReader(final File file, final SevenZFileOptions options) throws IOException {
-        this(file, null, options);
+        this(newByteChannel(file), file.getAbsolutePath(), AES256SHA256Decoder.utf16Decode(password), true,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES
+        );
     }
 
     /**
@@ -487,7 +465,10 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel) throws IOException {
-        this(channel, SevenZFileOptions.DEFAULT);
+        this(channel, DEFAULT_FILE_NAME, AES256SHA256Decoder.utf16Decode(null), false,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES);
     }
 
     /**
@@ -521,42 +502,11 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final char[] password) throws IOException {
-        this(channel, password, SevenZFileOptions.DEFAULT);
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive with additional options.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel  the channel to read
-     * @param password optional password if the archive is encrypted
-     * @param options  the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    public SevenZArchiveReader(final SeekableByteChannel channel, final char[] password, final SevenZFileOptions options) throws IOException {
-        this(channel, DEFAULT_FILE_NAME, password, options);
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive with additional options.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel the channel to read
-     * @param options the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    public SevenZArchiveReader(final SeekableByteChannel channel, final SevenZFileOptions options) throws IOException {
-        this(channel, DEFAULT_FILE_NAME, null, options);
+        this(channel, DEFAULT_FILE_NAME, AES256SHA256Decoder.utf16Decode(password), false,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES
+        );
     }
 
     /**
@@ -573,7 +523,10 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName) throws IOException {
-        this(channel, fileName, SevenZFileOptions.DEFAULT);
+        this(channel, fileName, null, false,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES);
     }
 
     /**
@@ -591,7 +544,10 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final byte[] password) throws IOException {
-        this(channel, fileName, password, false, SevenZFileOptions.DEFAULT);
+        this(channel, fileName, password, false,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES);
     }
 
     private SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final byte[] password, final boolean closeOnError, final int maxMemoryLimitKb,
@@ -618,24 +574,6 @@ public class SevenZArchiveReader implements Closeable {
     }
 
     /**
-     * Constructs a new instance.
-     *
-     * @param channel      the channel to read.
-     * @param fileName     name of the archive - only used for error reporting.
-     * @param password     optional password if the archive is encrypted.
-     * @param closeOnError closes the channel on error.
-     * @param options      options.
-     * @throws IOException if reading the archive fails
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    private SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final byte[] password, final boolean closeOnError,
-                                final SevenZFileOptions options) throws IOException {
-        this(channel, fileName, password, closeOnError, options.getMaxMemoryLimitInKb(), options.getUseDefaultNameForUnnamedEntries(),
-                options.getTryToRecoverBrokenArchives());
-    }
-
-    /**
      * Reads a SeekableByteChannel as 7z archive
      * <p>
      * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
@@ -650,44 +588,10 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final char[] password) throws IOException {
-        this(channel, fileName, password, SevenZFileOptions.DEFAULT);
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive with additional options.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel  the channel to read
-     * @param fileName name of the archive - only used for error reporting
-     * @param password optional password if the archive is encrypted
-     * @param options  the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final char[] password, final SevenZFileOptions options) throws IOException {
-        this(channel, fileName, AES256SHA256Decoder.utf16Decode(password), false, options);
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive with additional options.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel  the channel to read
-     * @param fileName name of the archive - only used for error reporting
-     * @param options  the options to apply
-     * @throws IOException if reading the archive fails or the memory limit (if set) is too small
-     * @since 1.19
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final SevenZFileOptions options) throws IOException {
-        this(channel, fileName, null, false, options);
+        this(channel, fileName, AES256SHA256Decoder.utf16Decode(password), false,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES);
     }
 
     private InputStream buildDecoderStack(final Folder folder, final long folderOffset, final int firstPackStreamIndex, final SevenZArchiveEntry entry)
@@ -910,7 +814,7 @@ public class SevenZArchiveReader implements Closeable {
      * </p>
      *
      * @return null if the name of the archive is unknown. Otherwise, if the name of the archive has got any extension, it is stripped and the remainder
-     *         returned. Finally, if the name of the archive hasn't got any extension, then a {@code ~} character is appended to the archive name.
+     * returned. Finally, if the name of the archive hasn't got any extension, then a {@code ~} character is appended to the archive name.
      * @since 1.19
      */
     public String getDefaultName() {
@@ -1212,103 +1116,108 @@ public class SevenZArchiveReader implements Closeable {
             }
             final long size = readUint64(header);
             switch (propertyType) {
-            case NID.kEmptyStream: {
-                isEmptyStream = readBits(header, numFilesInt);
-                break;
-            }
-            case NID.kEmptyFile: {
-                isEmptyFile = readBits(header, isEmptyStream.cardinality());
-                break;
-            }
-            case NID.kAnti: {
-                isAnti = readBits(header, isEmptyStream.cardinality());
-                break;
-            }
-            case NID.kName: {
-                /* final int external = */ getUnsignedByte(header);
-                final byte[] names = new byte[(int) (size - 1)];
-                final int namesLength = names.length;
-                get(header, names);
-                int nextFile = 0;
-                int nextName = 0;
-                for (int i = 0; i < namesLength; i += 2) {
-                    if (names[i] == 0 && names[i + 1] == 0) {
-                        checkEntryIsInitialized(fileMap, nextFile);
-                        fileMap.get(nextFile).setName(new String(names, nextName, i - nextName, UTF_16LE));
-                        nextName = i + 2;
-                        nextFile++;
+                case NID.kEmptyStream: {
+                    isEmptyStream = readBits(header, numFilesInt);
+                    break;
+                }
+                case NID.kEmptyFile: {
+                    isEmptyFile = readBits(header, isEmptyStream.cardinality());
+                    break;
+                }
+                case NID.kAnti: {
+                    isAnti = readBits(header, isEmptyStream.cardinality());
+                    break;
+                }
+                case NID.kName: {
+                    /* final int external = */
+                    getUnsignedByte(header);
+                    final byte[] names = new byte[(int) (size - 1)];
+                    final int namesLength = names.length;
+                    get(header, names);
+                    int nextFile = 0;
+                    int nextName = 0;
+                    for (int i = 0; i < namesLength; i += 2) {
+                        if (names[i] == 0 && names[i + 1] == 0) {
+                            checkEntryIsInitialized(fileMap, nextFile);
+                            fileMap.get(nextFile).setName(new String(names, nextName, i - nextName, UTF_16LE));
+                            nextName = i + 2;
+                            nextFile++;
+                        }
                     }
-                }
-                if (nextName != namesLength || nextFile != numFilesInt) {
-                    throw new IOException("Error parsing file names");
-                }
-                break;
-            }
-            case NID.kCTime: {
-                final BitSet timesDefined = readAllOrBits(header, numFilesInt);
-                /* final int external = */ getUnsignedByte(header);
-                for (int i = 0; i < numFilesInt; i++) {
-                    checkEntryIsInitialized(fileMap, i);
-                    final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasCreationTime(timesDefined.get(i));
-                    if (entryAtIndex.getHasCreationTime()) {
-                        entryAtIndex.setCreationTime(getLong(header));
+                    if (nextName != namesLength || nextFile != numFilesInt) {
+                        throw new IOException("Error parsing file names");
                     }
+                    break;
                 }
-                break;
-            }
-            case NID.kATime: {
-                final BitSet timesDefined = readAllOrBits(header, numFilesInt);
-                /* final int external = */ getUnsignedByte(header);
-                for (int i = 0; i < numFilesInt; i++) {
-                    checkEntryIsInitialized(fileMap, i);
-                    final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasAccessTime(timesDefined.get(i));
-                    if (entryAtIndex.getHasAccessTime()) {
-                        entryAtIndex.setAccessTime(getLong(header));
+                case NID.kCTime: {
+                    final BitSet timesDefined = readAllOrBits(header, numFilesInt);
+                    /* final int external = */
+                    getUnsignedByte(header);
+                    for (int i = 0; i < numFilesInt; i++) {
+                        checkEntryIsInitialized(fileMap, i);
+                        final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
+                        entryAtIndex.setHasCreationTime(timesDefined.get(i));
+                        if (entryAtIndex.getHasCreationTime()) {
+                            entryAtIndex.setCreationTime(getLong(header));
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case NID.kMTime: {
-                final BitSet timesDefined = readAllOrBits(header, numFilesInt);
-                /* final int external = */ getUnsignedByte(header);
-                for (int i = 0; i < numFilesInt; i++) {
-                    checkEntryIsInitialized(fileMap, i);
-                    final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasLastModifiedTime(timesDefined.get(i));
-                    if (entryAtIndex.getHasLastModifiedTime()) {
-                        entryAtIndex.setLastModifiedTime(getLong(header));
+                case NID.kATime: {
+                    final BitSet timesDefined = readAllOrBits(header, numFilesInt);
+                    /* final int external = */
+                    getUnsignedByte(header);
+                    for (int i = 0; i < numFilesInt; i++) {
+                        checkEntryIsInitialized(fileMap, i);
+                        final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
+                        entryAtIndex.setHasAccessTime(timesDefined.get(i));
+                        if (entryAtIndex.getHasAccessTime()) {
+                            entryAtIndex.setAccessTime(getLong(header));
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case NID.kWinAttributes: {
-                final BitSet attributesDefined = readAllOrBits(header, numFilesInt);
-                /* final int external = */ getUnsignedByte(header);
-                for (int i = 0; i < numFilesInt; i++) {
-                    checkEntryIsInitialized(fileMap, i);
-                    final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
-                    entryAtIndex.setHasWindowsAttributes(attributesDefined.get(i));
-                    if (entryAtIndex.getHasWindowsAttributes()) {
-                        entryAtIndex.setWindowsAttributes(getInt(header));
+                case NID.kMTime: {
+                    final BitSet timesDefined = readAllOrBits(header, numFilesInt);
+                    /* final int external = */
+                    getUnsignedByte(header);
+                    for (int i = 0; i < numFilesInt; i++) {
+                        checkEntryIsInitialized(fileMap, i);
+                        final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
+                        entryAtIndex.setHasLastModifiedTime(timesDefined.get(i));
+                        if (entryAtIndex.getHasLastModifiedTime()) {
+                            entryAtIndex.setLastModifiedTime(getLong(header));
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case NID.kDummy: {
-                // 7z 9.20 asserts the content is all zeros and ignores the property
-                // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
+                case NID.kWinAttributes: {
+                    final BitSet attributesDefined = readAllOrBits(header, numFilesInt);
+                    /* final int external = */
+                    getUnsignedByte(header);
+                    for (int i = 0; i < numFilesInt; i++) {
+                        checkEntryIsInitialized(fileMap, i);
+                        final SevenZArchiveEntry entryAtIndex = fileMap.get(i);
+                        entryAtIndex.setHasWindowsAttributes(attributesDefined.get(i));
+                        if (entryAtIndex.getHasWindowsAttributes()) {
+                            entryAtIndex.setWindowsAttributes(getInt(header));
+                        }
+                    }
+                    break;
+                }
+                case NID.kDummy: {
+                    // 7z 9.20 asserts the content is all zeros and ignores the property
+                    // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
 
-                skipBytesFully(header, size);
-                break;
-            }
+                    skipBytesFully(header, size);
+                    break;
+                }
 
-            default: {
-                // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
-                skipBytesFully(header, size);
-                break;
-            }
+                default: {
+                    // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
+                    skipBytesFully(header, size);
+                    break;
+                }
             }
         }
         int nonEmptyFileCounter = 0;
@@ -1380,7 +1289,7 @@ public class SevenZArchiveReader implements Closeable {
             // would need to keep looping as above:
             if (moreAlternativeMethods) {
                 throw new IOException("Alternative methods are unsupported, please report. " + // NOSONAR
-                        "The reference implementation doesn't support them either.");
+                                      "The reference implementation doesn't support them either.");
             }
             coders[i] = new Coder(decompressionMethodId, numInStreams, numOutStreams, properties);
         }
@@ -1492,7 +1401,7 @@ public class SevenZArchiveReader implements Closeable {
             return tryToLocateEndHeader(password);
         }
         throw new IOException("archive seems to be invalid.\nYou may want to retry and enable the"
-                + " tryToRecoverBrokenArchives if the archive could be a multi volume archive that has been closed" + " prematurely.");
+                              + " tryToRecoverBrokenArchives if the archive could be a multi volume archive that has been closed" + " prematurely.");
     }
 
     private void readPackInfo(final ByteBuffer header, final Archive archive) throws IOException {
@@ -1524,7 +1433,7 @@ public class SevenZArchiveReader implements Closeable {
         // using Stream rather than ByteBuffer for the benefit of the built-in CRC check
         try (DataInputStream dataInputStream = new DataInputStream(
                 new CRC32VerifyingInputStream(new BoundedSeekableByteChannelInputStream(channel, 20), 20, startHeaderCrc))) {
-                // @formatter:on
+            // @formatter:on
             final long nextHeaderOffset = Long.reverseBytes(dataInputStream.readLong());
             if (nextHeaderOffset < 0 || nextHeaderOffset + SIGNATURE_HEADER_SIZE > channel.size()) {
                 throw new IOException("nextHeaderOffset is out of bounds");
@@ -1645,7 +1554,8 @@ public class SevenZArchiveReader implements Closeable {
         final int numFoldersInt = (int) readUint64(header);
         final Folder[] folders = new Folder[numFoldersInt];
         archive.folders = folders;
-        /* final int external = */ getUnsignedByte(header);
+        /* final int external = */
+        getUnsignedByte(header);
         for (int i = 0; i < numFoldersInt; i++) {
             folders[i] = readFolder(header);
         }
@@ -1749,110 +1659,110 @@ public class SevenZArchiveReader implements Closeable {
             }
             final long size = readUint64(header);
             switch (propertyType) {
-            case NID.kEmptyStream: {
-                emptyStreams = readBits(header, stats.numberOfEntries).cardinality();
-                break;
-            }
-            case NID.kEmptyFile: {
-                if (emptyStreams == -1) {
-                    throw new IOException("Header format error: kEmptyStream must appear before kEmptyFile");
+                case NID.kEmptyStream: {
+                    emptyStreams = readBits(header, stats.numberOfEntries).cardinality();
+                    break;
                 }
-                readBits(header, emptyStreams);
-                break;
-            }
-            case NID.kAnti: {
-                if (emptyStreams == -1) {
-                    throw new IOException("Header format error: kEmptyStream must appear before kAnti");
-                }
-                readBits(header, emptyStreams);
-                break;
-            }
-            case NID.kName: {
-                final int external = getUnsignedByte(header);
-                if (external != 0) {
-                    throw new IOException("Not implemented");
-                }
-                final int namesLength = assertFitsIntoNonNegativeInt("file names length", size - 1);
-                if ((namesLength & 1) != 0) {
-                    throw new IOException("File names length invalid");
-                }
-
-                int filesSeen = 0;
-                for (int i = 0; i < namesLength; i += 2) {
-                    final char c = getChar(header);
-                    if (c == 0) {
-                        filesSeen++;
+                case NID.kEmptyFile: {
+                    if (emptyStreams == -1) {
+                        throw new IOException("Header format error: kEmptyStream must appear before kEmptyFile");
                     }
+                    readBits(header, emptyStreams);
+                    break;
                 }
-                if (filesSeen != stats.numberOfEntries) {
-                    throw new IOException("Invalid number of file names (" + filesSeen + " instead of " + stats.numberOfEntries + ")");
+                case NID.kAnti: {
+                    if (emptyStreams == -1) {
+                        throw new IOException("Header format error: kEmptyStream must appear before kAnti");
+                    }
+                    readBits(header, emptyStreams);
+                    break;
                 }
-                break;
-            }
-            case NID.kCTime: {
-                final int timesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
-                final int external = getUnsignedByte(header);
-                if (external != 0) {
-                    throw new IOException("Not implemented");
-                }
-                if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
-                    throw new IOException("invalid creation times size");
-                }
-                break;
-            }
-            case NID.kATime: {
-                final int timesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
-                final int external = getUnsignedByte(header);
-                if (external != 0) {
-                    throw new IOException("Not implemented");
-                }
-                if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
-                    throw new IOException("invalid access times size");
-                }
-                break;
-            }
-            case NID.kMTime: {
-                final int timesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
-                final int external = getUnsignedByte(header);
-                if (external != 0) {
-                    throw new IOException("Not implemented");
-                }
-                if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
-                    throw new IOException("invalid modification times size");
-                }
-                break;
-            }
-            case NID.kWinAttributes: {
-                final int attributesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
-                final int external = getUnsignedByte(header);
-                if (external != 0) {
-                    throw new IOException("Not implemented");
-                }
-                if (skipBytesFully(header, 4 * attributesDefined) < 4 * attributesDefined) {
-                    throw new IOException("invalid windows attributes size");
-                }
-                break;
-            }
-            case NID.kStartPos: {
-                throw new IOException("kStartPos is unsupported, please report");
-            }
-            case NID.kDummy: {
-                // 7z 9.20 asserts the content is all zeros and ignores the property
-                // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
+                case NID.kName: {
+                    final int external = getUnsignedByte(header);
+                    if (external != 0) {
+                        throw new IOException("Not implemented");
+                    }
+                    final int namesLength = assertFitsIntoNonNegativeInt("file names length", size - 1);
+                    if ((namesLength & 1) != 0) {
+                        throw new IOException("File names length invalid");
+                    }
 
-                if (skipBytesFully(header, size) < size) {
-                    throw new IOException("Incomplete kDummy property");
+                    int filesSeen = 0;
+                    for (int i = 0; i < namesLength; i += 2) {
+                        final char c = getChar(header);
+                        if (c == 0) {
+                            filesSeen++;
+                        }
+                    }
+                    if (filesSeen != stats.numberOfEntries) {
+                        throw new IOException("Invalid number of file names (" + filesSeen + " instead of " + stats.numberOfEntries + ")");
+                    }
+                    break;
                 }
-                break;
-            }
+                case NID.kCTime: {
+                    final int timesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
+                    final int external = getUnsignedByte(header);
+                    if (external != 0) {
+                        throw new IOException("Not implemented");
+                    }
+                    if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
+                        throw new IOException("invalid creation times size");
+                    }
+                    break;
+                }
+                case NID.kATime: {
+                    final int timesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
+                    final int external = getUnsignedByte(header);
+                    if (external != 0) {
+                        throw new IOException("Not implemented");
+                    }
+                    if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
+                        throw new IOException("invalid access times size");
+                    }
+                    break;
+                }
+                case NID.kMTime: {
+                    final int timesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
+                    final int external = getUnsignedByte(header);
+                    if (external != 0) {
+                        throw new IOException("Not implemented");
+                    }
+                    if (skipBytesFully(header, 8 * timesDefined) < 8 * timesDefined) {
+                        throw new IOException("invalid modification times size");
+                    }
+                    break;
+                }
+                case NID.kWinAttributes: {
+                    final int attributesDefined = readAllOrBits(header, stats.numberOfEntries).cardinality();
+                    final int external = getUnsignedByte(header);
+                    if (external != 0) {
+                        throw new IOException("Not implemented");
+                    }
+                    if (skipBytesFully(header, 4 * attributesDefined) < 4 * attributesDefined) {
+                        throw new IOException("invalid windows attributes size");
+                    }
+                    break;
+                }
+                case NID.kStartPos: {
+                    throw new IOException("kStartPos is unsupported, please report");
+                }
+                case NID.kDummy: {
+                    // 7z 9.20 asserts the content is all zeros and ignores the property
+                    // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
 
-            default: {
-                // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
-                if (skipBytesFully(header, size) < size) {
-                    throw new IOException("Incomplete property of type " + propertyType);
+                    if (skipBytesFully(header, size) < size) {
+                        throw new IOException("Incomplete kDummy property");
+                    }
+                    break;
                 }
-                break;
-            }
+
+                default: {
+                    // Compress up to 1.8.1 would throw an exception, now we ignore it (see COMPRESS-287
+                    if (skipBytesFully(header, size) < size) {
+                        throw new IOException("Incomplete property of type " + propertyType);
+                    }
+                    break;
+                }
             }
         }
         stats.numberOfEntriesWithStream = stats.numberOfEntries - Math.max(emptyStreams, 0);
