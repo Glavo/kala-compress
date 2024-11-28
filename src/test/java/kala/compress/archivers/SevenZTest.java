@@ -128,7 +128,7 @@ public class SevenZTest extends AbstractTest {
     @Test
     public void testMultiByteReadConsistentlyReturnsMinusOneAtEofUsingAES() throws Exception {
         assumeStrongCryptoIsAvailable();
-        try (SevenZArchiveReader archive = new SevenZArchiveReader(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(getPath("bla.encrypted.7z"), "foo".toCharArray())) {
             multiByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }
@@ -206,7 +206,7 @@ public class SevenZTest extends AbstractTest {
     @Test
     public void testSingleByteReadConsistentlyReturnsMinusOneAtEofUsingAES() throws Exception {
         assumeStrongCryptoIsAvailable();
-        try (SevenZArchiveReader archive = new SevenZArchiveReader(getFile("bla.encrypted.7z"), "foo".toCharArray())) {
+        try (SevenZArchiveReader archive = new SevenZArchiveReader(getPath("bla.encrypted.7z"), "foo".toCharArray())) {
             singleByteReadConsistentlyReturnsMinusOneAtEof(archive);
         }
     }

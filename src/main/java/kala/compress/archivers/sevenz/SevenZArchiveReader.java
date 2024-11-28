@@ -34,11 +34,9 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -356,10 +354,6 @@ public class SevenZArchiveReader implements Closeable {
         return true;
     }
 
-    private static SeekableByteChannel newByteChannel(final File file) throws IOException {
-        return Files.newByteChannel(file.toPath(), EnumSet.of(StandardOpenOption.READ));
-    }
-
     private static long readUint64(final ByteBuffer in) throws IOException {
         // long rather than int as it might get shifted beyond the range of an int
         final long firstByte = getUnsignedByte(in);
@@ -407,27 +401,25 @@ public class SevenZArchiveReader implements Closeable {
     /**
      * Reads a file as unencrypted 7z archive.
      *
-     * @param fileName the file to read.
+     * @param path the file to read.
      * @throws IOException if reading the archive fails.
-     * @deprecated Use {@link Builder#get()}.
+     * @since 1.27.1-0
      */
-    @Deprecated
-    public SevenZArchiveReader(final File fileName) throws IOException {
-        this(fileName, (byte[]) null);
+    public SevenZArchiveReader(final Path path) throws IOException {
+        this(path, (byte[]) null);
     }
 
     /**
      * Reads a file as 7z archive
      *
-     * @param file     the file to read
+     * @param path     the file to read
      * @param password optional password if the archive is encrypted - the byte array is supposed to be the UTF16-LE encoded representation of the password.
      * @throws IOException if reading the archive fails
-     * @deprecated Use {@link Builder#get()}.
+     * @since 1.27.1-0
      */
     @SuppressWarnings("resource") // caller closes
-    @Deprecated
-    public SevenZArchiveReader(final File file, final byte[] password) throws IOException {
-        this(newByteChannel(file), file.getAbsolutePath(), password, true,
+    public SevenZArchiveReader(final Path path, final byte[] password) throws IOException {
+        this(Files.newByteChannel(path), path.toAbsolutePath().toString(), password, true,
                 MEMORY_LIMIT_IN_KB,
                 USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
                 TRY_TO_RECOVER_BROKEN_ARCHIVES
@@ -437,15 +429,13 @@ public class SevenZArchiveReader implements Closeable {
     /**
      * Reads a file as 7z archive
      *
-     * @param file     the file to read
+     * @param path     the file to read
      * @param password optional password if the archive is encrypted
      * @throws IOException if reading the archive fails
-     * @since 1.17
-     * @deprecated Use {@link Builder#get()}.
+     * @since 1.27.1-0
      */
-    @Deprecated
-    public SevenZArchiveReader(final File file, final char[] password) throws IOException {
-        this(newByteChannel(file), file.getAbsolutePath(), AES256SHA256Decoder.utf16Decode(password), true,
+    public SevenZArchiveReader(final Path path, final char[] password) throws IOException {
+        this(Files.newByteChannel(path), path.toAbsolutePath().toString(), AES256SHA256Decoder.utf16Decode(password), true,
                 MEMORY_LIMIT_IN_KB,
                 USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
                 TRY_TO_RECOVER_BROKEN_ARCHIVES

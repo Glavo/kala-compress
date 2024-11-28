@@ -171,7 +171,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
 
     private void test7zUnarchive(final File file, final SevenZMethod method, final byte[] password) throws Exception {
         try (@SuppressWarnings("deprecation")
-             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(file, password)) {
+             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(file.toPath(), password)) {
             test7zUnarchive(sevenZFile, method);
         }
         try (SevenZArchiveReader sevenZFile = SevenZArchiveReader.builder().setFile(file).setPassword(password).get()) {
@@ -296,7 +296,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     @Test
     public void testExtractSpecifiedFileDeprecated() throws Exception {
         try (@SuppressWarnings("deprecation")
-             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(getFile("COMPRESS-256.7z"))) {
+             SevenZArchiveReader sevenZFile = new SevenZArchiveReader(getPath("COMPRESS-256.7z"))) {
             final String testTxtContents = "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
                                            + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
                                            + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n" + "111111111111111111111111111000101011\n"
