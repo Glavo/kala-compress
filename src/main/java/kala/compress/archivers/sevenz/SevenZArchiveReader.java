@@ -435,11 +435,7 @@ public class SevenZArchiveReader implements Closeable {
      * @since 1.27.1-0
      */
     public SevenZArchiveReader(final Path path, final char[] password) throws IOException {
-        this(Files.newByteChannel(path), path.toAbsolutePath().toString(), AES256SHA256Decoder.utf16Decode(password), true,
-                MEMORY_LIMIT_IN_KB,
-                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
-                TRY_TO_RECOVER_BROKEN_ARCHIVES
-        );
+        this(path, AES256SHA256Decoder.utf16Decode(password));
     }
 
     /**
@@ -483,11 +479,7 @@ public class SevenZArchiveReader implements Closeable {
      * @since 1.17
      */
     public SevenZArchiveReader(final SeekableByteChannel channel, final char[] password) throws IOException {
-        this(channel, DEFAULT_FILE_NAME, AES256SHA256Decoder.utf16Decode(password), false,
-                MEMORY_LIMIT_IN_KB,
-                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
-                TRY_TO_RECOVER_BROKEN_ARCHIVES
-        );
+        this(channel, AES256SHA256Decoder.utf16Decode(password));
     }
 
     /**
@@ -502,10 +494,7 @@ public class SevenZArchiveReader implements Closeable {
      * @since 1.17
      */
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName) throws IOException {
-        this(channel, fileName, null, false,
-                MEMORY_LIMIT_IN_KB,
-                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
-                TRY_TO_RECOVER_BROKEN_ARCHIVES);
+        this(channel, fileName, (byte[]) null);
     }
 
     /**
@@ -540,10 +529,7 @@ public class SevenZArchiveReader implements Closeable {
      * @since 1.17
      */
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final char[] password) throws IOException {
-        this(channel, fileName, AES256SHA256Decoder.utf16Decode(password), false,
-                MEMORY_LIMIT_IN_KB,
-                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
-                TRY_TO_RECOVER_BROKEN_ARCHIVES);
+        this(channel, fileName, AES256SHA256Decoder.utf16Decode(password));
     }
 
     private SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final byte[] password, final boolean closeOnError, final int maxMemoryLimitKb,
