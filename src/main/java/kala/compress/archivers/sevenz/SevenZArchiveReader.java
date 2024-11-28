@@ -451,14 +451,9 @@ public class SevenZArchiveReader implements Closeable {
      * @param channel the channel to read
      * @throws IOException if reading the archive fails
      * @since 1.13
-     * @deprecated Use {@link Builder#get()}.
      */
-    @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel) throws IOException {
-        this(channel, DEFAULT_FILE_NAME, null, false,
-                MEMORY_LIMIT_IN_KB,
-                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
-                TRY_TO_RECOVER_BROKEN_ARCHIVES);
+        this(channel, DEFAULT_FILE_NAME, (byte[]) null);
     }
 
     /**
@@ -471,9 +466,7 @@ public class SevenZArchiveReader implements Closeable {
      * @param password optional password if the archive is encrypted - the byte array is supposed to be the UTF16-LE encoded representation of the password.
      * @throws IOException if reading the archive fails
      * @since 1.13
-     * @deprecated Use {@link Builder#get()}.
      */
-    @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final byte[] password) throws IOException {
         this(channel, DEFAULT_FILE_NAME, password);
     }
@@ -488,9 +481,7 @@ public class SevenZArchiveReader implements Closeable {
      * @param password optional password if the archive is encrypted
      * @throws IOException if reading the archive fails
      * @since 1.17
-     * @deprecated Use {@link Builder#get()}.
      */
-    @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final char[] password) throws IOException {
         this(channel, DEFAULT_FILE_NAME, AES256SHA256Decoder.utf16Decode(password), false,
                 MEMORY_LIMIT_IN_KB,
@@ -509,9 +500,7 @@ public class SevenZArchiveReader implements Closeable {
      * @param fileName name of the archive - only used for error reporting
      * @throws IOException if reading the archive fails
      * @since 1.17
-     * @deprecated Use {@link Builder#get()}.
      */
-    @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName) throws IOException {
         this(channel, fileName, null, false,
                 MEMORY_LIMIT_IN_KB,
@@ -530,11 +519,28 @@ public class SevenZArchiveReader implements Closeable {
      * @param password optional password if the archive is encrypted - the byte array is supposed to be the UTF16-LE encoded representation of the password.
      * @throws IOException if reading the archive fails
      * @since 1.13
-     * @deprecated Use {@link Builder#get()}.
      */
-    @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final byte[] password) throws IOException {
         this(channel, fileName, password, false,
+                MEMORY_LIMIT_IN_KB,
+                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
+                TRY_TO_RECOVER_BROKEN_ARCHIVES);
+    }
+
+    /**
+     * Reads a SeekableByteChannel as 7z archive
+     * <p>
+     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
+     * </p>
+     *
+     * @param channel  the channel to read
+     * @param fileName name of the archive - only used for error reporting
+     * @param password optional password if the archive is encrypted
+     * @throws IOException if reading the archive fails
+     * @since 1.17
+     */
+    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final char[] password) throws IOException {
+        this(channel, fileName, AES256SHA256Decoder.utf16Decode(password), false,
                 MEMORY_LIMIT_IN_KB,
                 USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
                 TRY_TO_RECOVER_BROKEN_ARCHIVES);
@@ -561,27 +567,6 @@ public class SevenZArchiveReader implements Closeable {
                 this.channel.close();
             }
         }
-    }
-
-    /**
-     * Reads a SeekableByteChannel as 7z archive
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel  the channel to read
-     * @param fileName name of the archive - only used for error reporting
-     * @param password optional password if the archive is encrypted
-     * @throws IOException if reading the archive fails
-     * @since 1.17
-     * @deprecated Use {@link Builder#get()}.
-     */
-    @Deprecated
-    public SevenZArchiveReader(final SeekableByteChannel channel, final String fileName, final char[] password) throws IOException {
-        this(channel, fileName, AES256SHA256Decoder.utf16Decode(password), false,
-                MEMORY_LIMIT_IN_KB,
-                USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
-                TRY_TO_RECOVER_BROKEN_ARCHIVES);
     }
 
     private InputStream buildDecoderStack(final Folder folder, final long folderOffset, final int firstPackStreamIndex, final SevenZArchiveEntry entry)
