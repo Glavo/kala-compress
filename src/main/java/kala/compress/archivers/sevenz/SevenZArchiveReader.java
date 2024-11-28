@@ -231,7 +231,7 @@ public class SevenZArchiveReader implements Closeable {
          * @return {@code this} instance.
          */
         public Builder setPassword(final char[] password) {
-            this.password = password != null ? AES256SHA256Decoder.utf16Decode(password.clone()) : null;
+            this.password = AES256SHA256Decoder.utf16Decode(password);
             return this;
         }
 
@@ -242,7 +242,7 @@ public class SevenZArchiveReader implements Closeable {
          * @return {@code this} instance.
          */
         public Builder setPassword(final String password) {
-            this.password = password != null ? AES256SHA256Decoder.utf16Decode(password.toCharArray()) : null;
+            this.password = AES256SHA256Decoder.utf16Decode(password);
             return this;
         }
 

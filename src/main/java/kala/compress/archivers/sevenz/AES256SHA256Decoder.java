@@ -230,6 +230,20 @@ final class AES256SHA256Decoder extends AbstractCoder {
         return e;
     }
 
+    /**
+     * Convenience method that encodes Unicode characters into bytes in UTF-16 (little-endian byte order) charset
+     *
+     * @param string characters to encode
+     * @return encoded characters
+     * @since 1.27.1-0
+     */
+    static byte[] utf16Decode(final String string) {
+        if (string == null) {
+            return null;
+        }
+        return string.getBytes(UTF_16LE);
+    }
+
     AES256SHA256Decoder() {
         super(AES256Options.class);
     }
