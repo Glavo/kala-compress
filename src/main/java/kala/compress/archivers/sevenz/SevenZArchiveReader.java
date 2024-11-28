@@ -465,7 +465,7 @@ public class SevenZArchiveReader implements Closeable {
      */
     @Deprecated
     public SevenZArchiveReader(final SeekableByteChannel channel) throws IOException {
-        this(channel, DEFAULT_FILE_NAME, AES256SHA256Decoder.utf16Decode(null), false,
+        this(channel, DEFAULT_FILE_NAME, null, false,
                 MEMORY_LIMIT_IN_KB,
                 USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES,
                 TRY_TO_RECOVER_BROKEN_ARCHIVES);
