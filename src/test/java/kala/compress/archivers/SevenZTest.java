@@ -34,7 +34,7 @@ import kala.compress.AbstractTest;
 import kala.compress.archivers.sevenz.SevenZArchiveEntry;
 import kala.compress.archivers.sevenz.SevenZArchiveReader;
 import kala.compress.archivers.sevenz.SevenZMethod;
-import kala.compress.archivers.sevenz.SevenZOutputFile;
+import kala.compress.archivers.sevenz.SevenZArchiveWriter;
 import kala.compress.utils.TimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +54,7 @@ public class SevenZTest extends AbstractTest {
         file2 = getFile("test2.xml");
     }
 
-    private void copy(final File src, final SevenZOutputFile dst) throws IOException {
+    private void copy(final File src, final SevenZArchiveWriter dst) throws IOException {
         try (InputStream fis = Files.newInputStream(src.toPath())) {
             final byte[] buffer = new byte[8 * 1024];
             int bytesRead;
@@ -65,7 +65,7 @@ public class SevenZTest extends AbstractTest {
     }
 
     private void createArchive(final SevenZMethod method) throws Exception {
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             outArchive.setContentCompression(method);
             SevenZArchiveEntry entry;
 

@@ -389,7 +389,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     @Test
     public void testHandlesEmptyArchiveWithFilesInfo() throws Exception {
         final File file = newTempFile("empty.7z");
-        try (SevenZOutputFile s = new SevenZOutputFile(file.toPath())) {
+        try (SevenZArchiveWriter s = new SevenZArchiveWriter(file.toPath())) {
         }
         try (SevenZArchiveReader z = SevenZArchiveReader.builder().setFile(file).get()) {
             assertFalse(z.getEntries().iterator().hasNext());
@@ -791,7 +791,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     @Test
     public void testReadingBackDeltaDistance() throws Exception {
         final File output = newTempFile("delta-distance.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             outArchive.setContentMethods(
                     Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.DELTA_FILTER, 32), new SevenZMethodConfiguration(SevenZMethod.LZMA2)));
             final SevenZArchiveEntry entry = new SevenZArchiveEntry();
@@ -812,7 +812,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
     @Test
     public void testReadingBackLZMA2DictSize() throws Exception {
         final File output = newTempFile("lzma2-dictsize.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             outArchive.setContentMethods(Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.LZMA2, 1 << 20)));
             final SevenZArchiveEntry entry = new SevenZArchiveEntry();
             entry.setName("foo.txt");
@@ -868,7 +868,7 @@ public class SevenZArchiveReaderTest extends AbstractTest {
 
     @Test
     public void testRetrieveInputStreamForAllEntriesWithoutCRCMultipleTimes() throws IOException {
-        try (SevenZOutputFile out = new SevenZOutputFile(newTempFile("test.7z").toPath())) {
+        try (SevenZArchiveWriter out = new SevenZArchiveWriter(newTempFile("test.7z").toPath())) {
             final Path inputFile = Files.createTempFile("SevenZTestTemp", "");
 
             final SevenZArchiveEntry entry = out.createArchiveEntry(inputFile.toFile().toPath(), "test.txt");

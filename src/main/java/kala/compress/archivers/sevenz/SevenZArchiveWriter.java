@@ -58,7 +58,7 @@ import kala.compress.utils.TimeUtils;
  *
  * @since 1.6
  */
-public class SevenZOutputFile implements Closeable {
+public class SevenZArchiveWriter implements Closeable {
 
     private final class OutputStreamWrapper extends OutputStream {
 
@@ -131,7 +131,7 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if opening the file fails
      * @since 1.27.1-0
      */
-    public SevenZOutputFile(final Path file) throws IOException {
+    public SevenZArchiveWriter(final Path file) throws IOException {
         this(file, null);
     }
 
@@ -143,7 +143,7 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if opening the file fails
      * @since 1.27.1-0
      */
-    public SevenZOutputFile(final Path file, final char[] password) throws IOException {
+    public SevenZArchiveWriter(final Path file, final char[] password) throws IOException {
         this(Files.newByteChannel(file, EnumSet.of(StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)),
                 password);
     }
@@ -159,7 +159,7 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if the channel cannot be positioned properly
      * @since 1.13
      */
-    public SevenZOutputFile(final SeekableByteChannel channel) throws IOException {
+    public SevenZArchiveWriter(final SeekableByteChannel channel) throws IOException {
         this(channel, null);
     }
 
@@ -175,7 +175,7 @@ public class SevenZOutputFile implements Closeable {
      * @throws IOException if the channel cannot be positioned properly
      * @since 1.23
      */
-    public SevenZOutputFile(final SeekableByteChannel channel, final char[] password) throws IOException {
+    public SevenZArchiveWriter(final SeekableByteChannel channel, final char[] password) throws IOException {
         this.channel = channel;
         channel.position(SevenZArchiveReader.SIGNATURE_HEADER_SIZE);
         if (password != null) {

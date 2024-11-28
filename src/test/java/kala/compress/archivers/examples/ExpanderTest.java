@@ -43,7 +43,7 @@ import kala.compress.archivers.ArchiveOutputStream;
 import kala.compress.archivers.ArchiveStreamFactory;
 import kala.compress.archivers.StreamingNotSupportedException;
 import kala.compress.archivers.sevenz.SevenZArchiveReader;
-import kala.compress.archivers.sevenz.SevenZOutputFile;
+import kala.compress.archivers.sevenz.SevenZArchiveWriter;
 import kala.compress.archivers.tar.TarFile;
 import kala.compress.archivers.zip.ZipArchiveReader;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ public class ExpanderTest extends AbstractTest {
         try (OutputStream o = Files.newOutputStream(dummy.toPath())) {
             o.write(new byte[14]);
         }
-        try (SevenZOutputFile aos = new SevenZOutputFile(archive.toPath())) {
+        try (SevenZArchiveWriter aos = new SevenZArchiveWriter(archive.toPath())) {
             final File inputFile2 = getTempDirFile();
             aos.putArchiveEntry(aos.createArchiveEntry(inputFile2.toPath(), "a"));
             aos.closeArchiveEntry();

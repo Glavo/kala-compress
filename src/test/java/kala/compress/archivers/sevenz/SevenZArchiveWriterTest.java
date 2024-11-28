@@ -46,7 +46,7 @@ import kala.compress.utils.TimeUtils;
 import org.junit.jupiter.api.Test;
 import org.tukaani.xz.LZMA2Options;
 
-public class SevenZOutputFileTest extends AbstractTest {
+public class SevenZArchiveWriterTest extends AbstractTest {
 
     private static final boolean XZ_BCJ_IS_BUGGY;
 
@@ -71,23 +71,23 @@ public class SevenZOutputFileTest extends AbstractTest {
         assertFalse(actualIter.hasNext());
     }
 
-    private void addDir(final SevenZOutputFile archive) throws Exception {
+    private void addDir(final SevenZArchiveWriter archive) throws Exception {
         final File inputFile = getTempDirFile();
         final SevenZArchiveEntry entry = archive.createArchiveEntry(inputFile.toPath(), "foo/");
         archive.putArchiveEntry(entry);
         archive.closeArchiveEntry();
     }
 
-    private void addFile(final SevenZOutputFile archive, final int index, final boolean nonEmpty) throws Exception {
+    private void addFile(final SevenZArchiveWriter archive, final int index, final boolean nonEmpty) throws Exception {
         addFile(archive, index, nonEmpty, null);
     }
 
-    private void addFile(final SevenZOutputFile archive, final int index, final boolean nonEmpty, final Iterable<SevenZMethodConfiguration> methods)
+    private void addFile(final SevenZArchiveWriter archive, final int index, final boolean nonEmpty, final Iterable<SevenZMethodConfiguration> methods)
             throws Exception {
         addFile(archive, index, nonEmpty ? 1 : 0, methods);
     }
 
-    private void addFile(final SevenZOutputFile archive, final int index, final int size, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
+    private void addFile(final SevenZArchiveWriter archive, final int index, final int size, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
         final SevenZArchiveEntry entry = new SevenZArchiveEntry();
         entry.setName("foo/" + index + ".txt");
         entry.setContentMethods(methods);
@@ -97,7 +97,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     }
 
     private void createAndReadBack(final File output, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             outArchive.setContentMethods(methods);
             addFile(outArchive, 0, true);
         }
@@ -108,7 +108,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     }
 
     private void createAndReadBack(final SeekableInMemoryByteChannel output, final Iterable<SevenZMethodConfiguration> methods) throws Exception {
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output)) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output)) {
             outArchive.setContentMethods(methods);
             addFile(outArchive, 0, true);
         }
@@ -138,7 +138,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testArchiveWithMixedMethods() throws Exception {
         final File output = newTempFile("mixed-methods.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             addFile(outArchive, 0, true);
             addFile(outArchive, 1, true, Arrays.asList(new SevenZMethodConfiguration(SevenZMethod.BZIP2)));
         }
@@ -212,7 +212,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testCantFinishTwice() throws IOException {
         final File output = newTempFile("finish.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             outArchive.finish();
             final IOException ex = assertThrows(IOException.class, outArchive::finish, "shouldn't be able to call finish twice");
             assertEquals("This archive has already been finished", ex.getMessage());
@@ -223,7 +223,7 @@ public class SevenZOutputFileTest extends AbstractTest {
         final int nonEmptyModulus = numberOfNonEmptyFiles != 0 ? numberOfFiles / numberOfNonEmptyFiles : numberOfFiles + 1;
         int nonEmptyFilesAdded = 0;
         final File output = newTempFile("COMPRESS252-" + numberOfFiles + "-" + numberOfNonEmptyFiles + ".7z");
-        try (SevenZOutputFile archive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter archive = new SevenZArchiveWriter(output.toPath())) {
             addDir(archive);
             for (int i = 0; i < numberOfFiles; i++) {
                 addFile(archive, i, (i + 1) % nonEmptyModulus == 0 && nonEmptyFilesAdded++ < numberOfNonEmptyFiles);
@@ -263,7 +263,7 @@ public class SevenZOutputFileTest extends AbstractTest {
         cal.add(Calendar.HOUR, -1);
         final FileTime creationTime = FileTime.fromMillis(cal.getTimeInMillis());
 
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             final File inputFile1 = getTempDirFile();
             SevenZArchiveEntry entry = outArchive.createArchiveEntry(inputFile1.toPath(), "foo/");
             outArchive.putArchiveEntry(entry);
@@ -433,7 +433,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testDirectoriesOnly() throws Exception {
         final File output = newTempFile("dirs.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath())) {
             final SevenZArchiveEntry entry = new SevenZArchiveEntry();
             entry.setName("foo/");
             entry.setDirectory(true);
@@ -474,7 +474,7 @@ public class SevenZOutputFileTest extends AbstractTest {
     @Test
     public void testEncrypt() throws Exception {
         final File output = newTempFile("encrypted.7z");
-        try (SevenZOutputFile outArchive = new SevenZOutputFile(output.toPath(), "foo".toCharArray())) {
+        try (SevenZArchiveWriter outArchive = new SevenZArchiveWriter(output.toPath(), "foo".toCharArray())) {
             addFile(outArchive, 0, 1, null);
             addFile(outArchive, 1, 16, null);
             addFile(outArchive, 2, 32, null);

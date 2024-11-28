@@ -23,7 +23,7 @@ import kala.compress.archivers.ArchiveException;
 import kala.compress.archivers.ArchiveOutputStream;
 import kala.compress.archivers.ArchiveStreamFactory;
 import kala.compress.archivers.sevenz.SevenZArchiveEntry;
-import kala.compress.archivers.sevenz.SevenZOutputFile;
+import kala.compress.archivers.sevenz.SevenZArchiveWriter;
 import kala.compress.archivers.zip.ZipArchiveOutputStream;
 import kala.compress.utils.IOUtils;
 
@@ -136,7 +136,7 @@ public class Archiver {
      * @param directory the directory that contains the files to archive.
      * @throws IOException if an I/O error occurs
      */
-    public void create(final SevenZOutputFile target, final File directory) throws IOException {
+    public void create(final SevenZArchiveWriter target, final File directory) throws IOException {
         create(target, directory.toPath());
     }
 
@@ -148,7 +148,7 @@ public class Archiver {
      * @throws IOException if an I/O error occurs
      * @since 1.21
      */
-    public void create(final SevenZOutputFile target, final Path directory) throws IOException {
+    public void create(final SevenZArchiveWriter target, final Path directory) throws IOException {
         // This custom SimpleFileVisitor goes away with Java 8's BiConsumer.
         Files.walkFileTree(directory, new ArchiverFileVisitor<ArchiveOutputStream<ArchiveEntry>, ArchiveEntry>(null, directory) {
 
@@ -306,7 +306,7 @@ public class Archiver {
             } else if (ArchiveStreamFactory.ZIP.equalsIgnoreCase(format)) {
                 create(c.track(new ZipArchiveOutputStream(target)), directory);
             } else if (ArchiveStreamFactory.SEVEN_Z.equalsIgnoreCase(format)) {
-                create(c.track(new SevenZOutputFile(target)), directory);
+                create(c.track(new SevenZArchiveWriter(target)), directory);
             } else {
                 // never reached as prefersSeekableByteChannel only returns true for ZIP and 7z
                 throw new ArchiveException("Don't know how to handle format " + format);
@@ -326,7 +326,7 @@ public class Archiver {
      */
     public void create(final String format, final SeekableByteChannel target, final Path directory) throws IOException {
         if (ArchiveStreamFactory.SEVEN_Z.equalsIgnoreCase(format)) {
-            try (SevenZOutputFile sevenZFile = new SevenZOutputFile(target)) {
+            try (SevenZArchiveWriter sevenZFile = new SevenZArchiveWriter(target)) {
                 create(sevenZFile, directory);
             }
         } else if (ArchiveStreamFactory.ZIP.equalsIgnoreCase(format)) {
