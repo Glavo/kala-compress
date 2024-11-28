@@ -381,7 +381,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
         this.def = new Deflater(level, true);
         this.streamCompressor = StreamCompressor.create(out, def);
         this.isSplitZip = false;
-        this.setEncoding(encoding);
+        this.encoding = Charsets.toCharset(encoding);
     }
 
     /**

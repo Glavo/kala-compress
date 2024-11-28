@@ -47,8 +47,7 @@ public class JarArchiveOutputStream extends ZipArchiveOutputStream {
      * @since 1.27.1-0
      */
     public JarArchiveOutputStream(final OutputStream out, final Charset encoding) {
-        super(out);
-        setEncoding(encoding);
+        super(out, encoding);
     }
 
     // @throws ClassCastException if entry is not an instance of ZipArchiveEntry

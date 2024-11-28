@@ -245,7 +245,6 @@ public class SevenZArchiveReader implements Closeable {
             return this;
         }
 
-
         /**
          * Sets whether {@link SevenZArchiveReader} will try to recover broken archives where the CRC of the file's metadata is 0.
          * <p>
