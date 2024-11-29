@@ -8,28 +8,25 @@ repositories {
 }
 
 dependencies {
-    compileOnlyApi("org.jetbrains:annotations:26.0.1")
-    implementation("org.tukaani:xz:1.10")
-    implementation("com.github.luben:zstd-jni:1.5.6-7")
-    implementation("org.ow2.asm:asm:9.7.1")
+    compileOnlyApi(libs.jetbrains.annotations)
+    implementation(libs.xz)
+    implementation(libs.zstd.jni)
+    implementation(libs.asm)
 
-    val junitVersion = "5.11.0"
-    val mockitoVersion = "5.14.2"
-    val paxExamVersion = "4.13.5"
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-    testImplementation("org.junit.vintage:junit-vintage-engine:$junitVersion")
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-    testImplementation("com.github.marschall:memoryfilesystem:2.8.1")
-    testImplementation("org.ops4j.pax.exam:pax-exam-container-native:$paxExamVersion")
-    testImplementation("org.ops4j.pax.exam:pax-exam-junit4:$paxExamVersion")
-    testImplementation("org.ops4j.pax.exam:pax-exam-cm:$paxExamVersion")
-    testImplementation("org.ops4j.pax.exam:pax-exam-link-mvn:$paxExamVersion")
-    testImplementation("org.apache.felix:org.apache.felix.framework:7.0.5")
-    testImplementation("org.apache.commons:commons-lang3:3.17.0")
-    testImplementation("commons-io:commons-io:2.17.0")
-    testImplementation("javax.inject:javax.inject:1")
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter.params)
+    testImplementation(libs.junit.vintage.engine)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
+    testImplementation(libs.memoryfilesystem)
+    testImplementation(libs.pax.exam.container.native)
+    testImplementation(libs.pax.exam.junit4)
+    testImplementation(libs.pax.exam.cm)
+    testImplementation(libs.pax.exam.link.mvn)
+    testImplementation(libs.felix.framework)
+    testImplementation(libs.commons.lang3)
+    testImplementation(libs.commons.io)
+    testImplementation(libs.javax.inject)
 }
 
 tasks.withType<JavaCompile> {
