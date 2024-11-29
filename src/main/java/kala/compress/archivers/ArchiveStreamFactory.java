@@ -36,7 +36,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import kala.compress.utils.IOUtils;
-import kala.compress.utils.Sets;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,13 +81,6 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
     private static final int DUMP_SIGNATURE_SIZE = 32;
 
     private static final int SIGNATURE_SIZE = 12;
-
-    /**
-     * The singleton instance using the UTF-8.
-     *
-     * @since 1.21
-     */
-    public static final ArchiveStreamFactory DEFAULT = new ArchiveStreamFactory();
 
     /**
      * Constant (value {@value}) used to identify the APK archive format.
@@ -186,7 +178,6 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      */
     public static final String SEVEN_Z = "7z";
 
-
     private static final Map<String, BuiltinArchiver> BUILTIN_ARCHIVERS = new LinkedHashMap<>();
     private static final Set<String> ALL_NAMES;
     private static final Set<String> OUTPUT_NAMES;
@@ -247,9 +238,12 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
         OUTPUT_NAMES = Collections.unmodifiableSet(outputArchiverNames);
     }
 
-    private static Iterable<ArchiveStreamProvider> archiveStreamProviderIterable() {
-        return ServiceLoader.load(ArchiveStreamProvider.class, ClassLoader.getSystemClassLoader());
-    }
+    /**
+     * The singleton instance using the UTF-8.
+     *
+     * @since 1.21
+     */
+    public static final ArchiveStreamFactory DEFAULT = new ArchiveStreamFactory();
 
     /**
      * Try to determine the type of Archiver
@@ -322,66 +316,8 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
         throw new ArchiveException("No Archiver found for the stream signature");
     }
 
-    /**
-     * Constructs a new sorted map from input stream provider names to provider objects.
-     *
-     * <p>
-     * The map returned by this method will have one entry for each provider for which support is available in the current Java virtual machine. If two or more
-     * supported provider have the same name then the resulting map will contain just one of them; which one it will contain is not specified.
-     * </p>
-     *
-     * <p>
-     * The invocation of this method, and the subsequent use of the resulting map, may cause time-consuming disk or network I/O operations to occur. This method
-     * is provided for applications that need to enumerate all of the available providers, for example to allow user provider selection.
-     * </p>
-     *
-     * <p>
-     * This method may return different results at different times if new providers are dynamically made available to the current Java virtual machine.
-     * </p>
-     *
-     * @return An immutable, map from names to provider objects
-     * @since 1.13
-     */
-    public static SortedMap<String, ArchiveStreamProvider> findAvailableArchiveInputStreamProviders() {
-        final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
-        putAll(DEFAULT.getInputStreamArchiveNames(), DEFAULT, map);
-        archiveStreamProviderIterable().forEach(provider -> putAll(provider.getInputStreamArchiveNames(), provider, map));
-        return map;
-    }
-
-    /**
-     * Constructs a new sorted map from output stream provider names to provider objects.
-     *
-     * <p>
-     * The map returned by this method will have one entry for each provider for which support is available in the current Java virtual machine. If two or more
-     * supported provider have the same name then the resulting map will contain just one of them; which one it will contain is not specified.
-     * </p>
-     *
-     * <p>
-     * The invocation of this method, and the subsequent use of the resulting map, may cause time-consuming disk or network I/O operations to occur. This method
-     * is provided for applications that need to enumerate all of the available providers, for example to allow user provider selection.
-     * </p>
-     *
-     * <p>
-     * This method may return different results at different times if new providers are dynamically made available to the current Java virtual machine.
-     * </p>
-     *
-     * @return An immutable, map from names to provider objects
-     * @since 1.13
-     */
-    public static SortedMap<String, ArchiveStreamProvider> findAvailableArchiveOutputStreamProviders() {
-        final TreeMap<String, ArchiveStreamProvider> map = new TreeMap<>();
-        putAll(DEFAULT.getOutputStreamArchiveNames(), DEFAULT, map);
-        archiveStreamProviderIterable().forEach(provider -> putAll(provider.getOutputStreamArchiveNames(), provider, map));
-        return map;
-    }
-
-    static void putAll(final Set<String> names, final ArchiveStreamProvider provider, final TreeMap<String, ArchiveStreamProvider> map) {
-        names.forEach(name -> map.put(toKey(name), provider));
-    }
-
     private static String toKey(final String name) {
-        return name.toUpperCase(Locale.ROOT);
+        return name.toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -389,9 +325,10 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      */
     private final Charset entryEncoding;
 
-    private SortedMap<String, ArchiveStreamProvider> archiveInputStreamProviders;
-
-    private SortedMap<String, ArchiveStreamProvider> archiveOutputStreamProviders;
+    private final SortedMap<String, ArchiveStreamProvider> archiveInputStreamProviders = new TreeMap<>();
+    private final SortedMap<String, ArchiveStreamProvider> archiveOutputStreamProviders = new TreeMap<>();
+    private final Set<String> inputStreamArchiveNames = new HashSet<>(ALL_NAMES);
+    private final Set<String> outputStreamArchiveNames = new HashSet<>(OUTPUT_NAMES);
 
     /**
      * Constructs an instance using the archiver default encoding.
@@ -513,26 +450,18 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
      * Gets an unmodifiable sorted map from input stream provider names to provider objects.
      *
      * @return an unmodifiable sorted map of from input stream provider names to provider objects.
-     * @see #findAvailableArchiveInputStreamProviders()
      */
     public SortedMap<String, ArchiveStreamProvider> getArchiveInputStreamProviders() {
-        if (archiveInputStreamProviders == null) {
-            archiveInputStreamProviders = Collections.unmodifiableSortedMap(findAvailableArchiveInputStreamProviders());
-        }
-        return archiveInputStreamProviders;
+        return Collections.unmodifiableSortedMap(archiveInputStreamProviders);
     }
 
     /**
      * Gets an unmodifiable sorted map from output stream provider names to provider objects.
      *
      * @return an unmodifiable sorted map of from input stream provider names to provider objects.
-     * @see #findAvailableArchiveInputStreamProviders()
      */
     public SortedMap<String, ArchiveStreamProvider> getArchiveOutputStreamProviders() {
-        if (archiveOutputStreamProviders == null) {
-            archiveOutputStreamProviders = Collections.unmodifiableSortedMap(findAvailableArchiveOutputStreamProviders());
-        }
-        return archiveOutputStreamProviders;
+        return Collections.unmodifiableSortedMap(archiveOutputStreamProviders);
     }
 
     /**
@@ -548,12 +477,47 @@ public class ArchiveStreamFactory implements ArchiveStreamProvider {
 
     @Override
     public Set<String> getInputStreamArchiveNames() {
-        return Sets.newHashSet(AR, ARJ, ZIP, TAR, JAR, CPIO, DUMP, SEVEN_Z);
+        return Collections.unmodifiableSet(inputStreamArchiveNames);
     }
 
     @Override
     public Set<String> getOutputStreamArchiveNames() {
-        return Sets.newHashSet(AR, ZIP, TAR, JAR, CPIO, SEVEN_Z);
+        return Collections.unmodifiableSet(outputStreamArchiveNames);
+    }
+
+    /**
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Experimental
+    public ArchiveStreamFactory withInstalledProviders() {
+        return withProviders(ServiceLoader.load(ArchiveStreamProvider.class));
+    }
+
+    /**
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Experimental
+    public ArchiveStreamFactory withInstalledProviders(ClassLoader classLoader) {
+        return withProviders(ServiceLoader.load(ArchiveStreamProvider.class, classLoader));
+    }
+
+    /**
+     * @since 1.27.1-0
+     */
+    @ApiStatus.Experimental
+    public ArchiveStreamFactory withProviders(Iterable<? extends ArchiveStreamProvider> providers) {
+        ArchiveStreamFactory result = new ArchiveStreamFactory(this.entryEncoding);
+        for (ArchiveStreamProvider provider : providers) {
+            for (String name : provider.getInputStreamArchiveNames()) {
+                result.archiveInputStreamProviders.put(toKey(name), provider);
+                result.inputStreamArchiveNames.add(name);
+            }
+            for (String name : provider.getOutputStreamArchiveNames()) {
+                result.archiveOutputStreamProviders.put(toKey(name), provider);
+                result.outputStreamArchiveNames.add(name);
+            }
+        }
+        return result;
     }
 
     /**

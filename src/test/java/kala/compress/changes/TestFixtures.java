@@ -20,6 +20,7 @@
 package kala.compress.changes;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ final class TestFixtures {
     }
 
     static Set<String> getOutputArchiveNames() {
-        final Set<String> outputStreamArchiveNames = ArchiveStreamFactory.DEFAULT.getOutputStreamArchiveNames();
+        final Set<String> outputStreamArchiveNames = new HashSet<>(ArchiveStreamFactory.DEFAULT.getOutputStreamArchiveNames());
         outputStreamArchiveNames.remove(ArchiveStreamFactory.AR); // TODO BUG?
         outputStreamArchiveNames.remove(ArchiveStreamFactory.SEVEN_Z); // TODO Does not support streaming.
         return outputStreamArchiveNames;

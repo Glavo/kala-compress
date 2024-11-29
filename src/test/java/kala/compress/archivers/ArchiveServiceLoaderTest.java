@@ -31,12 +31,14 @@ public class ArchiveServiceLoaderTest {
     @Test
     public void testInputStream() {
         assertThrows(ArchiveException.class,
-                () -> ArchiveStreamFactory.DEFAULT.createArchiveInputStream("ArchiveTestInput1", new ByteArrayInputStream(new byte[] {})));
+                () -> ArchiveStreamFactory.DEFAULT.withInstalledProviders()
+                        .createArchiveInputStream("ArchiveTestInput1", new ByteArrayInputStream(new byte[] {})));
     }
 
     @Test
     public void testOutputStream() {
-        assertThrows(ArchiveException.class, () -> ArchiveStreamFactory.DEFAULT.createArchiveOutputStream("ArchiveTestOutput1", new ByteArrayOutputStream()));
+        assertThrows(ArchiveException.class, () -> ArchiveStreamFactory.DEFAULT.withInstalledProviders()
+                .createArchiveOutputStream("ArchiveTestOutput1", new ByteArrayOutputStream()));
     }
 
 }
