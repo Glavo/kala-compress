@@ -48,6 +48,7 @@ import java.util.zip.CheckedInputStream;
 import kala.compress.utils.BoundedInputStream;
 import kala.compress.utils.ByteUtils;
 import kala.compress.utils.CRC32VerifyingInputStream;
+import kala.compress.utils.FileNameUtils;
 import kala.compress.utils.IOUtils;
 import kala.compress.utils.InputStreamStatistics;
 import kala.compress.utils.SeekableInMemoryByteChannel;
@@ -275,7 +276,7 @@ public class SevenZArchiveReader implements Closeable {
 
     static final int SIGNATURE_HEADER_SIZE = 32;
 
-    private static final String DEFAULT_FILE_NAME = "unknown archive";
+    private static final String DEFAULT_FILE_NAME = new String("unknown archive");
     private static final int MEMORY_LIMIT_IN_KB = Integer.MAX_VALUE;
     private static final boolean USE_DEFAULTNAME_FOR_UNNAMED_ENTRIES = false;
     private static final boolean TRY_TO_RECOVER_BROKEN_ARCHIVES = false;
@@ -779,11 +780,11 @@ public class SevenZArchiveReader implements Closeable {
      * @since 1.19
      */
     public String getDefaultName() {
-        if (DEFAULT_FILE_NAME.equals(fileName) || fileName == null) {
+        if (DEFAULT_FILE_NAME == fileName || fileName == null) {
             return null;
         }
 
-        final String lastSegment = new File(fileName).getName();
+        final String lastSegment = FileNameUtils.getFileName(fileName);
         final int dotPos = lastSegment.lastIndexOf(".");
         if (dotPos > 0) { // if the file starts with a dot then this is not an extension
             return lastSegment.substring(0, dotPos);

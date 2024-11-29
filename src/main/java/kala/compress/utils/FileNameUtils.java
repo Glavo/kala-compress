@@ -17,7 +17,6 @@
 
 package kala.compress.utils;
 
-import java.io.File;
 import java.nio.file.Path;
 
 /**
@@ -38,13 +37,40 @@ public class FileNameUtils {
     }
 
     /**
+     * @since 1.27.1-0
+     */
+    public static String getFileName(final String path) {
+        int end = path.length();
+        while (end > 0) {
+            char ch = path.charAt(end - 1);
+            if (ch != '/' && ch != '\\') {
+                break;
+            }
+            end--;
+        }
+
+        if (end == 0) {
+            return "";
+        }
+
+        for (int start = end - 1; start > 0; start--) {
+            char ch = path.charAt(start);
+            if (ch == '/' || ch == '\\') {
+                return path.substring(start + 1, end);
+            }
+        }
+
+        return path;
+    }
+
+    /**
      * Gets the base name (i.e. the part up to and not including the last ".") of the last path segment of a file name.
      * <p>
      * Will return the file name itself if it doesn't contain any dots. All leading directories of the {@code file name} parameter are skipped.
      * </p>
      *
-     * @return the base name of file name
      * @param path the path of the file to obtain the base name of.
+     * @return the base name of file name
      * @since 1.22
      */
     public static String getBaseName(final Path path) {
@@ -62,14 +88,14 @@ public class FileNameUtils {
      * Will return the file name itself if it doesn't contain any dots. All leading directories of the {@code file name} parameter are skipped.
      * </p>
      *
-     * @return the base name of file name
      * @param fileName the name of the file to obtain the base name of.
+     * @return the base name of file name
      */
     public static String getBaseName(final String fileName) {
         if (fileName == null) {
             return null;
         }
-        return fileNameToBaseName(new File(fileName).getName());
+        return fileNameToBaseName(getFileName(fileName));
     }
 
     /**
@@ -79,8 +105,8 @@ public class FileNameUtils {
      * directories of the {@code file name} parameter are skipped.
      * </p>
      *
-     * @return the extension of file name
      * @param path the path of the file to obtain the extension of.
+     * @return the extension of file name
      * @since 1.22
      */
     public static String getExtension(final Path path) {
@@ -99,13 +125,13 @@ public class FileNameUtils {
      * directories of the {@code fileName} parameter are skipped.
      * </p>
      *
-     * @return the extension of file name
      * @param fileName the name of the file to obtain the extension of.
+     * @return the extension of file name
      */
     public static String getExtension(final String fileName) {
         if (fileName == null) {
             return null;
         }
-        return fileNameToExtension(new File(fileName).getName());
+        return fileNameToExtension(getFileName(fileName));
     }
 }

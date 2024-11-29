@@ -30,6 +30,17 @@ import org.junit.jupiter.api.Test;
 public class FileNameUtilsTest {
 
     @Test
+    public void testGetFileName() {
+        assertEquals("bar.foo", FileNameUtils.getFileName("a/b/c/bar.foo"));
+        assertEquals("foo", FileNameUtils.getFileName("foo"));
+        assertEquals("", FileNameUtils.getFileName(""));
+        assertEquals(".", FileNameUtils.getFileName("."));
+        assertEquals("b", FileNameUtils.getFileName("a/b/"));
+        assertEquals("b", FileNameUtils.getFileName("a\\b\\"));
+        assertEquals("b", FileNameUtils.getFileName("a/b\\/"));
+    }
+
+    @Test
     public void testGetBaseNamePathBaseCases() {
         assertEquals("bar", FileNameUtils.getBaseName(Paths.get("a/b/c/bar.foo")));
         assertEquals("foo", FileNameUtils.getBaseName(Paths.get("foo")));
