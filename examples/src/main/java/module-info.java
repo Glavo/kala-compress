@@ -18,5 +18,6 @@ module kala.compress.examples {
     requires kala.compress.archivers.sevenz;
     requires kala.compress.archivers.zip;
     requires kala.compress.archivers.tar;
+
     exports kala.compress.archivers.examples;
 }

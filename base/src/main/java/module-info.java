@@ -15,6 +15,8 @@
  */
 
 module kala.compress.base {
+    requires org.jetbrains.annotations;
+
     exports kala.compress;
     exports kala.compress.archivers;
     exports kala.compress.compressors;

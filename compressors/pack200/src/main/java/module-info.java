@@ -16,6 +16,9 @@
 
 module kala.compress.compressors.pack200 {
     requires transitive kala.compress.base;
+    requires org.objectweb.asm;
+    requires java.desktop;
+    requires java.logging;
 
     exports kala.compress.compressors.pack200;
 
