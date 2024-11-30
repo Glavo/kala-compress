@@ -7,6 +7,9 @@ Kala Compress
 This project is based on [Apache Commons Compress](https://github.com/apache/commons-compress).
 Kala Compress has made some improvements on its basis: Modularization (JPMS Support), NIO2 Path API support, etc.
 
+Another important improvement of Kala Compress is that it does not depend on libraries such as commons-io and commons-lang3.
+Its core jar has no dependencies and is less than 90KiB in size, making it suitable for programs that have requirements on program size.
+
 Its API is mostly consistent with Apache Commons Compress, with a few incompatibilities.
 So I renamed the package (and the module name) from `org.apache.commons.compress` to `kala.compress`.
 Therefore, it can coexist with Apache Commons Compress without conflict.
@@ -26,9 +29,9 @@ Each compressor and archive is split into a separate artifact with a separate mo
 you can optionally add dependencies on some of them without importing the entire Kala Compress.
 (The size of Kala Compress core jar is less than 90KB)
 
-The appearance of `ArchiveStreamFactory` and `CompressorStreamFactory` has not changed, 
-but the inside has been remodeled to find the optional component through `ServiceLoader` at runtime,
-so they are no longer dependent on them at compile time.
+`ArchiveStreamFactory` and `CompressorStreamFactory` have been refactored internally 
+so that they no longer have hard dependencies on all compressors and archivers,
+but instead look them up dynamically at runtime.
 
 Each module provides its `module-info.class`, so it can work well with `jlink`.
 
@@ -51,17 +54,9 @@ use the `kala.compress.utils.Charsets.nativeCharset()` explicitly as the alterna
 In addition, APIs that accept encoding represented by `String` now no longer fall back to the default character set when the encoding is not supported or invalid.
 Now they throw exceptions just like `Charset.forName`. (The behavior when `null` is passed in is not affected, it will still fall back to the UTF-8)
 
-### NIO2 Support (`java.nio.file.Path` and `java.nio.file.FileSystem`)
+### NIO2 Support
 
-Based on the Commons Compress 1.21, Kala Compress has better support for the NIO2 Path API.
-
-Internally, Kala Compress has switched entirely to Path-based representation, 
-all methods that accept `File` provide overloads that accept `Path`.
-The original `File`-based API is now delegated to the Path-based API. Please use the `Path`-based API first.
-
-Since `File` is no longer used internally, Kala Compress fully supports `Path`s on non default file systems.
-
-(TODO: Provide `FileSystem` implementations for each archivers)
+Most of the `java.io.File`-based APIs in commons-compress have been removed, please use the `java.nio.file.Path`-based APIs.
 
 ### Rename
 
@@ -76,7 +71,7 @@ It should be able to support both reading and writing archives, adding or deleti
 
 ### Deprecation and removal
 
-The deprecated features in Apache Commons Compress 1.21 have all been removed.
+MOst deprecated APIs in Apache Commons Compress have been removed.
 
 Additional support for OSGI is no longer provided, but this shouldn't make a big difference.
 If the problem is caused by caching of dependency checks, use the corresponding `setCache[Library]Availablity` to turn off its caching.
@@ -85,6 +80,8 @@ If the problem is caused by caching of dependency checks, use the corresponding 
 
 All methods that accept encoding represented by `String` have been removed, please use the `Charset` instead.
 
+All methods that accept `java.util.Date` have been removed, please use the `java.nio.file.attribute.FileTime` instead.
+
 Since Security Manager will be removed from JDK in the future, Kala Compress no longer use it.
 For more details, see [JEP 411: Deprecate the Security Manager for Removal](https://openjdk.java.net/jeps/411).
 
@@ -92,17 +89,7 @@ Since `finalize` method will be removed from JDK in the future, Kala Compress no
 For more details, see [JEP 421: Deprecate Finalization for Removal](https://openjdk.java.net/jeps/421).
 The `archiveName` in the `ZipFile` constructor is only used for error reporting in `finalize`, so it is removed together.
 
-The implementation of pack200 was removed, `kala.compress.compressors.pack200` now uses a more flexible reflection strategy to select the underlying implementation:
-
-* By default, it looks for the following pack200 implementations:
-  * For Java 13 and earlier, Kala Compress uses the `java.util.jar.Pack200` built into the JDK,
-    so it doesn't need external dependencies at this time.
-  * [`org.glavo.pack200.Pack200`](https://github.com/Glavo/pack200) (extracted from JDK 13 and published separately)
-  * `org.apache.commons.compress.java.util.jar.Pack200` (available in Apache Commons Compress 1.21)
-  * [`io.pack200.Pack200`](https://github.com/pack200/pack200)
-* You can use `Pack200Utils.setPack200Provider(String provider)` to specify specific implementations to use, including those not in the list above.
-
-A small number of methods that accept the `File` have been removed, please use the `Path` instead.
+Most methods that accept the `File` have been removed, please use the `Path` instead.
 
 ## Modules
 
@@ -134,7 +121,6 @@ All Kala Compress modules are listed below.
 
 This is an empty module, which declares the transitivity dependency on all modules of Kala Compress.
 You can use all the contents of Kala Compress only by adding dependencies on it.
-
 
 ### [`kala.compress.base`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-base) 
 
@@ -204,8 +190,11 @@ Here are some notes:
 
 ### [`kala.compress.changes`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-changes)
 
-
 It contains the package `kala.compress.changes`.
+
+### [`kala.compress.examples`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-examples)
+
+It contains the package `kala.compress.archivers.examples`.
 
 ## Bug Report
 

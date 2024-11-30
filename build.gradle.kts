@@ -28,7 +28,6 @@ buildscript {
     }
 }
 
-
 plugins {
     id("java-library")
     id("jacoco")
@@ -50,7 +49,7 @@ allprojects {
     group = "org.glavo.kala"
     description = "Kala Compress"
 
-    version = rootProject.version
+    version = "1.27.1-0" + // "SNAPSHOT"
 
     repositories {
         mavenCentral()
@@ -71,7 +70,7 @@ allprojects {
 
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.release.set(9)
+        options.release.set(8)
     }
 
     tasks.javadoc {
