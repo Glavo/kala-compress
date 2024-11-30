@@ -18,6 +18,7 @@ package kala.compress.utils;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -140,6 +141,25 @@ public final class TimeUtils {
      */
     public static FileTime unixTimeToFileTime(final long time) {
         return FileTime.from(time, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Converts DOS time to Java time (number of milliseconds since epoch).
+     *
+     * @param dosTime time to convert
+     * @return converted time
+     * @since 1.27.1-0
+     */
+    public static long dosToJavaTime(final long dosTime) {
+        final Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, (int) (dosTime >> 25 & 0x7f) + 1980);
+        cal.set(Calendar.MONTH, (int) (dosTime >> 21 & 0x0f) - 1);
+        cal.set(Calendar.DATE, (int) (dosTime >> 16) & 0x1f);
+        cal.set(Calendar.HOUR_OF_DAY, (int) (dosTime >> 11) & 0x1f);
+        cal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);
+        cal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

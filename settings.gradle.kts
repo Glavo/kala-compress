@@ -8,6 +8,9 @@ project(":base").name = "kala-compress-base"
 include("changes")
 project(":changes").name = "kala-compress-changes"
 
+include("examples")
+project(":examples").name = "kala-compress-examples"
+
 include("archivers")
 project(":archivers").name = "kala-compress-archivers"
 

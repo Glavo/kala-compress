@@ -109,9 +109,15 @@ allprojects {
 
 subprojects {
     rootProject.dependencies.api(this)
+
+    val base = project(":kala-compress-base")
+    if (project != base) {
+        dependencies.api(base)
+    }
 }
 
 dependencies {
+    testImplementation(libs.xz)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter.params)
     testImplementation(libs.junit.vintage.engine)
