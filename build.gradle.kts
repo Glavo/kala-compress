@@ -169,8 +169,6 @@ tasks.test {
     useJUnitPlatform()
     testLogging.showStandardStreams = true
 
-    exclude("org/apache/commons/compress/osgi/**")
-
     if (project.findProperty("run-tarit") != "true") {
         exclude("**/tar/*IT.class")
     }
