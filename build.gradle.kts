@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
+import kala.template.TemplateEngine
+import java.util.Properties
 import kotlin.math.max
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.glavo.kala:kala-template:0.2.0")
+    }
+}
+
 
 plugins {
     id("java-library")
@@ -194,5 +207,25 @@ nexusPublishing {
             username.set(rootProject.ext["sonatypeUsername"].toString())
             password.set(rootProject.ext["sonatypePassword"].toString())
         }
+    }
+}
+
+tasks.create("generateReadMe") {
+    group = "documentation"
+
+    val templateFile = file("README.md.template")
+    val outputFile = file("README.md")
+    val propertiesFile = file("README.properties")
+
+    inputs.files(templateFile, propertiesFile)
+    outputs.file(outputFile)
+
+
+    doLast {
+        val properties = Properties()
+        file("README.properties").reader().use { properties.load(it) }
+
+        TemplateEngine.builder().tag("\$\${", "}").build()
+            .process(templateFile.toPath(), outputFile.toPath(), properties)
     }
 }
