@@ -15,7 +15,7 @@
  */
 
 dependencies {
-    api(project(":kala-compress-archivers::kala-compress-archivers-sevenz"))
-    api(project(":kala-compress-archivers::kala-compress-archivers-tar"))
-    api(project(":kala-compress-archivers::kala-compress-archivers-zip"))
+    implementation(project(":kala-compress-archivers::kala-compress-archivers-sevenz"))
+    implementation(project(":kala-compress-archivers::kala-compress-archivers-tar"))
+    implementation(project(":kala-compress-archivers::kala-compress-archivers-zip"))
 }

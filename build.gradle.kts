@@ -136,6 +136,8 @@ subprojects {
 
 dependencies {
     testImplementation(libs.xz)
+    testImplementation(libs.zstd.jni)
+    testImplementation(libs.asm)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter.params)
     testImplementation(libs.junit.vintage.engine)

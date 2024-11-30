@@ -15,5 +15,5 @@
  */
 
 dependencies {
-    api(libs.zstd.jni)
+    implementation(libs.zstd.jni)
 }
