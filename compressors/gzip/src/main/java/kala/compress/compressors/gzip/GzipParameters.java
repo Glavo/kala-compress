@@ -24,8 +24,8 @@ import kala.compress.utils.Charsets;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.zip.Deflater;
-
 
 /**
  * Parameters for the GZIP compressor.
@@ -147,38 +147,38 @@ public class GzipParameters {
          */
         public static OS from(final int code) {
             switch (code) {
-            case OS_ACORN_RISCOS:
-                return ACORN_RISCOS;
-            case OS_AMIGA:
-                return AMIGA;
-            case OS_ATARI_TOS:
-                return ATARI_TOS;
-            case OS_CPM:
-                return CPM;
-            case OS_FAT:
-                return FAT;
-            case OS_HPFS:
-                return HPFS;
-            case OS_MACINTOSH:
-                return MACINTOSH;
-            case OS_NTFS:
-                return NTFS;
-            case OS_QDOS:
-                return QDOS;
-            case OS_TOPS_20:
-                return TOPS_20;
-            case OS_UNIX:
-                return UNIX;
-            case OS_UNKNOWN:
-                return UNKNOWN;
-            case OS_VM_CMS:
-                return VM_CMS;
-            case OS_VMS:
-                return VMS;
-            case OS_Z_SYSTEM:
-                return Z_SYSTEM;
-            default:
-                return UNKNOWN;
+                case OS_ACORN_RISCOS:
+                    return ACORN_RISCOS;
+                case OS_AMIGA:
+                    return AMIGA;
+                case OS_ATARI_TOS:
+                    return ATARI_TOS;
+                case OS_CPM:
+                    return CPM;
+                case OS_FAT:
+                    return FAT;
+                case OS_HPFS:
+                    return HPFS;
+                case OS_MACINTOSH:
+                    return MACINTOSH;
+                case OS_NTFS:
+                    return NTFS;
+                case OS_QDOS:
+                    return QDOS;
+                case OS_TOPS_20:
+                    return TOPS_20;
+                case OS_UNIX:
+                    return UNIX;
+                case OS_UNKNOWN:
+                    return UNKNOWN;
+                case OS_VM_CMS:
+                    return VM_CMS;
+                case OS_VMS:
+                    return VMS;
+                case OS_Z_SYSTEM:
+                    return Z_SYSTEM;
+                default:
+                    return UNKNOWN;
             }
         }
 
@@ -357,12 +357,22 @@ public class GzipParameters {
      * Gets the file name.
      *
      * @return the file name.
+     * @deprecated Use {@link #getFileName()}.
+     */
+    @Deprecated
+    public String getFilename() {
+        return fileName;
+    }
+
+    /**
+     * Gets the file name.
+     *
+     * @return the file name.
      * @since 1.25.0
      */
     public String getFileName() {
         return fileName;
     }
-
 
     /**
      * Gets the Charset to use for writing file names and comments.
@@ -376,6 +386,7 @@ public class GzipParameters {
     public Charset getFileNameCharset() {
         return fileNameCharset;
     }
+
 
     /**
      * Gets the most recent modification time (MTIME) of the original file being compressed.
@@ -420,6 +431,18 @@ public class GzipParameters {
         return operatingSystem;
     }
 
+    private String requireNonNulByte(final String text) {
+        if (text != null && !text.isEmpty()) {
+            byte[] bytes = text.getBytes(fileNameCharset);
+            for (byte b : bytes) {
+                if (b == 0) {
+                    throw new IllegalArgumentException("String encoded in Charset '" + fileNameCharset + "' contains the nul byte 0 which is not supported in gzip.");
+                }
+            }
+        }
+        return text;
+    }
+
     /**
      * Sets size of the buffer used to retrieve compressed data from {@link Deflater} and write to underlying {@link OutputStream}.
      *
@@ -437,9 +460,10 @@ public class GzipParameters {
      * Sets an arbitrary user-defined comment.
      *
      * @param comment a user-defined comment.
+     * @throws IllegalArgumentException if the encoded bytes would contain a nul byte '\0' reserved for gzip field termination.
      */
     public void setComment(final String comment) {
-        this.comment = comment;
+        this.comment = requireNonNulByte(comment);
     }
 
     /**
@@ -484,9 +508,10 @@ public class GzipParameters {
      * Sets the name of the compressed file.
      *
      * @param fileName the name of the file without the directory path
+     * @throws IllegalArgumentException if the encoded bytes would contain a nul byte '\0' reserved for gzip field termination.
      */
     public void setFileName(final String fileName) {
-        this.fileName = fileName;
+        this.fileName = requireNonNulByte(fileName);
     }
 
     /**

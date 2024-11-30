@@ -20,11 +20,16 @@
 package kala.compress.compressors.gzip;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.charset.Charset;
 import java.util.zip.Deflater;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Tests {@link GzipParameters}.
@@ -37,6 +42,50 @@ public class GzipParametersTest {
         assertEquals(Deflater.DEFAULT_STRATEGY, gzipParameters.getDeflateStrategy());
         gzipParameters.setDeflateStrategy(Deflater.HUFFMAN_ONLY);
         assertEquals(Deflater.HUFFMAN_ONLY, gzipParameters.getDeflateStrategy());
+    }
+
+    @ParameterizedTest
+    //@formatter:off
+    @CsvSource({
+            "          , hello\0world, false",
+            "ISO-8859-1, hello\0world, false",
+            "UTF-8     , hello\0world, false",
+            "UTF-16BE  , helloworld, false"
+    })
+    //@formatter:on
+    public void testIllegalCommentOrFileName(final Charset charset, final String text) {
+        final GzipParameters gzipParameters = new GzipParameters();
+        // null resets to default value
+        gzipParameters.setFileNameCharset(charset);
+        assertThrows(IllegalArgumentException.class, () -> gzipParameters.setComment(text));
+        assertNull(gzipParameters.getComment());
+        assertThrows(IllegalArgumentException.class, () -> gzipParameters.setFileName(text));
+        assertNull(gzipParameters.getFileName());
+        assertThrows(IllegalArgumentException.class, () -> gzipParameters.setFileName(text));
+        assertNull(gzipParameters.getFileName());
+    }
+
+    @ParameterizedTest
+    //@formatter:off
+    @CsvSource({
+            "          , helloworld",
+            "          , helloéworld",
+            "ISO-8859-1, helloworld",
+            "ISO-8859-1, helloéworld",
+            "UTF-8     , helloworld",
+            "UTF-8     , helloéworld"
+    })
+    //@formatter:on
+    public void testLegalCommentOrFileName(final Charset charset, final String text) {
+        final GzipParameters gzipParameters = new GzipParameters();
+        // null resets to default value
+        gzipParameters.setFileNameCharset(charset);
+        gzipParameters.setComment(text);
+        assertEquals(text, gzipParameters.getComment());
+        gzipParameters.setFileName(text);
+        assertEquals(text, gzipParameters.getFileName());
+        gzipParameters.setFileName(text);
+        assertEquals(text, gzipParameters.getFileName());
     }
 
     @Test
