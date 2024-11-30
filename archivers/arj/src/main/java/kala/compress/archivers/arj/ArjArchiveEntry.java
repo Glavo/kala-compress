@@ -18,6 +18,7 @@ package kala.compress.archivers.arj;
 
 import java.io.File;
 import java.nio.file.attribute.FileTime;
+import java.util.concurrent.TimeUnit;
 
 import kala.compress.archivers.ArchiveEntry;
 import kala.compress.utils.TimeUtils;
@@ -121,8 +122,8 @@ public class ArjArchiveEntry implements ArchiveEntry {
     /**
      * The operating system the archive has been created on.
      *
-     * @see HostOs
      * @return the host OS code
+     * @see HostOs
      */
     public int getHostOs() {
         return localFileHeader.hostOS;
@@ -143,8 +144,9 @@ public class ArjArchiveEntry implements ArchiveEntry {
      */
     @Override
     public FileTime getLastModifiedTime() {
-        final long ts = isHostOsUnix() ? localFileHeader.dateTimeModified * 1000L : TimeUtils.dosToJavaTime(0xFFFFFFFFL & localFileHeader.dateTimeModified);
-        return FileTime.fromMillis(ts);
+        return isHostOsUnix()
+                ? FileTime.from(localFileHeader.dateTimeModified, TimeUnit.SECONDS)
+                : TimeUtils.dosTimeToFileTime(0xFFFFFFFFL & localFileHeader.dateTimeModified);
     }
 
     int getMethod() {

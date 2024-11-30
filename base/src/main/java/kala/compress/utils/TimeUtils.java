@@ -150,7 +150,7 @@ public final class TimeUtils {
      * @return converted time
      * @since 1.27.1-0
      */
-    public static long dosToJavaTime(final long dosTime) {
+    public static FileTime dosTimeToFileTime(final long dosTime) {
         final Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, (int) (dosTime >> 25 & 0x7f) + 1980);
         cal.set(Calendar.MONTH, (int) (dosTime >> 21 & 0x0f) - 1);
@@ -159,7 +159,7 @@ public final class TimeUtils {
         cal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);
         cal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);
         cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTimeInMillis();
+        return FileTime.fromMillis(cal.getTimeInMillis());
     }
 
     /** Private constructor to prevent instantiation of this utility class. */

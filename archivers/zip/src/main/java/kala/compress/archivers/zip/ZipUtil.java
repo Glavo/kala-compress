@@ -171,7 +171,7 @@ public abstract class ZipUtil {
      * @return converted time
      */
     public static long dosToJavaTime(final long dosTime) {
-        return TimeUtils.dosToJavaTime(dosTime);
+        return TimeUtils.dosTimeToFileTime(dosTime).toMillis();
     }
 
     /**
