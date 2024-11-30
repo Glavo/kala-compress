@@ -91,7 +91,7 @@ public class BigFilesIT extends AbstractTest {
             Files.copy(gzin, output, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        try (TarFile tarFile = new TarFile(output)) {
+        try (TarArchiveReader tarFile = new TarArchiveReader(output)) {
             final List<TarArchiveEntry> entries = tarFile.getEntries();
             assertEquals(1, entries.size());
             assertNotNull(entries.get(0));

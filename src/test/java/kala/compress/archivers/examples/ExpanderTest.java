@@ -44,7 +44,7 @@ import kala.compress.archivers.ArchiveStreamFactory;
 import kala.compress.archivers.StreamingNotSupportedException;
 import kala.compress.archivers.sevenz.SevenZArchiveReader;
 import kala.compress.archivers.sevenz.SevenZArchiveWriter;
-import kala.compress.archivers.tar.TarFile;
+import kala.compress.archivers.tar.TarArchiveReader;
 import kala.compress.archivers.zip.ZipArchiveReader;
 import org.junit.jupiter.api.Test;
 
@@ -187,7 +187,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testCompress603Tar() throws IOException, ArchiveException {
         setupTarForCompress603();
-        try (TarFile f = new TarFile(archive.toPath())) {
+        try (TarArchiveReader f = new TarArchiveReader(archive.toPath())) {
             new Expander().expand(f, tempResultDir);
         }
         verifyTargetDir();
@@ -274,7 +274,7 @@ public class ExpanderTest extends AbstractTest {
     @Test
     public void testTarFileVersion() throws IOException, ArchiveException {
         setupTar();
-        try (TarFile f = new TarFile(archive.toPath())) {
+        try (TarArchiveReader f = new TarArchiveReader(archive.toPath())) {
             new Expander().expand(f, tempResultDir);
         }
         verifyTargetDir();

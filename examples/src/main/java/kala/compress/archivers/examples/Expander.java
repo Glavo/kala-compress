@@ -24,7 +24,7 @@ import kala.compress.archivers.ArchiveInputStream;
 import kala.compress.archivers.ArchiveStreamFactory;
 import kala.compress.archivers.sevenz.SevenZArchiveReader;
 import kala.compress.archivers.tar.TarArchiveEntry;
-import kala.compress.archivers.tar.TarFile;
+import kala.compress.archivers.tar.TarArchiveReader;
 import kala.compress.archivers.zip.ZipArchiveEntry;
 import kala.compress.archivers.zip.ZipArchiveReader;
 import kala.compress.utils.IOUtils;
@@ -403,7 +403,7 @@ public class Expander {
             if (!prefersSeekableByteChannel(format)) {
                 expand(format, c.track(Channels.newInputStream(archive)), targetDirectory, CloseableConsumer.NULL_CONSUMER);
             } else if (ArchiveStreamFactory.TAR.equalsIgnoreCase(format)) {
-                expand(c.track(new TarFile(archive)), targetDirectory);
+                expand(c.track(new TarArchiveReader(archive)), targetDirectory);
             } else if (ArchiveStreamFactory.ZIP.equalsIgnoreCase(format)) {
                 expand(c.track(ZipArchiveReader.builder().setSeekableByteChannel(archive).get()), targetDirectory);
             } else if (ArchiveStreamFactory.SEVEN_Z.equalsIgnoreCase(format)) {
@@ -423,7 +423,7 @@ public class Expander {
      * @throws IOException if an I/O error occurs
      * @since 1.21
      */
-    public void expand(final TarFile archive, final File targetDirectory) throws IOException {
+    public void expand(final TarArchiveReader archive, final File targetDirectory) throws IOException {
         expand(archive, toPath(targetDirectory));
     }
 
@@ -435,7 +435,7 @@ public class Expander {
      * @throws IOException if an I/O error occurs
      * @since 1.22
      */
-    public void expand(final TarFile archive, final Path targetDirectory) throws IOException {
+    public void expand(final TarArchiveReader archive, final Path targetDirectory) throws IOException {
         final Iterator<TarArchiveEntry> entryIterator = archive.getEntries().iterator();
         expand(() -> entryIterator.hasNext() ? entryIterator.next() : null, (entry, out) -> {
             try (InputStream in = archive.getInputStream(entry)) {

@@ -44,7 +44,7 @@ import kala.compress.utils.SeekableInMemoryByteChannel;
  *
  * @since 1.21
  */
-public class TarFile implements Closeable {
+public class TarArchiveReader implements Closeable {
 
     private final class BoundedTarEntryInputStream extends BoundedArchiveInputStream {
 
@@ -184,7 +184,7 @@ public class TarFile implements Closeable {
      * @param content the content to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final byte[] content) throws IOException {
+    public TarArchiveReader(final byte[] content) throws IOException {
         this(new SeekableInMemoryByteChannel(content));
     }
 
@@ -196,7 +196,7 @@ public class TarFile implements Closeable {
      *                {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final byte[] content, final boolean lenient) throws IOException {
+    public TarArchiveReader(final byte[] content, final boolean lenient) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, lenient);
     }
 
@@ -208,7 +208,7 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      * @since 1.27.1-0
      */
-    public TarFile(final byte[] content, final Charset encoding) throws IOException {
+    public TarArchiveReader(final byte[] content, final Charset encoding) throws IOException {
         this(new SeekableInMemoryByteChannel(content), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
@@ -218,7 +218,7 @@ public class TarFile implements Closeable {
      * @param archivePath the path of the archive to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final Path archivePath) throws IOException {
+    public TarArchiveReader(final Path archivePath) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, false);
     }
 
@@ -230,7 +230,7 @@ public class TarFile implements Closeable {
      *                    {@link TarArchiveEntry#UNKNOWN}. When set to false such illegal fields cause an exception instead.
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final Path archivePath, final boolean lenient) throws IOException {
+    public TarArchiveReader(final Path archivePath, final boolean lenient) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, lenient);
     }
 
@@ -242,7 +242,7 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      * @since 1.27.1-0
      */
-    public TarFile(final Path archivePath, final Charset encoding) throws IOException {
+    public TarArchiveReader(final Path archivePath, final Charset encoding) throws IOException {
         this(Files.newByteChannel(archivePath), TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, encoding, false);
     }
 
@@ -252,7 +252,7 @@ public class TarFile implements Closeable {
      * @param content the content to use
      * @throws IOException when reading the tar archive fails
      */
-    public TarFile(final SeekableByteChannel content) throws IOException {
+    public TarArchiveReader(final SeekableByteChannel content) throws IOException {
         this(content, TarConstants.DEFAULT_BLKSIZE, TarConstants.DEFAULT_RCDSIZE, null, false);
     }
 
@@ -268,7 +268,7 @@ public class TarFile implements Closeable {
      * @throws IOException when reading the tar archive fails
      * @since 1.27.1-0
      */
-    public TarFile(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient)
+    public TarArchiveReader(final SeekableByteChannel archive, final int blockSize, final int recordSize, final Charset encoding, final boolean lenient)
             throws IOException {
         this.archive = archive;
         this.encoding = Charsets.toCharset(encoding);

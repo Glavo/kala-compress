@@ -22,7 +22,7 @@ import kala.compress.archivers.ArchiveException;
 import kala.compress.archivers.ArchiveInputStream;
 import kala.compress.archivers.ArchiveStreamFactory;
 import kala.compress.archivers.sevenz.SevenZArchiveReader;
-import kala.compress.archivers.tar.TarFile;
+import kala.compress.archivers.tar.TarArchiveReader;
 import kala.compress.archivers.zip.ZipArchiveEntry;
 import kala.compress.archivers.zip.ZipArchiveReader;
 
@@ -158,7 +158,7 @@ public final class Lister {
     }
 
     private  void listZipUsingTarFile(final Path file) throws IOException {
-        try (TarFile tarFile = new TarFile(file)) {
+        try (TarArchiveReader tarFile = new TarArchiveReader(file)) {
             println("Created " + tarFile);
             tarFile.getEntries().forEach(this::println);
         }
