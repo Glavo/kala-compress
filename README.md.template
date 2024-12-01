@@ -71,10 +71,12 @@ It should be able to support both reading and writing archives, adding or deleti
 
 ### Deprecation and removal
 
-MOst deprecated APIs in Apache Commons Compress have been removed.
+Most deprecated APIs in Apache Commons Compress have been removed. 
+
+Unlike commons-compress, the constructors of `ZipArchiveReader`/`SevenZArchiveReader`  are not deprecated,
+so there is no need to use lengthy builder syntax for simple requirements.
 
 Additional support for OSGI is no longer provided, but this shouldn't make a big difference.
-If the problem is caused by caching of dependency checks, use the corresponding `setCache[Library]Availablity` to turn off its caching.
 
 `ZipEncoding` and `CharsetNames` has been removed, please switch to `Charset` and `StandardCharsets`.
 
