@@ -31,7 +31,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Enumeration;
 import java.util.zip.CRC32;
 
 import kala.compress.AbstractTest;
@@ -127,9 +126,7 @@ public class UTF8ZipFilesTest extends AbstractTest {
 
     private static void testFile(final File file, final Charset encoding) throws IOException {
         try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(file).setCharset(encoding).setUseUnicodeExtraFields(false).get()) {
-            final Enumeration<ZipArchiveEntry> e = zf.getEntries();
-            while (e.hasMoreElements()) {
-                final ZipArchiveEntry ze = e.nextElement();
+            for (ZipArchiveEntry ze : zf.getEntries()) {
                 if (ze.getName().endsWith("sser.txt")) {
                     assertUnicodeName(ze, OIL_BARREL_TXT, encoding);
                 } else if (ze.getName().endsWith("_for_Dollar.txt")) {

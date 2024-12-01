@@ -36,7 +36,6 @@ import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.TimeZone;
 import java.util.zip.ZipException;
 
@@ -437,13 +436,9 @@ public class X5455_ExtendedTimestampTest {
         final File archive = AbstractTest.getFile("COMPRESS-210_unix_time_zip_test.zip");
 
         try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(archive).get()) {
-            final Enumeration<ZipArchiveEntry> en = zf.getEntries();
-
             // We expect EVERY entry of this ZIP file
             // to contain extra field 0x5455.
-            while (en.hasMoreElements()) {
-
-                final ZipArchiveEntry zae = en.nextElement();
+            for (ZipArchiveEntry zae : zf.getEntries()) {
                 if (zae.isDirectory()) {
                     continue;
                 }

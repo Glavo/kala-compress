@@ -35,7 +35,7 @@ public class ScatterSampleTest extends AbstractTempDirTest {
 
     private void checkFile(final File result) throws IOException {
         try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setFile(result).get()) {
-            final ZipArchiveEntry archiveEntry1 = zipFile.getEntries().nextElement();
+            final ZipArchiveEntry archiveEntry1 = zipFile.getEntries().iterator().next();
             assertEquals("test1.xml", archiveEntry1.getName());
             try (InputStream inputStream = zipFile.getInputStream(archiveEntry1)) {
                 final byte[] b = new byte[6];

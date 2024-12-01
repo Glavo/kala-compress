@@ -154,7 +154,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
     private void multiByteReadConsistentlyReturnsMinusOneAtEof(final File file) throws Exception {
         final byte[] buf = new byte[2];
         try (ZipArchiveReader archive = ZipArchiveReader.builder().setFile(file).get()) {
-            final ZipArchiveEntry e = archive.getEntries().nextElement();
+            final ZipArchiveEntry e = archive.getEntries().iterator().next();
             try (InputStream is = archive.getInputStream(e)) {
                 IOUtils.toByteArray(is);
                 assertEquals(-1, is.read(buf));
@@ -188,7 +188,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
 
     private void singleByteReadConsistentlyReturnsMinusOneAtEof(final File file) throws Exception {
         try (ZipArchiveReader archive = ZipArchiveReader.builder().setFile(file).get();) {
-            final ZipArchiveEntry e = archive.getEntries().nextElement();
+            final ZipArchiveEntry e = archive.getEntries().iterator().next();
             try (InputStream is = archive.getInputStream(e)) {
                 IOUtils.toByteArray(is);
                 assertEquals(-1, is.read());
@@ -224,7 +224,8 @@ public class ZipArchiveReaderTest extends AbstractTest {
     }
 
     private void testCDOrderInMemory(final ZipArchiveReader zipFile) {
-        final ArrayList<ZipArchiveEntry> list = Collections.list(zipFile.getEntries());
+        final ArrayList<ZipArchiveEntry> list = new ArrayList<>();
+        zipFile.getEntries().forEach(list::add);
         assertEntryName(list, 0, "AbstractUnicodeExtraField");
         assertEntryName(list, 1, "AsiExtraField");
         assertEntryName(list, 2, "ExtraFieldUtils");
@@ -257,7 +258,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
         zf = new ZipArchiveReader(archive.toPath());
 
         final Map<String, byte[]> content = new HashMap<>();
-        for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+        for (final ZipArchiveEntry entry : zf.getEntries()) {
             try (InputStream inputStream = zf.getInputStream(entry)) {
                 content.put(entry.getName(), IOUtils.toByteArray(inputStream));
             }
@@ -265,7 +266,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
 
         final AtomicInteger passedCount = new AtomicInteger();
         final IORunnable run = () -> {
-            for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+            for (final ZipArchiveEntry entry : zf.getEntries()) {
                 assertAllReadMethods(content.get(entry.getName()), zf, entry);
             }
             passedCount.incrementAndGet();
@@ -290,7 +291,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
             zf = ZipArchiveReader.builder().setSeekableByteChannel(channel).setCharset(StandardCharsets.UTF_8).get();
 
             final Map<String, byte[]> content = new HashMap<>();
-            for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+            for (final ZipArchiveEntry entry : zf.getEntries()) {
                 try (InputStream inputStream = zf.getInputStream(entry)) {
                     content.put(entry.getName(), IOUtils.toByteArray(inputStream));
                 }
@@ -298,7 +299,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
 
             final AtomicInteger passedCount = new AtomicInteger();
             final IORunnable run = () -> {
-                for (final ZipArchiveEntry entry : Collections.list(zf.getEntries())) {
+                for (final ZipArchiveEntry entry : zf.getEntries()) {
                     assertAllReadMethods(content.get(entry.getName()), zf, entry);
                 }
                 passedCount.incrementAndGet();
@@ -626,7 +627,8 @@ public class ZipArchiveReaderTest extends AbstractTest {
     @Test
     public void testPhysicalOrder() throws Exception {
         readOrderTest();
-        final ArrayList<ZipArchiveEntry> l = Collections.list(zf.getEntriesInPhysicalOrder());
+        final ArrayList<ZipArchiveEntry> l = new ArrayList<>();
+        zf.getEntriesInPhysicalOrder().forEach(l::add);
         assertEntryName(l, 0, "AbstractUnicodeExtraField");
         assertEntryName(l, 1, "AsiExtraField");
         assertEntryName(l, 2, "ExtraFieldUtils");
@@ -899,9 +901,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
         final File archive = getFile("COMPRESS-214_unix_symlinks.zip");
 
         zf = new ZipArchiveReader(archive.toPath());
-        final Enumeration<ZipArchiveEntry> en = zf.getEntries();
-        while (en.hasMoreElements()) {
-            final ZipArchiveEntry zae = en.nextElement();
+        for (ZipArchiveEntry zae : zf.getEntries()) {
             final String link = zf.getUnixSymlink(zae);
             if (zae.isUnixSymlink()) {
                 final String name = zae.getName();

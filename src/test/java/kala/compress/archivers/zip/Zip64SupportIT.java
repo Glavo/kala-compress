@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.zip.ZipEntry;
 
@@ -164,8 +164,7 @@ public class Zip64SupportIT {
         try {
             zf = ZipArchiveReader.builder().setFile(f).get();
             int files = 0;
-            for (final Enumeration<ZipArchiveEntry> e = zf.getEntries(); e.hasMoreElements();) {
-                final ZipArchiveEntry zae = e.nextElement();
+            for (ZipArchiveEntry zae : zf.getEntries()) {
                 if (!zae.isDirectory()) {
                     files++;
                     assertEquals(0, zae.getSize());
@@ -208,11 +207,11 @@ public class Zip64SupportIT {
         ZipArchiveReader zf = null;
         try {
             zf = ZipArchiveReader.builder().setFile(f).get();
-            final Enumeration<ZipArchiveEntry> e = zf.getEntries();
-            assertTrue(e.hasMoreElements());
-            ZipArchiveEntry zae = e.nextElement();
+            final Iterator<ZipArchiveEntry> e = zf.getEntries().iterator();
+            assertTrue(e.hasNext());
+            ZipArchiveEntry zae = e.next();
             while (zae.isDirectory()) {
-                zae = e.nextElement();
+                zae = e.next();
             }
             assertEquals(expectedName, zae.getName());
             assertEquals(FIVE_BILLION, zae.getSize());
@@ -232,7 +231,7 @@ public class Zip64SupportIT {
                 }
             }
             assertEquals(FIVE_BILLION, read);
-            assertFalse(e.hasMoreElements());
+            assertFalse(e.hasNext());
         } finally {
             IOUtils.closeQuietly(zf);
         }
@@ -1895,8 +1894,7 @@ public class Zip64SupportIT {
             try {
                 zf = ZipArchiveReader.builder().setFile(f).get();
                 int idx = 0;
-                for (final Enumeration<ZipArchiveEntry> e = zf.getEntriesInPhysicalOrder(); e.hasMoreElements();) {
-                    final ZipArchiveEntry zae = e.nextElement();
+                for (ZipArchiveEntry zae : zf.getEntriesInPhysicalOrder()) {
                     assertEquals(String.valueOf(idx), zae.getName());
                     if (idx++ < 2) {
                         assertEquals(FIVE_BILLION / 2, zae.getSize());
@@ -2287,7 +2285,7 @@ public class Zip64SupportIT {
         final File zipUsingModeAlwaysWithCompatibility = buildZipWithZip64Mode("testZip64ModeAlwaysWithCompatibility-output-1",
                 Zip64Mode.AlwaysWithCompatibility, inputFile);
         final ZipArchiveReader zipFileWithAlwaysWithCompatibility = ZipArchiveReader.builder().setFile(zipUsingModeAlwaysWithCompatibility).get();
-        ZipArchiveEntry entry = zipFileWithAlwaysWithCompatibility.getEntries().nextElement();
+        ZipArchiveEntry entry = zipFileWithAlwaysWithCompatibility.getEntries().iterator().next();
         for (final ZipExtraField extraField : entry.getExtraFields()) {
             if (!(extraField instanceof Zip64ExtendedInformationExtraField)) {
                 continue;
@@ -2301,7 +2299,7 @@ public class Zip64SupportIT {
         // set in extra fields
         final File zipUsingModeAlways = buildZipWithZip64Mode("testZip64ModeAlwaysWithCompatibility-output-2", Zip64Mode.Always, inputFile);
         final ZipArchiveReader zipFileWithAlways = ZipArchiveReader.builder().setFile(zipUsingModeAlways).get();
-        entry = zipFileWithAlways.getEntries().nextElement();
+        entry = zipFileWithAlways.getEntries().iterator().next();
         for (final ZipExtraField extraField : entry.getExtraFields()) {
             if (!(extraField instanceof Zip64ExtendedInformationExtraField)) {
                 continue;

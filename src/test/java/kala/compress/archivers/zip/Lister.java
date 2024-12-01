@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Enumeration;
 
 import kala.compress.archivers.ArchiveEntry;
 import kala.compress.utils.Charsets;
@@ -81,8 +80,7 @@ public final class Lister {
             }
         } else {
             try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(f).setCharset(cl.encoding).get()) {
-                for (final Enumeration<ZipArchiveEntry> entries = zf.getEntries(); entries.hasMoreElements();) {
-                    final ZipArchiveEntry ze = entries.nextElement();
+                for (ZipArchiveEntry ze : zf.getEntries()) {
                     list(ze);
                     if (cl.dir != null) {
                         try (InputStream is = zf.getInputStream(ze)) {

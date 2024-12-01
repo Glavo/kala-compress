@@ -41,8 +41,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -95,12 +95,12 @@ public final class ZipTest extends AbstractTest {
             final byte[] expectedBuf = new byte[size];
             final byte[] actualBuf = new byte[size];
 
-            final Enumeration<ZipArchiveEntry> actualInOrder = actual.getEntriesInPhysicalOrder();
-            final Enumeration<ZipArchiveEntry> expectedInOrder = expected.getEntriesInPhysicalOrder();
+            final Iterator<ZipArchiveEntry> actualInOrder = actual.getEntriesInPhysicalOrder().iterator();
+            final Iterator<ZipArchiveEntry> expectedInOrder = expected.getEntriesInPhysicalOrder().iterator();
 
-            while (actualInOrder.hasMoreElements()) {
-                final ZipArchiveEntry actualElement = actualInOrder.nextElement();
-                final ZipArchiveEntry expectedElement = expectedInOrder.nextElement();
+            while (actualInOrder.hasNext()) {
+                final ZipArchiveEntry actualElement = actualInOrder.next();
+                final ZipArchiveEntry expectedElement = expectedInOrder.next();
                 assertEquals(expectedElement.getName(), actualElement.getName());
                 // Don't compare timestamps since they may vary;
                 // there's no support for stubbed out clock (TimeSource) in ZipArchiveOutputStream
@@ -184,14 +184,11 @@ public final class ZipTest extends AbstractTest {
     private File getFilesToZip() throws IOException {
         final File originalZipFile = getFile("COMPRESS-477/split_zip_created_by_zip/zip_to_compare_created_by_zip.zip");
         try (ZipArchiveReader zipFile = newZipFile(originalZipFile)) {
-            final Enumeration<ZipArchiveEntry> zipEntries = zipFile.getEntries();
-            ZipArchiveEntry zipEntry;
             File outputFile;
             byte[] buffer;
             int readLen;
 
-            while (zipEntries.hasMoreElements()) {
-                zipEntry = zipEntries.nextElement();
+            for (ZipArchiveEntry zipEntry : zipFile.getEntries()) {
                 if (zipEntry.isDirectory()) {
                     continue;
                 }
@@ -203,7 +200,7 @@ public final class ZipTest extends AbstractTest {
                 outputFile = newTempFile(zipEntry.getName());
 
                 try (InputStream inputStream = zipFile.getInputStream(zipEntry);
-                        OutputStream outputStream = Files.newOutputStream(outputFile.toPath())) {
+                     OutputStream outputStream = Files.newOutputStream(outputFile.toPath())) {
                     buffer = new byte[(int) zipEntry.getSize()];
                     while ((readLen = inputStream.read(buffer)) > 0) {
                         outputStream.write(buffer, 0, readLen);
@@ -580,9 +577,7 @@ public final class ZipTest extends AbstractTest {
         }
         // file access
         try (ZipArchiveReader zf = newZipFile(input)) {
-            final Enumeration<ZipArchiveEntry> entries = zf.getEntries();
-            while (entries.hasMoreElements()) {
-                final ZipArchiveEntry zae = entries.nextElement();
+            for (ZipArchiveEntry zae : zf.getEntries()) {
                 try (InputStream in = zf.getInputStream(zae)) {
                     readStream(in, zae, actualStatistics);
                 }

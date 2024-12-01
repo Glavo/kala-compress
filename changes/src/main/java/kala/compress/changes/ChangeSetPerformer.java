@@ -20,7 +20,6 @@ package kala.compress.changes;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -90,12 +89,12 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
     private static final class ZipFileIterator implements ArchiveEntryIterator<ZipArchiveEntry> {
 
         private final ZipArchiveReader reader;
-        private final Enumeration<ZipArchiveEntry> nestedEnumeration;
+        private final Iterator<ZipArchiveEntry> nestedIterator;
         private ZipArchiveEntry currentEntry;
 
         ZipFileIterator(final ZipArchiveReader reader) {
             this.reader = reader;
-            this.nestedEnumeration = reader.getEntriesInPhysicalOrder();
+            this.nestedIterator = reader.getEntriesInPhysicalOrder().iterator();
         }
 
         @Override
@@ -105,12 +104,12 @@ public class ChangeSetPerformer<I extends ArchiveInputStream<E>, O extends Archi
 
         @Override
         public boolean hasNext() {
-            return nestedEnumeration.hasMoreElements();
+            return nestedIterator.hasNext();
         }
 
         @Override
         public ZipArchiveEntry next() {
-            return currentEntry = nestedEnumeration.nextElement();
+            return currentEntry = nestedIterator.next();
         }
     }
 

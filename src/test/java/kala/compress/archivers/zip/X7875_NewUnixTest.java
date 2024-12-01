@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Enumeration;
 import java.util.zip.ZipException;
 
 import kala.compress.utils.ByteUtils;
@@ -167,13 +166,9 @@ public class X7875_NewUnixTest {
     @Test
     public void testSampleFile() throws Exception {
         try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(getFile("COMPRESS-211_uid_gid_zip_test.zip")).get()) {
-            final Enumeration<ZipArchiveEntry> en = zf.getEntries();
-
             // We expect EVERY entry of this ZIP file (dir & file) to
             // contain extra field 0x7875.
-            while (en.hasMoreElements()) {
-
-                final ZipArchiveEntry zae = en.nextElement();
+            for (ZipArchiveEntry zae : zf.getEntries()) {
                 final String name = zae.getName();
                 final X7875_NewUnix xf = (X7875_NewUnix) zae.getExtraField(X7875);
 

@@ -40,7 +40,7 @@ public class ExplodeSupportTest {
 
     private void testArchiveWithImplodeCompression(final String fileName, final String entryName) throws IOException {
         try (ZipArchiveReader zip = ZipArchiveReader.builder().setFile(fileName).get()) {
-            final ZipArchiveEntry entry = zip.getEntries().nextElement();
+            final ZipArchiveEntry entry = zip.getEntries().iterator().next();
             assertEquals(entryName, entry.getName(), "entry name");
             assertTrue(zip.canReadEntryData(entry), "entry can't be read");
             assertEquals(ZipMethod.IMPLODING.getCode(), entry.getMethod(), "method");

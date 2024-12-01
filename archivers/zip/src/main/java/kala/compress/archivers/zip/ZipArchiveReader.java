@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -837,9 +836,7 @@ public class ZipArchiveReader implements Closeable {
      * @throws IOException on error
      */
     public void copyRawEntries(final ZipArchiveOutputStream target, final ZipArchiveEntryPredicate predicate) throws IOException {
-        final Enumeration<ZipArchiveEntry> src = getEntriesInPhysicalOrder();
-        while (src.hasMoreElements()) {
-            final ZipArchiveEntry entry = src.nextElement();
+        for (ZipArchiveEntry entry : getEntriesInPhysicalOrder()) {
             if (predicate.test(entry)) {
                 target.addRawArchiveEntry(entry, getRawInputStream(entry));
             }
@@ -905,9 +902,11 @@ public class ZipArchiveReader implements Closeable {
      * </p>
      *
      * @return all entries as {@link ZipArchiveEntry} instances
+     * @apiNote This method has a different signature in commons-compress.
+     * @since 1.27.1-1
      */
-    public Enumeration<ZipArchiveEntry> getEntries() {
-        return Collections.enumeration(entries);
+    public Iterable<ZipArchiveEntry> getEntries() {
+        return Collections.unmodifiableList(entries);
     }
 
     /**
@@ -929,11 +928,12 @@ public class ZipArchiveReader implements Closeable {
      *
      * @return all entries as {@link ZipArchiveEntry} instances
      *
-     * @since 1.1
+     * @since 1.27.1-1
+     * @apiNote This method has a different signature in commons-compress.
      */
-    public Enumeration<ZipArchiveEntry> getEntriesInPhysicalOrder() {
+    public Iterable<ZipArchiveEntry> getEntriesInPhysicalOrder() {
         final ZipArchiveEntry[] allEntries = entries.toArray(ZipArchiveEntry.EMPTY_ARRAY);
-        return Collections.enumeration(Arrays.asList(sortByOffset(allEntries)));
+        return Arrays.asList(sortByOffset(allEntries));
     }
 
     /**

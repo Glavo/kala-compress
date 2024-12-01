@@ -36,7 +36,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Enumeration;
 import java.util.Iterator;
 
 /**
@@ -464,11 +463,11 @@ public class Expander {
      * @since 1.22
      */
     public void expand(final ZipArchiveReader archive, final Path targetDirectory) throws IOException {
-        final Enumeration<ZipArchiveEntry> entries = archive.getEntries();
+        final Iterator<ZipArchiveEntry> entries = archive.getEntries().iterator();
         expand(() -> {
-            ZipArchiveEntry next = entries.hasMoreElements() ? entries.nextElement() : null;
+            ZipArchiveEntry next = entries.hasNext() ? entries.next() : null;
             while (next != null && !archive.canReadEntryData(next)) {
-                next = entries.hasMoreElements() ? entries.nextElement() : null;
+                next = entries.hasNext() ? entries.next() : null;
             }
             return next;
         }, (entry, out) -> {

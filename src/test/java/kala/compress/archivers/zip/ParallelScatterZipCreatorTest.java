@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -107,9 +106,7 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
 
         // validate the content of the compressed files
         try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(result).get()) {
-            final Enumeration<ZipArchiveEntry> entriesInPhysicalOrder = zf.getEntriesInPhysicalOrder();
-            while (entriesInPhysicalOrder.hasMoreElements()) {
-                final ZipArchiveEntry zipArchiveEntry = entriesInPhysicalOrder.nextElement();
+            for (ZipArchiveEntry zipArchiveEntry : zf.getEntriesInPhysicalOrder()) {
                 try (InputStream inputStream = zf.getInputStream(zipArchiveEntry)) {
                     final byte[] actual = IOUtils.toByteArray(inputStream);
                     final byte[] expected = entries.remove(zipArchiveEntry.getName());
@@ -131,10 +128,8 @@ public class ParallelScatterZipCreatorTest extends AbstractTempDirTest {
 
     private void removeEntriesFoundInZipFile(final File result, final Map<String, byte[]> entries) throws IOException {
         try (ZipArchiveReader zf = ZipArchiveReader.builder().setFile(result).get()) {
-            final Enumeration<ZipArchiveEntry> entriesInPhysicalOrder = zf.getEntriesInPhysicalOrder();
             int i = 0;
-            while (entriesInPhysicalOrder.hasMoreElements()) {
-                final ZipArchiveEntry zipArchiveEntry = entriesInPhysicalOrder.nextElement();
+            for (ZipArchiveEntry zipArchiveEntry : zf.getEntriesInPhysicalOrder()) {
                 try (InputStream inputStream = zf.getInputStream(zipArchiveEntry)) {
                     final byte[] actual = IOUtils.toByteArray(inputStream);
                     final byte[] expected = entries.remove(zipArchiveEntry.getName());

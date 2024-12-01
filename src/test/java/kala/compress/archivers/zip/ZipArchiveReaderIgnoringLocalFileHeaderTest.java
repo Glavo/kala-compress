@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Enumeration;
+import java.util.Iterator;
 
 import kala.compress.AbstractTest;
 import org.junit.jupiter.api.Test;
@@ -86,11 +86,11 @@ public class ZipArchiveReaderIgnoringLocalFileHeaderTest {
     @Test
     public void testPhysicalOrder() throws IOException {
         try (ZipArchiveReader zf = openZipWithoutLocalFileHeader("ordertest.zip")) {
-            final Enumeration<ZipArchiveEntry> e = zf.getEntriesInPhysicalOrder();
+            final Iterator<ZipArchiveEntry> e = zf.getEntriesInPhysicalOrder().iterator();
             ZipArchiveEntry ze;
             do {
-                ze = e.nextElement();
-            } while (e.hasMoreElements());
+                ze = e.next();
+            } while (e.hasNext());
             assertEquals("src/main/java/org/apache/commons/compress/archivers/zip/ZipUtil.java", ze.getName());
         }
     }
@@ -103,8 +103,7 @@ public class ZipArchiveReaderIgnoringLocalFileHeaderTest {
     @Test
     public void testZipUnarchive() throws Exception {
         try (ZipArchiveReader zf = openZipWithoutLocalFileHeaderDeprecated("bla.zip")) {
-            for (final Enumeration<ZipArchiveEntry> e = zf.getEntries(); e.hasMoreElements();) {
-                final ZipArchiveEntry entry = e.nextElement();
+            for (ZipArchiveEntry entry : zf.getEntries()) {
                 try (InputStream inputStream = zf.getInputStream(entry)) {
                     Files.copy(inputStream, new File(dir, entry.getName()).toPath());
                 }

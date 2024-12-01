@@ -32,7 +32,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -167,8 +166,8 @@ public final class Lister {
     private  void listZipUsingZipFile(final Path file) throws IOException {
         try (ZipArchiveReader zipFile = ZipArchiveReader.builder().setPath(file).get()) {
             println("Created " + zipFile);
-            for (final Enumeration<ZipArchiveEntry> en = zipFile.getEntries(); en.hasMoreElements();) {
-                println(en.nextElement());
+            for (ZipArchiveEntry entry : zipFile.getEntries()) {
+                println(entry);
             }
         }
     }
