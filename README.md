@@ -146,18 +146,18 @@ You can include all compressors by adding a dependency on it.
 In addition, each compressor in Kala Compress has a separate module, and you can add dependencies on one or all of them separately.
 Here is a list of compressors:
 
-* (module) [`kala.compress.compressors.brotli`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-brotli)
-* (module) [`kala.compress.compressors.bzip2`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-bzip2)
-* (module) [`kala.compress.compressors.deflate`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-deflate)
-* (module) [`kala.compress.compressors.deflate64`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-deflate64)
-* (module) [`kala.compress.compressors.gzip`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-gzip)
-* (module) [`kala.compress.compressors.lz4`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-lz4)
-* (module) [`kala.compress.compressors.lzma`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-lzma)
-* (module) [`kala.compress.compressors.pack200`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-pack200)
-* (module) [`kala.compress.compressors.snappy`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-snappy)
-* (module) [`kala.compress.compressors.xz`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-xz)
-* (module) [`kala.compress.compressors.z`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-z)
-* (module) [`kala.compress.compressors.zstandard`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-zstandard)
+* (module) [`kala-compress-compressors-brotli`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-brotli)
+* (module) [`kala-compress-compressors-bzip2`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-bzip2)
+* (module) [`kala-compress-compressors-deflate`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-deflate)
+* (module) [`kala-compress-compressors-deflate64`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-deflate64)
+* (module) [`kala-compress-compressors-gzip`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-gzip)
+* (module) [`kala-compress-compressors-lz4`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-lz4)
+* (module) [`kala-compress-compressors-lzma`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-lzma)
+* (module) [`kala-compress-compressors-pack200`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-pack200)
+* (module) [`kala-compress-compressors-snappy`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-snappy)
+* (module) [`kala-compress-compressors-xz`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-xz)
+* (module) [`kala-compress-compressors-z`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-z)
+* (module) [`kala-compress-compressors-zstandard`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-compressors-zstandard)
 
 Here are some notes:
 
@@ -175,13 +175,13 @@ You can include all archivers by adding a dependency on it.
 In addition, each archiver in Kala Compress has a separate module, and you can add dependencies on one or all of them separately.
 Here is a list of archivers:
 
-* (module) [`kala.compress.archivers.ar`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-ar)
-* (module) [`kala.compress.archivers.arj`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-arj)
-* (module) [`kala.compress.archivers.cpio`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-cpio)
-* (module) [`kala.compress.archivers.dump`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-dump)
-* (module) [`kala.compress.archivers.sevenz`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-sevenz)
-* (module) [`kala.compress.archivers.tar`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-tar)
-* (module) [`kala.compress.archivers.zip`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-zip)
+* (module) [`kala-compress-archivers-ar`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-ar)
+* (module) [`kala-compress-archivers-arj`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-arj)
+* (module) [`kala-compress-archivers-cpio`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-cpio)
+* (module) [`kala-compress-archivers-dump`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-dump)
+* (module) [`kala-compress-archivers-sevenz`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-sevenz)
+* (module) [`kala-compress-archivers-tar`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-tar)
+* (module) [`kala-compress-archivers-zip`](https://search.maven.org/artifact/org.glavo.kala/kala-compress-archivers-zip)
 
 Here are some notes:
 
