@@ -38,8 +38,7 @@ import java.util.zip.ZipException;
 
 import kala.compress.archivers.ArchiveEntry;
 import kala.compress.archivers.ArchiveInputStream;
-import kala.compress.compressors.bzip2.BZip2CompressorInputStream;
-import kala.compress.compressors.deflate64.Deflate64CompressorInputStream;
+import kala.compress.compressors.CompressorStreamFactory;
 import kala.compress.utils.ArchiveUtils;
 import kala.compress.utils.Charsets;
 import kala.compress.utils.IOUtils;
@@ -762,10 +761,10 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
                         }
                         break;
                     case BZIP2:
-                        current.inputStream = new BZip2CompressorInputStream(bis);
+                        current.inputStream = CompressorStreamFactory.DEFAULT.createCompressorInputStream(CompressorStreamFactory.BZIP2, bis);
                         break;
                     case ENHANCED_DEFLATED:
-                        current.inputStream = new Deflate64CompressorInputStream(bis);
+                        current.inputStream = CompressorStreamFactory.DEFAULT.createCompressorInputStream(CompressorStreamFactory.DEFLATE64, bis);
                         break;
                     default:
                         // we should never get here as all supported methods have been covered
@@ -775,7 +774,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
                 }
             }
         } else if (m == ZipMethod.ENHANCED_DEFLATED) {
-            current.inputStream = new Deflate64CompressorInputStream(in);
+            current.inputStream = CompressorStreamFactory.DEFAULT.createCompressorInputStream(CompressorStreamFactory.DEFLATE64, in);
         }
 
         entriesRead++;

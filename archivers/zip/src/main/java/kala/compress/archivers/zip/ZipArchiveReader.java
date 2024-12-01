@@ -50,11 +50,10 @@ import java.util.stream.IntStream;
 import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
+import kala.compress.compressors.CompressorStreamFactory;
 import kala.compress.utils.SeekableInMemoryByteChannel;
 import kala.compress.archivers.ArchiveReaderBuilder;
 import kala.compress.archivers.EntryStreamOffsets;
-import kala.compress.compressors.bzip2.BZip2CompressorInputStream;
-import kala.compress.compressors.deflate64.Deflate64CompressorInputStream;
 import kala.compress.utils.BoundedArchiveInputStream;
 import kala.compress.utils.BoundedSeekableByteChannelInputStream;
 import kala.compress.utils.Charsets;
@@ -1021,9 +1020,9 @@ public class ZipArchiveReader implements Closeable {
                 }
             };
         case BZIP2:
-            return new BZip2CompressorInputStream(is);
+            return CompressorStreamFactory.DEFAULT.createCompressorInputStream(CompressorStreamFactory.BZIP2, is);
         case ENHANCED_DEFLATED:
-            return new Deflate64CompressorInputStream(is);
+            return CompressorStreamFactory.DEFAULT.createCompressorInputStream(CompressorStreamFactory.DEFLATE64, is);
         case AES_ENCRYPTED:
         case EXPANDING_LEVEL_1:
         case EXPANDING_LEVEL_2:
