@@ -49,7 +49,7 @@ allprojects {
     group = "org.glavo.kala"
     description = "Kala Compress"
 
-    version = "1.27.1-0" + "SNAPSHOT"
+    version = "1.27.1-0"// + "SNAPSHOT"
 
     repositories {
         mavenCentral()
