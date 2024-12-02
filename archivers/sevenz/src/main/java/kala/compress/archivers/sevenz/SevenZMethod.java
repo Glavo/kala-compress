@@ -107,8 +107,10 @@ public enum SevenZMethod {
      */
     DELTA_FILTER(new byte[] { 0x03 });
 
+    private static final SevenZMethod[] METHODS = SevenZMethod.values();
+
     static SevenZMethod byId(final byte[] id) {
-        for (final SevenZMethod method : SevenZMethod.class.getEnumConstants()) {
+        for (final SevenZMethod method : METHODS) {
             if (Arrays.equals(method.id, id)) {
                 return method;
             }
