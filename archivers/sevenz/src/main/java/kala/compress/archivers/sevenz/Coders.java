@@ -23,7 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -197,27 +197,23 @@ final class Coders {
         }
     }
 
-    private static final Map<SevenZMethod, AbstractCoder> CODER_MAP = new HashMap<SevenZMethod, AbstractCoder>() {
-
-        private static final long serialVersionUID = 1664829131806520867L;
-
-        {
-            put(SevenZMethod.COPY, new CopyDecoder());
-            put(SevenZMethod.LZMA, new LZMADecoder());
-            put(SevenZMethod.LZMA2, new LZMA2Decoder());
-            put(SevenZMethod.DEFLATE, new DeflateDecoder());
-            put(SevenZMethod.DEFLATE64, new Deflate64Decoder());
-            put(SevenZMethod.BZIP2, new BZIP2Decoder());
-            put(SevenZMethod.AES256SHA256, new AES256SHA256Decoder());
-            put(SevenZMethod.BCJ_X86_FILTER, new BCJDecoder(new X86Options()));
-            put(SevenZMethod.BCJ_PPC_FILTER, new BCJDecoder(new PowerPCOptions()));
-            put(SevenZMethod.BCJ_IA64_FILTER, new BCJDecoder(new IA64Options()));
-            put(SevenZMethod.BCJ_ARM_FILTER, new BCJDecoder(new ARMOptions()));
-            put(SevenZMethod.BCJ_ARM_THUMB_FILTER, new BCJDecoder(new ARMThumbOptions()));
-            put(SevenZMethod.BCJ_SPARC_FILTER, new BCJDecoder(new SPARCOptions()));
-            put(SevenZMethod.DELTA_FILTER, new DeltaDecoder());
-        }
-    };
+    private static final Map<SevenZMethod, AbstractCoder> CODER_MAP = new EnumMap<>(SevenZMethod.class);
+    static  {
+        CODER_MAP.put(SevenZMethod.COPY, new CopyDecoder());
+        CODER_MAP.put(SevenZMethod.LZMA, new LZMADecoder());
+        CODER_MAP.put(SevenZMethod.LZMA2, new LZMA2Decoder());
+        CODER_MAP.put(SevenZMethod.DEFLATE, new DeflateDecoder());
+        CODER_MAP.put(SevenZMethod.DEFLATE64, new Deflate64Decoder());
+        CODER_MAP.put(SevenZMethod.BZIP2, new BZIP2Decoder());
+        CODER_MAP.put(SevenZMethod.AES256SHA256, new AES256SHA256Decoder());
+        CODER_MAP.put(SevenZMethod.BCJ_X86_FILTER, new BCJDecoder(new X86Options()));
+        CODER_MAP.put(SevenZMethod.BCJ_PPC_FILTER, new BCJDecoder(new PowerPCOptions()));
+        CODER_MAP.put(SevenZMethod.BCJ_IA64_FILTER, new BCJDecoder(new IA64Options()));
+        CODER_MAP.put(SevenZMethod.BCJ_ARM_FILTER, new BCJDecoder(new ARMOptions()));
+        CODER_MAP.put(SevenZMethod.BCJ_ARM_THUMB_FILTER, new BCJDecoder(new ARMThumbOptions()));
+        CODER_MAP.put(SevenZMethod.BCJ_SPARC_FILTER, new BCJDecoder(new SPARCOptions()));
+        CODER_MAP.put(SevenZMethod.DELTA_FILTER, new DeltaDecoder());
+    }
 
     static InputStream addDecoder(final String archiveName, final InputStream is, final long uncompressedLength, final Coder coder, final byte[] password,
             final int maxMemoryLimitInKb) throws IOException {
