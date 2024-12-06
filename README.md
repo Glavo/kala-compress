@@ -97,7 +97,7 @@ Most methods that accept the `File` have been removed, please use the `Path` ins
 
 **Note: Kala Compress is in beta phase. Although it is developed based on mature Apache Commons Compress and has passed all tests, it may still be unstable. I may need to make some adjustments to the API before releasing to production.**
 
-The latest Kala Compress version is `1.27.1-0`.
+The latest Kala Compress version is `1.27.1-1`.
 
 You can add dependencies on Kala Compress modules as follows:
 
@@ -106,14 +106,14 @@ Maven:
 <dependency>
   <groupId>org.glavo.kala</groupId>
   <artifactId>${kala-compress-module-name}</artifactId>
-  <version>1.27.1-0</version>
+  <version>1.27.1-1</version>
 </dependency>
 ```
 
 Gradle:
 ```kotlin
 dependencies {
-  implementation("org.glavo.kala:${kala-compress-module-name}:1.27.1-0")
+  implementation("org.glavo.kala:${kala-compress-module-name}:1.27.1-1")
 }
 ```
 
