@@ -2,7 +2,7 @@
 
 ## 1.27.1-2 (In development)
 
-Based on [apache/commons-compress@e237e3b](https://github.com/apache/commons-compress/commit/e237e3b9ede9d1aaea61cb7fd29e199ea4d7ae71).
+Based on [apache/commons-compress@bea0994](https://github.com/apache/commons-compress/commit/bea0994a1d52886cca0b7ad54dec121dcba9b7b6).
 
 ## 1.27.1-1 (2024-12-01)
 

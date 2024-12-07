@@ -20,37 +20,43 @@ package kala.compress.archivers.zip;
 
 /**
  * Constants from stat.h on UNIX systems.
+ * <p>
+ * TODO This will be an class in 2.0.
+ * </p>
  */
 // CheckStyle:InterfaceIsTypeCheck OFF - backward compatible
 public interface UnixStat {
 
     /**
-     * Bits used for permissions (and sticky bit)
+     * Masks permissions (and sticky bit)
      */
     int PERM_MASK = 07777;
+
     /**
-     * Bits used to indicate the file system object type.
+     * Masks the file system object type.
      *
      * @since 1.14
      */
     int FILE_TYPE_FLAG = 0170000;
+
     /**
      * Indicates symbolic links.
      */
     int LINK_FLAG = 0120000;
+
     /**
      * Indicates plain files.
      */
     int FILE_FLAG = 0100000;
+
     /**
      * Indicates directories.
      */
     int DIR_FLAG = 040000;
 
-    // ----------------------------------------------------------
-    // somewhat arbitrary choices that are quite common for shared
-    // installations
-    // -----------------------------------------------------------
+    //
+    // Arbitrary choices that are quite common for shared installations.
+    //
 
     /**
      * Default permissions for symbolic links.
@@ -63,7 +69,7 @@ public interface UnixStat {
     int DEFAULT_DIR_PERM = 0755;
 
     /**
-     * Default permissions for plain files.
+     * Default permissions for all permissions.
      */
     int DEFAULT_FILE_PERM = 0644;
 }
