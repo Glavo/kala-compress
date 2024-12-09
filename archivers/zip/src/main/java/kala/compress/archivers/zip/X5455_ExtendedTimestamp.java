@@ -29,7 +29,7 @@ import kala.compress.utils.TimeUtils;
 /**
  * <p>
  * An extra field that stores additional file and directory timestamp data for ZIP entries. Each ZIP entry can include up to three timestamps (modify, access,
- * create*). The timestamps are stored as 32 bit signed integers representing seconds since UNIX epoch (Jan 1st, 1970, UTC). This field improves on ZIP's
+ * create*). The timestamps are stored as 32 bit signed integers representing seconds since Unix epoch (Jan 1st, 1970, UTC). This field improves on ZIP's
  * default timestamp granularity, since it allows one to store additional timestamps, and, in addition, the timestamps are stored using per-second granularity
  * (zip's default behavior can only store timestamps to the nearest <em>even</em> second).
  * </p>
@@ -42,7 +42,7 @@ import kala.compress.utils.TimeUtils;
  * <li><strong>accessTime:</strong> most recent time file/directory was opened (e.g., read from disk). Many people disable their operating systems from updating
  * this value using the NOATIME mount option to optimize disk behavior, and thus it's not always reliable. In those cases it's always equal to modifyTime.</li>
  * <li><strong>*createTime:</strong> modern Linux file systems (e.g., ext2 and newer) do not appear to store a value like this, and so it's usually omitted
- * altogether in the ZIP extra field. Perhaps other UNIX systems track this.</li>
+ * altogether in the ZIP extra field. Perhaps other Unix systems track this.</li>
  * </ul>
  * <p>
  * We're using the field definition given in Info-Zip's source archive: zip-3.0.tar.gz/proginfo/extrafld.txt
@@ -221,7 +221,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * </p>
      * <p>
      * Note: modern Linux file systems (e.g., ext2) do not appear to store a "create time" value, and so it's usually omitted altogether in the ZIP extra field.
-     * Perhaps other UNIX systems track this.
+     * Perhaps other Unix systems track this.
      * </p>
      *
      * @return create time (seconds since epoch) or null.

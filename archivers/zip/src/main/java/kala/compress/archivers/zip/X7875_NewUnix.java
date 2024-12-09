@@ -19,7 +19,6 @@
 package kala.compress.archivers.zip;
 
 import static kala.compress.archivers.zip.ZipUtil.reverse;
-import static kala.compress.archivers.zip.ZipUtil.signedByteToUnsignedInt;
 import static kala.compress.archivers.zip.ZipUtil.unsignedIntToSignedByte;
 
 import java.io.Serializable;
@@ -30,7 +29,7 @@ import java.util.zip.ZipException;
 import kala.compress.utils.ByteUtils;
 
 /**
- * An extra field that stores UNIX UID/GID data (owner &amp; group ownership) for a given ZIP entry. We're using the field definition given in Info-Zip's source
+ * An extra field that stores Unix UID/GID data (owner &amp; group ownership) for a given ZIP entry. We're using the field definition given in Info-Zip's source
  * archive: zip-3.0.tar.gz/proginfo/extrafld.txt
  *
  * <pre>
@@ -94,10 +93,10 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
          *
          * 2.) Fundamentally, ZIP files are about shrinking things, so let's save a few bytes per entry while we can.
          *
-         * 3.) Of all the people creating ZIP files using commons- compress, how many care about UNIX UID/GID attributes of the files they store? (e.g., I am
+         * 3.) Of all the people creating ZIP files using commons- compress, how many care about Unix UID/GID attributes of the files they store? (e.g., I am
          * probably thinking way too hard about this and no one cares!)
          *
-         * 4.) InfoZip's tool, even though it carefully stores every UID/GID for every file zipped on a UNIX machine (by default) currently appears unable to
+         * 4.) InfoZip's tool, even though it carefully stores every UID/GID for every file zipped on a Unix machine (by default) currently appears unable to
          * ever restore UID/GID. unzip -X has no effect on my machine, even when run as root!!!!
          *
          * And thus it is decided: MIN_LENGTH=1.
@@ -168,13 +167,13 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
     }
 
     /**
-     * Gets the GID as a long. GID is typically a 32 bit unsigned value on most UNIX systems, so we return a long to avoid integer overflow into the negatives
+     * Gets the GID as a long. GID is typically a 32 bit unsigned value on most Unix systems, so we return a long to avoid integer overflow into the negatives
      * in case values above and including 2^31 are being used.
      *
      * @return the GID value.
      */
     public long getGID() {
-        return ZipUtil.bigToLong(gid);
+        return ZipUtil.toLong(gid);
     }
 
     /**
@@ -251,13 +250,13 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
     }
 
     /**
-     * Gets the UID as a long. UID is typically a 32 bit unsigned value on most UNIX systems, so we return a long to avoid integer overflow into the negatives
+     * Gets the UID as a long. UID is typically a 32 bit unsigned value on most Unix systems, so we return a long to avoid integer overflow into the negatives
      * in case values above and including 2^31 are being used.
      *
      * @return the UID value.
      */
     public long getUID() {
-        return ZipUtil.bigToLong(uid);
+        return ZipUtil.toLong(uid);
     }
 
     @Override
@@ -292,8 +291,10 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
         if (length < 3) {
             throw new ZipException("X7875_NewUnix length is too short, only " + length + " bytes");
         }
-        this.version = signedByteToUnsignedInt(data[offset++]);
-        final int uidSize = signedByteToUnsignedInt(data[offset++]);
+        final byte b2 = data[offset++];
+        this.version = Byte.toUnsignedInt(b2);
+        final byte b1 = data[offset++];
+        final int uidSize = Byte.toUnsignedInt(b1);
         if (uidSize + 3 > length) {
             throw new ZipException("X7875_NewUnix invalid: uidSize " + uidSize + " doesn't fit into " + length + " bytes");
         }
@@ -301,7 +302,8 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
         offset += uidSize;
         this.uid = new BigInteger(1, reverse(uidBytes)); // sign-bit forced positive
 
-        final int gidSize = signedByteToUnsignedInt(data[offset++]);
+        final byte b = data[offset++];
+        final int gidSize = Byte.toUnsignedInt(b);
         if (uidSize + 3 + gidSize > length) {
             throw new ZipException("X7875_NewUnix invalid: gidSize " + gidSize + " doesn't fit into " + length + " bytes");
         }
@@ -313,7 +315,7 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
      * Reset state back to newly constructed state. Helps us make sure parse() calls always generate clean results.
      */
     private void reset() {
-        // Typical UID/GID of the first non-root user created on a UNIX system.
+        // Typical UID/GID of the first non-root user created on a Unix system.
         uid = ONE_THOUSAND;
         gid = ONE_THOUSAND;
     }

@@ -30,7 +30,7 @@ import java.util.zip.ZipEntry;
 import kala.compress.parallel.ScatterGatherBackingStore;
 
 /**
- * Encapsulates a {@link Deflater} and crc calculator, handling multiple types of output streams. Currently {@link ZipEntry#DEFLATED} and
+ * Encapsulates a {@link Deflater} and CRC calculator, handling multiple types of output streams. Currently {@link ZipEntry#DEFLATED} and
  * {@link ZipEntry#STORED} are the only supported compression methods.
  *
  * @since 1.10

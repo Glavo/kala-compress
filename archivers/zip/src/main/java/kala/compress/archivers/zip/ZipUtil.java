@@ -113,19 +113,6 @@ public abstract class ZipUtil {
     }
 
     /**
-     * Converts a BigInteger into a long, and blows up (NumberFormatException) if the BigInteger is too big.
-     *
-     * @param big BigInteger to convert.
-     * @return long representation of the BigInteger.
-     */
-    static long bigToLong(final BigInteger big) {
-        if (big.bitLength() <= 63) { // bitLength() doesn't count the sign bit.
-            return big.longValue();
-        }
-        throw new NumberFormatException("The BigInteger cannot fit inside a 64 bit java long: [" + big + "]");
-    }
-
-    /**
      * Tests if this library is able to read or write the given entry.
      */
     static boolean canHandleEntryData(final ZipArchiveEntry entry) {
@@ -237,7 +224,7 @@ public abstract class ZipUtil {
         }
         if (l < 0 && l >= Integer.MIN_VALUE) {
             // If someone passes in a -2, they probably mean 4294967294
-            // (For example, UNIX UID/GID's are 32 bit unsigned.)
+            // (For example, Unix UID/GID's are 32 bit unsigned.)
             l = adjustToLong((int) l);
         }
         return BigInteger.valueOf(l);
@@ -282,20 +269,6 @@ public abstract class ZipUtil {
                 ze.setCommentSource(ZipArchiveEntry.CommentSource.UNICODE_EXTRA_FIELD);
             }
         }
-    }
-
-    /**
-     * Converts a signed byte into an unsigned integer representation (e.g., -1 becomes 255).
-     *
-     * @param b byte to convert to int
-     * @return int representation of the provided byte
-     * @since 1.5
-     */
-    public static int signedByteToUnsignedInt(final byte b) {
-        if (b >= 0) {
-            return b;
-        }
-        return 256 + b;
     }
 
     /**
@@ -347,6 +320,20 @@ public abstract class ZipUtil {
      */
     public static void toDosTime(final long t, final byte[] buf, final int offset) {
         ZipLong.putLong(javaToDosTime(t), buf, offset);
+    }
+
+    /**
+     * Converts a BigInteger to a long, and throws a NumberFormatException if the BigInteger is too big.
+     *
+     * @param big BigInteger to convert.
+     * @return {@code BigInteger} converted to a {@code long}.
+     */
+    static long toLong(final BigInteger big) {
+        try {
+            return big.longValueExact();
+        } catch (final ArithmeticException e) {
+            throw new NumberFormatException("The BigInteger cannot fit inside a 64 bit java long: [" + big + "]");
+        }
     }
 
     /**

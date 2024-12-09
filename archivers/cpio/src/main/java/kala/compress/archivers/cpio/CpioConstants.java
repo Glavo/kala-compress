@@ -29,7 +29,7 @@ public interface CpioConstants {
     /** Magic number of a cpio entry in the new format */
     String MAGIC_NEW = "070701";
 
-    /** Magic number of a cpio entry in the new format with crc */
+    /** Magic number of a cpio entry in the new format with CRC */
     String MAGIC_NEW_CRC = "070702";
 
     /** Magic number of a cpio entry in the old ascii format */
@@ -41,7 +41,7 @@ public interface CpioConstants {
     /** Write/read a CpioArchiveEntry in the new format. FORMAT_ constants are internal. */
     short FORMAT_NEW = 1;
 
-    /** Write/read a CpioArchiveEntry in the new format with crc. FORMAT_ constants are internal. */
+    /** Write/read a CpioArchiveEntry in the new format with CRC. FORMAT_ constants are internal. */
     short FORMAT_NEW_CRC = 2;
 
     /** Write/read a CpioArchiveEntry in the old ascii format. FORMAT_ constants are internal. */

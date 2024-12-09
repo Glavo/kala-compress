@@ -40,7 +40,7 @@ import kala.compress.utils.Charsets;
 import kala.compress.utils.SeekableInMemoryByteChannel;
 
 /**
- * Provides random access to UNIX archives.
+ * Provides random access to Unix archives.
  *
  * @since 1.21
  */
