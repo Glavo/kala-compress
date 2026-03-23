@@ -50,6 +50,7 @@ import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
 import kala.compress.compressors.CompressorStreamFactory;
+import kala.compress.utils.BufferedSeekableByteChannel;
 import kala.compress.utils.SeekableInMemoryByteChannel;
 import kala.compress.archivers.ArchiveReaderBuilder;
 import kala.compress.archivers.EntryStreamOffsets;
@@ -461,7 +462,7 @@ public class ZipArchiveReader implements Closeable {
      * @throws IOException if an I/O error occurs
      */
     private static SeekableByteChannel newReadByteChannel(final Path path) throws IOException {
-        return Files.newByteChannel(path, READ);
+        return new BufferedSeekableByteChannel(Files.newByteChannel(path, READ));
     }
 
     private static SeekableByteChannel openZipChannel(final Path path, final long maxNumberOfDisks, final OpenOption[] openOptions) throws IOException {
