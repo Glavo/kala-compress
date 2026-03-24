@@ -76,6 +76,17 @@ public final class GeneralPurposeBit implements Cloneable {
      */
     public static GeneralPurposeBit parse(final byte[] data, final int offset) {
         final int generalPurposeFlag = ZipShort.getValue(data, offset);
+        return parse(generalPurposeFlag);
+    }
+
+    /**
+     * Parses the supported flags from the given general purpose bit.
+     *
+     * @param generalPurposeFlag the general purpose bit
+     * @return parsed flags
+     * @since 1.27.1-2
+     */
+    public static GeneralPurposeBit parse(int generalPurposeFlag) {
         final GeneralPurposeBit b = new GeneralPurposeBit();
         b.useDataDescriptor((generalPurposeFlag & DATA_DESCRIPTOR_FLAG) != 0);
         b.useUTF8ForNames((generalPurposeFlag & UFT8_NAMES_FLAG) != 0);

@@ -50,16 +50,9 @@ import java.util.zip.Inflater;
 import java.util.zip.ZipException;
 
 import kala.compress.compressors.CompressorStreamFactory;
-import kala.compress.utils.SeekableInMemoryByteChannel;
+import kala.compress.utils.*;
 import kala.compress.archivers.ArchiveReaderBuilder;
 import kala.compress.archivers.EntryStreamOffsets;
-import kala.compress.utils.BoundedArchiveInputStream;
-import kala.compress.utils.BoundedSeekableByteChannelInputStream;
-import kala.compress.utils.Charsets;
-import kala.compress.utils.CountingInputStream;
-import kala.compress.utils.FileNameUtils;
-import kala.compress.utils.IOUtils;
-import kala.compress.utils.InputStreamStatistics;
 
 /**
  * Replacement for {@link java.util.zip.ZipFile}.
@@ -84,26 +77,6 @@ import kala.compress.utils.InputStreamStatistics;
  * </ul>
  */
 public class ZipArchiveReader implements Closeable {
-
-    /**
-     * Lock-free implementation of BoundedInputStream. The implementation uses positioned reads on the underlying archive file channel and therefore performs
-     * significantly faster in concurrent environment.
-     */
-    private static class BoundedFileChannelInputStream extends BoundedArchiveInputStream {
-        private final FileChannel archive;
-
-        BoundedFileChannelInputStream(final long start, final long remaining, final FileChannel archive) {
-            super(start, remaining);
-            this.archive = archive;
-        }
-
-        @Override
-        protected int read(final long pos, final ByteBuffer buf) throws IOException {
-            final int read = archive.read(buf, pos);
-            buf.flip();
-            return read;
-        }
-    }
 
     /**
      * Builds new {@link ZipArchiveReader} instances.
@@ -643,7 +616,7 @@ public class ZipArchiveReader implements Closeable {
     /**
      * The actual data source.
      */
-    private final SeekableByteChannel archive;
+    private final DataInputSeekableChannel archive;
 
     /**
      * Whether to look for and use Unicode extra fields.
@@ -654,23 +627,6 @@ public class ZipArchiveReader implements Closeable {
      * Whether the ZIP archive is a split ZIP archive
      */
     private final boolean isSplitZipArchive;
-
-    // cached buffers - must only be used locally in the class (COMPRESS-172 - reduce garbage collection)
-    private final byte[] dwordBuf = new byte[ZipConstants.DWORD];
-
-    private final byte[] wordBuf = new byte[ZipConstants.WORD];
-
-    private final byte[] cfhBuf = new byte[CFH_LEN];
-
-    private final byte[] shortBuf = new byte[ZipConstants.SHORT];
-
-    private final ByteBuffer dwordBbuf = ByteBuffer.wrap(dwordBuf);
-
-    private final ByteBuffer wordBbuf = ByteBuffer.wrap(wordBuf);
-
-    private final ByteBuffer cfhBbuf = ByteBuffer.wrap(cfhBuf);
-
-    private final ByteBuffer shortBbuf = ByteBuffer.wrap(shortBuf);
 
     private long centralDirectoryStartDiskNumber, centralDirectoryStartRelativeOffset;
 
@@ -817,7 +773,9 @@ public class ZipArchiveReader implements Closeable {
         this.isSplitZipArchive = channel instanceof ZipSplitReadOnlySeekableByteChannel;
         this.encoding = Charsets.toCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
-        this.archive = channel;
+        this.archive = channel instanceof DataInputSeekableChannel && ((DataInputSeekableChannel) channel).byteOrder() == ByteOrder.LITTLE_ENDIAN
+                ? (DataInputSeekableChannel) channel
+                : new BufferedDataInputSeekableChannel(channel, ByteBuffer.allocate(512).order(ByteOrder.LITTLE_ENDIAN));
         boolean success = false;
         try {
             final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag = populateFromCentralDirectory();
@@ -884,8 +842,7 @@ public class ZipArchiveReader implements Closeable {
         if (start < 0 || remaining < 0 || start + remaining < start) {
             throw new IllegalArgumentException("Corrupted archive, stream boundaries" + " are out of range");
         }
-        return archive instanceof FileChannel ? new BoundedFileChannelInputStream(start, remaining, (FileChannel) archive)
-                : new BoundedSeekableByteChannelInputStream(start, remaining, archive);
+        return new BoundedSeekableByteChannelInputStream(start, remaining, archive);
     }
 
     private void fillNameMap() {
@@ -1136,9 +1093,7 @@ public class ZipArchiveReader implements Closeable {
         positionAtCentralDirectory();
         centralDirectoryStartOffset = archive.position();
 
-        wordBbuf.rewind();
-        IOUtils.readFully(archive, wordBbuf);
-        long sig = ZipLong.getValue(wordBuf);
+        long sig = archive.readUnsignedInt();
 
         if (sig != CFH_SIG && startsWithLocalFileHeader()) {
             throw new IOException("Central directory is empty, can't expand" + " corrupt archive.");
@@ -1146,9 +1101,7 @@ public class ZipArchiveReader implements Closeable {
 
         while (sig == CFH_SIG) {
             readCentralDirectoryEntry(noUTF8Flag);
-            wordBbuf.rewind();
-            IOUtils.readFully(archive, wordBbuf);
-            sig = ZipLong.getValue(wordBuf);
+            sig = archive.readUnsignedInt();
         }
         return noUTF8Flag;
     }
@@ -1175,26 +1128,18 @@ public class ZipArchiveReader implements Closeable {
         final long endOfCentralDirectoryRecordOffset = archive.position();
         if (isSplitZipArchive) {
             skipBytes(CFD_DISK_OFFSET);
-            shortBbuf.rewind();
-            IOUtils.readFully(archive, shortBbuf);
-            centralDirectoryStartDiskNumber = ZipShort.getValue(shortBuf);
+            centralDirectoryStartDiskNumber = archive.readUnsignedShort();
 
             skipBytes(CFD_LOCATOR_RELATIVE_OFFSET);
 
-            wordBbuf.rewind();
-            IOUtils.readFully(archive, wordBbuf);
-            centralDirectoryStartRelativeOffset = ZipLong.getValue(wordBuf);
+            centralDirectoryStartRelativeOffset = archive.readUnsignedInt();
             ((ZipSplitReadOnlySeekableByteChannel) archive).position(centralDirectoryStartDiskNumber, centralDirectoryStartRelativeOffset);
         } else {
             skipBytes(CFD_LENGTH_OFFSET);
-            wordBbuf.rewind();
-            IOUtils.readFully(archive, wordBbuf);
-            final long centralDirectoryLength = ZipLong.getValue(wordBuf);
+            final long centralDirectoryLength = archive.readUnsignedInt();
 
-            wordBbuf.rewind();
-            IOUtils.readFully(archive, wordBbuf);
             centralDirectoryStartDiskNumber = 0;
-            centralDirectoryStartRelativeOffset = ZipLong.getValue(wordBuf);
+            centralDirectoryStartRelativeOffset = archive.readUnsignedInt();
 
             firstLocalFileHeaderOffset = Long.max(endOfCentralDirectoryRecordOffset - centralDirectoryLength - centralDirectoryStartRelativeOffset, 0L);
             archive.position(centralDirectoryStartRelativeOffset + firstLocalFileHeaderOffset);
@@ -1210,45 +1155,31 @@ public class ZipArchiveReader implements Closeable {
     private void positionAtCentralDirectory64() throws IOException {
         skipBytes(ZipConstants.WORD);
         if (isSplitZipArchive) {
-            wordBbuf.rewind();
-            IOUtils.readFully(archive, wordBbuf);
-            final long diskNumberOfEOCD = ZipLong.getValue(wordBuf);
+            final long diskNumberOfEOCD = archive.readUnsignedInt();
 
-            dwordBbuf.rewind();
-            IOUtils.readFully(archive, dwordBbuf);
-            final long relativeOffsetOfEOCD = ZipEightByteInteger.getLongValue(dwordBuf);
+            final long relativeOffsetOfEOCD = archive.readLong();
             ((ZipSplitReadOnlySeekableByteChannel) archive).position(diskNumberOfEOCD, relativeOffsetOfEOCD);
         } else {
             skipBytes(ZIP64_EOCDL_LOCATOR_OFFSET - ZipConstants.WORD /* signature has already been read */);
-            dwordBbuf.rewind();
-            IOUtils.readFully(archive, dwordBbuf);
-            archive.position(ZipEightByteInteger.getLongValue(dwordBuf));
+            archive.position(archive.readLong());
         }
 
-        wordBbuf.rewind();
-        IOUtils.readFully(archive, wordBbuf);
-        if (!Arrays.equals(wordBuf, ZipArchiveOutputStream.ZIP64_EOCD_SIG)) {
+        if (archive.readInt() != 0X06064B50) {
             throw new ZipException("Archive's ZIP64 end of central directory locator is corrupt.");
         }
 
         if (isSplitZipArchive) {
             skipBytes(ZIP64_EOCD_CFD_DISK_OFFSET - ZipConstants.WORD /* signature has already been read */);
-            wordBbuf.rewind();
-            IOUtils.readFully(archive, wordBbuf);
-            centralDirectoryStartDiskNumber = ZipLong.getValue(wordBuf);
+            centralDirectoryStartDiskNumber = archive.readUnsignedInt();
 
             skipBytes(ZIP64_EOCD_CFD_LOCATOR_RELATIVE_OFFSET);
 
-            dwordBbuf.rewind();
-            IOUtils.readFully(archive, dwordBbuf);
-            centralDirectoryStartRelativeOffset = ZipEightByteInteger.getLongValue(dwordBuf);
+            centralDirectoryStartRelativeOffset = archive.readLong();
             ((ZipSplitReadOnlySeekableByteChannel) archive).position(centralDirectoryStartDiskNumber, centralDirectoryStartRelativeOffset);
         } else {
             skipBytes(ZIP64_EOCD_CFD_LOCATOR_OFFSET - ZipConstants.WORD /* signature has already been read */);
-            dwordBbuf.rewind();
-            IOUtils.readFully(archive, dwordBbuf);
             centralDirectoryStartDiskNumber = 0;
-            centralDirectoryStartRelativeOffset = ZipEightByteInteger.getLongValue(dwordBuf);
+            centralDirectoryStartRelativeOffset = archive.readLong();
             archive.position(centralDirectoryStartRelativeOffset);
         }
     }
@@ -1260,81 +1191,50 @@ public class ZipArchiveReader implements Closeable {
      *                   later. The current entry may be added to this map.
      */
     private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag) throws IOException {
-        cfhBbuf.rewind();
-        IOUtils.readFully(archive, cfhBbuf);
-        int off = 0;
+        ByteBuffer cfhBuffer = ByteBuffer.allocate(CFH_LEN).order(ByteOrder.LITTLE_ENDIAN);
+        IOUtils.readFully(archive, cfhBuffer);
+        cfhBuffer.rewind();
+
         final Entry ze = new Entry();
 
-        final int versionMadeBy = ZipShort.getValue(cfhBuf, off);
-        off += ZipConstants.SHORT;
+        final int versionMadeBy = Short.toUnsignedInt(cfhBuffer.getShort());
         ze.setVersionMadeBy(versionMadeBy);
         ze.setPlatform(toPlatform(versionMadeBy));
 
-        ze.setVersionRequired(ZipShort.getValue(cfhBuf, off));
-        off += ZipConstants.SHORT; // version required
+        ze.setVersionRequired(Short.toUnsignedInt(cfhBuffer.getShort()));
 
-        final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(cfhBuf, off);
+        final int flag = Short.toUnsignedInt(cfhBuffer.getShort());
+
+        final GeneralPurposeBit gpFlag = GeneralPurposeBit.parse(flag);
         final boolean hasUTF8Flag = gpFlag.usesUTF8ForNames();
         final Charset entryEncoding = hasUTF8Flag ? StandardCharsets.UTF_8 : encoding;
         if (hasUTF8Flag) {
             ze.setNameSource(ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG);
         }
         ze.setGeneralPurposeBit(gpFlag);
-        ze.setRawFlag(ZipShort.getValue(cfhBuf, off));
-
-        off += ZipConstants.SHORT;
+        ze.setRawFlag(flag);
 
         // noinspection MagicConstant
-        ze.setMethod(ZipShort.getValue(cfhBuf, off));
-        off += ZipConstants.SHORT;
+        ze.setMethod(Short.toUnsignedInt(cfhBuffer.getShort()));
 
-        final long time = ZipUtil.dosToJavaTime(ZipLong.getValue(cfhBuf, off));
+        final long time = ZipUtil.dosToJavaTime(Integer.toUnsignedLong(cfhBuffer.getInt()));
         ze.setTime(time);
-        off += ZipConstants.WORD;
 
-        ze.setCrc(ZipLong.getValue(cfhBuf, off));
-        off += ZipConstants.WORD;
+        ze.setCrc(Integer.toUnsignedLong(cfhBuffer.getInt()));
 
-        long size = ZipLong.getValue(cfhBuf, off);
-        if (size < 0) {
-            throw new IOException("broken archive, entry with negative compressed size");
-        }
-        ze.setCompressedSize(size);
-        off += ZipConstants.WORD;
+        final long compressedSize = Integer.toUnsignedLong(cfhBuffer.getInt());
+        ze.setCompressedSize(compressedSize);
 
-        size = ZipLong.getValue(cfhBuf, off);
-        if (size < 0) {
-            throw new IOException("broken archive, entry with negative size");
-        }
+        final long size = Integer.toUnsignedLong(cfhBuffer.getInt());
         ze.setSize(size);
-        off += ZipConstants.WORD;
 
-        final int fileNameLen = ZipShort.getValue(cfhBuf, off);
-        off += ZipConstants.SHORT;
-        if (fileNameLen < 0) {
-            throw new IOException("broken archive, entry with negative fileNameLen");
-        }
+        final int fileNameLen = Short.toUnsignedInt(cfhBuffer.getShort());
+        final int extraLen = Short.toUnsignedInt(cfhBuffer.getShort());
+        final int commentLen = Short.toUnsignedInt(cfhBuffer.getShort());
 
-        final int extraLen = ZipShort.getValue(cfhBuf, off);
-        off += ZipConstants.SHORT;
-        if (extraLen < 0) {
-            throw new IOException("broken archive, entry with negative extraLen");
-        }
-
-        final int commentLen = ZipShort.getValue(cfhBuf, off);
-        off += ZipConstants.SHORT;
-        if (commentLen < 0) {
-            throw new IOException("broken archive, entry with negative commentLen");
-        }
-
-        ze.setDiskNumberStart(ZipShort.getValue(cfhBuf, off));
-        off += ZipConstants.SHORT;
-
-        ze.setInternalAttributes(ZipShort.getValue(cfhBuf, off));
-        off += ZipConstants.SHORT;
-
-        ze.setExternalAttributes(ZipLong.getValue(cfhBuf, off));
-        off += ZipConstants.WORD;
+        ze.setDiskNumberStart(Short.toUnsignedInt(cfhBuffer.getShort()));
+        ze.setInternalAttributes(Short.toUnsignedInt(cfhBuffer.getShort()));
+        ze.setExternalAttributes(Integer.toUnsignedLong(cfhBuffer.getInt()));
 
         final byte[] fileName = IOUtils.readRange(archive, fileNameLen);
         if (fileName.length < fileNameLen) {
@@ -1343,7 +1243,7 @@ public class ZipArchiveReader implements Closeable {
         ze.setName(Charsets.decode(entryEncoding, fileName), fileName);
 
         // LFH offset,
-        ze.setLocalHeaderOffset(ZipLong.getValue(cfhBuf, off) + firstLocalFileHeaderOffset);
+        ze.setLocalHeaderOffset(Integer.toUnsignedLong(cfhBuffer.getInt()) + firstLocalFileHeaderOffset);
         // data offset will be filled later
         entries.add(ze);
 
@@ -1436,13 +1336,8 @@ public class ZipArchiveReader implements Closeable {
         } else {
             archive.position(offset + LFH_OFFSET_FOR_FILENAME_LENGTH);
         }
-        wordBbuf.rewind();
-        IOUtils.readFully(archive, wordBbuf);
-        wordBbuf.flip();
-        wordBbuf.get(shortBuf);
-        final int fileNameLen = ZipShort.getValue(shortBuf);
-        wordBbuf.get(shortBuf);
-        final int extraFieldLen = ZipShort.getValue(shortBuf);
+        final int fileNameLen = archive.readUnsignedShort();
+        final int extraFieldLen = archive.readUnsignedShort();
         entry.setDataOffset(offset + LFH_OFFSET_FOR_FILENAME_LENGTH + ZipConstants.SHORT + ZipConstants.SHORT + fileNameLen + extraFieldLen);
         if (entry.getDataOffset() + entry.getCompressedSize() > centralDirectoryStartOffset) {
             throw new IOException("data for " + entry.getName() + " overlaps with central directory.");
@@ -1529,8 +1424,6 @@ public class ZipArchiveReader implements Closeable {
      */
     private boolean startsWithLocalFileHeader() throws IOException {
         archive.position(firstLocalFileHeaderOffset);
-        wordBbuf.rewind();
-        IOUtils.readFully(archive, wordBbuf);
-        return Arrays.equals(wordBuf, ZipArchiveOutputStream.LFH_SIG);
+        return archive.readInt() == ZipLong.LFH_SIG.getIntValue();
     }
 }

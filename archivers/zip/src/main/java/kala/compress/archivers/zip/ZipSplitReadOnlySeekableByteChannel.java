@@ -20,6 +20,7 @@ package kala.compress.archivers.zip;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import kala.compress.archivers.ArchiveStreamFactory;
+import kala.compress.utils.DataInputSeekableChannel;
 import kala.compress.utils.FileNameUtils;
 import kala.compress.utils.MultiReadOnlySeekableByteChannel;
 
@@ -46,7 +48,7 @@ import kala.compress.utils.MultiReadOnlySeekableByteChannel;
  *
  * @since 1.20
  */
-public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableByteChannel {
+public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableByteChannel implements DataInputSeekableChannel {
 
     private static final class ZipSplitSegmentComparator implements Comparator<Path>, Serializable {
         private static final long serialVersionUID = 20200123L;
@@ -251,5 +253,10 @@ public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableBy
         }
 
         channel.position(0L);
+    }
+
+    @Override
+    public ByteOrder byteOrder() {
+        return ByteOrder.LITTLE_ENDIAN;
     }
 }

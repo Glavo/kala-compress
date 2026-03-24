@@ -17,6 +17,7 @@ package kala.compress.utils;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 
@@ -33,7 +34,12 @@ public interface DataInputReadableChannel extends ReadableByteChannel {
     ///
     /// @throws EOFException if this stream reaches the end before reading all the bytes.
     /// @throws IOException  if an I/O error occurs.
-    byte readByte() throws IOException;
+    default byte readByte() throws IOException {
+        final ByteBuffer buffer = ByteBuffer.allocate(Byte.BYTES).order(byteOrder());
+        IOUtils.readFully(this, buffer);
+        buffer.flip();
+        return buffer.get();
+    }
 
     /// Reads one input byte, zero-extends it to type `int`, and returns the result,
     /// which is therefore in the range `0` through `255`.
@@ -51,7 +57,12 @@ public interface DataInputReadableChannel extends ReadableByteChannel {
     ///
     /// @throws EOFException if this stream reaches the end before reading all the bytes.
     /// @throws IOException  if an I/O error occurs.
-    short readShort() throws IOException;
+    default short readShort() throws IOException {
+        final ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES).order(byteOrder());
+        IOUtils.readFully(this, buffer);
+        buffer.flip();
+        return buffer.getShort();
+    }
 
     /// Reads two input bytes and returns an `int` value in the range `0` through `65535`.
     ///
@@ -69,7 +80,12 @@ public interface DataInputReadableChannel extends ReadableByteChannel {
     ///
     /// @throws EOFException if this stream reaches the end before reading all the bytes.
     /// @throws IOException  if an I/O error occurs.
-    int readInt() throws IOException;
+    default int readInt() throws IOException {
+        final ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES).order(byteOrder());
+        IOUtils.readFully(this, buffer);
+        buffer.flip();
+        return buffer.getInt();
+    }
 
     /// Reads four input bytes and returns a `long` value.
     ///
@@ -87,5 +103,10 @@ public interface DataInputReadableChannel extends ReadableByteChannel {
     ///
     /// @throws EOFException if this stream reaches the end before reading all the bytes.
     /// @throws IOException  if an I/O error occurs.
-    long readLong() throws IOException;
+    default long readLong() throws IOException {
+        final ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES).order(byteOrder());
+        IOUtils.readFully(this, buffer);
+        buffer.flip();
+        return buffer.getLong();
+    }
 }
