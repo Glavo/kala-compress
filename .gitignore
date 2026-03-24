@@ -8,6 +8,7 @@ target
 *~
 /.externalToolBuilders/
 /maven-eclipse.xml
+gradle.properties
 
 # Ignore Gradle project-specific cache directory
 .gradle
