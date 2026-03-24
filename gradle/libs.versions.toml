@@ -23,6 +23,7 @@ asm = "9.7.1"
 junit = "6.0.3"
 mockito = "5.23.0"
 pax-exam = "4.13.5"
+memoryfilesystem = "2.8.2"
 
 [libraries]
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
@@ -37,7 +38,7 @@ junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", vers
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
-memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version = "2.8.1" }
+memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version.ref = "memoryfilesystem" }
 pax-exam-container-native = { module = "org.ops4j.pax.exam:pax-exam-container-native", version.ref = "pax-exam" }
 pax-exam-cm = { module = "org.ops4j.pax.exam:pax-exam-cm", version.ref = "pax-exam" }
 pax-exam-link-mvn = { module = "org.ops4j.pax.exam:pax-exam-link-mvn", version.ref = "pax-exam" }
