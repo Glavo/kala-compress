@@ -169,14 +169,7 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    private static final class NameAndComment {
-        private final byte[] name;
-        private final byte[] comment;
-
-        private NameAndComment(final byte[] name, final byte[] comment) {
-            this.name = name;
-            this.comment = comment;
-        }
+    private record NameAndComment(byte[] name, byte[] comment) {
     }
 
     private static final class StoredStatisticsStream extends CountingInputStream implements InputStreamStatistics {
