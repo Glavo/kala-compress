@@ -173,6 +173,7 @@ public final class BufferedDataInputSeekableChannel implements DataInputSeekable
         int remaining = readBuffer.remaining();
         if (remaining == 0) {
             if (dst.remaining() >= readBuffer.capacity()) {
+                // When the target buffer is large enough, we don't need to use the read buffer.
                 return channel.read(dst);
             }
 
@@ -181,10 +182,10 @@ public final class BufferedDataInputSeekableChannel implements DataInputSeekable
             readBuffer.flip();
             remaining = readBuffer.remaining();
 
-            assert n == remaining;
+            assert n == remaining || (n == -1 && remaining == 0);
 
-            if (n == 0) {
-                return 0;
+            if (n <= 0) {
+                return n;
             }
         } else {
             ensureOpen();
