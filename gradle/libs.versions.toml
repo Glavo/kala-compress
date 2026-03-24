@@ -24,6 +24,7 @@ junit = "6.0.3"
 mockito = "5.23.0"
 pax-exam = "4.13.5"
 memoryfilesystem = "2.8.2"
+commons-lang3 = "3.20.0"
 
 [libraries]
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
@@ -43,6 +44,6 @@ pax-exam-container-native = { module = "org.ops4j.pax.exam:pax-exam-container-na
 pax-exam-cm = { module = "org.ops4j.pax.exam:pax-exam-cm", version.ref = "pax-exam" }
 pax-exam-link-mvn = { module = "org.ops4j.pax.exam:pax-exam-link-mvn", version.ref = "pax-exam" }
 felix-framework = { module = "org.apache.felix:org.apache.felix.framework", version = "7.0.5" }
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 commons-io = { module = "commons-io:commons-io", version = "2.17.0" }
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
