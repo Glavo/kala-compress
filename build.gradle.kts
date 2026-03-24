@@ -209,7 +209,7 @@ nexusPublishing {
     }
 }
 
-tasks.create("generateReadMe") {
+val generateReadMe by tasks.registering {
     group = "documentation"
 
     val templateFile = file("README.md.template")
