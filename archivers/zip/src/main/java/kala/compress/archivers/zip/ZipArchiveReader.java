@@ -69,6 +69,26 @@ import kala.compress.archivers.EntryStreamOffsets;
 ///
 public class ZipArchiveReader implements Closeable {
 
+    /**
+     * Lock-free implementation of BoundedInputStream. The implementation uses positioned reads on the underlying archive file channel and therefore performs
+     * significantly faster in concurrent environment.
+     */
+    private static class BoundedFileChannelInputStream extends BoundedArchiveInputStream {
+        private final FileChannel archive;
+
+        BoundedFileChannelInputStream(final long start, final long remaining, final FileChannel archive) {
+            super(start, remaining);
+            this.archive = archive;
+        }
+
+        @Override
+        protected int read(final long pos, final ByteBuffer buf) throws IOException {
+            final int read = archive.read(buf, pos);
+            buf.flip();
+            return read;
+        }
+    }
+
     /// Builds new [ZipArchiveReader] instances.
     ///
     /// The channel will be opened for reading, assuming the specified encoding for file names.
@@ -551,6 +571,9 @@ public class ZipArchiveReader implements Closeable {
     /// The actual data source.
     private final DataInputSeekableChannel archive;
 
+    /// The raw file channel if the archive is a file channel, otherwise null.
+    private final FileChannel rawFileChannel;
+
     /// Whether to look for and use Unicode extra fields.
     private final boolean useUnicodeExtraFields;
 
@@ -686,9 +709,10 @@ public class ZipArchiveReader implements Closeable {
         this.isSplitZipArchive = channel instanceof ZipSplitReadOnlySeekableByteChannel;
         this.encoding = Charsets.toCharset(encoding);
         this.useUnicodeExtraFields = useUnicodeExtraFields;
-        this.archive = channel instanceof DataInputSeekableChannel && ((DataInputSeekableChannel) channel).byteOrder() == ByteOrder.LITTLE_ENDIAN
-                ? (DataInputSeekableChannel) channel
+        this.archive = channel instanceof DataInputSeekableChannel dataInputSeekableChannel && dataInputSeekableChannel.byteOrder() == ByteOrder.LITTLE_ENDIAN
+                ? dataInputSeekableChannel
                 : new BufferedDataInputSeekableChannel(channel, 512, ByteOrder.LITTLE_ENDIAN);
+        this.rawFileChannel = channel instanceof FileChannel fileChannel ? fileChannel : null;
         boolean success = false;
         try {
             final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag = populateFromCentralDirectory();
@@ -747,7 +771,9 @@ public class ZipArchiveReader implements Closeable {
         if (start < 0 || remaining < 0 || start + remaining < start) {
             throw new IllegalArgumentException("Corrupted archive, stream boundaries" + " are out of range");
         }
-        return new BoundedSeekableByteChannelInputStream(start, remaining, archive);
+        return rawFileChannel != null
+                ? new BoundedFileChannelInputStream(start, remaining, rawFileChannel)
+                : new BoundedSeekableByteChannelInputStream(start, remaining, archive);
     }
 
     private void fillNameMap() {
