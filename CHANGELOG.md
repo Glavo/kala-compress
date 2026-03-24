@@ -9,6 +9,7 @@ Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-com
 * Update zstd-jni to 1.5.7-7.
 * Update ASM to 9.7.1.
 * New interface `DataInputReadableChannel` for reading primitive data types from a `ReadableByteChannel`.
+* New interface `DataInputSeekableChannel` for reading primitive data types from a `SeekableByteChannel`.
 
 ## 1.27.1-1 (2024-12-01)
 
