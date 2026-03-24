@@ -4,6 +4,7 @@
 
 Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-compress/commit/d0aec98f62d1870d22f869aeec5ac1ed9ea3126a).
 
+* Update minimum required Java version to 17.
 * Update JetBrains Annotations to 26.1.0.
 * Update XZ for Java to 1.12.
 * Update zstd-jni to 1.5.7-7.

@@ -35,7 +35,6 @@ plugins {
     id("signing")
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("org.glavo.load-maven-publish-properties") version "0.1.0"
-    id("org.glavo.compile-module-info-plugin") version "2.0"
 }
 
 allprojects {
@@ -43,7 +42,6 @@ allprojects {
         plugin("java-library")
         plugin("maven-publish")
         plugin("signing")
-        plugin("org.glavo.compile-module-info-plugin")
     }
 
     group = "org.glavo.kala"
@@ -63,18 +61,10 @@ allprojects {
         withSourcesJar()
     }
 
-    tasks.compileJava {
-        sourceCompatibility = "9"
-        options.isWarnings = false
-    }
-
     tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.release.set(8)
-    }
-
-    tasks.compileTestJava {
         options.release.set(17)
+        options.isWarnings = false
     }
 
     tasks.javadoc {
