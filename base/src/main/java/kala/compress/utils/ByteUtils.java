@@ -22,6 +22,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.invoke.VarHandle;
+import java.nio.ByteOrder;
+
+import static java.lang.invoke.MethodHandles.byteArrayViewVarHandle;
 
 /**
  * Utility methods for reading and writing bytes.
@@ -260,6 +264,209 @@ public final class ByteUtils {
         }
     }
 
+    private static final VarHandle SHORT_LE = byteArrayViewVarHandle(short[].class, ByteOrder.LITTLE_ENDIAN);
+    private static final VarHandle SHORT_BE = byteArrayViewVarHandle(short[].class, ByteOrder.BIG_ENDIAN);
+    private static final VarHandle INT_LE = byteArrayViewVarHandle(int[].class, ByteOrder.LITTLE_ENDIAN);
+    private static final VarHandle INT_BE = byteArrayViewVarHandle(int[].class, ByteOrder.BIG_ENDIAN);
+    private static final VarHandle LONG_LE = byteArrayViewVarHandle(long[].class, ByteOrder.LITTLE_ENDIAN);
+    private static final VarHandle LONG_BE = byteArrayViewVarHandle(long[].class, ByteOrder.BIG_ENDIAN);
+
+
+    /// Get the byte at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static byte getByte(byte[] array, int offset) {
+        return array[offset];
+    }
+
+    /// Get the unsigned byte at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static int getUnsignedByte(byte[] array, int offset) {
+        return Byte.toUnsignedInt(getByte(array, offset));
+    }
+
+    /// Get the little-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static short getShortLE(byte[] array, int offset) {
+        return (short) SHORT_LE.get(array, offset);
+    }
+
+    /// Get the unsigned little-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static int getUnsignedShortLE(byte[] array, int offset) {
+        return Short.toUnsignedInt(getShortLE(array, offset));
+    }
+
+    /// Get the big-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static short getShortBE(byte[] array, int offset) {
+        return (short) SHORT_BE.get(array, offset);
+    }
+
+    /// Get the unsigned big-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static int getUnsignedShortBE(byte[] array, int offset) {
+        return Short.toUnsignedInt(getShortBE(array, offset));
+    }
+
+    /// Get the little-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static int getIntLE(byte[] array, int offset) {
+        return (int) INT_LE.get(array, offset);
+    }
+
+    /// Get the unsigned little-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static long getUnsignedIntLE(byte[] array, int offset) {
+        return Integer.toUnsignedLong(getIntLE(array, offset));
+    }
+
+    /// Get the big-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static int getIntBE(byte[] array, int offset) {
+        return (int) INT_BE.get(array, offset);
+    }
+
+    /// Get the unsigned big-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static long getUnsignedIntBE(byte[] array, int offset) {
+        return Integer.toUnsignedLong(getIntBE(array, offset));
+    }
+
+    /// Get the little-endian long at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static long getLongLE(byte[] array, int offset) {
+        return (long) LONG_LE.get(array, offset);
+    }
+
+    /// Get the big-endian long at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static long getLongBE(byte[] array, int offset) {
+        return (long) LONG_BE.get(array, offset);
+    }
+
+    // Set
+
+    /// Set the byte at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setByte(byte[] array, int offset, byte value) {
+        array[offset] = value;
+    }
+
+    /// Set the unsigned byte at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setUnsignedByte(byte[] array, int offset, int value) {
+        array[offset] = (byte) (value & 0xff);
+    }
+
+    /// Set the little-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setShortLE(byte[] array, int offset, short value) {
+        SHORT_LE.set(array, offset, value);
+    }
+
+    /// Set the unsigned little-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setUnsignedShortLE(byte[] array, int offset, int value) {
+        setShortLE(array, offset, (short) (value & 0xffff));
+    }
+
+    /// Set the big-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setShortBE(byte[] array, int offset, short value) {
+        SHORT_BE.set(array, offset, value);
+    }
+
+    /// Set the unsigned big-endian short at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setUnsignedShortBE(byte[] array, int offset, int value) {
+        setShortBE(array, offset, (short) (value & 0xffff));
+    }
+
+    /// Set the little-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setIntLE(byte[] array, int offset, int value) {
+        INT_LE.set(array, offset, value);
+    }
+
+    /// Set the unsigned little-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setUnsignedIntLE(byte[] array, int offset, long value) {
+        setIntLE(array, offset, (int) (value & 0xffff_ffffL));
+    }
+
+    /// Set the big-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setIntBE(byte[] array, int offset, int value) {
+        INT_BE.set(array, offset, value);
+    }
+
+    /// Set the unsigned big-endian int at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setUnsignedIntBE(byte[] array, int offset, long value) {
+        setIntBE(array, offset, (int) (value & 0xffff_ffffL));
+    }
+
+    /// Set the little-endian long at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setLongLE(byte[] array, int offset, long value) {
+        LONG_LE.set(array, offset, value);
+    }
+
+    /// Set the big-endian long at the given offset.
+    ///
+    /// @throws ArrayIndexOutOfBoundsException if offset is out of bounds.
+    /// @since 1.27.1-2
+    public static void setLongBE(byte[] array, int offset, long value) {
+        LONG_BE.set(array, offset, value);
+    }
+
     private ByteUtils() {
-        /* no instances */ }
+        /* no instances */
+    }
 }

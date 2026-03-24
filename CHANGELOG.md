@@ -13,6 +13,7 @@ Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-com
 * New interface `DataInputSeekableChannel` for reading primitive data types from a `SeekableByteChannel`.
 * New class `BufferedDataInputSeekableChannel` for buffering reads from a `SeekableByteChannel`.
 * Refactor `ZipArchiveReader` to use `DataInputSeekableChannel` instead of `SeekableByteChannel`.
+* Add new utility methods for reading and writing bytes to `ByteUtils`.
 
 ## 1.27.1-1 (2024-12-01)
 
