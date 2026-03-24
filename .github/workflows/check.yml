@@ -10,4 +10,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
       - name: Running Tests
-        run: ./gradlew check --info --no-daemon --stacktrace
+        run: ./gradlew check jacocoTestReport --info --no-daemon --stacktrace
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
