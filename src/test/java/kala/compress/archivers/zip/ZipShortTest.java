@@ -54,7 +54,7 @@ public class ZipShortTest {
         assertEquals(zs2, zs, "symmetric");
 
         assertNotEquals(null, zs, "null handling");
-        assertNotEquals(zs, Integer.valueOf(0x1234), "non ZipShort handling");
+        assertNotEquals(zs, 0x1234, "non ZipShort handling");
     }
 
     /**

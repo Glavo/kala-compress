@@ -16,6 +16,7 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
 import kala.compress.utils.TimeUtils;
 
 import java.nio.file.attribute.FileTime;
@@ -61,8 +62,8 @@ import java.util.zip.ZipException;
  *          Ctime      8 bytes    File creation time
  * </pre>
  *
- * @since 1.11
  * @NotThreadSafe
+ * @since 1.11
  */
 public class X000A_NTFS implements ZipExtraField {
 
@@ -189,17 +190,22 @@ public class X000A_NTFS implements ZipExtraField {
     public byte[] getLocalFileDataData() {
         final byte[] data = new byte[getLocalFileDataLength().getValue()];
         int pos = 4;
-        System.arraycopy(TIME_ATTR_TAG.getBytes(), 0, data, pos, 2);
+        ByteUtils.setUnsignedShortLE(data, pos, TIME_ATTR_TAG.getValue());
         pos += 2;
-        System.arraycopy(TIME_ATTR_SIZE.getBytes(), 0, data, pos, 2);
+        ByteUtils.setUnsignedShortLE(data, pos, TIME_ATTR_SIZE.getValue());
         pos += 2;
-        System.arraycopy(modifyTime.getBytes(), 0, data, pos, 8);
+        ByteUtils.setLongLE(data, pos, modifyTime.getLongValue());
         pos += 8;
-        System.arraycopy(accessTime.getBytes(), 0, data, pos, 8);
+        ByteUtils.setLongLE(data, pos, accessTime.getLongValue());
         pos += 8;
-        System.arraycopy(createTime.getBytes(), 0, data, pos, 8);
+        ByteUtils.setLongLE(data, pos, createTime.getLongValue());
         return data;
     }
+
+    private static final ZipShort LOCAL_FILE_DATA_LENGTH = new ZipShort(4 /* reserved */
+            + 2 /* Tag#1 */
+            + 2 /* Size#1 */
+            + 3 * 8 /* time values */);
 
     /**
      * Gets the length of the extra field in the local file data - without Header-ID or length specifier.
@@ -208,10 +214,7 @@ public class X000A_NTFS implements ZipExtraField {
      */
     @Override
     public ZipShort getLocalFileDataLength() {
-        return new ZipShort(4 /* reserved */
-                + 2 /* Tag#1 */
-                + 2 /* Size#1 */
-                + 3 * 8 /* time values */);
+        return LOCAL_FILE_DATA_LENGTH;
     }
 
     /**
