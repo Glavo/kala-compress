@@ -23,8 +23,8 @@ mockito = "5.23.0"
 pax-exam = "4.13.5"
 
 [libraries]
-jetbrains-annotations = { module = "org.jetbrains:annotations", version = "jetbrains-annotations" }
-xz = { module = "org.tukaani:xz", version = "xz" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+xz = { module = "org.tukaani:xz", version.ref = "xz" }
 zstd-jni = { module = "com.github.luben:zstd-jni", version = "1.5.6-8" }
 asm = { module = "org.ow2.asm:asm", version = "9.7.1" }
 
