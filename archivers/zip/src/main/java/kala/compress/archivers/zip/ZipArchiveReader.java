@@ -54,48 +54,44 @@ import kala.compress.utils.*;
 import kala.compress.archivers.ArchiveReaderBuilder;
 import kala.compress.archivers.EntryStreamOffsets;
 
-/**
- * Replacement for {@link java.util.zip.ZipFile}.
- * <p>
- * This class adds support for file name encodings other than UTF-8 (which is required to work on ZIP files created by native ZIP tools and is able to skip a
- * preamble like the one found in self extracting archives. Furthermore it returns instances of
- * {@code org.apache.commons.compress.archivers.zip.ZipArchiveEntry} instead of {@link java.util.zip.ZipEntry}.
- * </p>
- * <p>
- * It doesn't extend {@link java.util.zip.ZipFile} as it would have to reimplement all methods anyway. Like {@link java.util.zip.ZipFile}, it uses
- * SeekableByteChannel under the covers and supports compressed and uncompressed entries. As of Apache Commons Compress 1.3 it also transparently supports Zip64
- * extensions and thus individual entries and archives larger than 4 GB or with more than 65,536 entries.
- * </p>
- * <p>
- * The method signatures mimic the ones of {@link java.util.zip.ZipFile}, with a couple of exceptions:
- * </p>
- * <ul>
- * <li>There is no getName method.</li>
- * <li>entries has been renamed to getEntries.</li>
- * <li>getEntries and getEntry return {@code org.apache.commons.compress.archivers.zip.ZipArchiveEntry} instances.</li>
- * <li>close is allowed to throw IOException.</li>
- * </ul>
- */
+/// Replacement for [java.util.zip.ZipFile].
+///
+/// This class adds support for file name encodings other than UTF-8 (which is required to work on ZIP files created by native ZIP tools and is able to skip a
+/// preamble like the one found in self extracting archives. Furthermore it returns instances of
+/// `org.apache.commons.compress.archivers.zip.ZipArchiveEntry` instead of [java.util.zip.ZipEntry].
+///
+///
+/// It doesn't extend [java.util.zip.ZipFile] as it would have to reimplement all methods anyway. Like [java.util.zip.ZipFile], it uses
+/// SeekableByteChannel under the covers and supports compressed and uncompressed entries. As of Apache Commons Compress 1.3 it also transparently supports Zip64
+/// extensions and thus individual entries and archives larger than 4 GB or with more than 65,536 entries.
+///
+///
+/// The method signatures mimic the ones of [java.util.zip.ZipFile], with a couple of exceptions:
+///
+///
+///   - There is no getName method.
+///   - entries has been renamed to getEntries.
+///   - getEntries and getEntry return `org.apache.commons.compress.archivers.zip.ZipArchiveEntry` instances.
+///   - close is allowed to throw IOException.
+///
 public class ZipArchiveReader implements Closeable {
 
-    /**
-     * Builds new {@link ZipArchiveReader} instances.
-     * <p>
-     * The channel will be opened for reading, assuming the specified encoding for file names.
-     * </p>
-     * <p>
-     * See {@link SeekableInMemoryByteChannel} to read from an in-memory archive.
-     * </p>
-     * <p>
-     * By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
-     * when the archive is big. The {@code ignoreLocalFileHeader} parameter can be set to {@code true} which restricts parsing to the central directory.
-     * Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-     * set to {@code true}. This includes the content of the Unicode extra field, so setting {@code
-     * ignoreLocalFileHeader} to {@code true} means {@code useUnicodeExtraFields} will be ignored effectively.
-     * </p>
-     *
-     * @since 1.26.0
-     */
+    /// Builds new [ZipArchiveReader] instances.
+    ///
+    /// The channel will be opened for reading, assuming the specified encoding for file names.
+    ///
+    ///
+    /// See [SeekableInMemoryByteChannel] to read from an in-memory archive.
+    ///
+    ///
+    /// By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
+    /// when the archive is big. The `ignoreLocalFileHeader` parameter can be set to `true` which restricts parsing to the central directory.
+    /// Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
+    /// set to `true`. This includes the content of the Unicode extra field, so setting
+    /// `ignoreLocalFileHeader` to `true` means `useUnicodeExtraFields` will be ignored effectively.
+    ///
+    ///
+    /// @since 1.26.0
     public static class Builder extends ArchiveReaderBuilder<ZipArchiveReader, Builder> {
 
         private boolean useUnicodeExtraFields = true;
@@ -123,35 +119,29 @@ public class ZipArchiveReader implements Closeable {
             return new ZipArchiveReader(actualChannel, actualDescription, charset, useUnicodeExtraFields, closeOnError, ignoreLocalFileHeader);
         }
 
-        /**
-         * Sets whether to ignore information stored inside the local file header.
-         *
-         * @param ignoreLocalFileHeader whether to ignore information stored inside.
-         * @return {@code this} instance.
-         */
+        /// Sets whether to ignore information stored inside the local file header.
+        ///
+        /// @param ignoreLocalFileHeader whether to ignore information stored inside.
+        /// @return `this` instance.
         public Builder setIgnoreLocalFileHeader(final boolean ignoreLocalFileHeader) {
             this.ignoreLocalFileHeader = ignoreLocalFileHeader;
             return this;
         }
 
-        /**
-         * Sets max number of multi archive disks, default is 1 (no multi archive).
-         *
-         * @param maxNumberOfDisks max number of multi archive disks.
-         *
-         * @return {@code this} instance.
-         */
+        /// Sets max number of multi archive disks, default is 1 (no multi archive).
+        ///
+        /// @param maxNumberOfDisks max number of multi archive disks.
+        ///
+        /// @return `this` instance.
         public Builder setMaxNumberOfDisks(final long maxNumberOfDisks) {
             this.maxNumberOfDisks = maxNumberOfDisks;
             return this;
         }
 
-        /**
-         * Sets whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-         *
-         * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-         * @return {@code this} instance.
-         */
+        /// Sets whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+        ///
+        /// @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+        /// @return `this` instance.
         public Builder setUseUnicodeExtraFields(final boolean useUnicodeExtraFields) {
             this.useUnicodeExtraFields = useUnicodeExtraFields;
             return this;
@@ -159,9 +149,7 @@ public class ZipArchiveReader implements Closeable {
 
     }
 
-    /**
-     * Extends ZipArchiveEntry to store the offset within the archive.
-     */
+    /// Extends ZipArchiveEntry to store the offset within the archive.
     private static final class Entry extends ZipArchiveEntry {
 
         @Override
@@ -220,9 +208,7 @@ public class ZipArchiveReader implements Closeable {
     private static final int POS_3 = 3;
     private static final byte[] ONE_ZERO_BYTE = new byte[1];
 
-    /**
-     * Length of a "central directory" entry structure without file name, extra fields or comment.
-     */
+    /// Length of a "central directory" entry structure without file name, extra fields or comment.
     private static final int CFH_LEN =
     // @formatter:off
         /* version made by                 */ ZipConstants.SHORT
@@ -245,9 +231,7 @@ public class ZipArchiveReader implements Closeable {
 
     private static final long CFH_SIG = ZipLong.getValue(ZipArchiveOutputStream.CFH_SIG);
 
-    /**
-     * Length of the "End of central directory record" - which is supposed to be the last structure of the archive - without file comment.
-     */
+    /// Length of the "End of central directory record" - which is supposed to be the last structure of the archive - without file comment.
     static final int MIN_EOCD_SIZE =
     // @formatter:off
         /* end of central dir signature    */ ZipConstants.WORD
@@ -265,18 +249,14 @@ public class ZipArchiveReader implements Closeable {
         /* ZIP file comment length         */ + ZipConstants.SHORT;
     // @formatter:on
 
-    /**
-     * Maximum length of the "End of central directory record" with a file comment.
-     */
+    /// Maximum length of the "End of central directory record" with a file comment.
     private static final int MAX_EOCD_SIZE = MIN_EOCD_SIZE
     // @formatter:off
         /* maximum length of ZIP file comment */ + ZipConstants.ZIP64_MAGIC_SHORT;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the location of the length of the central directory inside the "End of central directory record" relative to the start of
-     * the "End of central directory record".
-     */
+    /// Offset of the field that holds the location of the length of the central directory inside the "End of central directory record" relative to the start of
+    /// the "End of central directory record".
     private static final int CFD_LENGTH_OFFSET =
     // @formatter:off
         /* end of central dir signature    */ ZipConstants.WORD
@@ -289,20 +269,16 @@ public class ZipArchiveReader implements Closeable {
         /* the central dir                 */ + ZipConstants.SHORT;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the disk number of the first central directory entry inside the "End of central directory record" relative to the start of
-     * the "End of central directory record".
-     */
+    /// Offset of the field that holds the disk number of the first central directory entry inside the "End of central directory record" relative to the start of
+    /// the "End of central directory record".
     private static final int CFD_DISK_OFFSET =
     // @formatter:off
             /* end of central dir signature    */ ZipConstants.WORD
             /* number of this disk             */ + ZipConstants.SHORT;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the location of the first central directory entry inside the "End of central directory record" relative to the "number of
-     * the disk with the start of the central directory".
-     */
+    /// Offset of the field that holds the location of the first central directory entry inside the "End of central directory record" relative to the "number of
+    /// the disk with the start of the central directory".
     private static final int CFD_LOCATOR_RELATIVE_OFFSET =
     // @formatter:off
             /* total number of entries in      */
@@ -312,10 +288,8 @@ public class ZipArchiveReader implements Closeable {
             /* size of the central directory   */ + ZipConstants.WORD;
     // @formatter:on
 
-    /**
-     * Length of the "Zip64 end of central directory locator" - which should be right in front of the "end of central directory record" if one is present at
-     * all.
-     */
+    /// Length of the "Zip64 end of central directory locator" - which should be right in front of the "end of central directory record" if one is present at
+    /// all.
     private static final int ZIP64_EOCDL_LENGTH =
     // @formatter:off
         /* zip64 end of central dir locator sig */ ZipConstants.WORD
@@ -327,10 +301,8 @@ public class ZipArchiveReader implements Closeable {
         /* total number of disks                */ + ZipConstants.WORD;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the location of the "Zip64 end of central directory record" inside the "Zip64 end of central directory locator" relative
-     * to the start of the "Zip64 end of central directory locator".
-     */
+    /// Offset of the field that holds the location of the "Zip64 end of central directory record" inside the "Zip64 end of central directory locator" relative
+    /// to the start of the "Zip64 end of central directory locator".
     private static final int ZIP64_EOCDL_LOCATOR_OFFSET =
     // @formatter:off
         /* zip64 end of central dir locator sig */ ZipConstants.WORD
@@ -339,10 +311,8 @@ public class ZipArchiveReader implements Closeable {
         /* central directory                    */ + ZipConstants.WORD;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the location of the first central directory entry inside the "Zip64 end of central directory record" relative to the start
-     * of the "Zip64 end of central directory record".
-     */
+    /// Offset of the field that holds the location of the first central directory entry inside the "Zip64 end of central directory record" relative to the start
+    /// of the "Zip64 end of central directory record".
     private static final int ZIP64_EOCD_CFD_LOCATOR_OFFSET =
     // @formatter:off
         /* zip64 end of central dir        */
@@ -361,10 +331,8 @@ public class ZipArchiveReader implements Closeable {
         /* size of the central directory   */ + ZipConstants.DWORD;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the disk number of the first central directory entry inside the "Zip64 end of central directory record" relative to the
-     * start of the "Zip64 end of central directory record".
-     */
+    /// Offset of the field that holds the disk number of the first central directory entry inside the "Zip64 end of central directory record" relative to the
+    /// start of the "Zip64 end of central directory record".
     private static final int ZIP64_EOCD_CFD_DISK_OFFSET =
     // @formatter:off
             /* zip64 end of central dir        */
@@ -376,10 +344,8 @@ public class ZipArchiveReader implements Closeable {
             /* number of this disk             */ + ZipConstants.WORD;
     // @formatter:on
 
-    /**
-     * Offset of the field that holds the location of the first central directory entry inside the "Zip64 end of central directory record" relative to the
-     * "number of the disk with the start of the central directory".
-     */
+    /// Offset of the field that holds the location of the first central directory entry inside the "Zip64 end of central directory record" relative to the
+    /// "number of the disk with the start of the central directory".
     private static final int ZIP64_EOCD_CFD_LOCATOR_RELATIVE_OFFSET =
     // @formatter:off
             /* total number of entries in the  */
@@ -389,9 +355,7 @@ public class ZipArchiveReader implements Closeable {
             /* size of the central directory   */ + ZipConstants.DWORD;
     // @formatter:on
 
-    /**
-     * Number of bytes in local file header up to the &quot;length of file name&quot; entry.
-     */
+    /// Number of bytes in local file header up to the &quot;length of file name&quot; entry.
     private static final long LFH_OFFSET_FOR_FILENAME_LENGTH =
     // @formatter:off
         /* local file header signature     */ ZipConstants.WORD
@@ -405,34 +369,28 @@ public class ZipArchiveReader implements Closeable {
         /* uncompressed size               */ + (long) ZipConstants.WORD;
     // @formatter:on
 
-    /**
-     * Compares two ZipArchiveEntries based on their offset within the archive.
-     * <p>
-     * Won't return any meaningful results if one of the entries isn't part of the archive at all.
-     * </p>
-     *
-     * @since 1.1
-     */
+    /// Compares two ZipArchiveEntries based on their offset within the archive.
+    ///
+    /// Won't return any meaningful results if one of the entries isn't part of the archive at all.
+    ///
+    ///
+    /// @since 1.1
     private static final Comparator<ZipArchiveEntry> offsetComparator = Comparator.comparingLong(ZipArchiveEntry::getDiskNumberStart)
             .thenComparingLong(ZipArchiveEntry::getLocalHeaderOffset);
 
-    /**
-     * Creates a new Builder.
-     *
-     * @return a new Builder.
-     * @since 1.26.0
-     */
+    /// Creates a new Builder.
+    ///
+    /// @return a new Builder.
+    /// @since 1.26.0
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Creates a new SeekableByteChannel for reading.
-     *
-     * @param path the path to the file to open or create
-     * @return a new seekable byte channel
-     * @throws IOException if an I/O error occurs
-     */
+    /// Creates a new SeekableByteChannel for reading.
+    ///
+    /// @param path the path to the file to open or create
+    /// @return a new seekable byte channel
+    /// @throws IOException if an I/O error occurs
     private static SeekableByteChannel newReadByteChannel(final Path path) throws IOException {
         return Files.newByteChannel(path, READ);
     }
@@ -489,11 +447,9 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Searches for the and positions the stream at the start of the &quot;End of central dir record&quot;.
-     *
-     * @return true if it's Zip64 end of central directory or false if it's Zip32
-     */
+    /// Searches for the and positions the stream at the start of the &quot;End of central dir record&quot;.
+    ///
+    /// @return true if it's Zip64 end of central directory or false if it's Zip32
     private static boolean positionAtEndOfCentralDirectoryRecord(final SeekableByteChannel channel) throws IOException {
         final boolean found = tryToLocateSignature(channel, MIN_EOCD_SIZE, MAX_EOCD_SIZE, ZipArchiveOutputStream.EOCD_SIG);
         if (!found) {
@@ -518,44 +474,40 @@ public class ZipArchiveReader implements Closeable {
         return found64;
     }
 
-    /**
-     * Converts a raw version made by int to a <a href="https://pkwaredownloads.blob.core.windows.net/pkware-general/Documentation/APPNOTE_6.2.0.TXT">platform
-     * code</a>.
-     * <ul>
-     * <li>0 - MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)</li>
-     * <li>1 - Amiga</li>
-     * <li>2 - OpenVMS</li>
-     * <li>3 - Unix</li>
-     * <li>4 - VM/CMS</li>
-     * <li>5 - Atari ST</li>
-     * <li>6 - OS/2 H.P.F.S.</li>
-     * <li>7 - Macintosh</li>
-     * <li>8 - Z-System</li>
-     * <li>9 - CP/M</li>
-     * <li>10 - Windows NTFS</li>
-     * <li>11 - MVS (OS/390 - Z/OS)</li>
-     * <li>12 - VSE</li>
-     * <li>13 - Acorn Risc</li>
-     * <li>14 - VFAT</li>
-     * <li>15 - alternate MVS</li>
-     * <li>16 - BeOS</li>
-     * <li>17 - Tandem</li>
-     * <li>18 - OS/400</li>
-     * <li>19 - OS/X (Darwin)</li>
-     * <li>20 thru 255 - unused</li>
-     * </ul>
-     *
-     * @param versionMadeBy version/
-     * @return a platform code.
-     */
+    /// Converts a raw version made by int to a <a href="https://pkwaredownloads.blob.core.windows.net/pkware-general/Documentation/APPNOTE_6.2.0.TXT">platform
+    /// code</a>.
+    ///
+    ///   - 0 - MS-DOS and OS/2 (FAT / VFAT / FAT32 file systems)
+    ///   - 1 - Amiga
+    ///   - 2 - OpenVMS
+    ///   - 3 - Unix
+    ///   - 4 - VM/CMS
+    ///   - 5 - Atari ST
+    ///   - 6 - OS/2 H.P.F.S.
+    ///   - 7 - Macintosh
+    ///   - 8 - Z-System
+    ///   - 9 - CP/M
+    ///   - 10 - Windows NTFS
+    ///   - 11 - MVS (OS/390 - Z/OS)
+    ///   - 12 - VSE
+    ///   - 13 - Acorn Risc
+    ///   - 14 - VFAT
+    ///   - 15 - alternate MVS
+    ///   - 16 - BeOS
+    ///   - 17 - Tandem
+    ///   - 18 - OS/400
+    ///   - 19 - OS/X (Darwin)
+    ///   - 20 thru 255 - unused
+    ///
+    ///
+    /// @param versionMadeBy version/
+    /// @return a platform code.
     static int toPlatform(final int versionMadeBy) {
         return versionMadeBy >> BYTE_SHIFT & NIBLET_MASK;
     }
 
-    /**
-     * Searches the archive backwards from minDistance to maxDistance for the given signature, positions the RandomaccessFile right at the signature if it has
-     * been found.
-     */
+    /// Searches the archive backwards from minDistance to maxDistance for the given signature, positions the RandomaccessFile right at the signature if it has
+    /// been found.
     private static boolean tryToLocateSignature(final SeekableByteChannel channel, final long minDistanceFromEnd, final long maxDistanceFromEnd,
             final byte[] sig) throws IOException {
         final ByteBuffer wordBuf = ByteBuffer.allocate(ZipConstants.WORD);
@@ -594,38 +546,26 @@ public class ZipArchiveReader implements Closeable {
         return found;
     }
 
-    /**
-     * List of entries in the order they appear inside the central directory.
-     */
+    /// List of entries in the order they appear inside the central directory.
     private final List<ZipArchiveEntry> entries = new LinkedList<>();
 
-    /**
-     * Maps String to list of ZipArchiveEntrys, name -> actual entries.
-     */
+    /// Maps String to list of ZipArchiveEntrys, name -> actual entries.
     private final Map<String, LinkedList<ZipArchiveEntry>> nameMap = new HashMap<>(HASH_SIZE);
 
-    /**
-     * The encoding to use for file names and the file comment.
-     * <p>
-     * For a list of possible values see <a href="Supported Encodings">https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html</a>.
-     * Defaults to UTF-8.
-     * </p>
-     */
+    /// The encoding to use for file names and the file comment.
+    ///
+    /// For a list of possible values see <a href="Supported Encodings">https://docs.oracle.com/javase/8/docs/technotes/guides/intl/encoding.doc.html</a>.
+    /// Defaults to UTF-8.
+    ///
     private final Charset encoding;
 
-    /**
-     * The actual data source.
-     */
+    /// The actual data source.
     private final DataInputSeekableChannel archive;
 
-    /**
-     * Whether to look for and use Unicode extra fields.
-     */
+    /// Whether to look for and use Unicode extra fields.
     private final boolean useUnicodeExtraFields;
 
-    /**
-     * Whether the ZIP archive is a split ZIP archive
-     */
+    /// Whether the ZIP archive is a split ZIP archive
     private final boolean isSplitZipArchive;
 
     private long centralDirectoryStartDiskNumber, centralDirectoryStartRelativeOffset;
@@ -636,133 +576,117 @@ public class ZipArchiveReader implements Closeable {
 
     // Caller closes
 
-    /**
-     * Opens the given path for reading, assuming "UTF-8" for file names.
-     *
-     * @param path path to the archive.
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.22
-     */
+    /// Opens the given path for reading, assuming "UTF-8" for file names.
+    ///
+    /// @param path path to the archive.
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.22
     public ZipArchiveReader(final Path path) throws IOException {
         this(path, DEFAULT_CHARSET);
     }
 
-    /**
-     * Opens the given path for reading, assuming the specified encoding for file names and scanning for Unicode extra fields.
-     *
-     * @param path     path to the archive.
-     * @param encoding the encoding to use for file names, use null for the UTF-8
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
+    /// Opens the given path for reading, assuming the specified encoding for file names and scanning for Unicode extra fields.
+    ///
+    /// @param path     path to the archive.
+    /// @param encoding the encoding to use for file names, use null for the UTF-8
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.27.1-0
     public ZipArchiveReader(final Path path, final Charset encoding) throws IOException {
         this(path, encoding, true);
     }
 
-    /**
-     * Opens the given path for reading, assuming the specified encoding for file names.
-     *
-     * @param path                  path to the archive.
-     * @param encoding              the encoding to use for file names, use null for the UTF-8
-     * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
+    /// Opens the given path for reading, assuming the specified encoding for file names.
+    ///
+    /// @param path                  path to the archive.
+    /// @param encoding              the encoding to use for file names, use null for the UTF-8
+    /// @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.27.1-0
     public ZipArchiveReader(final Path path, final Charset encoding, final boolean useUnicodeExtraFields) throws IOException {
         this(path, encoding, useUnicodeExtraFields, false);
     }
 
-    /**
-     * Opens the given path for reading, assuming the specified encoding for file names.
-     * <p>
-     * By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
-     * when the archive is big. The {@code ignoreLocalFileHeader} parameter can be set to {@code true} which restricts parsing to the central directory.
-     * Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-     * set to {@code true}. This includes the content of the Unicode extra field, so setting {@code
-     * ignoreLocalFileHeader} to {@code true} means {@code useUnicodeExtraFields} will be ignored effectively.
-     * </p>
-     *
-     * @param path                  path to the archive.
-     * @param encoding              the encoding to use for file names, use null for the UTF-8
-     * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @param ignoreLocalFileHeader whether to ignore information stored inside the local file header (see the notes in this method's Javadoc)
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
+    /// Opens the given path for reading, assuming the specified encoding for file names.
+    ///
+    /// By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
+    /// when the archive is big. The `ignoreLocalFileHeader` parameter can be set to `true` which restricts parsing to the central directory.
+    /// Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
+    /// set to `true`. This includes the content of the Unicode extra field, so setting
+    /// `ignoreLocalFileHeader` to `true` means `useUnicodeExtraFields` will be ignored effectively.
+    ///
+    ///
+    /// @param path                  path to the archive.
+    /// @param encoding              the encoding to use for file names, use null for the UTF-8
+    /// @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+    /// @param ignoreLocalFileHeader whether to ignore information stored inside the local file header (see the notes in this method's Javadoc)
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.27.1-0
     @SuppressWarnings("resource") // Caller closes
     public ZipArchiveReader(final Path path, final Charset encoding, final boolean useUnicodeExtraFields, final boolean ignoreLocalFileHeader) throws IOException {
         this(newReadByteChannel(path), path.toAbsolutePath().toString(), encoding, useUnicodeExtraFields, true, ignoreLocalFileHeader);
     }
 
-    /**
-     * Opens the given channel for reading, assuming "UTF-8" for file names.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel the archive.
-     *
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.13
-     */
+    /// Opens the given channel for reading, assuming "UTF-8" for file names.
+    ///
+    /// [SeekableInMemoryByteChannel] allows you to read from an in-memory archive.
+    ///
+    ///
+    /// @param channel the archive.
+    ///
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.13
     public ZipArchiveReader(final SeekableByteChannel channel) throws IOException {
         this(channel, "a SeekableByteChannel", DEFAULT_CHARSET, true);
     }
 
-    /**
-     * Opens the given channel for reading, assuming the specified encoding for file names.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel  the archive.
-     * @param encoding the encoding to use for file names, use null for the UTF-8
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
+    /// Opens the given channel for reading, assuming the specified encoding for file names.
+    ///
+    /// [SeekableInMemoryByteChannel] allows you to read from an in-memory archive.
+    ///
+    ///
+    /// @param channel  the archive.
+    /// @param encoding the encoding to use for file names, use null for the UTF-8
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.27.1-0
     public ZipArchiveReader(final SeekableByteChannel channel, final Charset encoding) throws IOException {
         this(channel, "a SeekableByteChannel", encoding, true);
     }
 
-    /**
-     * Opens the given channel for reading, assuming the specified encoding for file names.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     *
-     * @param channel               the archive.
-     * @param channelDescription    description of the archive, used for error messages only.
-     * @param encoding              the encoding to use for file names, use null for the UTF-8
-     * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
+    /// Opens the given channel for reading, assuming the specified encoding for file names.
+    ///
+    /// [SeekableInMemoryByteChannel] allows you to read from an in-memory archive.
+    ///
+    ///
+    /// @param channel               the archive.
+    /// @param channelDescription    description of the archive, used for error messages only.
+    /// @param encoding              the encoding to use for file names, use null for the UTF-8
+    /// @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.27.1-0
     public ZipArchiveReader(final SeekableByteChannel channel, final String channelDescription, final Charset encoding, final boolean useUnicodeExtraFields)
             throws IOException {
         this(channel, channelDescription, encoding, useUnicodeExtraFields, false, false);
     }
 
-    /**
-     * Opens the given channel for reading, assuming the specified encoding for file names.
-     * <p>
-     * {@link SeekableInMemoryByteChannel} allows you to read from an in-memory archive.
-     * </p>
-     * <p>
-     * By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
-     * when the archive is big. The {@code ignoreLocalFileHeader} parameter can be set to {@code true} which restricts parsing to the central directory.
-     * Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-     * set to {@code true}. This includes the content of the Unicode extra field, so setting {@code
-     * ignoreLocalFileHeader} to {@code true} means {@code useUnicodeExtraFields} will be ignored effectively.
-     * </p>
-     *
-     * @param channel               the archive.
-     * @param channelDescription    description of the archive, used for error messages only.
-     * @param encoding              the encoding to use for file names, use null for the UTF-8
-     * @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
-     * @param ignoreLocalFileHeader whether to ignore information stored inside the local file header (see the notes in this method's Javadoc)
-     * @throws IOException if an error occurs while reading the file.
-     * @since 1.27.1-0
-     */
+    /// Opens the given channel for reading, assuming the specified encoding for file names.
+    ///
+    /// [SeekableInMemoryByteChannel] allows you to read from an in-memory archive.
+    ///
+    ///
+    /// By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
+    /// when the archive is big. The `ignoreLocalFileHeader` parameter can be set to `true` which restricts parsing to the central directory.
+    /// Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
+    /// set to `true`. This includes the content of the Unicode extra field, so setting
+    /// `ignoreLocalFileHeader` to `true` means `useUnicodeExtraFields` will be ignored effectively.
+    ///
+    ///
+    /// @param channel               the archive.
+    /// @param channelDescription    description of the archive, used for error messages only.
+    /// @param encoding              the encoding to use for file names, use null for the UTF-8
+    /// @param useUnicodeExtraFields whether to use InfoZIP Unicode Extra Fields (if present) to set the file names.
+    /// @param ignoreLocalFileHeader whether to ignore information stored inside the local file header (see the notes in this method's Javadoc)
+    /// @throws IOException if an error occurs while reading the file.
+    /// @since 1.27.1-0
     public ZipArchiveReader(final SeekableByteChannel channel, final String channelDescription, final Charset encoding, final boolean useUnicodeExtraFields,
                             final boolean ignoreLocalFileHeader) throws IOException {
         this(channel, channelDescription, encoding, useUnicodeExtraFields, false, ignoreLocalFileHeader);
@@ -793,40 +717,34 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Whether this class is able to read the given entry.
-     * <p>
-     * May return false if it is set up to use encryption or a compression method that hasn't been implemented yet.
-     * </p>
-     *
-     * @since 1.1
-     * @param entry the entry
-     * @return whether this class is able to read the given entry.
-     */
+    /// Whether this class is able to read the given entry.
+    ///
+    /// May return false if it is set up to use encryption or a compression method that hasn't been implemented yet.
+    ///
+    ///
+    /// @since 1.1
+    /// @param entry the entry
+    /// @return whether this class is able to read the given entry.
     public boolean canReadEntryData(final ZipArchiveEntry entry) {
         return ZipUtil.canHandleEntryData(entry);
     }
 
-    /**
-     * Closes the archive.
-     *
-     * @throws IOException if an error occurs closing the archive.
-     */
+    /// Closes the archive.
+    ///
+    /// @throws IOException if an error occurs closing the archive.
     @Override
     public void close() throws IOException {
         archive.close();
     }
 
-    /**
-     * Transfer selected entries from this ZIP file to a given #ZipArchiveOutputStream. Compression and all other attributes will be as in this file.
-     * <p>
-     * This method transfers entries based on the central directory of the ZIP file.
-     * </p>
-     *
-     * @param target    The zipArchiveOutputStream to write the entries to
-     * @param predicate A predicate that selects which entries to write
-     * @throws IOException on error
-     */
+    /// Transfer selected entries from this ZIP file to a given #ZipArchiveOutputStream. Compression and all other attributes will be as in this file.
+    ///
+    /// This method transfers entries based on the central directory of the ZIP file.
+    ///
+    ///
+    /// @param target    The zipArchiveOutputStream to write the entries to
+    /// @param predicate A predicate that selects which entries to write
+    /// @throws IOException on error
     public void copyRawEntries(final ZipArchiveOutputStream target, final ZipArchiveEntryPredicate predicate) throws IOException {
         for (ZipArchiveEntry entry : getEntriesInPhysicalOrder()) {
             if (predicate.test(entry)) {
@@ -835,9 +753,7 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Creates new BoundedInputStream, according to implementation of underlying archive channel.
-     */
+    /// Creates new BoundedInputStream, according to implementation of underlying archive channel.
     private BoundedArchiveInputStream createBoundedInputStream(final long start, final long remaining) {
         if (start < 0 || remaining < 0 || start + remaining < start) {
             throw new IllegalArgumentException("Corrupted archive, stream boundaries" + " are out of range");
@@ -855,13 +771,11 @@ public class ZipArchiveReader implements Closeable {
         });
     }
 
-    /**
-     * Gets an InputStream for reading the content before the first local file header.
-     *
-     * @return null if there is no content before the first local file header. Otherwise, returns a stream to read the content before the first local file
-     *         header.
-     * @since 1.23
-     */
+    /// Gets an InputStream for reading the content before the first local file header.
+    ///
+    /// @return null if there is no content before the first local file header. Otherwise, returns a stream to read the content before the first local file
+    ///         header.
+    /// @since 1.23
     public InputStream getContentBeforeFirstLocalFileHeader() {
         return firstLocalFileHeaderOffset == 0 ? null : createBoundedInputStream(0, firstLocalFileHeaderOffset);
     }
@@ -875,101 +789,85 @@ public class ZipArchiveReader implements Closeable {
         return s;
     }
 
-    /**
-     * Gets the encoding to use for file names and the file comment.
-     *
-     * @return null if using the platform's default character encoding.
-     * @apiNote This method has a different signature in commons-compress.
-     * @since 1.27.1-0
-     */
+    /// Gets the encoding to use for file names and the file comment.
+    ///
+    /// @return null if using the platform's default character encoding.
+    /// @apiNote This method has a different signature in commons-compress.
+    /// @since 1.27.1-0
     public Charset getEncoding() {
         return encoding;
     }
 
-    /**
-     * Gets all entries.
-     * <p>
-     * Entries will be returned in the same order they appear within the archive's central directory.
-     * </p>
-     *
-     * @return all entries as {@link ZipArchiveEntry} instances
-     * @apiNote This method has a different signature in commons-compress.
-     * @since 1.27.1-1
-     */
+    /// Gets all entries.
+    ///
+    /// Entries will be returned in the same order they appear within the archive's central directory.
+    ///
+    ///
+    /// @return all entries as [ZipArchiveEntry] instances
+    /// @apiNote This method has a different signature in commons-compress.
+    /// @since 1.27.1-1
     public Iterable<ZipArchiveEntry> getEntries() {
         return Collections.unmodifiableList(entries);
     }
 
-    /**
-     * Gets all named entries in the same order they appear within the archive's central directory.
-     *
-     * @param name name of the entry.
-     * @return the Iterable&lt;ZipArchiveEntry&gt; corresponding to the given name
-     * @since 1.6
-     */
+    /// Gets all named entries in the same order they appear within the archive's central directory.
+    ///
+    /// @param name name of the entry.
+    /// @return the Iterable&lt;ZipArchiveEntry&gt; corresponding to the given name
+    /// @since 1.6
     public Iterable<ZipArchiveEntry> getEntries(final String name) {
         return nameMap.getOrDefault(name, ZipArchiveEntry.EMPTY_LINKED_LIST);
     }
 
-    /**
-     * Gets all entries in physical order.
-     * <p>
-     * Entries will be returned in the same order their contents appear within the archive.
-     * </p>
-     *
-     * @return all entries as {@link ZipArchiveEntry} instances
-     *
-     * @since 1.27.1-1
-     * @apiNote This method has a different signature in commons-compress.
-     */
+    /// Gets all entries in physical order.
+    ///
+    /// Entries will be returned in the same order their contents appear within the archive.
+    ///
+    ///
+    /// @return all entries as [ZipArchiveEntry] instances
+    ///
+    /// @since 1.27.1-1
+    /// @apiNote This method has a different signature in commons-compress.
     public Iterable<ZipArchiveEntry> getEntriesInPhysicalOrder() {
         final ZipArchiveEntry[] allEntries = entries.toArray(ZipArchiveEntry.EMPTY_ARRAY);
         return Arrays.asList(sortByOffset(allEntries));
     }
 
-    /**
-     * Gets all named entries in the same order their contents appear within the archive.
-     *
-     * @param name name of the entry.
-     * @return the Iterable&lt;ZipArchiveEntry&gt; corresponding to the given name
-     * @since 1.6
-     */
+    /// Gets all named entries in the same order their contents appear within the archive.
+    ///
+    /// @param name name of the entry.
+    /// @return the Iterable&lt;ZipArchiveEntry&gt; corresponding to the given name
+    /// @since 1.6
     public Iterable<ZipArchiveEntry> getEntriesInPhysicalOrder(final String name) {
         final LinkedList<ZipArchiveEntry> linkedList = nameMap.getOrDefault(name, ZipArchiveEntry.EMPTY_LINKED_LIST);
         return Arrays.asList(sortByOffset(linkedList.toArray(ZipArchiveEntry.EMPTY_ARRAY)));
     }
 
-    /**
-     * Gets a named entry or {@code null} if no entry by that name exists.
-     * <p>
-     * If multiple entries with the same name exist the first entry in the archive's central directory by that name is returned.
-     * </p>
-     *
-     * @param name name of the entry.
-     * @return the ZipArchiveEntry corresponding to the given name - or {@code null} if not present.
-     */
+    /// Gets a named entry or `null` if no entry by that name exists.
+    ///
+    /// If multiple entries with the same name exist the first entry in the archive's central directory by that name is returned.
+    ///
+    ///
+    /// @param name name of the entry.
+    /// @return the ZipArchiveEntry corresponding to the given name - or `null` if not present.
     public ZipArchiveEntry getEntry(final String name) {
         final LinkedList<ZipArchiveEntry> entries = nameMap.get(name);
         return entries != null ? entries.getFirst() : null;
     }
 
-    /**
-     * Gets the offset of the first local file header in the file.
-     *
-     * @return the length of the content before the first local file header
-     * @since 1.23
-     */
+    /// Gets the offset of the first local file header in the file.
+    ///
+    /// @return the length of the content before the first local file header
+    /// @since 1.23
     public long getFirstLocalFileHeaderOffset() {
         return firstLocalFileHeaderOffset;
     }
 
-    /**
-     * Gets an InputStream for reading the contents of the given entry.
-     *
-     * @param entry the entry to get the stream for.
-     * @return a stream to read the entry from. The returned stream implements {@link InputStreamStatistics}.
-     * @throws IOException if unable to create an input stream from the zipEntry.
-     */
+    /// Gets an InputStream for reading the contents of the given entry.
+    ///
+    /// @param entry the entry to get the stream for.
+    /// @return a stream to read the entry from. The returned stream implements [InputStreamStatistics].
+    /// @throws IOException if unable to create an input stream from the zipEntry.
     public InputStream getInputStream(final ZipArchiveEntry entry) throws IOException {
         if (!(entry instanceof Entry)) {
             return null;
@@ -1032,21 +930,19 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Gets the raw stream of the archive entry (compressed form).
-     * <p>
-     * This method does not relate to how/if we understand the payload in the stream, since we really only intend to move it on to somewhere else.
-     * </p>
-     * <p>
-     * Since version 1.22, this method will make an attempt to read the entry's data stream offset, even if the {@code ignoreLocalFileHeader} parameter was
-     * {@code true} in the constructor. An IOException can also be thrown from the body of the method if this lookup fails for some reason.
-     * </p>
-     *
-     * @param entry The entry to get the stream for
-     * @return The raw input stream containing (possibly) compressed data.
-     * @since 1.11
-     * @throws IOException if there is a problem reading data offset (added in version 1.22).
-     */
+    /// Gets the raw stream of the archive entry (compressed form).
+    ///
+    /// This method does not relate to how/if we understand the payload in the stream, since we really only intend to move it on to somewhere else.
+    ///
+    ///
+    /// Since version 1.22, this method will make an attempt to read the entry's data stream offset, even if the `ignoreLocalFileHeader` parameter was
+    /// `true` in the constructor. An IOException can also be thrown from the body of the method if this lookup fails for some reason.
+    ///
+    ///
+    /// @param entry The entry to get the stream for
+    /// @return The raw input stream containing (possibly) compressed data.
+    /// @since 1.11
+    /// @throws IOException if there is a problem reading data offset (added in version 1.22).
     public InputStream getRawInputStream(final ZipArchiveEntry entry) throws IOException {
         if (!(entry instanceof Entry)) {
             return null;
@@ -1058,17 +954,15 @@ public class ZipArchiveReader implements Closeable {
         return createBoundedInputStream(start, entry.getCompressedSize());
     }
 
-    /**
-     * Gets the entry's content as a String if isUnixSymlink() returns true for it, otherwise returns null.
-     * <p>
-     * This method assumes the symbolic link's file name uses the same encoding that as been specified for this ZipFile.
-     * </p>
-     *
-     * @param entry ZipArchiveEntry object that represents the symbolic link
-     * @return entry's content as a String
-     * @throws IOException problem with content's input stream
-     * @since 1.5
-     */
+    /// Gets the entry's content as a String if isUnixSymlink() returns true for it, otherwise returns null.
+    ///
+    /// This method assumes the symbolic link's file name uses the same encoding that as been specified for this ZipFile.
+    ///
+    ///
+    /// @param entry ZipArchiveEntry object that represents the symbolic link
+    /// @return entry's content as a String
+    /// @throws IOException problem with content's input stream
+    /// @since 1.5
     public String getUnixSymlink(final ZipArchiveEntry entry) throws IOException {
         if (entry != null && entry.isUnixSymlink()) {
             try (InputStream in = getInputStream(entry)) {
@@ -1078,15 +972,13 @@ public class ZipArchiveReader implements Closeable {
         return null;
     }
 
-    /**
-     * Reads the central directory of the given archive and populates the internal tables with ZipArchiveEntry instances.
-     * <p>
-     * The ZipArchiveEntrys will know all data that can be obtained from the central directory alone, but not the data that requires the local file header or
-     * additional data to be read.
-     * </p>
-     *
-     * @return a map of zip entries that didn't have the language encoding flag set when read.
-     */
+    /// Reads the central directory of the given archive and populates the internal tables with ZipArchiveEntry instances.
+    ///
+    /// The ZipArchiveEntrys will know all data that can be obtained from the central directory alone, but not the data that requires the local file header or
+    /// additional data to be read.
+    ///
+    ///
+    /// @return a map of zip entries that didn't have the language encoding flag set when read.
     private Map<ZipArchiveEntry, NameAndComment> populateFromCentralDirectory() throws IOException {
         final HashMap<ZipArchiveEntry, NameAndComment> noUTF8Flag = new HashMap<>();
 
@@ -1106,10 +998,8 @@ public class ZipArchiveReader implements Closeable {
         return noUTF8Flag;
     }
 
-    /**
-     * Searches for either the &quot;Zip64 end of central directory locator&quot; or the &quot;End of central dir record&quot;, parses it and positions the
-     * stream at the first central directory record.
-     */
+    /// Searches for either the &quot;Zip64 end of central directory locator&quot; or the &quot;End of central dir record&quot;, parses it and positions the
+    /// stream at the first central directory record.
     private void positionAtCentralDirectory() throws IOException {
         final boolean is64 = positionAtEndOfCentralDirectoryRecord(archive);
         if (!is64) {
@@ -1119,11 +1009,9 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Parses the &quot;End of central dir record&quot; and positions the stream at the first central directory record.
-     *
-     * Expects stream to be positioned at the beginning of the &quot;End of central dir record&quot;.
-     */
+    /// Parses the &quot;End of central dir record&quot; and positions the stream at the first central directory record.
+    ///
+    /// Expects stream to be positioned at the beginning of the &quot;End of central dir record&quot;.
     private void positionAtCentralDirectory32() throws IOException {
         final long endOfCentralDirectoryRecordOffset = archive.position();
         if (isSplitZipArchive) {
@@ -1146,12 +1034,10 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Parses the &quot;Zip64 end of central directory locator&quot;, finds the &quot;Zip64 end of central directory record&quot; using the parsed information,
-     * parses that and positions the stream at the first central directory record.
-     *
-     * Expects stream to be positioned right behind the &quot;Zip64 end of central directory locator&quot;'s signature.
-     */
+    /// Parses the &quot;Zip64 end of central directory locator&quot;, finds the &quot;Zip64 end of central directory record&quot; using the parsed information,
+    /// parses that and positions the stream at the first central directory record.
+    ///
+    /// Expects stream to be positioned right behind the &quot;Zip64 end of central directory locator&quot;'s signature.
     private void positionAtCentralDirectory64() throws IOException {
         skipBytes(ZipConstants.WORD);
         if (isSplitZipArchive) {
@@ -1184,12 +1070,10 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Reads an individual entry of the central directory, creates an ZipArchiveEntry from it and adds it to the global maps.
-     *
-     * @param noUTF8Flag map used to collect entries that don't have their UTF-8 flag set and whose name will be set by data read from the local file header
-     *                   later. The current entry may be added to this map.
-     */
+    /// Reads an individual entry of the central directory, creates an ZipArchiveEntry from it and adds it to the global maps.
+    ///
+    /// @param noUTF8Flag map used to collect entries that don't have their UTF-8 flag set and whose name will be set by data read from the local file header
+    ///                   later. The current entry may be added to this map.
     private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag) throws IOException {
         ByteBuffer cfhBuffer = ByteBuffer.allocate(CFH_LEN).order(ByteOrder.LITTLE_ENDIAN);
         IOUtils.readFully(archive, cfhBuffer);
@@ -1275,12 +1159,10 @@ public class ZipArchiveReader implements Closeable {
         ze.setStreamContiguous(true);
     }
 
-    /**
-     * Walks through all recorded entries and adds the data available from the local file header.
-     * <p>
-     * Also records the offsets for the data to read from the entries.
-     * </p>
-     */
+    /// Walks through all recorded entries and adds the data available from the local file header.
+    ///
+    /// Also records the offsets for the data to read from the entries.
+    ///
     private void resolveLocalFileHeaderData(final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag) throws IOException {
         for (final ZipArchiveEntry zipArchiveEntry : entries) {
             // entries are filled in populateFromCentralDirectory and never modified
@@ -1345,14 +1227,12 @@ public class ZipArchiveReader implements Closeable {
         return new int[] { fileNameLen, extraFieldLen };
     }
 
-    /**
-     * If the entry holds a Zip64 extended information extra field, read sizes from there if the entry's sizes are set to 0xFFFFFFFFF, do the same for the
-     * offset of the local file header.
-     * <p>
-     * Ensures the Zip64 extra either knows both compressed and uncompressed size or neither of both as the internal logic in ExtraFieldUtils forces the field
-     * to create local header data even if they are never used - and here a field with only one size would be invalid.
-     * </p>
-     */
+    /// If the entry holds a Zip64 extended information extra field, read sizes from there if the entry's sizes are set to 0xFFFFFFFFF, do the same for the
+    /// offset of the local file header.
+    ///
+    /// Ensures the Zip64 extra either knows both compressed and uncompressed size or neither of both as the internal logic in ExtraFieldUtils forces the field
+    /// to create local header data even if they are never used - and here a field with only one size would be invalid.
+    ///
     private void setSizesAndOffsetFromZip64Extra(final ZipArchiveEntry entry) throws IOException {
         final ZipExtraField extra = entry.getExtraField(Zip64ExtendedInformationExtraField.HEADER_ID);
         if (extra != null && !(extra instanceof Zip64ExtendedInformationExtraField)) {
@@ -1396,9 +1276,7 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    /**
-     * Skips the given number of bytes or throws an EOFException if skipping failed.
-     */
+    /// Skips the given number of bytes or throws an EOFException if skipping failed.
     private void skipBytes(final int count) throws IOException {
         final long currentPosition = archive.position();
         final long newPosition = currentPosition + count;
@@ -1408,20 +1286,16 @@ public class ZipArchiveReader implements Closeable {
         archive.position(newPosition);
     }
 
-    /**
-     * Sorts entries in place by offset.
-     *
-     * @param allEntries entries to sort
-     * @return the given entries, sorted.
-     */
+    /// Sorts entries in place by offset.
+    ///
+    /// @param allEntries entries to sort
+    /// @return the given entries, sorted.
     private ZipArchiveEntry[] sortByOffset(final ZipArchiveEntry[] allEntries) {
         Arrays.sort(allEntries, offsetComparator);
         return allEntries;
     }
 
-    /**
-     * Checks whether the archive starts with an LFH. If it doesn't, it may be an empty archive.
-     */
+    /// Checks whether the archive starts with an LFH. If it doesn't, it may be an empty archive.
     private boolean startsWithLocalFileHeader() throws IOException {
         archive.position(firstLocalFileHeaderOffset);
         return archive.readInt() == ZipLong.LFH_SIG.getIntValue();
