@@ -6,8 +6,8 @@ jobs:
   gradle-check:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v5
       - name: Running Tests
         run: ./gradlew check --info --no-daemon --stacktrace
