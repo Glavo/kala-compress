@@ -81,7 +81,7 @@ public final class ZipLong implements Cloneable, Serializable {
      */
     public static byte[] getBytes(final long value) {
         final byte[] result = new byte[WORD];
-        putLong(value, result, 0);
+        ByteUtils.setUnsignedIntLE(result, 0, value);
         return result;
     }
 
