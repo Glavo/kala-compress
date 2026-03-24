@@ -171,23 +171,36 @@ public final class BufferedDataInputSeekableChannel implements DataInputSeekable
     @Override
     public int read(ByteBuffer dst) throws IOException {
         int remaining = readBuffer.remaining();
-
-        if (remaining > 0) {
-            ensureOpen();
-            int nRead = Math.min(dst.remaining(), remaining);
-            if (nRead == remaining) {
-                dst.put(readBuffer);
-                clearReadBuffer();
-            } else {
-                int oldLimit = readBuffer.limit();
-                readBuffer.limit(readBuffer.position() + nRead);
-                dst.put(readBuffer);
-                readBuffer.limit(oldLimit);
+        if (remaining == 0) {
+            if (dst.remaining() >= readBuffer.capacity()) {
+                return channel.read(dst);
             }
-            return nRead;
+
+            readBuffer.compact();
+            int n = channel.read(readBuffer);
+            readBuffer.flip();
+            remaining = readBuffer.remaining();
+
+            assert n == remaining;
+
+            if (n == 0) {
+                return 0;
+            }
         } else {
-            return channel.read(dst);
+            ensureOpen();
         }
+
+        int nRead = Math.min(dst.remaining(), remaining);
+        if (nRead == remaining) {
+            dst.put(readBuffer);
+            clearReadBuffer();
+        } else {
+            int oldLimit = readBuffer.limit();
+            readBuffer.limit(readBuffer.position() + nRead);
+            dst.put(readBuffer);
+            readBuffer.limit(oldLimit);
+        }
+        return nRead;
     }
 
     @Override
