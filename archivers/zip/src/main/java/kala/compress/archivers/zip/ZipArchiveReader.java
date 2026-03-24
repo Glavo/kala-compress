@@ -775,7 +775,7 @@ public class ZipArchiveReader implements Closeable {
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         this.archive = channel instanceof DataInputSeekableChannel && ((DataInputSeekableChannel) channel).byteOrder() == ByteOrder.LITTLE_ENDIAN
                 ? (DataInputSeekableChannel) channel
-                : new BufferedDataInputSeekableChannel(channel, ByteBuffer.allocate(512).order(ByteOrder.LITTLE_ENDIAN));
+                : new BufferedDataInputSeekableChannel(channel, 512, ByteOrder.LITTLE_ENDIAN);
         boolean success = false;
         try {
             final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag = populateFromCentralDirectory();
