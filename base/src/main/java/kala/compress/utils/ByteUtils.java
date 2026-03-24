@@ -27,50 +27,38 @@ import java.nio.ByteOrder;
 
 import static java.lang.invoke.MethodHandles.byteArrayViewVarHandle;
 
-/**
- * Utility methods for reading and writing bytes.
- *
- * @since 1.14
- */
+/// Utility methods for reading and writing bytes.
+///
+/// @since 1.14
 public final class ByteUtils {
 
-    /**
-     * Used to consume bytes.
-     *
-     * @since 1.14
-     */
+    /// Used to consume bytes.
+    ///
+    /// @since 1.14
     @FunctionalInterface
     public interface ByteConsumer {
-        /**
-         * The contract is similar to {@link OutputStream#write(int)}, consume the lower eight bytes of the int as a byte.
-         *
-         * @param b the byte to consume
-         * @throws IOException if consuming fails
-         */
+        /// The contract is similar to [OutputStream#write(int)], consume the lower eight bytes of the int as a byte.
+        ///
+        /// @param b the byte to consume
+        /// @throws IOException if consuming fails
         void accept(int b) throws IOException;
     }
 
-    /**
-     * Used to supply bytes.
-     *
-     * @since 1.14
-     */
+    /// Used to supply bytes.
+    ///
+    /// @since 1.14
     @FunctionalInterface
     public interface ByteSupplier {
-        /**
-         * The contract is similar to {@link InputStream#read()}, return the byte as an unsigned int, -1 if there are no more bytes.
-         *
-         * @return the supplied byte or -1 if there are no more bytes
-         * @throws IOException if supplying fails
-         */
+        /// The contract is similar to [InputStream#read()], return the byte as an unsigned int, -1 if there are no more bytes.
+        ///
+        /// @return the supplied byte or -1 if there are no more bytes
+        /// @throws IOException if supplying fails
         int getAsByte() throws IOException;
     }
 
-    /**
-     * {@link ByteConsumer} based on {@link OutputStream}.
-     *
-     * @since 1.14
-     */
+    /// [ByteConsumer] based on [OutputStream].
+    ///
+    /// @since 1.14
     public static class OutputStreamByteConsumer implements ByteConsumer {
         private final OutputStream os;
 
@@ -84,11 +72,9 @@ public final class ByteUtils {
         }
     }
 
-    /**
-     * Empty array.
-     *
-     * @since 1.21
-     */
+    /// Empty array.
+    ///
+    /// @since 1.21
     public static final byte[] EMPTY_BYTE_ARRAY = {};
 
     private static void checkReadLength(final int length) {
@@ -97,25 +83,21 @@ public final class ByteUtils {
         }
     }
 
-    /**
-     * Reads the given byte array as a little-endian long.
-     *
-     * @param bytes the byte array to convert
-     * @return the number read
-     */
+    /// Reads the given byte array as a little-endian long.
+    ///
+    /// @param bytes the byte array to convert
+    /// @return the number read
     public static long fromLittleEndian(final byte[] bytes) {
         return fromLittleEndian(bytes, 0, bytes.length);
     }
 
-    /**
-     * Reads the given byte array as a little-endian long.
-     *
-     * @param bytes  the byte array to convert
-     * @param off    the offset into the array that starts the value
-     * @param length the number of bytes representing the value
-     * @return the number read
-     * @throws IllegalArgumentException if len is bigger than eight
-     */
+    /// Reads the given byte array as a little-endian long.
+    ///
+    /// @param bytes  the byte array to convert
+    /// @param off    the offset into the array that starts the value
+    /// @param length the number of bytes representing the value
+    /// @return the number read
+    /// @throws IllegalArgumentException if len is bigger than eight
     public static long fromLittleEndian(final byte[] bytes, final int off, final int length) {
         checkReadLength(length);
         long l = 0;
@@ -125,19 +107,16 @@ public final class ByteUtils {
         return l;
     }
 
-    /**
-     * Reads the given number of bytes from the given supplier as a little-endian long.
-     *
-     * <p>
-     * Typically used by our InputStreams that need to count the bytes read as well.
-     * </p>
-     *
-     * @param supplier the supplier for bytes
-     * @param length   the number of bytes representing the value
-     * @return the number read
-     * @throws IllegalArgumentException if len is bigger than eight
-     * @throws IOException              if the supplier fails or doesn't supply the given number of bytes anymore
-     */
+    /// Reads the given number of bytes from the given supplier as a little-endian long.
+    ///
+    /// Typically used by our InputStreams that need to count the bytes read as well.
+    ///
+    ///
+    /// @param supplier the supplier for bytes
+    /// @param length   the number of bytes representing the value
+    /// @return the number read
+    /// @throws IllegalArgumentException if len is bigger than eight
+    /// @throws IOException              if the supplier fails or doesn't supply the given number of bytes anymore
     public static long fromLittleEndian(final ByteSupplier supplier, final int length) throws IOException {
         checkReadLength(length);
         long l = 0;
@@ -151,15 +130,13 @@ public final class ByteUtils {
         return l;
     }
 
-    /**
-     * Reads the given number of bytes from the given input as little-endian long.
-     *
-     * @param in     the input to read from
-     * @param length the number of bytes representing the value
-     * @return the number read
-     * @throws IllegalArgumentException if len is bigger than eight
-     * @throws IOException              if reading fails or the stream doesn't contain the given number of bytes anymore
-     */
+    /// Reads the given number of bytes from the given input as little-endian long.
+    ///
+    /// @param in     the input to read from
+    /// @param length the number of bytes representing the value
+    /// @return the number read
+    /// @throws IllegalArgumentException if len is bigger than eight
+    /// @throws IOException              if reading fails or the stream doesn't contain the given number of bytes anymore
     public static long fromLittleEndian(final DataInput in, final int length) throws IOException {
         // somewhat duplicates the ByteSupplier version in order to save the creation of a wrapper object
         checkReadLength(length);
@@ -171,16 +148,14 @@ public final class ByteUtils {
         return l;
     }
 
-    /**
-     * Reads the given number of bytes from the given stream as a little-endian long.
-     *
-     * @param in     the stream to read from
-     * @param length the number of bytes representing the value
-     * @return the number read
-     * @throws IllegalArgumentException if len is bigger than eight
-     * @throws IOException              if reading fails or the stream doesn't contain the given number of bytes anymore
-     * @deprecated Unused
-     */
+    /// Reads the given number of bytes from the given stream as a little-endian long.
+    ///
+    /// @param in     the stream to read from
+    /// @param length the number of bytes representing the value
+    /// @return the number read
+    /// @throws IllegalArgumentException if len is bigger than eight
+    /// @throws IOException              if reading fails or the stream doesn't contain the given number of bytes anymore
+    /// @deprecated Unused
     @Deprecated
     public static long fromLittleEndian(final InputStream in, final int length) throws IOException {
         // somewhat duplicates the ByteSupplier version in order to save the creation of a wrapper object
@@ -196,14 +171,12 @@ public final class ByteUtils {
         return l;
     }
 
-    /**
-     * Inserts the given value into the array as a little-endian sequence of the given length starting at the given offset.
-     *
-     * @param b      the array to write into
-     * @param value  the value to insert
-     * @param off    the offset into the array that receives the first byte
-     * @param length the number of bytes to use to represent the value
-     */
+    /// Inserts the given value into the array as a little-endian sequence of the given length starting at the given offset.
+    ///
+    /// @param b      the array to write into
+    /// @param value  the value to insert
+    /// @param off    the offset into the array that receives the first byte
+    /// @param length the number of bytes to use to represent the value
     public static void toLittleEndian(final byte[] b, final long value, final int off, final int length) {
         long num = value;
         for (int i = 0; i < length; i++) {
@@ -212,14 +185,12 @@ public final class ByteUtils {
         }
     }
 
-    /**
-     * Provides the given value to the given consumer as a little-endian sequence of the given length.
-     *
-     * @param consumer the consumer to provide the bytes to
-     * @param value    the value to provide
-     * @param length   the number of bytes to use to represent the value
-     * @throws IOException if writing fails
-     */
+    /// Provides the given value to the given consumer as a little-endian sequence of the given length.
+    ///
+    /// @param consumer the consumer to provide the bytes to
+    /// @param value    the value to provide
+    /// @param length   the number of bytes to use to represent the value
+    /// @throws IOException if writing fails
     public static void toLittleEndian(final ByteConsumer consumer, final long value, final int length) throws IOException {
         long num = value;
         for (int i = 0; i < length; i++) {
@@ -228,15 +199,13 @@ public final class ByteUtils {
         }
     }
 
-    /**
-     * Writes the given value to the given stream as a little-endian array of the given length.
-     *
-     * @param out    the output to write to
-     * @param value  the value to write
-     * @param length the number of bytes to use to represent the value
-     * @throws IOException if writing fails
-     * @deprecated Unused
-     */
+    /// Writes the given value to the given stream as a little-endian array of the given length.
+    ///
+    /// @param out    the output to write to
+    /// @param value  the value to write
+    /// @param length the number of bytes to use to represent the value
+    /// @throws IOException if writing fails
+    /// @deprecated Unused
     @Deprecated
     public static void toLittleEndian(final DataOutput out, final long value, final int length) throws IOException {
         // somewhat duplicates the ByteConsumer version in order to save the creation of a wrapper object
@@ -247,14 +216,12 @@ public final class ByteUtils {
         }
     }
 
-    /**
-     * Writes the given value to the given stream as a little-endian array of the given length.
-     *
-     * @param out    the stream to write to
-     * @param value  the value to write
-     * @param length the number of bytes to use to represent the value
-     * @throws IOException if writing fails
-     */
+    /// Writes the given value to the given stream as a little-endian array of the given length.
+    ///
+    /// @param out    the stream to write to
+    /// @param value  the value to write
+    /// @param length the number of bytes to use to represent the value
+    /// @throws IOException if writing fails
     public static void toLittleEndian(final OutputStream out, final long value, final int length) throws IOException {
         // somewhat duplicates the ByteConsumer version in order to save the creation of a wrapper object
         long num = value;
@@ -270,7 +237,6 @@ public final class ByteUtils {
     private static final VarHandle INT_BE = byteArrayViewVarHandle(int[].class, ByteOrder.BIG_ENDIAN);
     private static final VarHandle LONG_LE = byteArrayViewVarHandle(long[].class, ByteOrder.LITTLE_ENDIAN);
     private static final VarHandle LONG_BE = byteArrayViewVarHandle(long[].class, ByteOrder.BIG_ENDIAN);
-
 
     /// Get the byte at the given offset.
     ///
