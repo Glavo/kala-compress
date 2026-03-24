@@ -3,6 +3,7 @@ Kala Compress
 
 [![Gradle Check](https://github.com/Glavo/compress/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/compress/actions/workflows/check.yml)
 [![](https://img.shields.io/maven-central/v/org.glavo.kala/kala-compress?label=Maven%20Central)](https://search.maven.org/artifact/org.glavo.kala/kala-compress)
+[![codecov](https://codecov.io/gh/Glavo/commons-compress/graph/badge.svg?token=EKYS1O54XQ)](https://codecov.io/gh/Glavo/commons-compress)
 
 This project is based on [Apache Commons Compress](https://github.com/apache/commons-compress).
 Kala Compress has made some improvements on its basis: Modularization (JPMS Support), NIO2 Path API support, etc.
