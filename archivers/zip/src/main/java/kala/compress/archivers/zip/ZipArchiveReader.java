@@ -36,14 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.Inflater;
@@ -540,10 +533,13 @@ public class ZipArchiveReader implements Closeable {
     }
 
     /// List of entries in the order they appear inside the central directory.
-    private final List<ZipArchiveEntry> entries = new LinkedList<>();
+    private final List<ZipArchiveEntry> entries = new ArrayList<>();
 
-    /// Maps String to list of ZipArchiveEntrys, name -> actual entries.
-    private final Map<String, LinkedList<ZipArchiveEntry>> nameMap = new HashMap<>(HASH_SIZE);
+    /// Maps a string to the first entry by that name.
+    private final Map<String, ZipArchiveEntry> nameMap = new HashMap<>(HASH_SIZE);
+
+    /// If multiple entries have the same name, maps the name to entries by that name.
+    private Map<String, List<ZipArchiveEntry>> duplicateNameMap;
 
     /// The encoding to use for file names and the file comment.
     ///
@@ -755,13 +751,27 @@ public class ZipArchiveReader implements Closeable {
     }
 
     private void fillNameMap() {
-        entries.forEach(ze -> {
+        for (ZipArchiveEntry ze : entries) {
             // entries are filled in populateFromCentralDirectory and
             // never modified
             final String name = ze.getName();
-            final LinkedList<ZipArchiveEntry> entriesOfThatName = nameMap.computeIfAbsent(name, k -> new LinkedList<>());
-            entriesOfThatName.addLast(ze);
-        });
+            final ZipArchiveEntry firstEntry = nameMap.putIfAbsent(name, ze);
+
+            if (firstEntry != null) {
+                if (duplicateNameMap == null) {
+                    duplicateNameMap = new HashMap<>();
+                }
+
+                final List<ZipArchiveEntry> entriesOfThatName = duplicateNameMap.computeIfAbsent(name, k -> {
+                    // Create a list when there are two entries with the same name
+                    final ArrayList<ZipArchiveEntry> list = new ArrayList<>(2);
+                    list.add(firstEntry);
+                    return list;
+                });
+
+                entriesOfThatName.add(ze);
+            }
+        }
     }
 
     /// Gets an InputStream for reading the content before the first local file header.
@@ -809,7 +819,13 @@ public class ZipArchiveReader implements Closeable {
     /// @return the Iterable&lt;ZipArchiveEntry&gt; corresponding to the given name
     /// @since 1.6
     public Iterable<ZipArchiveEntry> getEntries(final String name) {
-        return nameMap.getOrDefault(name, ZipArchiveEntry.EMPTY_LINKED_LIST);
+        final List<ZipArchiveEntry> entriesOfThatName = duplicateNameMap == null ? null : duplicateNameMap.get(name);
+        if (entriesOfThatName == null) {
+            final ZipArchiveEntry entry = nameMap.get(name);
+            return entry != null ? List.of(entry) : List.of();
+        } else {
+            return Collections.unmodifiableList(entriesOfThatName);
+        }
     }
 
     /// Gets all entries in physical order.
@@ -832,8 +848,16 @@ public class ZipArchiveReader implements Closeable {
     /// @return the Iterable&lt;ZipArchiveEntry&gt; corresponding to the given name
     /// @since 1.6
     public Iterable<ZipArchiveEntry> getEntriesInPhysicalOrder(final String name) {
-        final LinkedList<ZipArchiveEntry> linkedList = nameMap.getOrDefault(name, ZipArchiveEntry.EMPTY_LINKED_LIST);
-        return Arrays.asList(sortByOffset(linkedList.toArray(ZipArchiveEntry.EMPTY_ARRAY)));
+        if (duplicateNameMap != null) {
+            final List<ZipArchiveEntry> list = duplicateNameMap.get(name);
+            if (list != null) {
+                final ZipArchiveEntry[] entriesOfThatName = list.toArray(ZipArchiveEntry.EMPTY_ARRAY);
+                return Arrays.asList(sortByOffset(entriesOfThatName));
+            }
+        }
+
+        final ZipArchiveEntry entry = nameMap.get(name);
+        return entry != null ? List.of(entry) : List.of();
     }
 
     /// Gets a named entry or `null` if no entry by that name exists.
@@ -844,8 +868,7 @@ public class ZipArchiveReader implements Closeable {
     /// @param name name of the entry.
     /// @return the ZipArchiveEntry corresponding to the given name - or `null` if not present.
     public ZipArchiveEntry getEntry(final String name) {
-        final LinkedList<ZipArchiveEntry> entries = nameMap.get(name);
-        return entries != null ? entries.getFirst() : null;
+        return nameMap.get(name);
     }
 
     /// Gets the offset of the first local file header in the file.
