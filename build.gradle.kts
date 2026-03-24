@@ -165,9 +165,7 @@ tasks.processTestResources {
 }
 
 tasks.test {
-    if (javaLauncher.get().metadata.languageVersion.asInt() > 8) {
-        jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
-    }
+    jvmArgs("--add-opens=java.base/java.io=ALL-UNNAMED")
 
     maxParallelForks = max(Runtime.getRuntime().availableProcessors() / 4, 1)
 
