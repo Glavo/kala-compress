@@ -18,13 +18,6 @@
  */
 package kala.compress;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +34,8 @@ import kala.compress.archivers.cpio.CpioArchiveInputStream;
 import kala.compress.archivers.tar.TarArchiveInputStream;
 import kala.compress.archivers.zip.ZipArchiveInputStream;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class DetectArchiverTest extends AbstractTest {
 

@@ -51,7 +51,6 @@ import kala.compress.utils.ByteUtils;
 import kala.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.function.IORunnable;
-import org.junit.Assume;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -790,7 +789,7 @@ public class ZipArchiveReaderTest extends AbstractTest {
             final int rc = process.waitFor();
             if (rc == OUT_OF_MEMORY && System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
                 // On my old Mac mini, this test runs out of memory, so allow the build to continue.
-                Assume.assumeTrue(Boolean.getBoolean("skipReturnCode137"));
+                Assumptions.assumeTrue(Boolean.getBoolean("skipReturnCode137"));
                 return;
             }
             try (InputStream processInputStream = process.getInputStream()) {

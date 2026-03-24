@@ -161,7 +161,6 @@ dependencies {
     testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.memoryfilesystem)
     testImplementation(libs.pax.exam.container.native)
-    testImplementation(libs.pax.exam.junit4)
     testImplementation(libs.pax.exam.cm)
     testImplementation(libs.pax.exam.link.mvn)
     testImplementation(libs.felix.framework)
