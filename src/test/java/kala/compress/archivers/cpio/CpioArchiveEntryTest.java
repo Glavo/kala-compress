@@ -18,9 +18,9 @@
  */
 package kala.compress.archivers.cpio;
 
-import static org.junit.Assert.assertThrows;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CpioArchiveEntryTest {
     @Test

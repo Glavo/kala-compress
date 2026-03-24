@@ -73,6 +73,10 @@ allprojects {
         options.release.set(8)
     }
 
+    tasks.compileTestJava {
+        options.release.set(17)
+    }
+
     tasks.javadoc {
         isEnabled = false
         (options as StandardJavadocDocletOptions).apply {
@@ -152,7 +156,7 @@ dependencies {
     testImplementation(libs.asm)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter.params)
-    testImplementation(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.memoryfilesystem)
