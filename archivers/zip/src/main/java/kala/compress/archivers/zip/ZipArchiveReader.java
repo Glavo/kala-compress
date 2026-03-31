@@ -205,6 +205,8 @@ public class ZipArchiveReader implements Closeable {
 
     private static final EnumSet<StandardOpenOption> READ = EnumSet.of(StandardOpenOption.READ);
 
+    private static final int DEFAULT_BUFFER_SIZE = 8192;
+
     private static final int HASH_SIZE = 509;
     static final int NIBLET_MASK = 0x0f;
     static final int BYTE_SHIFT = 8;
@@ -711,7 +713,7 @@ public class ZipArchiveReader implements Closeable {
         this.useUnicodeExtraFields = useUnicodeExtraFields;
         this.archive = channel instanceof DataInputSeekableChannel dataInputSeekableChannel && dataInputSeekableChannel.byteOrder() == ByteOrder.LITTLE_ENDIAN
                 ? dataInputSeekableChannel
-                : new BufferedDataInputSeekableChannel(channel, 512, ByteOrder.LITTLE_ENDIAN);
+                : new BufferedDataInputSeekableChannel(channel, DEFAULT_BUFFER_SIZE, ByteOrder.LITTLE_ENDIAN);
         this.rawFileChannel = channel instanceof FileChannel fileChannel ? fileChannel : null;
         boolean success = false;
         try {
