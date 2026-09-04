@@ -72,6 +72,10 @@ allprojects {
         isEnabled = false
         (options as StandardJavadocDocletOptions).apply {
             encoding = "UTF-8"
+
+            jFlags("-Duser.language=en")
+
+            addStringOption("link", "https://docs.oracle.com/en/java/javase/25/docs/api/")
             addBooleanOption("html5", true)
             addStringOption("Xdoclint:none", "-quiet")
         }
