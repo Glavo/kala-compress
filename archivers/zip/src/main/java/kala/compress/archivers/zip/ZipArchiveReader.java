@@ -582,6 +582,9 @@ public class ZipArchiveReader implements Closeable {
     /// Whether the ZIP archive is a split ZIP archive
     private final boolean isSplitZipArchive;
 
+    /// Cache of the archive size to avoid multiple calls to [SeekableByteChannel#size()].
+    private final long archiveSize;
+
     private long centralDirectoryStartDiskNumber, centralDirectoryStartRelativeOffset;
 
     private long centralDirectoryStartOffset;
@@ -717,6 +720,8 @@ public class ZipArchiveReader implements Closeable {
         this.rawFileChannel = channel instanceof FileChannel fileChannel ? fileChannel : null;
         boolean success = false;
         try {
+            this.archiveSize = archive.size();
+
             final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag = populateFromCentralDirectory();
             if (!ignoreLocalFileHeader) {
                 resolveLocalFileHeaderData(entriesWithoutUTF8Flag);
@@ -1324,7 +1329,7 @@ public class ZipArchiveReader implements Closeable {
     private void skipBytes(final int count) throws IOException {
         final long currentPosition = archive.position();
         final long newPosition = currentPosition + count;
-        if (newPosition > archive.size()) {
+        if (newPosition > archiveSize) {
             throw new EOFException();
         }
         archive.position(newPosition);

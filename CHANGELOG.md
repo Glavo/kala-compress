@@ -2,6 +2,11 @@
 
 ## 1.27.1-4 (In development)
 
+Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-compress/commit/d0aec98f62d1870d22f869aeec5ac1ed9ea3126a).
+
+* Enlarge the default buffer size of `SeekableByteChannel` in `ZipArchiveReader` to 8192 bytes. ([#5](https://github.com/Glavo/kala-compress/pull/5))
+* Optimize `ZipArchiveReader#skipBytes(int)` by caching the result of `SeekableByteChannel#size()`.
+
 ## 1.27.1-3 (2026-03-25)
 
 Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-compress/commit/d0aec98f62d1870d22f869aeec5ac1ed9ea3126a).
