@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.zone.ZoneRules;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -173,9 +174,14 @@ public final class TimeUtils {
         final int seconds = hour * 3600 + minute * 60 + second;
         final LocalDate date = LocalDate.of(year + Math.floorDiv(month - 1, 12), Math.floorMod(month - 1, 12) + 1, 1)
                 .plusDays(day - 1L + seconds / 86400);
-        final LocalTime time = LocalTime.ofSecondOfDay(seconds % 86400);
+        final int secondOfDay = seconds % 86400;
 
-        return ZonedDateTime.of(date, time, zone)
+        final ZoneRules rules = zone.getRules();
+        if (rules.isFixedOffset()) {
+            return (date.toEpochDay() * 86400 + secondOfDay - rules.getOffset(Instant.EPOCH).getTotalSeconds()) * 1000;
+        }
+
+        return ZonedDateTime.of(date, LocalTime.ofSecondOfDay(secondOfDay), zone)
                 .withLaterOffsetAtOverlap()
                 .toEpochSecond() * 1000;
     }

@@ -56,6 +56,11 @@ public class DosTimeTest {
             "UTC, 2024, 13, 1, 0, 0, 0, 2025-01-01T00:00:00Z",
             "UTC, 2024, 12, 31, 31, 63, 62, 2025-01-01T08:04:02Z",
             "UTC, 2107, 15, 31, 31, 63, 62, 2108-04-01T08:04:02Z",
+            "+05:45, 1980, 0, 0, 0, 0, 0, 1979-11-29T18:15:00Z",
+            "-03:30, 2024, 12, 31, 31, 63, 62, 2025-01-01T11:34:02Z",
+            "+18:00, 1980, 1, 1, 0, 0, 0, 1979-12-31T06:00:00Z",
+            "-18:00, 2107, 15, 31, 31, 63, 62, 2108-04-02T02:04:02Z",
+            "Etc/GMT+5, 2024, 2, 29, 0, 0, 0, 2024-02-29T05:00:00Z",
             "America/New_York, 2024, 3, 10, 2, 30, 0, 2024-03-10T07:30:00Z",
             "America/New_York, 2024, 11, 3, 1, 30, 0, 2024-11-03T06:30:00Z",
             "Australia/Lord_Howe, 2024, 10, 6, 2, 10, 0, 2024-10-05T15:40:00Z",
@@ -84,7 +89,8 @@ public class DosTimeTest {
     ///
     /// @param zoneId the time-zone ID used for conversion
     @ParameterizedTest
-    @ValueSource(strings = {"UTC", "Asia/Shanghai", "America/New_York", "Europe/Berlin", "Australia/Lord_Howe", "Pacific/Apia"})
+    @ValueSource(strings = {"UTC", "+05:45", "-03:30", "Etc/GMT+5", "Asia/Shanghai", "America/New_York",
+            "Europe/Berlin", "Australia/Lord_Howe", "Pacific/Apia"})
     public void testCalendarCompatibility(final String zoneId) {
         final ZoneId zone = ZoneId.of(zoneId);
         final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone(zone), Locale.ROOT);
