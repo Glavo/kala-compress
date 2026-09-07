@@ -77,6 +77,9 @@ public class X000A_NTFS implements ZipExtraField {
     private static final ZipShort TIME_ATTR_TAG = new ZipShort(0x0001);
     private static final ZipShort TIME_ATTR_SIZE = new ZipShort(3 * 8);
 
+    /// The missing-timestamp marker recognized by java.util.zip.
+    private static final ZipEightByteInteger TIME_NOT_AVAILABLE = new ZipEightByteInteger(Long.MIN_VALUE);
+
     private static ZipEightByteInteger fileTimeToZip(final FileTime time) {
         if (time == null) {
             return null;
@@ -84,18 +87,22 @@ public class X000A_NTFS implements ZipExtraField {
         return new ZipEightByteInteger(TimeUtils.toNtfsTime(time));
     }
 
+    /// Decodes a timestamp, accepting both the JDK marker and legacy zero values as absent.
     private static FileTime zipToFileTime(final ZipEightByteInteger z) {
-        if (z == null || ZipEightByteInteger.ZERO.equals(z)) {
+        if (z == null || TIME_NOT_AVAILABLE.equals(z) || ZipEightByteInteger.ZERO.equals(z)) {
             return null;
         }
         return TimeUtils.ntfsTimeToFileTime(z.getLongValue());
     }
 
-    private ZipEightByteInteger modifyTime = ZipEightByteInteger.ZERO;
+    /// The encoded modification time or a missing-time marker.
+    private ZipEightByteInteger modifyTime = TIME_NOT_AVAILABLE;
 
-    private ZipEightByteInteger accessTime = ZipEightByteInteger.ZERO;
+    /// The encoded access time or a missing-time marker.
+    private ZipEightByteInteger accessTime = TIME_NOT_AVAILABLE;
 
-    private ZipEightByteInteger createTime = ZipEightByteInteger.ZERO;
+    /// The encoded creation time or a missing-time marker.
+    private ZipEightByteInteger createTime = TIME_NOT_AVAILABLE;
 
     @Override
     public boolean equals(final Object o) {
@@ -117,12 +124,8 @@ public class X000A_NTFS implements ZipExtraField {
         return zipToFileTime(accessTime);
     }
 
-    /**
-     * Gets the "File last access time" of this ZIP entry as a ZipEightByteInteger object, or {@link ZipEightByteInteger#ZERO} if no such timestamp exists in
-     * the ZIP entry.
-     *
-     * @return File last access time
-     */
+    /// Returns the encoded access time in 100-nanosecond units since 1601-01-01 UTC.
+    /// Unset times use [Long#MIN_VALUE]; a parsed zero is also treated as absent.
     public ZipEightByteInteger getAccessTime() {
         return accessTime;
     }
@@ -161,12 +164,8 @@ public class X000A_NTFS implements ZipExtraField {
         return zipToFileTime(createTime);
     }
 
-    /**
-     * Gets the "File creation time" of this ZIP entry as a ZipEightByteInteger object, or {@link ZipEightByteInteger#ZERO} if no such timestamp exists in the
-     * ZIP entry.
-     *
-     * @return File creation time
-     */
+    /// Returns the encoded creation time in 100-nanosecond units since 1601-01-01 UTC.
+    /// Unset times use [Long#MIN_VALUE]; a parsed zero is also treated as absent.
     public ZipEightByteInteger getCreateTime() {
         return createTime;
     }
@@ -227,12 +226,8 @@ public class X000A_NTFS implements ZipExtraField {
         return zipToFileTime(modifyTime);
     }
 
-    /**
-     * Gets the "File last modification time" of this ZIP entry as a ZipEightByteInteger object, or {@link ZipEightByteInteger#ZERO} if no such timestamp exists
-     * in the ZIP entry.
-     *
-     * @return File last modification time
-     */
+    /// Returns the encoded modification time in 100-nanosecond units since 1601-01-01 UTC.
+    /// Unset times use [Long#MIN_VALUE]; a parsed zero is also treated as absent.
     public ZipEightByteInteger getModifyTime() {
         return modifyTime;
     }
@@ -308,9 +303,9 @@ public class X000A_NTFS implements ZipExtraField {
      * Reset state back to newly constructed state. Helps us make sure parse() calls always generate clean results.
      */
     private void reset() {
-        this.modifyTime = ZipEightByteInteger.ZERO;
-        this.accessTime = ZipEightByteInteger.ZERO;
-        this.createTime = ZipEightByteInteger.ZERO;
+        this.modifyTime = TIME_NOT_AVAILABLE;
+        this.accessTime = TIME_NOT_AVAILABLE;
+        this.createTime = TIME_NOT_AVAILABLE;
     }
 
     /**
@@ -323,13 +318,11 @@ public class X000A_NTFS implements ZipExtraField {
         setAccessTime(fileTimeToZip(time));
     }
 
-    /**
-     * Sets the File last access time of this ZIP entry using a ZipEightByteInteger object.
-     *
-     * @param t ZipEightByteInteger of the access time
-     */
+    /// Sets the encoded access time.
+    ///
+    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or null to clear it
     public void setAccessTime(final ZipEightByteInteger t) {
-        accessTime = t == null ? ZipEightByteInteger.ZERO : t;
+        accessTime = t == null ? TIME_NOT_AVAILABLE : t;
     }
 
     /**
@@ -342,13 +335,11 @@ public class X000A_NTFS implements ZipExtraField {
         setCreateTime(fileTimeToZip(time));
     }
 
-    /**
-     * Sets the File creation time of this ZIP entry using a ZipEightByteInteger object.
-     *
-     * @param t ZipEightByteInteger of the create time
-     */
+    /// Sets the encoded creation time.
+    ///
+    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or null to clear it
     public void setCreateTime(final ZipEightByteInteger t) {
-        createTime = t == null ? ZipEightByteInteger.ZERO : t;
+        createTime = t == null ? TIME_NOT_AVAILABLE : t;
     }
 
     /**
@@ -361,13 +352,11 @@ public class X000A_NTFS implements ZipExtraField {
         setModifyTime(fileTimeToZip(time));
     }
 
-    /**
-     * Sets the File last modification time of this ZIP entry using a ZipEightByteInteger object.
-     *
-     * @param t ZipEightByteInteger of the modify time
-     */
+    /// Sets the encoded modification time.
+    ///
+    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or null to clear it
     public void setModifyTime(final ZipEightByteInteger t) {
-        modifyTime = t == null ? ZipEightByteInteger.ZERO : t;
+        modifyTime = t == null ? TIME_NOT_AVAILABLE : t;
     }
 
     /**

@@ -1482,7 +1482,6 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
             internalRemoveExtraField(X000A_NTFS.HEADER_ID);
         }
         if (lastModifiedTime != null || lastAccessTime != null || creationTime != null) {
-            final FileTime lastModifiedTime = getLastModifiedTime();
             if (canConvertToInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime)) {
                 addInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime);
             }

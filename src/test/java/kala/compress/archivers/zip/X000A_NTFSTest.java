@@ -21,10 +21,42 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.zip.ZipEntry;
 
 import org.junit.jupiter.api.Test;
 
 public class X000A_NTFSTest {
+
+    /// Encodes absent timestamps so JDK readers leave them unset.
+    @Test
+    public void testMissingTimes() {
+        final X000A_NTFS field = new X000A_NTFS();
+        field.setAccessFileTime(FileTime.from(Instant.parse("2024-03-04T12:34:56Z")));
+        field.setAccessFileTime(null);
+        assertEquals(Long.MIN_VALUE, field.getModifyTime().getLongValue());
+        assertEquals(Long.MIN_VALUE, field.getAccessTime().getLongValue());
+        assertEquals(Long.MIN_VALUE, field.getCreateTime().getLongValue());
+        final ZipArchiveEntry holder = new ZipArchiveEntry("entry");
+        holder.addExtraField(field);
+        final ZipEntry jdk = new ZipEntry("entry");
+        jdk.setExtra(holder.getExtra());
+        assertNull(jdk.getLastModifiedTime());
+        assertNull(jdk.getLastAccessTime());
+        assertNull(jdk.getCreationTime());
+    }
+
+    /// Retains support for zero-valued missing timestamps in older archives.
+    @Test
+    public void testLegacyMissingTimes() throws Exception {
+        final X000A_NTFS field = new X000A_NTFS();
+        final byte[] data = field.getLocalFileDataData();
+        Arrays.fill(data, 8, data.length, (byte) 0);
+        field.parseFromLocalFileData(data, 0, data.length);
+        assertNull(field.getModifyFileTime());
+        assertNull(field.getAccessFileTime());
+        assertNull(field.getCreateFileTime());
+    }
 
     @Test
     public void testSimpleRoundtrip() throws Exception {
