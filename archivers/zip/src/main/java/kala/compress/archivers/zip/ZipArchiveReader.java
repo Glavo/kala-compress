@@ -198,8 +198,6 @@ public class ZipArchiveReader implements Closeable {
         }
     }
 
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
     private static final EnumSet<StandardOpenOption> READ = EnumSet.of(StandardOpenOption.READ);
 
     private static final int DEFAULT_BUFFER_SIZE = 8192;
@@ -594,7 +592,7 @@ public class ZipArchiveReader implements Closeable {
     /// @throws IOException if an error occurs while reading the file.
     /// @since 1.22
     public ZipArchiveReader(final Path path) throws IOException {
-        this(path, DEFAULT_CHARSET);
+        this(path, StandardCharsets.UTF_8);
     }
 
     /// Opens the given path for reading, assuming the specified encoding for file names and scanning for Unicode extra fields.
@@ -631,7 +629,6 @@ public class ZipArchiveReader implements Closeable {
     /// @param ignoreLocalFileHeader whether to ignore information stored inside the local file header (see the notes in this method's Javadoc)
     /// @throws IOException if an error occurs while reading the file.
     /// @since 1.27.1-0
-    @SuppressWarnings("resource") // Caller closes
     public ZipArchiveReader(final Path path, final Charset encoding, final boolean useUnicodeExtraFields, final boolean ignoreLocalFileHeader) throws IOException {
         this(newReadByteChannel(path), path.toAbsolutePath().toString(), encoding, useUnicodeExtraFields, true, ignoreLocalFileHeader);
     }
@@ -646,7 +643,7 @@ public class ZipArchiveReader implements Closeable {
     /// @throws IOException if an error occurs while reading the file.
     /// @since 1.13
     public ZipArchiveReader(final SeekableByteChannel channel) throws IOException {
-        this(channel, "a SeekableByteChannel", DEFAULT_CHARSET, true);
+        this(channel, "a SeekableByteChannel", StandardCharsets.UTF_8, true);
     }
 
     /// Opens the given channel for reading, assuming the specified encoding for file names.
