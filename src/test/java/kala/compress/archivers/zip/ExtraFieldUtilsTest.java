@@ -19,6 +19,11 @@ package kala.compress.archivers.zip;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.Arrays;
+import java.util.zip.ZipException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +32,25 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SuppressWarnings("OctalInteger")
 public class ExtraFieldUtilsTest implements UnixStat {
+
+    /// Applies the selected parsing policy to incomplete headers in either extra data location.
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void testIncompleteHeader(final int length) throws Exception {
+        for (final boolean local : new boolean[]{false, true}) {
+            for (final int prefixLength : new int[]{0, data.length}) {
+                final byte[] bytes = Arrays.copyOf(data, prefixLength + length);
+                Arrays.fill(bytes, prefixLength, bytes.length, (byte) 1);
+                final ZipExtraField[] fields = ExtraFieldUtils.parse(bytes, local, ExtraFieldUtils.UnparseableExtraField.READ);
+                assertInstanceOf(UnparseableExtraFieldData.class, fields[fields.length - 1]);
+                assertArrayEquals(bytes, local ? ExtraFieldUtils.mergeLocalFileDataData(fields)
+                        : ExtraFieldUtils.mergeCentralDirectoryData(fields));
+                final ZipExtraField[] skipped = ExtraFieldUtils.parse(bytes, local, ExtraFieldUtils.UnparseableExtraField.SKIP);
+                assertEquals(prefixLength == 0 ? 0 : 2, skipped.length);
+                assertThrows(ZipException.class, () -> ExtraFieldUtils.parse(bytes, local, ExtraFieldUtils.UnparseableExtraField.THROW));
+            }
+        }
+    }
 
     /**
      * Header-ID of a ZipExtraField not supported by Commons Compress.

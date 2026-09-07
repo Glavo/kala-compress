@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.attribute.FileTime;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.stream.Stream;
 
@@ -32,8 +33,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class TimeUtilsTest {
+
+    /// Decodes the full signed NTFS range without overflowing during the epoch adjustment.
+    @ParameterizedTest
+    @ValueSource(longs = {Long.MIN_VALUE, Long.MIN_VALUE + 1, Long.MIN_VALUE + 116444736000000000L - 1,
+            Long.MIN_VALUE + 116444736000000000L, -1, 0, 1, Long.MAX_VALUE})
+    void testNtfsTimeToFileTimeBoundaries(final long value) {
+        final BigInteger[] parts = BigInteger.valueOf(value).add(BigInteger.valueOf(WINDOWS_EPOCH_OFFSET))
+                .divideAndRemainder(BigInteger.valueOf(10_000_000));
+        final Instant expected = Instant.ofEpochSecond(parts[0].longValueExact(), parts[1].longValueExact() * 100);
+        assertEquals(FileTime.from(expected), ntfsTimeToFileTime(value));
+    }
 
     public static Stream<Arguments> dateToNtfsProvider() {
         return Stream.of(Arguments.of("1601-01-01T00:00:00.000Z", 0), Arguments.of("1601-01-01T00:00:00.000Z", 1), Arguments.of("1600-12-31T23:59:59.999Z", -1),

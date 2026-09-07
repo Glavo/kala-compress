@@ -49,6 +49,7 @@ import kala.compress.utils.TimeUtils;
 /// Data that does not follow this structure is retained as unparseable extra data.
 /// Parsed timestamp fields update the entry times, with NTFS values taking precedence
 /// over extended timestamp values.
+/// Time setters leave the entry unchanged if updating the timestamp extra fields fails.
 ///
 /// This class is not thread-safe.
 public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Cloneable {
@@ -634,7 +635,8 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         updateTimeFieldsFromExtraField(ze);
     }
 
-    private void addInfoZipExtendedTimestamp(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime creationTime) {
+    /// Creates an extended timestamp field for the supplied times.
+    private static X5455_ExtendedTimestamp createInfoZipExtendedTimestamp(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime creationTime) {
         final X5455_ExtendedTimestamp infoZipTimestamp = new X5455_ExtendedTimestamp();
         if (lastModifiedTime != null) {
             infoZipTimestamp.setModifyFileTime(lastModifiedTime);
@@ -645,10 +647,11 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         if (creationTime != null) {
             infoZipTimestamp.setCreateFileTime(creationTime);
         }
-        internalAddExtraField(infoZipTimestamp);
+        return infoZipTimestamp;
     }
 
-    private void addNTFSTimestamp(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime creationTime) {
+    /// Creates an NTFS timestamp field for the supplied times.
+    private static X000A_NTFS createNTFSTimestamp(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime creationTime) {
         final X000A_NTFS ntfsTimestamp = new X000A_NTFS();
         if (lastModifiedTime != null) {
             ntfsTimestamp.setModifyFileTime(lastModifiedTime);
@@ -659,7 +662,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         if (creationTime != null) {
             ntfsTimestamp.setCreateFileTime(creationTime);
         }
-        internalAddExtraField(ntfsTimestamp);
+        return ntfsTimestamp;
     }
 
     /// Returns a copy of this entry. Extra field objects are shared with the original.
@@ -1393,9 +1396,9 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// @param time the creation time, not null
     /// @return this entry
     /// @throws NullPointerException if time is null
+    /// @throws IllegalArgumentException if the updated extra data exceeds 65535 bytes
     public ZipArchiveEntry setCreationTime(final FileTime time) {
-        creationTime = Objects.requireNonNull(time, "time");
-        setExtraTimeFields();
+        setExtraTimeFields(xdostime, lastModifiedTime, lastAccessTime, Objects.requireNonNull(time, "time"));
         return this;
     }
 
@@ -1436,14 +1439,14 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         extra = data;
     }
 
-    /**
-     * Parses the given bytes as extra field data and consumes any unparseable data as an {@link UnparseableExtraFieldData} instance.
-     *
-     * @param extra an array of bytes to be parsed into extra fields
-     * @throws RuntimeException if the bytes cannot be parsed
-     * @throws RuntimeException on error
-     */
+    /// Parses and merges extra field data, retaining unparseable data as [UnparseableExtraFieldData].
+    ///
+    /// @param extra an array of bytes to be parsed into extra fields, or null
+    /// @throws IllegalArgumentException if the input or merged extra data exceeds 65535 bytes, or parsing fails
     public void setExtra(final byte[] extra) throws RuntimeException {
+        if (extra != null && extra.length > 0xffff) {
+            throw new IllegalArgumentException("Extra data exceeds 65535 bytes");
+        }
         try {
             mergeExtraFields(parseExtraFields(extra, true, ExtraFieldParsingMode.BEST_EFFORT), true);
         } catch (final ZipException e) {
@@ -1475,20 +1478,44 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         updateTimeFieldsFromExtraFields();
     }
 
+    /// Regenerates timestamp extra fields from the current times.
     private void setExtraTimeFields() {
-        if (getExtraField(X5455_ExtendedTimestamp.HEADER_ID) != null) {
-            internalRemoveExtraField(X5455_ExtendedTimestamp.HEADER_ID);
-        }
-        if (getExtraField(X000A_NTFS.HEADER_ID) != null) {
-            internalRemoveExtraField(X000A_NTFS.HEADER_ID);
+        setExtraTimeFields(xdostime, lastModifiedTime, lastAccessTime, creationTime);
+    }
+
+    /// Validates the replacement extra data before committing the supplied times and fields.
+    private void setExtraTimeFields(final long xdostime, final FileTime lastModifiedTime,
+                                   final FileTime lastAccessTime, final FileTime creationTime) {
+        final List<ZipExtraField> fields = new ArrayList<>();
+        if (extraFields != null) {
+            for (final ZipExtraField field : extraFields) {
+                final ZipShort id = field.getHeaderId();
+                if (!X5455_ExtendedTimestamp.HEADER_ID.equals(id) && !X000A_NTFS.HEADER_ID.equals(id)) {
+                    fields.add(field);
+                }
+            }
         }
         if (lastModifiedTime != null || lastAccessTime != null || creationTime != null) {
             if (canConvertToInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime)) {
-                addInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime);
+                fields.add(createInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime));
             }
-            addNTFSTimestamp(lastModifiedTime, lastAccessTime, creationTime);
+            fields.add(createNTFSTimestamp(lastModifiedTime, lastAccessTime, creationTime));
         }
-        setExtra();
+        final ZipExtraField[] newFields = fields.toArray(ExtraFieldUtils.EMPTY_ZIP_EXTRA_FIELD_ARRAY);
+        if (unparseableExtra != null) {
+            fields.add(unparseableExtra);
+        }
+        final byte[] data = ExtraFieldUtils.mergeLocalFileDataData(unparseableExtra == null ? newFields
+                : fields.toArray(ExtraFieldUtils.EMPTY_ZIP_EXTRA_FIELD_ARRAY));
+        if (data.length > 0xffff) {
+            throw new IllegalArgumentException("Extra data exceeds 65535 bytes");
+        }
+        this.xdostime = xdostime;
+        this.lastModifiedTime = lastModifiedTime;
+        this.lastAccessTime = lastAccessTime;
+        this.creationTime = creationTime;
+        extraFields = newFields;
+        extra = data;
     }
 
     /**
@@ -1515,9 +1542,9 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// @param fileTime the last access time, not null
     /// @return this entry
     /// @throws NullPointerException if fileTime is null
+    /// @throws IllegalArgumentException if the updated extra data exceeds 65535 bytes
     public ZipArchiveEntry setLastAccessTime(final FileTime fileTime) {
-        lastAccessTime = Objects.requireNonNull(fileTime, "fileTime");
-        setExtraTimeFields();
+        setExtraTimeFields(xdostime, lastModifiedTime, Objects.requireNonNull(fileTime, "fileTime"), creationTime);
         return this;
     }
 
@@ -1526,9 +1553,11 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// @param fileTime the modification time, not null
     /// @return this entry
     /// @throws NullPointerException if fileTime is null
+    /// @throws IllegalArgumentException if the updated extra data exceeds 65535 bytes
     public ZipArchiveEntry setLastModifiedTime(final FileTime fileTime) {
-        internalSetLastModifiedTime(fileTime);
-        setExtraTimeFields();
+        Objects.requireNonNull(fileTime, "fileTime");
+        final long dosTime = toExtendedDosTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(fileTime.toMillis()), ZoneId.systemDefault()));
+        setExtraTimeFields(dosTime, fileTime, lastAccessTime, creationTime);
         return this;
     }
 
@@ -1638,13 +1667,13 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// other times are also recorded in timestamp extra fields.
     ///
     /// @param timeEpochMillis the last modification time in milliseconds since the epoch
+    /// @throws IllegalArgumentException if the updated extra data exceeds 65535 bytes
     /// @see #getTime()
     /// @see #setLastModifiedTime(FileTime)
     public void setTime(final long timeEpochMillis) {
         final LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeEpochMillis), ZoneId.systemDefault());
-        xdostime = toExtendedDosTime(time);
-        lastModifiedTime = time.getYear() >= 1980 && time.getYear() <= 2099 ? null : FileTime.fromMillis(timeEpochMillis);
-        setExtraTimeFields();
+        final FileTime modified = time.getYear() >= 1980 && time.getYear() <= 2099 ? null : FileTime.fromMillis(timeEpochMillis);
+        setExtraTimeFields(toExtendedDosTime(time), modified, lastAccessTime, creationTime);
     }
 
     /// Sets the local modification time with millisecond precision and updates timestamp extra fields.
@@ -1654,13 +1683,14 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     ///
     /// @param time the local modification time, not null
     /// @throws NullPointerException if time is null
+    /// @throws IllegalArgumentException if the updated extra data exceeds 65535 bytes
     public void setTimeLocal(final LocalDateTime time) {
         Objects.requireNonNull(time, "time");
-        xdostime = toExtendedDosTime(time);
-        lastModifiedTime = xdostime != DOSTIME_BEFORE_1980 && time.getYear() <= 2107 ? null
+        final long dosTime = toExtendedDosTime(time);
+        final FileTime modified = dosTime != DOSTIME_BEFORE_1980 && time.getYear() <= 2107 ? null
                 : FileTime.from(time.withNano(time.getNano() / 1_000_000 * 1_000_000)
                         .atZone(ZoneId.systemDefault()).toInstant());
-        setExtraTimeFields();
+        setExtraTimeFields(dosTime, modified, lastAccessTime, creationTime);
     }
 
     /// Sets the DOS modification time read from an archive, using only the low 32 bits.

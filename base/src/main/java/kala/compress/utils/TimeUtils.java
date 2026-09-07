@@ -87,9 +87,9 @@ public final class TimeUtils {
      * @return the FileTime.
      */
     public static FileTime ntfsTimeToFileTime(final long ntfsTime) {
-        final long javaHundredsNanos = Math.addExact(ntfsTime, WINDOWS_EPOCH_OFFSET);
-        final long javaSeconds = Math.floorDiv(javaHundredsNanos, HUNDRED_NANOS_PER_SECOND);
-        final long javaNanos = Math.floorMod(javaHundredsNanos, HUNDRED_NANOS_PER_SECOND) * 100;
+        final long javaSeconds = Math.floorDiv(ntfsTime, HUNDRED_NANOS_PER_SECOND)
+                + WINDOWS_EPOCH_OFFSET / HUNDRED_NANOS_PER_SECOND;
+        final long javaNanos = Math.floorMod(ntfsTime, HUNDRED_NANOS_PER_SECOND) * 100;
         return FileTime.from(Instant.ofEpochSecond(javaSeconds, javaNanos));
     }
 

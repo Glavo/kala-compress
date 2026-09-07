@@ -87,6 +87,9 @@ public class ExtraFieldUtils {
                 throws ZipException {
             switch (key) {
             case THROW_KEY:
+                if (claimedLength < 0) {
+                    throw new ZipException("Incomplete extra field header starting at " + off + ": " + len + " bytes remaining.");
+                }
                 throw new ZipException("Bad extra field starting at " + off + ".  Block length of " + claimedLength + " bytes exceeds remaining" + " data of "
                         + (len - WORD) + " bytes.");
             case READ_KEY:
@@ -306,10 +309,9 @@ public class ExtraFieldUtils {
         final List<ZipExtraField> v = new ArrayList<>();
         int start = 0;
         final int dataLength = data.length;
-        LOOP: while (start <= dataLength - WORD) {
-            final ZipShort headerId = new ZipShort(data, start);
-            final int length = new ZipShort(data, start + 2).getValue();
-            if (start + WORD + length > dataLength) {
+        LOOP: while (start < dataLength) {
+            final int length = dataLength - start < WORD ? -1 : new ZipShort(data, start + 2).getValue();
+            if (length < 0 || length > dataLength - start - WORD) {
                 final ZipExtraField field = parsingBehavior.onUnparseableExtraField(data, start, dataLength - start, local, length);
                 if (field != null) {
                     v.add(field);
@@ -319,6 +321,7 @@ public class ExtraFieldUtils {
                 // available data
                 break LOOP;
             }
+            final ZipShort headerId = new ZipShort(data, start);
             try {
                 final ZipExtraField ze = Objects.requireNonNull(parsingBehavior.createExtraField(headerId), "createExtraField must not return null");
                 v.add(Objects.requireNonNull(parsingBehavior.fill(ze, data, start + WORD, length, local), "fill must not return null"));

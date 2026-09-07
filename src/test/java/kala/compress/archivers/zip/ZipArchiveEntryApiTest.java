@@ -41,6 +41,96 @@ import static org.junit.jupiter.api.Assertions.*;
 /// Tests the independently implemented ZIP entry API and its archive representation.
 class ZipArchiveEntryApiTest {
 
+    /// Preserves incomplete extra headers and rejects oversized input before parsing or merging.
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3})
+    void incompleteExtraHeader(final int length) {
+        final byte[] tail = new byte[length];
+        final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+        entry.setExtra(tail);
+        assertArrayEquals(tail, entry.getExtra());
+        final ZipArchiveEntry central = new ZipArchiveEntry("entry");
+        central.setCentralDirectoryExtra(tail);
+        assertArrayEquals(tail, central.getCentralDirectoryExtra());
+
+        final byte[] oversized = new byte[65535 + length];
+        ZipShort.putShort(0x5555, oversized, 0);
+        ZipShort.putShort(65531, oversized, 2);
+        assertThrows(IllegalArgumentException.class, () -> entry.setExtra(oversized));
+        assertArrayEquals(tail, entry.getExtra());
+        assertArrayEquals(tail, entry.getUnparseableExtraFieldData().getLocalFileDataData());
+    }
+
+    /// Leaves timestamps, serialized data, and existing extra field objects unchanged when a time setter fails.
+    @ParameterizedTest
+    @ValueSource(strings = {"modified", "accessed", "created", "millis", "fileTime", "local"})
+    void timeSetterFailureIsAtomic(final String setter) {
+        final FileTime replacement = FileTime.from(Instant.parse("1960-03-04T12:34:57Z"));
+        for (final boolean existingTime : new boolean[]{false, true}) {
+            final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+            entry.setTimeLocal(LocalDateTime.of(2024, 3, 4, 12, 34, 57, 123000000));
+            if (existingTime) {
+                if (setter.equals("created")) {
+                    entry.setLastAccessTime(replacement);
+                } else {
+                    entry.setCreationTime(replacement);
+                }
+            }
+            final UnrecognizedExtraField padding = new UnrecognizedExtraField();
+            padding.setHeaderId(new ZipShort(0x5555));
+            padding.setLocalFileDataData(new byte[(existingTime ? 65535 : 65500) - entry.getExtra().length - 4]);
+            entry.addExtraField(padding);
+            final byte[] extra = entry.getExtra().clone();
+            final byte[] central = entry.getCentralDirectoryExtra();
+            final ZipExtraField[] fields = entry.getExtraFields(true);
+            final long millis = entry.getTime();
+            final LocalDateTime local = entry.getTimeLocal();
+            final FileTime modified = entry.getLastModifiedTime();
+            final FileTime accessed = entry.getLastAccessTime();
+            final FileTime created = entry.getCreationTime();
+            assertThrows(IllegalArgumentException.class, () -> {
+                switch (setter) {
+                    case "modified" -> entry.setLastModifiedTime(replacement);
+                    case "accessed" -> entry.setLastAccessTime(replacement);
+                    case "created" -> entry.setCreationTime(replacement);
+                    case "millis" -> entry.setTime(replacement.toMillis());
+                    case "fileTime" -> entry.setTime(replacement);
+                    case "local" -> entry.setTimeLocal(LocalDateTime.of(1960, 3, 4, 12, 34, 57));
+                    default -> fail("Unknown setter: " + setter);
+                }
+            });
+            assertEquals(millis, entry.getTime());
+            assertEquals(local, entry.getTimeLocal());
+            assertEquals(modified, entry.getLastModifiedTime());
+            assertEquals(accessed, entry.getLastAccessTime());
+            assertEquals(created, entry.getCreationTime());
+            assertArrayEquals(extra, entry.getExtra());
+            assertArrayEquals(central, entry.getCentralDirectoryExtra());
+            final ZipExtraField[] remaining = entry.getExtraFields(true);
+            assertEquals(fields.length, remaining.length);
+            for (int i = 0; i < fields.length; i++) {
+                assertSame(fields[i], remaining[i]);
+            }
+        }
+    }
+
+    /// Reads NTFS values whose Unix epoch adjustment cannot fit in a signed count of 100-nanosecond units.
+    @ParameterizedTest
+    @ValueSource(longs = {Long.MIN_VALUE + 1, Long.MIN_VALUE + 116444736000000000L - 1})
+    void extremeNtfsTimestamp(final long value) {
+        final X000A_NTFS ntfs = new X000A_NTFS();
+        ntfs.setModifyTime(new ZipEightByteInteger(value));
+        final byte[] extra = ExtraFieldUtils.mergeLocalFileDataData(new ZipExtraField[]{ntfs});
+        final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+        entry.setExtra(extra);
+        final ZipEntry jdk = new ZipEntry("entry");
+        jdk.setExtra(extra);
+        // JDK truncates the NTFS count to microseconds toward zero.
+        assertEquals(jdk.getLastModifiedTime().toInstant(), entry.getLastModifiedTime().toInstant().plusNanos(-(value % 10) * 100));
+        assertEquals(ntfs.getModifyFileTime(), entry.getLastModifiedTime());
+        assertArrayEquals(extra, entry.getExtra());
+    }
+
     /// Verifies that removing inheritance retains all public ZipEntry methods and constants.
     @Test
     void publicApi() throws Exception {
