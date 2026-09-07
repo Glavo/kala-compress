@@ -22,6 +22,10 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,26 +40,16 @@ import kala.compress.archivers.EntryStreamOffsets;
 import kala.compress.utils.ByteUtils;
 import kala.compress.utils.TimeUtils;
 
-/**
- * Extension that adds better handling of extra fields and provides access to the internal and external file attributes.
- *
- * <p>
- * The extra data is expected to follow the recommendation of <a href="http://www.pkware.com/documents/casestudies/APPNOTE.TXT">APPNOTE.TXT</a>:
- * </p>
- * <ul>
- * <li>the extra byte array consists of a sequence of extra fields</li>
- * <li>each extra fields starts by a two byte header id followed by a two byte sequence holding the length of the remainder of data.</li>
- * </ul>
- *
- * <p>
- * Any extra data that cannot be parsed by the rules above will be consumed as "unparseable" extra data and treated differently by the methods of this class.
- * Versions prior to Apache Commons Compress 1.1 would have thrown an exception if any attempt was made to read or write extra data not conforming to the
- * recommendation.
- * </p>
- *
- * @NotThreadSafe
- */
-public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStreamOffsets {
+/// A ZIP entry with structured extra fields and internal and external file attributes.
+///
+/// Extra data follows [APPNOTE.TXT](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT):
+/// each field starts with a two-byte identifier and a two-byte data length.
+/// Data that does not follow this structure is retained as unparseable extra data.
+/// Parsed timestamp fields update the entry times, with NTFS values taking precedence
+/// over extended timestamp values.
+///
+/// This class is not thread-safe.
+public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Cloneable {
 
     /**
      * Indicates how the comment of this entry has been determined.
@@ -222,6 +216,132 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     public static final int PLATFORM_FAT = 0;
     public static final int CRC_UNKNOWN = -1;
 
+    /// The compression method for uncompressed entries.
+    public static final int STORED = 0;
+
+    /// The compression method for entries compressed with DEFLATE.
+    public static final int DEFLATED = 8;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCSIG].
+    public static final long LOCSIG = ZipEntry.LOCSIG;
+
+    /// The ZIP format constant defined by [ZipEntry#EXTSIG].
+    public static final long EXTSIG = ZipEntry.EXTSIG;
+
+    /// The ZIP format constant defined by [ZipEntry#CENSIG].
+    public static final long CENSIG = ZipEntry.CENSIG;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDSIG].
+    public static final long ENDSIG = ZipEntry.ENDSIG;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCHDR].
+    public static final int LOCHDR = ZipEntry.LOCHDR;
+
+    /// The ZIP format constant defined by [ZipEntry#EXTHDR].
+    public static final int EXTHDR = ZipEntry.EXTHDR;
+
+    /// The ZIP format constant defined by [ZipEntry#CENHDR].
+    public static final int CENHDR = ZipEntry.CENHDR;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDHDR].
+    public static final int ENDHDR = ZipEntry.ENDHDR;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCVER].
+    public static final int LOCVER = ZipEntry.LOCVER;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCFLG].
+    public static final int LOCFLG = ZipEntry.LOCFLG;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCHOW].
+    public static final int LOCHOW = ZipEntry.LOCHOW;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCTIM].
+    public static final int LOCTIM = ZipEntry.LOCTIM;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCCRC].
+    public static final int LOCCRC = ZipEntry.LOCCRC;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCSIZ].
+    public static final int LOCSIZ = ZipEntry.LOCSIZ;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCLEN].
+    public static final int LOCLEN = ZipEntry.LOCLEN;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCNAM].
+    public static final int LOCNAM = ZipEntry.LOCNAM;
+
+    /// The ZIP format constant defined by [ZipEntry#LOCEXT].
+    public static final int LOCEXT = ZipEntry.LOCEXT;
+
+    /// The ZIP format constant defined by [ZipEntry#EXTCRC].
+    public static final int EXTCRC = ZipEntry.EXTCRC;
+
+    /// The ZIP format constant defined by [ZipEntry#EXTSIZ].
+    public static final int EXTSIZ = ZipEntry.EXTSIZ;
+
+    /// The ZIP format constant defined by [ZipEntry#EXTLEN].
+    public static final int EXTLEN = ZipEntry.EXTLEN;
+
+    /// The ZIP format constant defined by [ZipEntry#CENVEM].
+    public static final int CENVEM = ZipEntry.CENVEM;
+
+    /// The ZIP format constant defined by [ZipEntry#CENVER].
+    public static final int CENVER = ZipEntry.CENVER;
+
+    /// The ZIP format constant defined by [ZipEntry#CENFLG].
+    public static final int CENFLG = ZipEntry.CENFLG;
+
+    /// The ZIP format constant defined by [ZipEntry#CENHOW].
+    public static final int CENHOW = ZipEntry.CENHOW;
+
+    /// The ZIP format constant defined by [ZipEntry#CENTIM].
+    public static final int CENTIM = ZipEntry.CENTIM;
+
+    /// The ZIP format constant defined by [ZipEntry#CENCRC].
+    public static final int CENCRC = ZipEntry.CENCRC;
+
+    /// The ZIP format constant defined by [ZipEntry#CENSIZ].
+    public static final int CENSIZ = ZipEntry.CENSIZ;
+
+    /// The ZIP format constant defined by [ZipEntry#CENLEN].
+    public static final int CENLEN = ZipEntry.CENLEN;
+
+    /// The ZIP format constant defined by [ZipEntry#CENNAM].
+    public static final int CENNAM = ZipEntry.CENNAM;
+
+    /// The ZIP format constant defined by [ZipEntry#CENEXT].
+    public static final int CENEXT = ZipEntry.CENEXT;
+
+    /// The ZIP format constant defined by [ZipEntry#CENCOM].
+    public static final int CENCOM = ZipEntry.CENCOM;
+
+    /// The ZIP format constant defined by [ZipEntry#CENDSK].
+    public static final int CENDSK = ZipEntry.CENDSK;
+
+    /// The ZIP format constant defined by [ZipEntry#CENATT].
+    public static final int CENATT = ZipEntry.CENATT;
+
+    /// The ZIP format constant defined by [ZipEntry#CENATX].
+    public static final int CENATX = ZipEntry.CENATX;
+
+    /// The ZIP format constant defined by [ZipEntry#CENOFF].
+    public static final int CENOFF = ZipEntry.CENOFF;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDSUB].
+    public static final int ENDSUB = ZipEntry.ENDSUB;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDTOT].
+    public static final int ENDTOT = ZipEntry.ENDTOT;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDSIZ].
+    public static final int ENDSIZ = ZipEntry.ENDSIZ;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDOFF].
+    public static final int ENDOFF = ZipEntry.ENDOFF;
+
+    /// The ZIP format constant defined by [ZipEntry#ENDCOM].
+    public static final int ENDCOM = ZipEntry.ENDCOM;
+
     private static final int SHORT_MASK = 0xFFFF;
 
     private static final int SHORT_SHIFT = 16;
@@ -242,25 +362,29 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         return Files.isDirectory(inputPath, options) ? toDirectoryEntryName(entryName) : entryName;
     }
 
-    /**
-     * The {@link ZipEntry} base class only supports the compression methods STORED and DEFLATED. We override the field so that any compression
-     * methods can be used.
-     * <p>
-     * The default value -1 means that the method has not been specified.
-     * </p>
-     *
-     * @see <a href="https://issues.apache.org/jira/browse/COMPRESS-93">COMPRESS-93</a>
-     */
+    /// The compression method, or -1 if unspecified.
     private int method = ZipMethod.UNKNOWN_CODE;
 
-    /**
-     * The {@link ZipEntry#setSize} method in the base class throws an IllegalArgumentException if the size is bigger than 2GB for Java versions
-     * &lt; 7 and even in Java 7+ if the implementation in java.util.zip doesn't support Zip64 itself (it is an optional feature).
-     * <p>
-     * We need to keep our own size information for Zip64 support.
-     * </p>
-     */
+    /// The uncompressed size in bytes, or -1 if unknown.
     private long size = SIZE_UNKNOWN;
+    /// The compressed size in bytes, or -1 if unknown.
+    private long compressedSize = SIZE_UNKNOWN;
+    /// The unsigned CRC-32 value, or -1 if unknown.
+    private long crc = CRC_UNKNOWN;
+    /// The optional entry comment.
+    private String comment;
+    /// The serialized local extra fields, or null if never set.
+    private byte[] extra;
+    /// The local DOS modification time, or -1 if none is set; ignored when an absolute time is available.
+    private long dosTime = -1;
+    /// The milliseconds omitted by the two-second DOS time resolution.
+    private int timeMillis;
+    /// The absolute modification time, or null when only a DOS time is available.
+    private FileTime lastModifiedTime;
+    /// The optional last access time.
+    private FileTime lastAccessTime;
+    /// The optional creation time.
+    private FileTime creationTime;
     private int internalAttributes;
     private int versionRequired;
     private int versionMadeBy;
@@ -326,7 +450,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @param name              the name of the entry
      */
     private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final String name) {
-        super(name);
         this.extraFieldFactory = extraFieldFactory;
         setName(name);
     }
@@ -343,18 +466,40 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @throws ZipException on error
      */
     private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final ZipEntry entry) throws ZipException {
-        super(entry);
-        this.extraFieldFactory = extraFieldFactory;
-        setName(entry.getName());
+        this(extraFieldFactory, entry.getName());
+        method = entry.getMethod();
+        size = entry.getSize();
+        compressedSize = entry.getCompressedSize();
+        crc = entry.getCrc();
+        comment = entry.getComment();
+        final FileTime modified = entry.getLastModifiedTime();
+        LocalDateTime localTime = null;
+        if (modified != null) {
+            try {
+                localTime = entry.getTimeLocal();
+            } catch (final DateTimeException e) {
+                // JDK entries may contain DOS dates with invalid calendar fields.
+                localTime = LocalDateTime.ofInstant(modified.toInstant(), ZoneId.systemDefault());
+            }
+        }
         final byte[] extra = entry.getExtra();
         if (extra != null) {
             setExtraFields(parseExtraFields(extra, true, ExtraFieldParsingMode.BEST_EFFORT));
-        } else {
-            // initializes extra data to an empty byte array
-            setExtra();
         }
-        setMethod(entry.getMethod());
-        this.size = entry.getSize();
+        if (localTime != null) {
+            dosTime = toDosTime(localTime);
+            timeMillis = (localTime.getSecond() & 1) * 1000 + localTime.getNano() / 1_000_000;
+            lastModifiedTime = localTime.equals(LocalDateTime.ofInstant(modified.toInstant(), ZoneId.systemDefault()))
+                    ? modified : null;
+        }
+        lastAccessTime = entry.getLastAccessTime();
+        creationTime = entry.getCreationTime();
+        if (lastModifiedTime != null) {
+            final long millis = lastModifiedTime.toMillis();
+            lastModifiedTimeSet |= !ZipUtil.isDosTime(millis)
+                    || !lastModifiedTime.equals(FileTime.fromMillis(millis));
+        }
+        setExtraTimeFields();
     }
 
     /**
@@ -375,38 +520,54 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         this(null, inputPath, entryName, options);
     }
 
-    /**
-     * Creates a new ZIP entry with the specified name.
-     *
-     * <p>
-     * Assumes the entry represents a directory if and only if the name ends with a forward slash "/".
-     * </p>
-     *
-     * @param name the name of the entry
-     * @since 1.26.0
-     */
+    /// Creates a ZIP entry with the specified name.
+    /// The entry is a directory if its normalized name ends with `/`.
+    ///
+    /// @param name the entry name, not null; backslashes are replaced with `/` if no `/` is present
+    /// @throws NullPointerException if name is null
+    /// @throws IllegalArgumentException if name exceeds 65535 characters
+    /// @since 1.26.0
     public ZipArchiveEntry(final String name) {
         this((Function<ZipShort, ZipExtraField>) null, name);
     }
 
-    /**
-     * Creates a new ZIP entry with fields taken from the specified ZIP entry.
-     *
-     * <p>
-     * Assumes the entry represents a directory if and only if the name ends with a forward slash "/".
-     * </p>
-     *
-     * @param entry the entry to get fields from
-     * @throws ZipException on error
-     */
-    public ZipArchiveEntry(final ZipArchiveEntry entry) throws ZipException {
-        this((ZipEntry) entry);
-        setInternalAttributes(entry.getInternalAttributes());
-        setExternalAttributes(entry.getExternalAttributes());
-        setExtraFields(entry.getAllExtraFieldsNoCopy());
-        setPlatform(entry.getPlatform());
-        final GeneralPurposeBit other = entry.getGeneralPurposeBit();
-        setGeneralPurposeBit(other == null ? null : (GeneralPurposeBit) other.clone());
+    /// Creates a ZIP entry by copying the entry metadata.
+    /// Extra field objects are shared with the original entry.
+    ///
+    /// @param entry the entry to copy, not null
+    /// @throws NullPointerException if entry is null
+    public ZipArchiveEntry(final ZipArchiveEntry entry) {
+        extraFieldFactory = entry.extraFieldFactory;
+        name = entry.name;
+        rawName = entry.getRawName();
+        method = entry.method;
+        size = entry.size;
+        compressedSize = entry.compressedSize;
+        crc = entry.crc;
+        comment = entry.comment;
+        dosTime = entry.dosTime;
+        timeMillis = entry.timeMillis;
+        lastModifiedTime = entry.lastModifiedTime;
+        lastAccessTime = entry.lastAccessTime;
+        creationTime = entry.creationTime;
+        lastModifiedTimeSet = entry.lastModifiedTimeSet;
+        internalAttributes = entry.internalAttributes;
+        externalAttributes = entry.externalAttributes;
+        versionRequired = entry.versionRequired;
+        versionMadeBy = entry.versionMadeBy;
+        platform = entry.platform;
+        rawFlag = entry.rawFlag;
+        alignment = entry.alignment;
+        extraFields = entry.extraFields == null ? null : entry.extraFields.clone();
+        unparseableExtra = entry.unparseableExtra;
+        extra = entry.extra == null ? null : entry.extra.clone();
+        generalPurposeBit = entry.generalPurposeBit == null ? null : (GeneralPurposeBit) entry.generalPurposeBit.clone();
+        localHeaderOffset = entry.localHeaderOffset;
+        dataOffset = entry.dataOffset;
+        isStreamContiguous = entry.isStreamContiguous;
+        nameSource = entry.nameSource;
+        commentSource = entry.commentSource;
+        diskNumberStart = entry.diskNumberStart;
     }
 
     /**
@@ -448,6 +609,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
             }
         }
         setExtra();
+        updateTimeFieldsFromExtraField(ze);
     }
 
     /**
@@ -462,6 +624,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     public void addExtraField(final ZipExtraField ze) {
         internalAddExtraField(ze);
         setExtra();
+        updateTimeFieldsFromExtraField(ze);
     }
 
     private void addInfoZipExtendedTimestamp(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime creationTime) {
@@ -492,19 +655,19 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         internalAddExtraField(ntfsTimestamp);
     }
 
-    /**
-     * Overwrite clone.
-     *
-     * @return a cloned copy of this ZipArchiveEntry
-     */
+    /// Returns a copy of this entry. Extra field objects are shared with the original.
     @Override
-    public Object clone() {
-        final ZipArchiveEntry e = (ZipArchiveEntry) super.clone();
-
-        e.setInternalAttributes(getInternalAttributes());
-        e.setExternalAttributes(getExternalAttributes());
-        e.setExtraFields(getAllExtraFieldsNoCopy());
-        return e;
+    public ZipArchiveEntry clone() {
+        try {
+            final ZipArchiveEntry e = (ZipArchiveEntry) super.clone();
+            e.extraFields = extraFields == null ? null : extraFields.clone();
+            e.extra = extra == null ? null : extra.clone();
+            e.rawName = getRawName();
+            e.generalPurposeBit = generalPurposeBit == null ? null : (GeneralPurposeBit) generalPurposeBit.clone();
+            return e;
+        } catch (final CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 
     private ZipExtraField[] copyOf(final ZipExtraField[] src, final int length) {
@@ -585,6 +748,72 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      */
     public byte[] getCentralDirectoryExtra() {
         return ExtraFieldUtils.mergeCentralDirectoryData(getAllExtraFieldsNoCopy());
+    }
+
+    /// Returns the entry comment, or null if unspecified.
+    public String getComment() {
+        return comment;
+    }
+
+    /// Returns the compressed size in bytes, or -1 if unknown.
+    public long getCompressedSize() {
+        return compressedSize;
+    }
+
+    /// Returns the unsigned CRC-32 value of the uncompressed data, or -1 if unknown.
+    public long getCrc() {
+        return crc;
+    }
+
+    /// Returns the creation time, or null if unspecified.
+    public FileTime getCreationTime() {
+        return creationTime;
+    }
+
+    /// Returns the serialized local extra fields, or null if never set.
+    /// The returned array is not copied; modifying it does not update the structured extra fields.
+    public byte[] getExtra() {
+        return extra;
+    }
+
+    /// Returns the last access time, or null if unspecified.
+    public FileTime getLastAccessTime() {
+        return lastAccessTime;
+    }
+
+    /// Returns the modification time, or null if unspecified.
+    /// A DOS local time is interpreted in the system default time zone.
+    @Override
+    public FileTime getLastModifiedTime() {
+        return lastModifiedTime != null ? lastModifiedTime : dosTime == -1 ? null : FileTime.fromMillis(getTime());
+    }
+
+    /// Returns the modification time in milliseconds since the epoch, or -1 if unspecified.
+    /// A DOS local time is interpreted in the system default time zone using
+    /// [TimeUtils#dosTimeToEpochMilli(long, ZoneId)].
+    public long getTime() {
+        if (lastModifiedTime != null) {
+            return lastModifiedTime.toMillis();
+        }
+        return dosTime == -1 ? -1 : TimeUtils.dosTimeToEpochMilli(dosTime, ZoneId.systemDefault()) + timeMillis;
+    }
+
+    /// Returns the local modification time, or null if unspecified.
+    /// An absolute timestamp is converted using the system default time zone.
+    /// A DOS timestamp is returned without time-zone adjustment, normalizing invalid fields.
+    public LocalDateTime getTimeLocal() {
+        if (lastModifiedTime != null) {
+            return LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault());
+        }
+        return dosTime == -1 ? null : LocalDateTime.ofEpochSecond(
+                TimeUtils.dosTimeToEpochMilli(dosTime, ZoneOffset.UTC) / 1000 + timeMillis / 1000,
+                timeMillis % 1000 * 1_000_000, ZoneOffset.UTC);
+    }
+
+    /// Returns the packed DOS modification time, or -1 if unspecified.
+    long getDosTime() {
+        return lastModifiedTime == null ? dosTime
+                : toDosTime(LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault()));
     }
 
     /**
@@ -765,7 +994,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @return compression method
      * @since 1.1
      */
-    @Override
     public int getMethod() {
         return method;
     }
@@ -781,7 +1009,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      */
     @Override
     public String getName() {
-        return name == null ? super.getName() : name;
+        return name;
     }
 
     /**
@@ -907,10 +1135,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      */
     @Override
     public int hashCode() {
-        // this method has severe consequences on performance. We cannot rely
-        // on the super.hashCode() method since super.getName() always return
-        // the empty string in the current implementation (there's no setter)
-        // so it is basically draining the performance of a hashmap lookup
         return getName().hashCode();
     }
 
@@ -947,7 +1171,8 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
 
     /// Sets the modification time and marks it for inclusion in timestamp extra fields.
     private void internalSetLastModifiedTime(final FileTime time) {
-        super.setLastModifiedTime(time);
+        lastModifiedTime = Objects.requireNonNull(time, "time");
+        timeMillis = 0;
         lastModifiedTimeSet = true;
     }
 
@@ -987,7 +1212,9 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         if (extraFields == null) {
             setExtraFields(f);
         } else {
+            boolean updateTimes = false;
             for (final ZipExtraField element : f) {
+                updateTimes |= isTimestampExtraField(element);
                 final ZipExtraField existing;
                 if (element instanceof UnparseableExtraFieldData) {
                     existing = unparseableExtra;
@@ -1021,6 +1248,9 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
                 }
             }
             setExtra();
+            if (updateTimes) {
+                updateTimeFieldsFromExtraFields();
+            }
         }
     }
 
@@ -1099,9 +1329,9 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         if (attributes.isRegularFile()) {
             setSize(attributes.size());
         }
-        super.setLastModifiedTime(attributes.lastModifiedTime());
-        super.setCreationTime(attributes.creationTime());
-        super.setLastAccessTime(attributes.lastAccessTime());
+        internalSetLastModifiedTime(attributes.lastModifiedTime());
+        creationTime = attributes.creationTime();
+        lastAccessTime = attributes.lastAccessTime();
         setExtraTimeFields();
     }
 
@@ -1129,17 +1359,45 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         this.commentSource = commentSource;
     }
 
-    @Override
-    public ZipEntry setCreationTime(final FileTime time) {
-        super.setCreationTime(time);
+    /// Sets the entry comment.
+    ///
+    /// @param comment the comment, or null to clear it
+    /// @throws IllegalArgumentException if the comment exceeds 65535 characters
+    public void setComment(final String comment) {
+        if (comment != null && comment.length() > 0xffff) {
+            throw new IllegalArgumentException("Entry comment exceeds 65535 characters");
+        }
+        this.comment = comment;
+    }
+
+    /// Sets the compressed size in bytes. No range validation is performed.
+    ///
+    /// @param size the compressed size, or -1 if unknown
+    public void setCompressedSize(final long size) {
+        compressedSize = size;
+    }
+
+    /// Sets the CRC-32 value of the uncompressed data.
+    ///
+    /// @param crc the unsigned CRC-32 value
+    /// @throws IllegalArgumentException if crc is outside the range 0 to 0xffffffff
+    public void setCrc(final long crc) {
+        if (crc < 0 || crc > 0xffffffffL) {
+            throw new IllegalArgumentException("Invalid entry CRC-32: " + crc);
+        }
+        this.crc = crc;
+    }
+
+    /// Sets the creation time and updates the timestamp extra fields.
+    ///
+    /// @param time the creation time, not null
+    /// @return this entry
+    /// @throws NullPointerException if time is null
+    public ZipArchiveEntry setCreationTime(final FileTime time) {
+        creationTime = Objects.requireNonNull(time, "time");
         setExtraTimeFields();
         return this;
     }
-    /*
-     * (non-Javadoc)
-     *
-     * @see Object#equals(Object)
-     */
 
     /**
      * Sets the data offset.
@@ -1169,15 +1427,13 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         externalAttributes = value;
     }
 
-    /**
-     * Unfortunately {@link java.util.zip.ZipOutputStream} seems to access the extra data directly, so overriding getExtra doesn't help - we need to modify
-     * super's data directly and on every update.
-     */
+    /// Serializes the current local extra fields.
     protected void setExtra() {
-        // ZipEntry will update the time fields here, so we need to reprocess them afterwards
-        super.setExtra(ExtraFieldUtils.mergeLocalFileDataData(getAllExtraFieldsNoCopy()));
-        // Reprocess and overwrite the modifications made by ZipEntry#setExtra(byte[])
-        updateTimeFieldsFromExtraFields();
+        final byte[] data = ExtraFieldUtils.mergeLocalFileDataData(getAllExtraFieldsNoCopy());
+        if (data.length > 0xffff) {
+            throw new IllegalArgumentException("Extra data exceeds 65535 bytes");
+        }
+        extra = data;
     }
 
     /**
@@ -1187,7 +1443,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @throws RuntimeException if the bytes cannot be parsed
      * @throws RuntimeException on error
      */
-    @Override
     public void setExtra(final byte[] extra) throws RuntimeException {
         try {
             mergeExtraFields(parseExtraFields(extra, true, ExtraFieldParsingMode.BEST_EFFORT), true);
@@ -1217,6 +1472,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         }
         extraFields = newFields.toArray(ExtraFieldUtils.EMPTY_ZIP_EXTRA_FIELD_ARRAY);
         setExtra();
+        updateTimeFieldsFromExtraFields();
     }
 
     private void setExtraTimeFields() {
@@ -1257,15 +1513,23 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         this.internalAttributes = internalAttributes;
     }
 
-    @Override
-    public ZipEntry setLastAccessTime(final FileTime fileTime) {
-        super.setLastAccessTime(fileTime);
+    /// Sets the last access time and updates the timestamp extra fields.
+    ///
+    /// @param fileTime the last access time, not null
+    /// @return this entry
+    /// @throws NullPointerException if fileTime is null
+    public ZipArchiveEntry setLastAccessTime(final FileTime fileTime) {
+        lastAccessTime = Objects.requireNonNull(fileTime, "fileTime");
         setExtraTimeFields();
         return this;
     }
 
-    @Override
-    public ZipEntry setLastModifiedTime(final FileTime fileTime) {
+    /// Sets the modification time and records it in timestamp extra fields.
+    ///
+    /// @param fileTime the modification time, not null
+    /// @return this entry
+    /// @throws NullPointerException if fileTime is null
+    public ZipArchiveEntry setLastModifiedTime(final FileTime fileTime) {
         internalSetLastModifiedTime(fileTime);
         setExtraTimeFields();
         return this;
@@ -1281,7 +1545,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @param method compression method
      * @since 1.1
      */
-    @Override
     public void setMethod(final int method) {
         if (method < 0) {
             throw new IllegalArgumentException("ZIP compression method cannot be negative: " + method);
@@ -1289,13 +1552,17 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         this.method = method;
     }
 
-    /**
-     * Sets the name of the entry.
-     *
-     * @param name the name to use
-     */
+    /// Sets the entry name, normalizing backslashes on the FAT platform when no `/` is present.
+    ///
+    /// @param name the name to use, not null
+    /// @throws NullPointerException if name is null
+    /// @throws IllegalArgumentException if name exceeds 65535 characters
     protected void setName(String name) {
-        if (name != null && getPlatform() == PLATFORM_FAT && !name.contains(ZIP_DIR_SEP)) {
+        Objects.requireNonNull(name, "name");
+        if (name.length() > 0xffff) {
+            throw new IllegalArgumentException("Entry name exceeds 65535 characters");
+        }
+        if (getPlatform() == PLATFORM_FAT && !name.contains(ZIP_DIR_SEP)) {
             name = name.replace('\\', '/');
         }
         this.name = name;
@@ -1348,7 +1615,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
      * @param size the uncompressed size in bytes
      * @throws IllegalArgumentException if the specified size is less than 0
      */
-    @Override
     public void setSize(final long size) {
         if (size < 0) {
             throw new IllegalArgumentException("Invalid entry size");
@@ -1375,15 +1641,53 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     /// @param timeEpochMillis the last modification time in milliseconds since the epoch
     /// @see #getTime()
     /// @see #setLastModifiedTime(FileTime)
-    @Override
     public void setTime(final long timeEpochMillis) {
-        if (ZipUtil.isDosTime(timeEpochMillis)) {
-            super.setTime(timeEpochMillis);
+        internalSetLastModifiedTime(FileTime.fromMillis(timeEpochMillis));
+        lastModifiedTimeSet = !ZipUtil.isDosTime(timeEpochMillis);
+        setExtraTimeFields();
+    }
+
+    /// Sets the local modification time with millisecond precision and updates timestamp extra fields.
+    /// Times outside the DOS year range 1980 through 2107 are stored as absolute timestamps
+    /// using the system default time zone. Gaps are shifted forward and overlaps use the later offset.
+    ///
+    /// @param time the local modification time, not null
+    /// @throws NullPointerException if time is null
+    public void setTimeLocal(final LocalDateTime time) {
+        Objects.requireNonNull(time, "time");
+        if (time.getYear() < 1980 || time.getYear() > 2107) {
+            setLastModifiedTime(FileTime.from(time.withNano(time.getNano() / 1_000_000 * 1_000_000)
+                    .atZone(ZoneId.systemDefault()).withLaterOffsetAtOverlap().toInstant()));
+        } else {
+            dosTime = toDosTime(time);
+            timeMillis = (time.getSecond() & 1) * 1000 + time.getNano() / 1_000_000;
+            lastModifiedTime = null;
             lastModifiedTimeSet = false;
             setExtraTimeFields();
-        } else {
-            setLastModifiedTime(FileTime.fromMillis(timeEpochMillis));
         }
+    }
+
+    /// Sets the DOS modification time read from an archive, using only the low 32 bits.
+    void setDosTime(final long time) {
+        dosTime = time & 0xffffffffL;
+        timeMillis = 0;
+        lastModifiedTime = null;
+        lastModifiedTimeSet = false;
+    }
+
+    /// Encodes a local time with two-second resolution, using 1980-01-01 for out-of-range years.
+    private static long toDosTime(final LocalDateTime time) {
+        if (time.getYear() < 1980 || time.getYear() > 2107) {
+            return 0x00210000L;
+        }
+        return (long) (time.getYear() - 1980) << 25 | time.getMonthValue() << 21
+                | time.getDayOfMonth() << 16 | time.getHour() << 11 | time.getMinute() << 5 | time.getSecond() >> 1;
+    }
+
+    /// Returns the entry name.
+    @Override
+    public String toString() {
+        return getName();
     }
 
     /**
@@ -1422,6 +1726,19 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         this.versionRequired = versionRequired;
     }
 
+    /// Tests whether the field contains supported timestamps.
+    private static boolean isTimestampExtraField(final ZipExtraField field) {
+        return field instanceof X5455_ExtendedTimestamp || field instanceof X000A_NTFS;
+    }
+
+    /// Refreshes timestamps when a timestamp extra field has changed.
+    private void updateTimeFieldsFromExtraField(final ZipExtraField field) {
+        if (isTimestampExtraField(field)) {
+            updateTimeFieldsFromExtraFields();
+        }
+    }
+
+    /// Reads timestamp extra fields, giving NTFS values precedence over extended timestamps.
     private void updateTimeFieldsFromExtraFields() {
         // Update times from X5455_ExtendedTimestamp field
         updateTimeFromExtendedTimestampField();
@@ -1429,10 +1746,7 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         updateTimeFromNtfsField();
     }
 
-    /**
-     * Workaround for the fact that, as of Java 17, {@link ZipEntry} does not properly modify the entry's {@code xdostime} field, only setting
-     * {@code mtime}. While this is not strictly necessary, it's better to maintain the same behavior between this and the NTFS field.
-     */
+    /// Reads available times from the extended timestamp field.
     private void updateTimeFromExtendedTimestampField() {
         final ZipExtraField extraField = getExtraField(X5455_ExtendedTimestamp.HEADER_ID);
         if (extraField instanceof X5455_ExtendedTimestamp) {
@@ -1446,22 +1760,19 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
             if (extendedTimestamp.isBit1_accessTimePresent()) {
                 final FileTime accessTime = extendedTimestamp.getAccessFileTime();
                 if (accessTime != null) {
-                    super.setLastAccessTime(accessTime);
+                    lastAccessTime = accessTime;
                 }
             }
             if (extendedTimestamp.isBit2_createTimePresent()) {
                 final FileTime creationTime = extendedTimestamp.getCreateFileTime();
                 if (creationTime != null) {
-                    super.setCreationTime(creationTime);
+                    this.creationTime = creationTime;
                 }
             }
         }
     }
 
-    /**
-     * Workaround for the fact that, as of Java 17, {@link ZipEntry} parses NTFS timestamps with a maximum precision of microseconds, which is
-     * lower than the 100ns precision provided by this extra field.
-     */
+    /// Reads available NTFS times with 100-nanosecond precision.
     private void updateTimeFromNtfsField() {
         final ZipExtraField extraField = getExtraField(X000A_NTFS.HEADER_ID);
         if (extraField instanceof X000A_NTFS) {
@@ -1472,11 +1783,11 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
             }
             final FileTime accessTime = ntfsTimestamp.getAccessFileTime();
             if (accessTime != null) {
-                super.setLastAccessTime(accessTime);
+                lastAccessTime = accessTime;
             }
             final FileTime creationTime = ntfsTimestamp.getCreateFileTime();
             if (creationTime != null) {
-                super.setCreationTime(creationTime);
+                this.creationTime = creationTime;
             }
         }
     }

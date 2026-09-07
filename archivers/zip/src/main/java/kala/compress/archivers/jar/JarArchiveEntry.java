@@ -50,13 +50,12 @@ public class JarArchiveEntry extends ZipArchiveEntry {
         super(name);
     }
 
-    /**
-     * Constructs a new instance.
-     *
-     * @param entry See super.
-     * @throws ZipException See super.
-     */
-    public JarArchiveEntry(final ZipArchiveEntry entry) throws ZipException {
+    /// Creates a JAR entry by copying the ZIP entry metadata.
+    /// Extra field objects are shared with the original entry.
+    ///
+    /// @param entry the entry to copy, not null
+    /// @throws NullPointerException if entry is null
+    public JarArchiveEntry(final ZipArchiveEntry entry) {
         super(entry);
     }
 

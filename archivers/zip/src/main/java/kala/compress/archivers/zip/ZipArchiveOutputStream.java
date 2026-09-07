@@ -690,7 +690,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
         ZipShort.putShort(zipMethod, buf, CFH_METHOD_OFFSET);
 
         // last mod. time and date
-        ZipUtil.toDosTime(ze.getTime(), buf, CFH_TIME_OFFSET);
+        ZipLong.putLong(ze.getDosTime(), buf, CFH_TIME_OFFSET);
 
         // CRC
         // compressed length
@@ -789,7 +789,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
         // compression method
         ZipShort.putShort(zipMethod, buf, LFH_METHOD_OFFSET);
 
-        ZipUtil.toDosTime(ze.getTime(), buf, LFH_TIME_OFFSET);
+        ZipLong.putLong(ze.getDosTime(), buf, LFH_TIME_OFFSET);
 
         // CRC
         if (phased || !(zipMethod == DEFLATED || out instanceof RandomAccessOutputStream)) {
@@ -1270,7 +1270,7 @@ public class ZipArchiveOutputStream extends ArchiveOutputStream<ZipArchiveEntry>
             entry.setMethod(method);
         }
 
-        if (entry.getTime() == -1) { // not specified
+        if (entry.getDosTime() == -1) { // not specified
             entry.setTime(System.currentTimeMillis());
         }
     }

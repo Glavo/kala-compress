@@ -696,8 +696,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         current.entry.setMethod(ZipShort.getValue(lfhBuf, off));
         off += SHORT;
 
-        final long time = ZipUtil.dosToJavaTime(ZipLong.getValue(lfhBuf, off));
-        current.entry.setTime(time);
+        current.entry.setDosTime(ZipLong.getValue(lfhBuf, off));
         off += WORD;
 
         ZipLong size = null, cSize = null;

@@ -1129,8 +1129,7 @@ public class ZipArchiveReader implements Closeable {
         ze.setRawFlag(flag);
         ze.setMethod(Short.toUnsignedInt(cfhBuffer.getShort()));
 
-        final long time = ZipUtil.dosToJavaTime(Integer.toUnsignedLong(cfhBuffer.getInt()));
-        ze.setTime(time);
+        ze.setDosTime(Integer.toUnsignedLong(cfhBuffer.getInt()));
 
         ze.setCrc(Integer.toUnsignedLong(cfhBuffer.getInt()));
 
