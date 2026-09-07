@@ -1023,8 +1023,13 @@ public class ZipArchiveReader implements Closeable {
             throw new IOException("Central directory is empty, can't expand" + " corrupt archive.");
         }
 
+        ByteBuffer cfhBuffer = ByteBuffer.allocate(CFH_LEN).order(ByteOrder.LITTLE_ENDIAN);
         while (sig == CFH_SIG) {
-            readCentralDirectoryEntry(noUTF8Flag);
+            cfhBuffer.clear();
+            IOUtils.readFully(archive, cfhBuffer);
+            cfhBuffer.rewind();
+
+            readCentralDirectoryEntry(noUTF8Flag, cfhBuffer);
             sig = archive.readUnsignedInt();
         }
         return noUTF8Flag;
@@ -1105,11 +1110,7 @@ public class ZipArchiveReader implements Closeable {
     /// Reads an individual entry of the central directory, creates an ZipArchiveEntry from it and adds it to the global maps.
     ///
     /// @param noUTF8Flag map used to collect entries whose names and comments may be replaced using Unicode extra fields
-    private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag) throws IOException {
-        ByteBuffer cfhBuffer = ByteBuffer.allocate(CFH_LEN).order(ByteOrder.LITTLE_ENDIAN);
-        IOUtils.readFully(archive, cfhBuffer);
-        cfhBuffer.rewind();
-
+    private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag, final ByteBuffer cfhBuffer) throws IOException {
         final Entry ze = new Entry();
 
         final int versionMadeBy = Short.toUnsignedInt(cfhBuffer.getShort());
@@ -1128,8 +1129,6 @@ public class ZipArchiveReader implements Closeable {
         }
         ze.setGeneralPurposeBit(gpFlag);
         ze.setRawFlag(flag);
-
-        // noinspection MagicConstant
         ze.setMethod(Short.toUnsignedInt(cfhBuffer.getShort()));
 
         final long time = ZipUtil.dosToJavaTime(Integer.toUnsignedLong(cfhBuffer.getInt()));
