@@ -204,7 +204,6 @@ public class ZipArchiveReader implements Closeable {
 
     private static final int DEFAULT_BUFFER_SIZE = 8192;
 
-    private static final int HASH_SIZE = 509;
     static final int NIBLET_MASK = 0x0f;
     static final int BYTE_SHIFT = 8;
     private static final int POS_0 = 0;
@@ -554,10 +553,10 @@ public class ZipArchiveReader implements Closeable {
     private final List<ZipArchiveEntry> entries = new ArrayList<>();
 
     /// Maps a string to the first entry by that name.
-    private final Map<String, ZipArchiveEntry> nameMap = new HashMap<>(HASH_SIZE);
+    private final Map<String, ZipArchiveEntry> nameMap;
 
     /// If multiple entries have the same name, maps the name to entries by that name.
-    private Map<String, List<ZipArchiveEntry>> duplicateNameMap;
+    private final Map<String, List<ZipArchiveEntry>> duplicateNameMap;
 
     /// The encoding to use for file names and the file comment.
     ///
@@ -721,7 +720,33 @@ public class ZipArchiveReader implements Closeable {
                 final NameAndComment nc = entry.getValue();
                 ZipUtil.setNameAndCommentFromExtraFields(entry.getKey(), nc.name, nc.comment);
             }
-            fillNameMap();
+
+            this.nameMap = new HashMap<>((int) Math.ceil(entries.size() / 0.75));
+
+            Map<String, List<ZipArchiveEntry>> duplicateNameMap = null;
+            for (ZipArchiveEntry ze : entries) {
+                // entries are filled in populateFromCentralDirectory and
+                // never modified
+                final String name = ze.getName();
+                final ZipArchiveEntry firstEntry = nameMap.putIfAbsent(name, ze);
+
+                if (firstEntry != null) {
+                    if (duplicateNameMap == null) {
+                        duplicateNameMap = new HashMap<>();
+                    }
+
+                    final List<ZipArchiveEntry> entriesOfThatName = duplicateNameMap.computeIfAbsent(name, k -> {
+                        // Create a list when there are two entries with the same name
+                        final ArrayList<ZipArchiveEntry> list = new ArrayList<>(2);
+                        list.add(firstEntry);
+                        return list;
+                    });
+
+                    entriesOfThatName.add(ze);
+                }
+            }
+            this.duplicateNameMap = duplicateNameMap;
+
             success = true;
         } catch (final IOException e) {
             throw new IOException("Error reading Zip content from " + channelDescription, e);
@@ -776,30 +801,6 @@ public class ZipArchiveReader implements Closeable {
         return rawFileChannel != null
                 ? new BoundedFileChannelInputStream(start, remaining, rawFileChannel)
                 : new BoundedSeekableByteChannelInputStream(start, remaining, archive);
-    }
-
-    private void fillNameMap() {
-        for (ZipArchiveEntry ze : entries) {
-            // entries are filled in populateFromCentralDirectory and
-            // never modified
-            final String name = ze.getName();
-            final ZipArchiveEntry firstEntry = nameMap.putIfAbsent(name, ze);
-
-            if (firstEntry != null) {
-                if (duplicateNameMap == null) {
-                    duplicateNameMap = new HashMap<>();
-                }
-
-                final List<ZipArchiveEntry> entriesOfThatName = duplicateNameMap.computeIfAbsent(name, k -> {
-                    // Create a list when there are two entries with the same name
-                    final ArrayList<ZipArchiveEntry> list = new ArrayList<>(2);
-                    list.add(firstEntry);
-                    return list;
-                });
-
-                entriesOfThatName.add(ze);
-            }
-        }
     }
 
     /// Gets an InputStream for reading the content before the first local file header.
