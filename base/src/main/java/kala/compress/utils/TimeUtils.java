@@ -18,7 +18,10 @@ package kala.compress.utils;
 
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -143,23 +146,49 @@ public final class TimeUtils {
         return FileTime.from(time, TimeUnit.SECONDS);
     }
 
-    /**
-     * Converts DOS time to Java time (number of milliseconds since epoch).
-     *
-     * @param dosTime time to convert
-     * @return converted time
-     * @since 1.27.1-0
-     */
+    /// Converts a packed DOS timestamp to milliseconds since `1970-01-01T00:00:00Z`.
+    ///
+    /// Only the low 32 bits are used. The fields are interpreted in the specified
+    /// time zone, with a year offset from 1980 and a two-second time resolution.
+    /// Out-of-range fields are normalized by adding the month minus one, day minus
+    /// one, and time of day to January 1 of the encoded year. For example, day zero
+    /// denotes the last day of the preceding month.
+    ///
+    /// A local time in a time-zone gap is shifted forward by the gap's length.
+    /// A local time in an overlap uses the later offset.
+    ///
+    /// @param dosTime the packed DOS timestamp
+    /// @param zone the time zone used to interpret the timestamp, not null
+    /// @return the number of milliseconds since the epoch
+    /// @throws NullPointerException if zone is null
+    /// @since 1.27.1-5
+    public static long dosTimeToEpochMilli(final long dosTime, final ZoneId zone) {
+        final int year = (int) ((dosTime >>> 25) & 0x7F) + 1980;
+        final int month = (int) ((dosTime >>> 21) & 0x0F);
+        final int day = (int) ((dosTime >>> 16) & 0x1F);
+        final int hour = (int) ((dosTime >>> 11) & 0x1F);
+        final int minute = (int) ((dosTime >>> 5) & 0x3F);
+        final int second = (int) (dosTime & 0x1F) * 2;
+
+        final int seconds = hour * 3600 + minute * 60 + second;
+        final LocalDate date = LocalDate.of(year + Math.floorDiv(month - 1, 12), Math.floorMod(month - 1, 12) + 1, 1)
+                .plusDays(day - 1L + seconds / 86400);
+        final LocalTime time = LocalTime.ofSecondOfDay(seconds % 86400);
+
+        return ZonedDateTime.of(date, time, zone)
+                .withLaterOffsetAtOverlap()
+                .toEpochSecond() * 1000;
+    }
+
+    /// Converts a packed DOS timestamp to a file time in the system default time zone.
+    ///
+    /// Conversion follows [#dosTimeToEpochMilli(long, ZoneId)].
+    ///
+    /// @param dosTime the packed DOS timestamp
+    /// @return the converted file time
+    /// @since 1.27.1-0
     public static FileTime dosTimeToFileTime(final long dosTime) {
-        final Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, (int) (dosTime >> 25 & 0x7f) + 1980);
-        cal.set(Calendar.MONTH, (int) (dosTime >> 21 & 0x0f) - 1);
-        cal.set(Calendar.DATE, (int) (dosTime >> 16) & 0x1f);
-        cal.set(Calendar.HOUR_OF_DAY, (int) (dosTime >> 11) & 0x1f);
-        cal.set(Calendar.MINUTE, (int) (dosTime >> 5) & 0x3f);
-        cal.set(Calendar.SECOND, (int) (dosTime << 1) & 0x3e);
-        cal.set(Calendar.MILLISECOND, 0);
-        return FileTime.fromMillis(cal.getTimeInMillis());
+        return FileTime.fromMillis(dosTimeToEpochMilli(dosTime, ZoneId.systemDefault()));
     }
 
     /** Private constructor to prevent instantiation of this utility class. */
