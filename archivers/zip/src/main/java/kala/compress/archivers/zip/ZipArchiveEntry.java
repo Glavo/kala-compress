@@ -285,9 +285,8 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
 
     private long diskNumberStart;
 
+    /// Whether the modification time requires timestamp extra fields.
     private boolean lastModifiedTimeSet;
-
-    private long time = -1;
 
     /**
      *
@@ -859,25 +858,6 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * Override to work around bug <a href="https://bugs.openjdk.org/browse/JDK-8130914">JDK-8130914</a>
-     * </p>
-     *
-     * @return The last modification time of the entry in milliseconds since the epoch, or -1 if not specified
-     * @see #setTime(long)
-     * @see #setLastModifiedTime(FileTime)
-     */
-    @Override
-    public long getTime() {
-        if (lastModifiedTimeSet) {
-            return getLastModifiedTime().toMillis();
-        }
-        return time != -1 ? time : super.getTime();
-    }
-
-    /**
      * Gets the Unix permission.
      *
      * @return the unix permissions
@@ -965,9 +945,9 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         extraFields = newResult.toArray(ExtraFieldUtils.EMPTY_ZIP_EXTRA_FIELD_ARRAY);
     }
 
+    /// Sets the modification time and marks it for inclusion in timestamp extra fields.
     private void internalSetLastModifiedTime(final FileTime time) {
         super.setLastModifiedTime(time);
-        this.time = time.toMillis();
         lastModifiedTimeSet = true;
     }
 
@@ -1390,22 +1370,15 @@ public class ZipArchiveEntry extends ZipEntry implements ArchiveEntry, EntryStre
         setTime(fileTime.toMillis());
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * Override to work around bug <a href="https://bugs.openjdk.org/browse/JDK-8130914">JDK-8130914</a>
-     * </p>
-     *
-     * @param timeEpochMillis The last modification time of the entry in milliseconds since the epoch.
-     * @see #getTime()
-     * @see #getLastModifiedTime()
-     */
+    /// Sets the modification time and updates the timestamp extra fields.
+    ///
+    /// @param timeEpochMillis the last modification time in milliseconds since the epoch
+    /// @see #getTime()
+    /// @see #setLastModifiedTime(FileTime)
     @Override
     public void setTime(final long timeEpochMillis) {
         if (ZipUtil.isDosTime(timeEpochMillis)) {
             super.setTime(timeEpochMillis);
-            this.time = timeEpochMillis;
             lastModifiedTimeSet = false;
             setExtraTimeFields();
         } else {

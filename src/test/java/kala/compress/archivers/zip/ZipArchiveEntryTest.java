@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -31,6 +32,8 @@ import kala.compress.utils.ByteUtils;
 import kala.compress.utils.TimeUtils;
 import org.apache.commons.io.file.attribute.FileTimes;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * JUnit tests for org.apache.commons.compress.archivers.zip.ZipEntry.
@@ -324,6 +327,78 @@ public class ZipArchiveEntryTest {
 
         final long dosTime = ZipLong.getValue(ZipUtil.toDosTime(ze.getTime()));
         ZipUtilTest.assertDosDate(dosTime, 2022, 12, 28, 20, 39, 32); // DOS dates only store even seconds
+    }
+
+    /// Replaces a modification time and synchronizes timestamp extra fields across DOS date boundaries.
+    @ParameterizedTest
+    @CsvSource({
+            "1975-11-27T00:00:00, true",
+            "1980-01-01T00:00:00, false",
+            "1980-01-01T00:00:00.123, true",
+            "2022-12-28T20:39:33.123, false",
+            "2097-11-27T00:00:00, false",
+            "2099-01-01T00:00:00, true",
+            "2108-01-01T00:00:00, true"
+    })
+    public void testReplaceModificationTime(final String date, final boolean requiresExtra) throws Exception {
+        final ZipArchiveEntry entry = new ZipArchiveEntry("test");
+        entry.setMethod(ZipEntry.STORED);
+        entry.setTime(Instant.parse("2020-03-04T12:34:56.123Z").toEpochMilli());
+        final long time = ZipUtilTest.toLocalInstant(date).toEpochMilli();
+        entry.setTime(time);
+
+        assertEquals(time, entry.getTime());
+        assertEquals(time, entry.getLastModifiedTime().toMillis());
+        if (requiresExtra) {
+            final X000A_NTFS ntfs = (X000A_NTFS) entry.getExtraField(X000A_NTFS.HEADER_ID);
+            assertNotNull(ntfs);
+            assertEquals(time, ntfs.getModifyFileTime().toMillis());
+        } else {
+            assertNull(entry.getExtraField(X5455_ExtendedTimestamp.HEADER_ID));
+            assertNull(entry.getExtraField(X000A_NTFS.HEADER_ID));
+        }
+
+        final FileTime accessTime = FileTime.from(Instant.parse("2021-05-06T01:02:03.1234567Z"));
+        entry.setLastAccessTime(accessTime);
+        final ZipArchiveEntry copy = new ZipArchiveEntry(entry);
+        assertEquals(time, copy.getTime());
+        assertEquals(accessTime, copy.getLastAccessTime());
+        final X000A_NTFS ntfs = (X000A_NTFS) copy.getExtraField(X000A_NTFS.HEADER_ID);
+        assertEquals(time, ntfs.getModifyFileTime().toMillis());
+    }
+
+    /// Replaces a FileTime without retaining its modification time or changing other timestamps.
+    @Test
+    public void testSetTimeAfterLastModifiedTime() {
+        final ZipArchiveEntry entry = new ZipArchiveEntry("test");
+        entry.setLastModifiedTime(FileTime.from(Instant.parse("2020-03-04T12:34:56.1234567Z")));
+        final FileTime accessTime = entry.getLastAccessTime();
+        final FileTime creationTime = entry.getCreationTime();
+        final long time = Instant.parse("2022-12-28T12:39:33.123Z").toEpochMilli();
+        entry.setTime(time);
+
+        assertEquals(time, entry.getTime());
+        assertEquals(time, entry.getLastModifiedTime().toMillis());
+        assertEquals(accessTime, entry.getLastAccessTime());
+        assertEquals(creationTime, entry.getCreationTime());
+        final X000A_NTFS ntfs = (X000A_NTFS) entry.getExtraField(X000A_NTFS.HEADER_ID);
+        if (ntfs != null) {
+            assertEquals(time, ntfs.getModifyFileTime().toMillis());
+        }
+    }
+
+    /// Reads the current JDK time after the inherited local-time setter replaces an epoch time.
+    @Test
+    public void testSetTimeLocalAfterSetTime() {
+        final ZipArchiveEntry entry = new ZipArchiveEntry("test");
+        entry.setTime(Instant.parse("2020-03-04T12:34:56Z").toEpochMilli());
+        final LocalDateTime time = LocalDateTime.parse("2022-12-28T20:39:33.123");
+        entry.setTimeLocal(time);
+
+        final ZipEntry expected = new ZipEntry("test");
+        expected.setTimeLocal(time);
+        assertEquals(expected.getTime(), entry.getTime());
+        assertEquals(expected.getLastModifiedTime(), entry.getLastModifiedTime());
     }
 
     @Test
