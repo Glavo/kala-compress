@@ -180,9 +180,9 @@ class ZipArchiveEntryApiTest {
             final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
             entry.setTimeLocal(time);
             assertEquals(time, entry.getTimeLocal());
-            assertEquals(time.atZone(zone).withLaterOffsetAtOverlap().toInstant().toEpochMilli(), entry.getTime());
             final ZipEntry jdkEntry = new ZipEntry("entry");
             jdkEntry.setTimeLocal(time);
+            assertEquals(jdkEntry.getTime(), entry.getTime());
             assertEquals(time, new ZipArchiveEntry(jdkEntry).getTimeLocal());
             final byte[] data = write(entry);
             for (final boolean ignoreLocal : new boolean[]{false, true}) {
@@ -196,6 +196,46 @@ class ZipArchiveEntryApiTest {
             try (ZipArchiveInputStream input = new ZipArchiveInputStream(new ByteArrayInputStream(data))) {
                 assertEquals(time, input.getNextEntry().getTimeLocal());
             }
+        } finally {
+            TimeZone.setDefault(previousZone);
+        }
+    }
+
+    /// Matches JDK epoch-time conversion on both sides of a daylight-saving overlap.
+    @ParameterizedTest
+    @ValueSource(strings = {"2024-11-03T05:30:01.123Z", "2024-11-03T06:30:01.123Z"})
+    void epochTimeInOverlap(final String text) {
+        final TimeZone previousZone = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"));
+            final long time = Instant.parse(text).toEpochMilli();
+            final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+            final ZipEntry expected = new ZipEntry("entry");
+            entry.setTime(time);
+            expected.setTime(time);
+            assertEquals(expected.getTime(), entry.getTime());
+            assertEquals(expected.getTimeLocal(), entry.getTimeLocal());
+            assertEquals(expected.getLastModifiedTime(), entry.getLastModifiedTime());
+        } finally {
+            TimeZone.setDefault(previousZone);
+        }
+    }
+
+    /// Matches JDK overlap resolution when a local time requires an extended timestamp.
+    @Test
+    void extendedLocalTimeInOverlap() {
+        final TimeZone previousZone = TimeZone.getDefault();
+        final ZoneId zone = ZoneId.of("America/New_York");
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone(zone));
+            final LocalDateTime time = zone.getRules().nextTransition(Instant.parse("2108-10-01T00:00:00Z"))
+                    .getDateTimeAfter().plusMinutes(30);
+            final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+            final ZipEntry expected = new ZipEntry("entry");
+            entry.setTimeLocal(time);
+            expected.setTimeLocal(time);
+            assertEquals(expected.getTime(), entry.getTime());
+            assertEquals(expected.getLastModifiedTime(), entry.getLastModifiedTime());
         } finally {
             TimeZone.setDefault(previousZone);
         }
@@ -398,6 +438,41 @@ class ZipArchiveEntryApiTest {
         assertEquals(time, reparsed.getLastModifiedTime());
         assertEquals(time, reparsed.getLastAccessTime());
         assertEquals(time, reparsed.getCreationTime());
+    }
+
+    /// Recovers NTFS precision from JDK entries and preserves later changes made through JDK setters.
+    @ParameterizedTest
+    @ValueSource(strings = {"1960-03-04T12:34:56.1234567Z", "2024-03-04T12:34:56.1234567Z"})
+    void importNtfsPrecision(final String text) throws Exception {
+        final FileTime modified = FileTime.from(Instant.parse(text));
+        final FileTime accessed = FileTime.from(modified.toInstant().plusSeconds(1));
+        final FileTime created = FileTime.from(modified.toInstant().minusSeconds(1));
+        final X000A_NTFS ntfs = new X000A_NTFS();
+        ntfs.setModifyFileTime(modified);
+        ntfs.setAccessFileTime(accessed);
+        ntfs.setCreateFileTime(created);
+        final ZipArchiveEntry holder = new ZipArchiveEntry("entry");
+        holder.addExtraField(ntfs);
+        final ZipEntry source = new ZipEntry("entry");
+        source.setExtra(holder.getExtra());
+
+        for (final ZipArchiveEntry copy : new ZipArchiveEntry[]{new ZipArchiveEntry(source), new JarArchiveEntry(source)}) {
+            assertEquals(modified, copy.getLastModifiedTime());
+            assertEquals(accessed, copy.getLastAccessTime());
+            assertEquals(created, copy.getCreationTime());
+            final ZipArchiveEntry reparsed = new ZipArchiveEntry("entry");
+            reparsed.setExtra(copy.getExtra());
+            assertEquals(modified, reparsed.getLastModifiedTime());
+            assertEquals(accessed, reparsed.getLastAccessTime());
+            assertEquals(created, reparsed.getCreationTime());
+        }
+
+        final FileTime replacement = FileTime.from(modified.toInstant().plusSeconds(100));
+        source.setLastModifiedTime(replacement).setLastAccessTime(replacement).setCreationTime(replacement);
+        final ZipArchiveEntry changed = new ZipArchiveEntry(source);
+        assertEquals(replacement, changed.getLastModifiedTime());
+        assertEquals(replacement, changed.getLastAccessTime());
+        assertEquals(replacement, changed.getCreationTime());
     }
 
     /// Writes an empty STORED entry to an in-memory ZIP archive.

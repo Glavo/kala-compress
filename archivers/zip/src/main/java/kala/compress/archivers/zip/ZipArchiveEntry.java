@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -354,6 +355,19 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         return TimeUtils.isUnixTime(lastModifiedTime) && TimeUtils.isUnixTime(lastAccessTime) && TimeUtils.isUnixTime(creationTime);
     }
 
+    /// Restores extra-field precision when the JDK timestamp is absent or matches its truncated microsecond value.
+    ///
+    /// @param extraTime the parsed timestamp, or null
+    /// @param entryTime the JDK timestamp, or null
+    /// @return the restored timestamp, or the JDK timestamp if it differs
+    private static FileTime restoreTimestampPrecision(final FileTime extraTime, final FileTime entryTime) {
+        if (extraTime != null && (entryTime == null
+                || FileTime.from(extraTime.toInstant().truncatedTo(ChronoUnit.MICROS)).equals(entryTime))) {
+            return extraTime;
+        }
+        return entryTime;
+    }
+
     private static boolean isDirectoryEntryName(final String entryName) {
         return entryName.endsWith(ZIP_DIR_SEP);
     }
@@ -489,11 +503,11 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
             xdostime = toExtendedDosTime(localTime);
             if (lastModifiedTime != null || localTime.getYear() < 1980 || localTime.getYear() > 2099
                     || localTime.getNano() % 1_000_000 != 0) {
-                lastModifiedTime = modified;
+                lastModifiedTime = restoreTimestampPrecision(lastModifiedTime, modified);
             }
         }
-        lastAccessTime = entry.getLastAccessTime();
-        creationTime = entry.getCreationTime();
+        lastAccessTime = restoreTimestampPrecision(lastAccessTime, entry.getLastAccessTime());
+        creationTime = restoreTimestampPrecision(creationTime, entry.getCreationTime());
         setExtraTimeFields();
     }
 
@@ -782,13 +796,13 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     }
 
     /// Returns the modification time in milliseconds since the epoch, or -1 if unspecified.
-    /// A DOS local time is interpreted in the system default time zone using
-    /// [TimeUtils#dosTimeToEpochMilli(long, ZoneId)].
+    /// A DOS local time is interpreted in the system default time zone.
+    /// Gaps are shifted forward and overlaps use the earlier offset.
     public long getTime() {
         if (lastModifiedTime != null) {
             return lastModifiedTime.toMillis();
         }
-        return xdostime == -1 ? -1 : TimeUtils.dosTimeToEpochMilli(xdostime, ZoneId.systemDefault()) + (xdostime >>> 32);
+        return xdostime == -1 ? -1 : getTimeLocal().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     /// Returns the local modification time, or null if unspecified.
@@ -1636,7 +1650,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// Sets the local modification time with millisecond precision and updates timestamp extra fields.
     /// Times outside the DOS year range 1980 through 2107, and exactly 1980-01-01T00:00,
     /// are also stored as absolute timestamps using the system default time zone.
-    /// Gaps are shifted forward and overlaps use the later offset.
+    /// Gaps are shifted forward and overlaps use the earlier offset.
     ///
     /// @param time the local modification time, not null
     /// @throws NullPointerException if time is null
@@ -1645,7 +1659,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         xdostime = toExtendedDosTime(time);
         lastModifiedTime = xdostime != DOSTIME_BEFORE_1980 && time.getYear() <= 2107 ? null
                 : FileTime.from(time.withNano(time.getNano() / 1_000_000 * 1_000_000)
-                        .atZone(ZoneId.systemDefault()).withLaterOffsetAtOverlap().toInstant());
+                        .atZone(ZoneId.systemDefault()).toInstant());
         setExtraTimeFields();
     }
 
