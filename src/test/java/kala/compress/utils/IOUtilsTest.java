@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,10 +33,15 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Random;
 
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.io.output.NullOutputStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class IOUtilsTest {
 
@@ -170,6 +176,94 @@ public class IOUtilsTest {
             final ByteBuffer b = ByteBuffer.allocate(1);
             assertEquals(-1, in.read(b));
         }
+    }
+
+    /// Checks concatenation, short reads, EOF, and the requested length across buffer boundaries.
+    ///
+    /// @param sourceLength the number of available bytes
+    /// @param requestedLength the maximum number of bytes to read
+    /// @param chunkSize the maximum number of bytes returned by one channel read
+    /// @throws IOException if reading fails
+    @ParameterizedTest
+    @CsvSource({
+            "0, 100, 7",
+            "17, 0, 2",
+            "17, -1, 2",
+            "17, 10, 2",
+            "17, 2147483647, 2",
+            "8191, 8192, 317",
+            "8192, 8192, 317",
+            "8192, 8193, 317",
+            "8193, 8193, 317",
+            "16384, 16384, 8192",
+            "16384, 16385, 317",
+            "16385, 16384, 317",
+            "16385, 16385, 1",
+            "25000, 24000, 317",
+            "25000, 30000, 317"
+    })
+    public void testReadRangeFromChannelBufferBoundaries(final int sourceLength, final int requestedLength,
+                                                        final int chunkSize) throws IOException {
+        final byte[] source = new byte[sourceLength];
+        new Random(0).nextBytes(source);
+        try (SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(source) {
+            /// Reads at most the configured chunk size without changing the buffer's limit.
+            @Override
+            public int read(final ByteBuffer buffer) throws IOException {
+                final int limit = buffer.limit();
+                try {
+                    buffer.limit(buffer.position() + Math.min(buffer.remaining(), chunkSize));
+                    return super.read(buffer);
+                } finally {
+                    buffer.limit(limit);
+                }
+            }
+        }) {
+            final int expectedLength = Math.max(0, Math.min(sourceLength, requestedLength));
+            assertArrayEquals(Arrays.copyOf(source, expectedLength), IOUtils.readRange(channel, requestedLength));
+            assertEquals(expectedLength, channel.position());
+            assertTrue(channel.isOpen());
+        }
+    }
+
+    /// Checks that a zero-byte read returns only the accumulated bytes and leaves the channel open.
+    ///
+    /// @param stopAfter the number of bytes returned before a zero-byte read
+    /// @throws IOException if reading fails
+    @ParameterizedTest
+    @ValueSource(ints = {0, 17, 8192, 8193})
+    public void testReadRangeFromChannelStopsOnZeroRead(final int stopAfter) throws IOException {
+        final byte[] source = new byte[16385];
+        new Random(0).nextBytes(source);
+        try (SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(source) {
+            /// Returns zero after the configured number of bytes has been consumed.
+            @Override
+            public int read(final ByteBuffer buffer) throws IOException {
+                if (position() == stopAfter) {
+                    return 0;
+                }
+                final int limit = buffer.limit();
+                try {
+                    buffer.limit(buffer.position() + Math.min(buffer.remaining(), stopAfter - (int) position()));
+                    return super.read(buffer);
+                } finally {
+                    buffer.limit(limit);
+                }
+            }
+        }) {
+            assertArrayEquals(Arrays.copyOf(source, stopAfter), IOUtils.readRange(channel, source.length));
+            assertEquals(stopAfter, channel.position());
+            assertTrue(channel.isOpen());
+        }
+    }
+
+    /// Checks that non-positive lengths do not access the channel.
+    ///
+    /// @throws IOException if reading unexpectedly fails
+    @Test
+    public void testReadRangeFromChannelNonPositiveLength() throws IOException {
+        assertArrayEquals(new byte[0], IOUtils.readRange((ReadableByteChannel) null, 0));
+        assertArrayEquals(new byte[0], IOUtils.readRange((ReadableByteChannel) null, -1));
     }
 
     @Test

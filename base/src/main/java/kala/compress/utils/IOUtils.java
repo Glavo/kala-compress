@@ -28,6 +28,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -58,7 +61,8 @@ public final class IOUtils {
      */
     public static final LinkOption[] EMPTY_LINK_OPTIONS = {};
 
-    private static final byte[] SKIP_BUFFER = new byte[DEFAULT_BUFFER_SIZE];
+    /// Shared result for reads that produce no bytes.
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /**
      * Closes the given {@link Closeable} as a null-safe operation.
@@ -255,32 +259,59 @@ public final class IOUtils {
         return output.toByteArray();
     }
 
-    /**
-     * Gets part of the contents of an {@code ReadableByteChannel} as a {@code byte[]}.
-     *
-     * @param input the {@code ReadableByteChannel} to read from
-     * @param length   maximum amount of bytes to copy
-     * @return the requested byte array
-     * @throws NullPointerException if the input is null
-     * @throws IOException          if an I/O error occurs
-     * @since 1.21
-     */
+    /// Reads at most the given number of bytes from a channel.
+    ///
+    /// Reading stops when the requested length is reached or a read returns zero
+    /// or end of input. A non-positive length returns an empty array without
+    /// accessing the channel. The channel is not closed.
+    ///
+    /// If a read throws, bytes consumed by earlier reads remain consumed and no
+    /// partial result is returned.
+    ///
+    /// @param input the channel to read from
+    /// @param length the maximum number of bytes to read
+    /// @return an array containing exactly the bytes read, in order
+    /// @throws NullPointerException if input is null and length is positive
+    /// @throws IOException if a channel read fails
+    /// @since 1.21
     public static byte[] readRange(final ReadableByteChannel input, final int length) throws IOException {
-        final ByteArrayOutputStream output = new ByteArrayOutputStream();
-        final ByteBuffer b = ByteBuffer.allocate(Math.min(length, DEFAULT_BUFFER_SIZE));
+        if (length <= 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        List<byte[]> buffers = null;
+        ByteBuffer currentBuffer = ByteBuffer.allocate(Math.min(length, DEFAULT_BUFFER_SIZE));
+
         int read = 0;
         while (read < length) {
-            // Make sure we never read more than len bytes
-            b.limit(Math.min(length - read, b.capacity()));
-            final int readCount = input.read(b);
+            final int readCount = input.read(currentBuffer);
             if (readCount <= 0) {
                 break;
             }
-            output.write(b.array(), 0, readCount);
-            b.rewind();
             read += readCount;
+            if (!currentBuffer.hasRemaining() && read < length) {
+                if (buffers == null) {
+                    buffers = new ArrayList<>();
+                }
+                buffers.add(currentBuffer.array());
+                currentBuffer = ByteBuffer.allocate(Math.min(length - read, DEFAULT_BUFFER_SIZE));
+            }
         }
-        return output.toByteArray();
+
+        if (read == 0) {
+            return EMPTY_BYTE_ARRAY;
+        }
+        if (buffers == null) {
+            return currentBuffer.hasRemaining() ? Arrays.copyOf(currentBuffer.array(), read) : currentBuffer.array();
+        }
+
+        final byte[] result = new byte[read];
+        int offset = 0;
+        for (final byte[] buffer : buffers) {
+            System.arraycopy(buffer, 0, result, offset, buffer.length);
+            offset += buffer.length;
+        }
+        System.arraycopy(currentBuffer.array(), 0, result, offset, currentBuffer.position());
+        return result;
     }
 
     /**
