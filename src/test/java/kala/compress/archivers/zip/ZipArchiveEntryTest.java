@@ -334,10 +334,11 @@ public class ZipArchiveEntryTest {
     @CsvSource({
             "1975-11-27T00:00:00, true",
             "1980-01-01T00:00:00, false",
-            "1980-01-01T00:00:00.123, true",
+            "1980-01-01T00:00:00.123, false",
             "2022-12-28T20:39:33.123, false",
             "2097-11-27T00:00:00, false",
-            "2099-01-01T00:00:00, true",
+            "2099-01-01T00:00:00, false",
+            "2100-01-01T00:00:00, true",
             "2108-01-01T00:00:00, true"
     })
     public void testReplaceModificationTime(final String date, final boolean requiresExtra) throws Exception {
@@ -387,7 +388,7 @@ public class ZipArchiveEntryTest {
         }
     }
 
-    /// Reads the current JDK time after the inherited local-time setter replaces an epoch time.
+    /// Matches JDK getters after the local-time setter replaces an epoch time.
     @Test
     public void testSetTimeLocalAfterSetTime() {
         final ZipArchiveEntry entry = new ZipArchiveEntry("test");

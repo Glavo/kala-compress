@@ -28,6 +28,7 @@ import java.util.TimeZone;
 import java.util.jar.JarEntry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import kala.compress.archivers.jar.JarArchiveEntry;
 import org.junit.jupiter.api.Test;
@@ -129,7 +130,7 @@ class ZipArchiveEntryApiTest {
     @ParameterizedTest
     @CsvSource({
             "1975-01-02T03:04:05.123, true",
-            "1980-01-01T00:00:00, false",
+            "1980-01-01T00:00:00, true",
             "2024-03-04T12:34:56, false",
             "2107-12-31T23:59:58, false",
             "2108-01-02T03:04:05.123, true"
@@ -200,25 +201,102 @@ class ZipArchiveEntryApiTest {
         }
     }
 
-    /// Converts absolute timestamps at write time while preserving explicitly set wall-clock times.
+    /// Retains DOS local times across time-zone changes, as JDK ZipEntry does.
     @Test
     void changedDefaultTimeZone() throws Exception {
         final TimeZone previousZone = TimeZone.getDefault();
         try {
             TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-            final ZipArchiveEntry absolute = new ZipArchiveEntry("entry");
-            absolute.setTime(Instant.parse("2024-03-04T12:34:56Z").toEpochMilli());
+            final ZipArchiveEntry epochEntry = new ZipArchiveEntry("entry");
+            final ZipEntry jdkEntry = new ZipEntry("entry");
+            final long epoch = Instant.parse("2024-03-04T12:34:56Z").toEpochMilli();
+            epochEntry.setTime(epoch);
+            jdkEntry.setTime(epoch);
             final ZipArchiveEntry local = new ZipArchiveEntry("entry");
             final LocalDateTime localTime = LocalDateTime.of(2024, 3, 4, 12, 34, 56);
             local.setTimeLocal(localTime);
             TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
             assertEquals(localTime, local.getTimeLocal());
-            assertEquals(localTime.plusHours(8), absolute.getTimeLocal());
-            for (final ZipArchiveEntry entry : new ZipArchiveEntry[]{absolute, local}) {
+            assertEquals(jdkEntry.getTimeLocal(), epochEntry.getTimeLocal());
+            assertEquals(jdkEntry.getTime(), epochEntry.getTime());
+            for (final ZipArchiveEntry entry : new ZipArchiveEntry[]{epochEntry, local}) {
                 try (ZipArchiveReader reader = ZipArchiveReader.builder().setByteArray(write(entry)).get()) {
                     assertEquals(entry.getTimeLocal(), reader.getEntry("entry").getTimeLocal());
                     assertEquals(entry.getTime(), reader.getEntry("entry").getTime());
                 }
+            }
+        } finally {
+            TimeZone.setDefault(previousZone);
+        }
+    }
+
+    /// Compares modification-time setters and serialized DOS timestamps with the JDK implementation.
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "1975-01-02T03:04:05.123", "1980-01-01T00:00:00", "1980-01-01T00:00:00.123",
+            "1980-01-01T00:00:01.999", "2024-03-04T12:34:57.123", "2099-12-31T23:59:59.999",
+            "2100-01-01T00:00:00", "2107-12-31T23:59:59.999", "2108-01-01T00:00:00",
+            "2138-01-02T03:04:05.123"
+    })
+    void jdkTimeCompatibility(final String text) throws Exception {
+        final LocalDateTime local = LocalDateTime.parse(text);
+        final FileTime time = FileTime.from(local.atZone(ZoneId.systemDefault()).toInstant());
+        for (int setter = 0; setter < 3; setter++) {
+            final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+            final ZipEntry expected = new ZipEntry("entry");
+            switch (setter) {
+                case 0:
+                    entry.setTime(time.toMillis());
+                    expected.setTime(time.toMillis());
+                    break;
+                case 1:
+                    entry.setTimeLocal(local);
+                    expected.setTimeLocal(local);
+                    break;
+                default:
+                    entry.setLastModifiedTime(time);
+                    expected.setLastModifiedTime(time);
+                    break;
+            }
+            assertEquals(expected.getTime(), entry.getTime());
+            assertEquals(expected.getTimeLocal(), entry.getTimeLocal());
+            assertEquals(expected.getLastModifiedTime(), entry.getLastModifiedTime());
+            final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            expected.setMethod(ZipEntry.STORED);
+            expected.setSize(0);
+            expected.setCrc(0);
+            try (ZipOutputStream output = new ZipOutputStream(bytes)) {
+                output.putNextEntry(expected);
+                output.closeEntry();
+            }
+            assertEquals(ZipLong.getValue(bytes.toByteArray(), ZipEntry.LOCTIM),
+                    ZipLong.getValue(write(entry), ZipEntry.LOCTIM));
+        }
+    }
+
+    /// Keeps a DOS modification time local when access-time extras are generated.
+    @Test
+    void accessTimeDoesNotPromoteDosTime() throws Exception {
+        final TimeZone previousZone = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+            final ZipEntry expected = new ZipEntry("entry");
+            final long time = Instant.parse("2024-03-04T12:34:56Z").toEpochMilli();
+            entry.setTime(time);
+            expected.setTime(time);
+            entry.setLastAccessTime(FileTime.fromMillis(time));
+            entry.addExtraField(new JarMarker());
+            final ZipArchiveEntry copy = new ZipArchiveEntry(entry);
+            final ZipArchiveEntry clone = entry.clone();
+            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+            for (final ZipArchiveEntry other : new ZipArchiveEntry[]{entry, copy, clone}) {
+                assertEquals(expected.getTime(), other.getTime());
+                assertEquals(expected.getTimeLocal(), other.getTimeLocal());
+            }
+            entry.setLastAccessTime(FileTime.fromMillis(time));
+            try (ZipInputStream input = new ZipInputStream(new ByteArrayInputStream(write(entry)))) {
+                assertEquals(expected.getTime(), input.getNextEntry().getTime());
             }
         } finally {
             TimeZone.setDefault(previousZone);

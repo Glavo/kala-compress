@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -346,6 +347,9 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
 
     private static final int SHORT_SHIFT = 16;
 
+    /// The DOS timestamp used for dates before 1980.
+    private static final long DOSTIME_BEFORE_1980 = 0x00210000L;
+
     private static boolean canConvertToInfoZipExtendedTimestamp(final FileTime lastModifiedTime, final FileTime lastAccessTime, final FileTime creationTime) {
         return TimeUtils.isUnixTime(lastModifiedTime) && TimeUtils.isUnixTime(lastAccessTime) && TimeUtils.isUnixTime(creationTime);
     }
@@ -375,11 +379,9 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     private String comment;
     /// The serialized local extra fields, or null if never set.
     private byte[] extra;
-    /// The local DOS modification time, or -1 if none is set; ignored when an absolute time is available.
-    private long dosTime = -1;
-    /// The milliseconds omitted by the two-second DOS time resolution.
-    private int timeMillis;
-    /// The absolute modification time, or null when only a DOS time is available.
+    /// The DOS timestamp in the low 32 bits and its millisecond remainder in the high 32 bits, or -1 if unset.
+    private long xdostime = -1;
+    /// The modification time requiring timestamp extra fields, or null when only a DOS time is available.
     private FileTime lastModifiedTime;
     /// The optional last access time.
     private FileTime lastAccessTime;
@@ -408,9 +410,6 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     private CommentSource commentSource = CommentSource.COMMENT;
 
     private long diskNumberStart;
-
-    /// Whether the modification time requires timestamp extra fields.
-    private boolean lastModifiedTimeSet;
 
     /**
      *
@@ -487,18 +486,14 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
             setExtraFields(parseExtraFields(extra, true, ExtraFieldParsingMode.BEST_EFFORT));
         }
         if (localTime != null) {
-            dosTime = toDosTime(localTime);
-            timeMillis = (localTime.getSecond() & 1) * 1000 + localTime.getNano() / 1_000_000;
-            lastModifiedTime = localTime.equals(LocalDateTime.ofInstant(modified.toInstant(), ZoneId.systemDefault()))
-                    ? modified : null;
+            xdostime = toExtendedDosTime(localTime);
+            if (lastModifiedTime != null || localTime.getYear() < 1980 || localTime.getYear() > 2099
+                    || localTime.getNano() % 1_000_000 != 0) {
+                lastModifiedTime = modified;
+            }
         }
         lastAccessTime = entry.getLastAccessTime();
         creationTime = entry.getCreationTime();
-        if (lastModifiedTime != null) {
-            final long millis = lastModifiedTime.toMillis();
-            lastModifiedTimeSet |= !ZipUtil.isDosTime(millis)
-                    || !lastModifiedTime.equals(FileTime.fromMillis(millis));
-        }
         setExtraTimeFields();
     }
 
@@ -545,12 +540,10 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         compressedSize = entry.compressedSize;
         crc = entry.crc;
         comment = entry.comment;
-        dosTime = entry.dosTime;
-        timeMillis = entry.timeMillis;
+        xdostime = entry.xdostime;
         lastModifiedTime = entry.lastModifiedTime;
         lastAccessTime = entry.lastAccessTime;
         creationTime = entry.creationTime;
-        lastModifiedTimeSet = entry.lastModifiedTimeSet;
         internalAttributes = entry.internalAttributes;
         externalAttributes = entry.externalAttributes;
         versionRequired = entry.versionRequired;
@@ -785,7 +778,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// A DOS local time is interpreted in the system default time zone.
     @Override
     public FileTime getLastModifiedTime() {
-        return lastModifiedTime != null ? lastModifiedTime : dosTime == -1 ? null : FileTime.fromMillis(getTime());
+        return lastModifiedTime != null ? lastModifiedTime : xdostime == -1 ? null : FileTime.fromMillis(getTime());
     }
 
     /// Returns the modification time in milliseconds since the epoch, or -1 if unspecified.
@@ -795,7 +788,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         if (lastModifiedTime != null) {
             return lastModifiedTime.toMillis();
         }
-        return dosTime == -1 ? -1 : TimeUtils.dosTimeToEpochMilli(dosTime, ZoneId.systemDefault()) + timeMillis;
+        return xdostime == -1 ? -1 : TimeUtils.dosTimeToEpochMilli(xdostime, ZoneId.systemDefault()) + (xdostime >>> 32);
     }
 
     /// Returns the local modification time, or null if unspecified.
@@ -805,15 +798,15 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         if (lastModifiedTime != null) {
             return LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault());
         }
-        return dosTime == -1 ? null : LocalDateTime.ofEpochSecond(
-                TimeUtils.dosTimeToEpochMilli(dosTime, ZoneOffset.UTC) / 1000 + timeMillis / 1000,
-                timeMillis % 1000 * 1_000_000, ZoneOffset.UTC);
+        final int millis = (int) (xdostime >>> 32);
+        return xdostime == -1 ? null : LocalDateTime.ofEpochSecond(
+                TimeUtils.dosTimeToEpochMilli(xdostime, ZoneOffset.UTC) / 1000 + millis / 1000,
+                millis % 1000 * 1_000_000, ZoneOffset.UTC);
     }
 
     /// Returns the packed DOS modification time, or -1 if unspecified.
     long getDosTime() {
-        return lastModifiedTime == null ? dosTime
-                : toDosTime(LocalDateTime.ofInstant(lastModifiedTime.toInstant(), ZoneId.systemDefault()));
+        return xdostime == -1 ? -1 : xdostime & 0xffffffffL;
     }
 
     /**
@@ -1172,8 +1165,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// Sets the modification time and marks it for inclusion in timestamp extra fields.
     private void internalSetLastModifiedTime(final FileTime time) {
         lastModifiedTime = Objects.requireNonNull(time, "time");
-        timeMillis = 0;
-        lastModifiedTimeSet = true;
+        xdostime = toExtendedDosTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(time.toMillis()), ZoneId.systemDefault()));
     }
 
     /**
@@ -1302,13 +1294,6 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         }
         unparseableExtra = null;
         setExtra();
-    }
-
-    private boolean requiresExtraTimeFields() {
-        if (getLastAccessTime() != null || getCreationTime() != null) {
-            return true;
-        }
-        return lastModifiedTimeSet;
     }
 
     /**
@@ -1482,10 +1467,8 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         if (getExtraField(X000A_NTFS.HEADER_ID) != null) {
             internalRemoveExtraField(X000A_NTFS.HEADER_ID);
         }
-        if (requiresExtraTimeFields()) {
+        if (lastModifiedTime != null || lastAccessTime != null || creationTime != null) {
             final FileTime lastModifiedTime = getLastModifiedTime();
-            final FileTime lastAccessTime = getLastAccessTime();
-            final FileTime creationTime = getCreationTime();
             if (canConvertToInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime)) {
                 addInfoZipExtendedTimestamp(lastModifiedTime, lastAccessTime, creationTime);
             }
@@ -1637,51 +1620,51 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     }
 
     /// Sets the modification time and updates the timestamp extra fields.
+    /// Times in local years 1980 through 2099 are stored as DOS local times;
+    /// other times are also recorded in timestamp extra fields.
     ///
     /// @param timeEpochMillis the last modification time in milliseconds since the epoch
     /// @see #getTime()
     /// @see #setLastModifiedTime(FileTime)
     public void setTime(final long timeEpochMillis) {
-        internalSetLastModifiedTime(FileTime.fromMillis(timeEpochMillis));
-        lastModifiedTimeSet = !ZipUtil.isDosTime(timeEpochMillis);
+        final LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeEpochMillis), ZoneId.systemDefault());
+        xdostime = toExtendedDosTime(time);
+        lastModifiedTime = time.getYear() >= 1980 && time.getYear() <= 2099 ? null : FileTime.fromMillis(timeEpochMillis);
         setExtraTimeFields();
     }
 
     /// Sets the local modification time with millisecond precision and updates timestamp extra fields.
-    /// Times outside the DOS year range 1980 through 2107 are stored as absolute timestamps
-    /// using the system default time zone. Gaps are shifted forward and overlaps use the later offset.
+    /// Times outside the DOS year range 1980 through 2107, and exactly 1980-01-01T00:00,
+    /// are also stored as absolute timestamps using the system default time zone.
+    /// Gaps are shifted forward and overlaps use the later offset.
     ///
     /// @param time the local modification time, not null
     /// @throws NullPointerException if time is null
     public void setTimeLocal(final LocalDateTime time) {
         Objects.requireNonNull(time, "time");
-        if (time.getYear() < 1980 || time.getYear() > 2107) {
-            setLastModifiedTime(FileTime.from(time.withNano(time.getNano() / 1_000_000 * 1_000_000)
-                    .atZone(ZoneId.systemDefault()).withLaterOffsetAtOverlap().toInstant()));
-        } else {
-            dosTime = toDosTime(time);
-            timeMillis = (time.getSecond() & 1) * 1000 + time.getNano() / 1_000_000;
-            lastModifiedTime = null;
-            lastModifiedTimeSet = false;
-            setExtraTimeFields();
-        }
+        xdostime = toExtendedDosTime(time);
+        lastModifiedTime = xdostime != DOSTIME_BEFORE_1980 && time.getYear() <= 2107 ? null
+                : FileTime.from(time.withNano(time.getNano() / 1_000_000 * 1_000_000)
+                        .atZone(ZoneId.systemDefault()).withLaterOffsetAtOverlap().toInstant());
+        setExtraTimeFields();
     }
 
     /// Sets the DOS modification time read from an archive, using only the low 32 bits.
     void setDosTime(final long time) {
-        dosTime = time & 0xffffffffL;
-        timeMillis = 0;
+        xdostime = time & 0xffffffffL;
         lastModifiedTime = null;
-        lastModifiedTimeSet = false;
     }
 
-    /// Encodes a local time with two-second resolution, using 1980-01-01 for out-of-range years.
-    private static long toDosTime(final LocalDateTime time) {
-        if (time.getYear() < 1980 || time.getYear() > 2107) {
-            return 0x00210000L;
+    /// Encodes the low seven bits of the DOS year and stores the millisecond remainder in the high 32 bits.
+    /// Dates before 1980 use [#DOSTIME_BEFORE_1980].
+    private static long toExtendedDosTime(final LocalDateTime time) {
+        if (time.getYear() < 1980) {
+            return DOSTIME_BEFORE_1980;
         }
-        return (long) (time.getYear() - 1980) << 25 | time.getMonthValue() << 21
+        final long dosTime = (long) (time.getYear() - 1980) << 25 | time.getMonthValue() << 21
                 | time.getDayOfMonth() << 16 | time.getHour() << 11 | time.getMinute() << 5 | time.getSecond() >> 1;
+        final long millis = (time.getSecond() & 1) * 1000 + time.getNano() / 1_000_000;
+        return (dosTime & 0xffffffffL) | millis << 32;
     }
 
     /// Returns the entry name.
