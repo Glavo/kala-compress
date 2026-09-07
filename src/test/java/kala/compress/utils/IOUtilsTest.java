@@ -188,7 +188,6 @@ public class IOUtilsTest {
     @CsvSource({
             "0, 100, 7",
             "17, 0, 2",
-            "17, -1, 2",
             "17, 10, 2",
             "17, 2147483647, 2",
             "8191, 8192, 317",
@@ -257,13 +256,21 @@ public class IOUtilsTest {
         }
     }
 
-    /// Checks that non-positive lengths do not access the channel.
+    /// Checks that a zero length does not access the channel.
     ///
     /// @throws IOException if reading unexpectedly fails
     @Test
-    public void testReadRangeFromChannelNonPositiveLength() throws IOException {
+    public void testReadRangeFromChannelZeroLength() throws IOException {
         assertArrayEquals(new byte[0], IOUtils.readRange((ReadableByteChannel) null, 0));
-        assertArrayEquals(new byte[0], IOUtils.readRange((ReadableByteChannel) null, -1));
+    }
+
+    /// Checks that negative lengths are rejected before accessing the channel.
+    ///
+    /// @param length the negative requested length
+    @ParameterizedTest
+    @ValueSource(ints = {-1, Integer.MIN_VALUE})
+    public void testReadRangeFromChannelNegativeLength(final int length) {
+        assertThrows(IllegalArgumentException.class, () -> IOUtils.readRange((ReadableByteChannel) null, length));
     }
 
     @Test

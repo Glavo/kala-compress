@@ -262,20 +262,21 @@ public final class IOUtils {
     /// Reads at most the given number of bytes from a channel.
     ///
     /// Reading stops when the requested length is reached or a read returns zero
-    /// or end of input. A non-positive length returns an empty array without
+    /// or end of input. A zero length returns an empty array without
     /// accessing the channel. The channel is not closed.
     ///
     /// If a read throws, bytes consumed by earlier reads remain consumed and no
     /// partial result is returned.
     ///
     /// @param input the channel to read from
-    /// @param length the maximum number of bytes to read
+    /// @param length the maximum number of bytes to read, must be non-negative
     /// @return an array containing exactly the bytes read, in order
     /// @throws NullPointerException if input is null and length is positive
+    /// @throws IllegalArgumentException if length is negative
     /// @throws IOException if a channel read fails
     /// @since 1.21
     public static byte[] readRange(final ReadableByteChannel input, final int length) throws IOException {
-        if (length <= 0) {
+        if (length == 0) {
             return EMPTY_BYTE_ARRAY;
         }
         List<byte[]> buffers = null;
