@@ -1,6 +1,8 @@
 # Changelog
 
-## 1.27.1-4 (In development)
+## 1.27.1-5 (In development)
+
+## 1.27.1-4 (2026-09-04)
 
 Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-compress/commit/d0aec98f62d1870d22f869aeec5ac1ed9ea3126a).
 
