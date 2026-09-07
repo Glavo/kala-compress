@@ -20,12 +20,10 @@
 package kala.compress.archivers.zip;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -213,7 +211,6 @@ public class ZipArchiveReader implements Closeable {
     private static final int POS_1 = 1;
     private static final int POS_2 = 2;
     private static final int POS_3 = 3;
-    private static final byte[] ONE_ZERO_BYTE = new byte[1];
 
     /// Length of a "central directory" entry structure without file name, extra fields or comment.
     private static final int CFH_LEN =
@@ -925,8 +922,13 @@ public class ZipArchiveReader implements Closeable {
         // doesn't get closed if the method is not supported - which
         // should never happen because of the checkRequestedFeatures
         // call above
-        final InputStream is = new BufferedInputStream(getRawInputStream(entry)); // NOSONAR
-        switch (ZipMethod.getMethodByCode(entry.getMethod())) {
+        final ZipMethod method = ZipMethod.getMethodByCode(entry.getMethod());
+        final InputStream raw = getRawInputStream(entry);
+        if (method == ZipMethod.DEFLATED) {
+            return new InflaterInputStreamWithStatistics(raw, new Inflater(true), DEFAULT_BUFFER_SIZE);
+        }
+        final InputStream is = new BufferedInputStream(raw); // NOSONAR
+        switch (method) {
         case STORED:
             return new StoredStatisticsStream(is);
         case UNSHRINKING:
@@ -938,23 +940,6 @@ public class ZipArchiveReader implements Closeable {
             } catch (final IllegalArgumentException ex) {
                 throw new IOException("bad IMPLODE data", ex);
             }
-        case DEFLATED:
-            final Inflater inflater = new Inflater(true);
-            // Inflater with nowrap=true has this odd contract for a zero padding
-            // byte following the data stream; this used to be zlib's requirement
-            // and has been fixed a long time ago, but the contract persists so
-            // we comply.
-            // https://docs.oracle.com/javase/8/docs/api/java/util/zip/Inflater.html#Inflater(boolean)
-            return new InflaterInputStreamWithStatistics(new SequenceInputStream(is, new ByteArrayInputStream(ONE_ZERO_BYTE)), inflater) {
-                @Override
-                public void close() throws IOException {
-                    try {
-                        super.close();
-                    } finally {
-                        inflater.end();
-                    }
-                }
-            };
         case BZIP2:
             return CompressorStreamFactory.DEFAULT.createCompressorInputStream(CompressorStreamFactory.BZIP2, is);
         case ENHANCED_DEFLATED:

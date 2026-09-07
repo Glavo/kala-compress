@@ -17,6 +17,7 @@
 
 package kala.compress.archivers.zip;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.Inflater;
@@ -24,34 +25,53 @@ import java.util.zip.InflaterInputStream;
 
 import kala.compress.utils.InputStreamStatistics;
 
-/**
- * Helper class to provide statistics
- *
- * @since 1.17
- */
+/// Reads raw DEFLATE data with trailing padding and byte counts.
+///
+/// Closing this stream closes the input and releases the supplied inflater.
+///
+/// @since 1.17
 class InflaterInputStreamWithStatistics extends InflaterInputStream implements InputStreamStatistics {
 
+    /// Number of compressed bytes read from the input, excluding padding.
     private long compressedCount;
+    /// Number of decompressed bytes read.
     private long uncompressedCount;
+    /// Whether the trailing padding byte has been supplied.
+    private boolean eof;
 
-    InflaterInputStreamWithStatistics(final InputStream in) {
-        super(in);
-    }
-
-    InflaterInputStreamWithStatistics(final InputStream in, final Inflater inf) {
-        super(in, inf);
-    }
-
+    /// Creates a stream using the supplied raw DEFLATE inflater and input buffer size.
     InflaterInputStreamWithStatistics(final InputStream in, final Inflater inf, final int size) {
         super(in, inf, size);
     }
 
+    /// Closes the input and releases the inflater, even if closing the input fails.
     @Override
-    protected void fill() throws IOException {
-        super.fill();
-        compressedCount += inf.getRemaining();
+    public void close() throws IOException {
+        try {
+            super.close();
+        } finally {
+            inf.end();
+        }
     }
 
+    /// Fills the input buffer, supplying one trailing zero byte as required by [Inflater#Inflater(boolean)].
+    @Override
+    protected void fill() throws IOException {
+        if (eof) {
+            throw new EOFException("Unexpected end of ZLIB input stream");
+        }
+        len = in.read(buf, 0, buf.length);
+        if (len == -1) {
+            buf[0] = 0;
+            len = 1;
+            eof = true;
+        } else {
+            compressedCount += len;
+        }
+        inf.setInput(buf, 0, len);
+    }
+
+    /// Returns the number of compressed bytes read from the input, excluding padding.
     @Override
     public long getCompressedCount() {
         return compressedCount;
@@ -60,15 +80,6 @@ class InflaterInputStreamWithStatistics extends InflaterInputStream implements I
     @Override
     public long getUncompressedCount() {
         return uncompressedCount;
-    }
-
-    @Override
-    public int read() throws IOException {
-        final int b = super.read();
-        if (b > -1) {
-            uncompressedCount++;
-        }
-        return b;
     }
 
     @Override

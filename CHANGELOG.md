@@ -3,6 +3,7 @@
 ## 1.27.1-5 (In development)
 
 * Fix `ZipArchiveReader` ignoring Unicode path and comment extra fields in the central directory when `ignoreLocalFileHeader` is `true` and `useUnicodeExtraFields` is enabled.
+* Reduce stream wrappers and buffering overhead when reading DEFLATED entries with `ZipArchiveReader`, and correct their byte counts for single-byte reads and trailing padding.
 
 ## 1.27.1-4 (2026-09-04)
 
