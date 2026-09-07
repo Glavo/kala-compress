@@ -1284,17 +1284,18 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         return ExtraFieldUtils.parse(data, local, parsingBehavior);
     }
 
-    /**
-     * Remove an extra field.
-     *
-     * @param type the type of extra field to remove
-     */
+    /// Removes an extra field, reapplying remaining timestamps if a timestamp field is removed.
+    ///
+    /// @param type the type of extra field to remove
+    /// @throws NoSuchElementException if no field with this type exists
     public void removeExtraField(final ZipShort type) {
-        if (getExtraField(type) == null) {
+        final ZipExtraField removed = getExtraField(type);
+        if (removed == null) {
             throw new NoSuchElementException();
         }
         internalRemoveExtraField(type);
         setExtra();
+        updateTimeFieldsFromExtraField(removed);
     }
 
     /**

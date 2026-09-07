@@ -152,6 +152,42 @@ class ZipArchiveEntryApiTest {
         }
     }
 
+    /// Reapplies remaining timestamp fields after removing either of two conflicting timestamp fields.
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void removeTimestampExtraField(final boolean removeNtfs) throws Exception {
+        final FileTime unixTime = FileTime.from(Instant.parse("2020-03-04T12:34:56Z"));
+        final FileTime ntfsTime = FileTime.from(Instant.parse("2024-03-04T12:34:56.1234567Z"));
+        final X5455_ExtendedTimestamp unix = new X5455_ExtendedTimestamp();
+        unix.setModifyFileTime(unixTime);
+        unix.setAccessFileTime(unixTime);
+        unix.setCreateFileTime(unixTime);
+        final X000A_NTFS ntfs = new X000A_NTFS();
+        ntfs.setModifyFileTime(ntfsTime);
+        ntfs.setAccessFileTime(ntfsTime);
+        ntfs.setCreateFileTime(ntfsTime);
+        final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+        entry.setExtraFields(new ZipExtraField[]{unix, ntfs});
+        assertEquals(ntfsTime, entry.getLastModifiedTime());
+
+        final ZipShort removed = removeNtfs ? X000A_NTFS.HEADER_ID : X5455_ExtendedTimestamp.HEADER_ID;
+        entry.removeExtraField(removed);
+        assertNull(entry.getExtraField(removed));
+        final FileTime expected = removeNtfs ? unixTime : ntfsTime;
+        assertEquals(expected.toMillis(), entry.getTime());
+        assertEquals(expected, entry.getLastModifiedTime());
+        assertEquals(expected, entry.getLastAccessTime());
+        assertEquals(expected, entry.getCreationTime());
+        final ZipArchiveEntry reparsed = new ZipArchiveEntry("entry");
+        reparsed.setExtra(entry.getExtra());
+        assertEquals(reparsed.getLastModifiedTime(), entry.getLastModifiedTime());
+        assertEquals(reparsed.getLastAccessTime(), entry.getLastAccessTime());
+        assertEquals(reparsed.getCreationTime(), entry.getCreationTime());
+        try (ZipArchiveReader reader = ZipArchiveReader.builder().setByteArray(write(entry)).get()) {
+            assertEquals(expected, reader.getEntry("entry").getLastModifiedTime());
+        }
+    }
+
     /// Preserves access and creation times when replacing the local modification time.
     @Test
     void replaceLocalTimeWithOtherTimes() {
