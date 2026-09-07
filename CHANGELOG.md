@@ -5,7 +5,6 @@
 * Fix `ZipArchiveReader` ignoring Unicode path and comment extra fields in the central directory when `ignoreLocalFileHeader` is `true` and `useUnicodeExtraFields` is enabled.
 * Reduce stream wrappers and buffering overhead when reading DEFLATED entries with `ZipArchiveReader`, and correct their byte counts for single-byte reads and trailing padding.
 * Implement ZIP entry metadata independently, synchronize local modification times with timestamp extra fields, and preserve DOS local times when reading and writing archives.
-* Align `ZipArchiveEntry` time storage with JDK `ZipEntry` using extended DOS timestamps and nullable modification times, removing the separate modification-time flag.
 
 Breaking Changes:
 
