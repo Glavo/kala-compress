@@ -100,8 +100,7 @@ public class ZipArchiveReader implements Closeable {
     /// By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
     /// when the archive is big. The `ignoreLocalFileHeader` parameter can be set to `true` which restricts parsing to the central directory.
     /// Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-    /// set to `true`. This includes the content of the Unicode extra field, so setting
-    /// `ignoreLocalFileHeader` to `true` means `useUnicodeExtraFields` will be ignored effectively.
+    /// set to `true`.
     ///
     ///
     /// @since 1.26.0
@@ -628,9 +627,7 @@ public class ZipArchiveReader implements Closeable {
     /// By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
     /// when the archive is big. The `ignoreLocalFileHeader` parameter can be set to `true` which restricts parsing to the central directory.
     /// Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-    /// set to `true`. This includes the content of the Unicode extra field, so setting
-    /// `ignoreLocalFileHeader` to `true` means `useUnicodeExtraFields` will be ignored effectively.
-    ///
+    /// set to `true`.
     ///
     /// @param path                  path to the archive.
     /// @param encoding              the encoding to use for file names, use null for the UTF-8
@@ -689,13 +686,10 @@ public class ZipArchiveReader implements Closeable {
     ///
     /// [SeekableInMemoryByteChannel] allows you to read from an in-memory archive.
     ///
-    ///
     /// By default the central directory record and all local file headers of the archive will be read immediately which may take a considerable amount of time
     /// when the archive is big. The `ignoreLocalFileHeader` parameter can be set to `true` which restricts parsing to the central directory.
     /// Unfortunately the local file header may contain information not present inside of the central directory which will not be available when the argument is
-    /// set to `true`. This includes the content of the Unicode extra field, so setting
-    /// `ignoreLocalFileHeader` to `true` means `useUnicodeExtraFields` will be ignored effectively.
-    ///
+    /// set to `true`.
     ///
     /// @param channel               the archive.
     /// @param channelDescription    description of the archive, used for error messages only.
@@ -724,7 +718,11 @@ public class ZipArchiveReader implements Closeable {
 
             final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag = populateFromCentralDirectory();
             if (!ignoreLocalFileHeader) {
-                resolveLocalFileHeaderData(entriesWithoutUTF8Flag);
+                resolveLocalFileHeaderData();
+            }
+            for (final Map.Entry<ZipArchiveEntry, NameAndComment> entry : entriesWithoutUTF8Flag.entrySet()) {
+                final NameAndComment nc = entry.getValue();
+                ZipUtil.setNameAndCommentFromExtraFields(entry.getKey(), nc.name, nc.comment);
             }
             fillNameMap();
             success = true;
@@ -1121,8 +1119,7 @@ public class ZipArchiveReader implements Closeable {
 
     /// Reads an individual entry of the central directory, creates an ZipArchiveEntry from it and adds it to the global maps.
     ///
-    /// @param noUTF8Flag map used to collect entries that don't have their UTF-8 flag set and whose name will be set by data read from the local file header
-    ///                   later. The current entry may be added to this map.
+    /// @param noUTF8Flag map used to collect entries whose names and comments may be replaced using Unicode extra fields
     private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag) throws IOException {
         ByteBuffer cfhBuffer = ByteBuffer.allocate(CFH_LEN).order(ByteOrder.LITTLE_ENDIAN);
         IOUtils.readFully(archive, cfhBuffer);
@@ -1212,7 +1209,7 @@ public class ZipArchiveReader implements Closeable {
     ///
     /// Also records the offsets for the data to read from the entries.
     ///
-    private void resolveLocalFileHeaderData(final Map<ZipArchiveEntry, NameAndComment> entriesWithoutUTF8Flag) throws IOException {
+    private void resolveLocalFileHeaderData() throws IOException {
         for (final ZipArchiveEntry zipArchiveEntry : entries) {
             // entries are filled in populateFromCentralDirectory and never modified
             final Entry ze = (Entry) zipArchiveEntry;
@@ -1230,11 +1227,6 @@ public class ZipArchiveReader implements Closeable {
                 final ZipException z = new ZipException("Invalid extra data in entry " + ze.getName());
                 z.initCause(e);
                 throw z;
-            }
-
-            if (entriesWithoutUTF8Flag.containsKey(ze)) {
-                final NameAndComment nc = entriesWithoutUTF8Flag.get(ze);
-                ZipUtil.setNameAndCommentFromExtraFields(ze, nc.name, nc.comment);
             }
         }
     }

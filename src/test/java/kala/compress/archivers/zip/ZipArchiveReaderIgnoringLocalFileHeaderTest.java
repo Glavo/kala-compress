@@ -23,13 +23,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Iterator;
 
 import kala.compress.AbstractTest;
+import kala.compress.utils.SeekableInMemoryByteChannel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class ZipArchiveReaderIgnoringLocalFileHeaderTest {
 
@@ -50,6 +55,92 @@ public class ZipArchiveReaderIgnoringLocalFileHeaderTest {
 
     @TempDir
     private File dir;
+
+    /// Creates Unicode path and comment fields, or an empty extra field block when the prefix is absent.
+    private static byte[] unicodeExtra(final String prefix, final boolean validCrc) {
+        if (prefix == null) {
+            return new byte[0];
+        }
+        return ExtraFieldUtils.mergeLocalFileDataData(new ZipExtraField[] {
+                new UnicodePathExtraField(prefix + "\u00e9.txt", (validCrc ? "raw.txt" : "wrong.txt").getBytes(StandardCharsets.UTF_8)),
+                new UnicodeCommentExtraField(prefix + "\u00e9 comment", (validCrc ? "raw comment" : "wrong comment").getBytes(StandardCharsets.UTF_8))
+        });
+    }
+
+    /// Creates an empty stored entry with independently specified local and central extra fields.
+    private static byte[] unicodeArchive(final byte[] localExtra, final byte[] centralExtra, final boolean utf8Flag) {
+        final byte[] name = "raw.txt".getBytes(StandardCharsets.UTF_8);
+        final byte[] comment = "raw comment".getBytes(StandardCharsets.UTF_8);
+        final int centralOffset = 30 + name.length + localExtra.length;
+        final int centralLength = 46 + name.length + centralExtra.length + comment.length;
+        final int endOffset = centralOffset + centralLength;
+        final short flags = (short) (utf8Flag ? 0x800 : 0);
+        final ByteBuffer buffer = ByteBuffer.allocate(endOffset + 22).order(ByteOrder.LITTLE_ENDIAN);
+
+        buffer.putInt(0, 0x04034b50);
+        buffer.putShort(4, (short) 20);
+        buffer.putShort(6, flags);
+        buffer.putShort(26, (short) name.length);
+        buffer.putShort(28, (short) localExtra.length);
+        buffer.position(30).put(name).put(localExtra);
+
+        buffer.putInt(centralOffset, 0x02014b50);
+        buffer.putShort(centralOffset + 4, (short) 20);
+        buffer.putShort(centralOffset + 6, (short) 20);
+        buffer.putShort(centralOffset + 8, flags);
+        buffer.putShort(centralOffset + 28, (short) name.length);
+        buffer.putShort(centralOffset + 30, (short) centralExtra.length);
+        buffer.putShort(centralOffset + 32, (short) comment.length);
+        buffer.position(centralOffset + 46).put(name).put(centralExtra).put(comment);
+
+        buffer.putInt(endOffset, 0x06054b50);
+        buffer.putShort(endOffset + 8, (short) 1);
+        buffer.putShort(endOffset + 10, (short) 1);
+        buffer.putInt(endOffset + 12, centralLength);
+        buffer.putInt(endOffset + 16, centralOffset);
+        return buffer.array();
+    }
+
+    /// Checks Unicode resolution and name lookup with and without local header parsing.
+    @ParameterizedTest
+    @CsvSource({
+            "central, , true, true, true, false, central, central",
+            ", local, true, true, true, false, local, raw",
+            "central, local, true, true, true, false, local, central",
+            "central, local, true, false, true, false, raw, central",
+            "central, , false, true, true, false, raw, raw",
+            "central, local, false, true, true, false, local, raw",
+            "central, local, true, true, false, false, raw, raw",
+            "central, local, true, true, true, true, raw, raw",
+            ", , true, true, true, false, raw, raw"
+    })
+    public void testUnicodeExtraFields(final String centralPrefix, final String localPrefix,
+                                      final boolean centralCrcValid, final boolean localCrcValid,
+                                      final boolean useUnicode, final boolean utf8Flag,
+                                      final String expectedWithLocal, final String expectedWithoutLocal) throws IOException {
+        final byte[] data = unicodeArchive(unicodeExtra(localPrefix, localCrcValid), unicodeExtra(centralPrefix, centralCrcValid), utf8Flag);
+        for (final boolean ignoreLocal : new boolean[] {false, true}) {
+            final String expected = ignoreLocal ? expectedWithoutLocal : expectedWithLocal;
+            final boolean unicode = !"raw".equals(expected);
+            final String expectedName = unicode ? expected + "\u00e9.txt" : "raw.txt";
+            try (ZipArchiveReader reader = ZipArchiveReader.builder()
+                    .setSeekableByteChannel(new SeekableInMemoryByteChannel(data))
+                    .setCharset(StandardCharsets.UTF_8)
+                    .setUseUnicodeExtraFields(useUnicode)
+                    .setIgnoreLocalFileHeader(ignoreLocal)
+                    .get()) {
+                final ZipArchiveEntry entry = reader.getEntry(expectedName);
+                assertNotNull(entry, "ignoreLocalFileHeader=" + ignoreLocal);
+                assertEquals(unicode ? expected + "\u00e9 comment" : "raw comment", entry.getComment());
+                assertEquals(unicode ? ZipArchiveEntry.NameSource.UNICODE_EXTRA_FIELD
+                        : utf8Flag ? ZipArchiveEntry.NameSource.NAME_WITH_EFS_FLAG : ZipArchiveEntry.NameSource.NAME, entry.getNameSource());
+                assertEquals(unicode ? ZipArchiveEntry.CommentSource.UNICODE_EXTRA_FIELD : ZipArchiveEntry.CommentSource.COMMENT, entry.getCommentSource());
+                try (InputStream stream = reader.getInputStream(entry)) {
+                    assertEquals(-1, stream.read());
+                }
+            }
+        }
+    }
 
     @Test
     public void testDuplicateEntry() throws Exception {
