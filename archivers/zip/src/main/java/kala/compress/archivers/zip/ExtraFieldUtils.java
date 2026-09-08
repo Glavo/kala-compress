@@ -19,9 +19,10 @@ package kala.compress.archivers.zip;
 import kala.compress.utils.ByteUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.zip.ZipException;
 
@@ -29,6 +30,7 @@ import java.util.zip.ZipException;
  * {@link ZipExtraField} related methods.
  */
 // CheckStyle:HideUtilityClassConstructorCheck OFF (bc)
+@SuppressWarnings("unchecked")
 public class ExtraFieldUtils {
 
     /**
@@ -113,27 +115,36 @@ public class ExtraFieldUtils {
 
     private static final int WORD = 4;
 
-    /**
-     * Static registry of known extra fields.
-     */
-    private static final HashMap<Short, Supplier<ZipExtraField>> IMPLEMENTATIONS;
+    // Static registry of known extra fields.
+    private static final short[] SORTEDS_HEADER_IDS;
+    private static final Supplier<ZipExtraField>[] SORTED_PROVIDERS;
 
     static {
-        IMPLEMENTATIONS = new HashMap<>();
-        IMPLEMENTATIONS.put(AsiExtraField.HEADER_ID, AsiExtraField::new);
-        IMPLEMENTATIONS.put(X5455_ExtendedTimestamp.HEADER_ID, X5455_ExtendedTimestamp::new);
-        IMPLEMENTATIONS.put(X7875_NewUnix.HEADER_ID, X7875_NewUnix::new);
-        IMPLEMENTATIONS.put(JarMarker.ID, JarMarker::new);
-        IMPLEMENTATIONS.put(UnicodePathExtraField.UPATH_ID, UnicodePathExtraField::new);
-        IMPLEMENTATIONS.put(UnicodeCommentExtraField.UCOM_ID, UnicodeCommentExtraField::new);
-        IMPLEMENTATIONS.put(Zip64ExtendedInformationExtraField.HEADER_ID, Zip64ExtendedInformationExtraField::new);
-        IMPLEMENTATIONS.put(X000A_NTFS.HEADER_ID, X000A_NTFS::new);
-        IMPLEMENTATIONS.put(X0014_X509Certificates.HEADER_ID, X0014_X509Certificates::new);
-        IMPLEMENTATIONS.put(X0015_CertificateIdForFile.HEADER_ID, X0015_CertificateIdForFile::new);
-        IMPLEMENTATIONS.put(X0016_CertificateIdForCentralDirectory.HEADER_ID, X0016_CertificateIdForCentralDirectory::new);
-        IMPLEMENTATIONS.put(X0017_StrongEncryptionHeader.HEADER_ID, X0017_StrongEncryptionHeader::new);
-        IMPLEMENTATIONS.put(X0019_EncryptionRecipientCertificateList.HEADER_ID, X0019_EncryptionRecipientCertificateList::new);
-        IMPLEMENTATIONS.put(ResourceAlignmentExtraField.ID, ResourceAlignmentExtraField::new);
+        TreeMap<Short, Supplier<ZipExtraField>> implementations = new TreeMap<>();
+        implementations.put(AsiExtraField.HEADER_ID, AsiExtraField::new);
+        implementations.put(X5455_ExtendedTimestamp.HEADER_ID, X5455_ExtendedTimestamp::new);
+        implementations.put(X7875_NewUnix.HEADER_ID, X7875_NewUnix::new);
+        implementations.put(JarMarker.ID, JarMarker::new);
+        implementations.put(UnicodePathExtraField.UPATH_ID, UnicodePathExtraField::new);
+        implementations.put(UnicodeCommentExtraField.UCOM_ID, UnicodeCommentExtraField::new);
+        implementations.put(Zip64ExtendedInformationExtraField.HEADER_ID, Zip64ExtendedInformationExtraField::new);
+        implementations.put(X000A_NTFS.HEADER_ID, X000A_NTFS::new);
+        implementations.put(X0014_X509Certificates.HEADER_ID, X0014_X509Certificates::new);
+        implementations.put(X0015_CertificateIdForFile.HEADER_ID, X0015_CertificateIdForFile::new);
+        implementations.put(X0016_CertificateIdForCentralDirectory.HEADER_ID, X0016_CertificateIdForCentralDirectory::new);
+        implementations.put(X0017_StrongEncryptionHeader.HEADER_ID, X0017_StrongEncryptionHeader::new);
+        implementations.put(X0019_EncryptionRecipientCertificateList.HEADER_ID, X0019_EncryptionRecipientCertificateList::new);
+        implementations.put(ResourceAlignmentExtraField.ID, ResourceAlignmentExtraField::new);
+
+        SORTEDS_HEADER_IDS = new short[implementations.size()];
+        SORTED_PROVIDERS = (Supplier<ZipExtraField>[]) new Supplier<?>[implementations.size()];
+
+        int i = 0;
+        for (var entry : implementations.entrySet()) {
+            SORTEDS_HEADER_IDS[i] = entry.getKey();
+            SORTED_PROVIDERS[i] = entry.getValue();
+            i++;
+        }
     }
 
     static final ZipExtraField[] EMPTY_ZIP_EXTRA_FIELD_ARRAY = {};
@@ -158,8 +169,8 @@ public class ExtraFieldUtils {
     /// @return a new extra field, or null if the identifier is unsupported
     /// @since 1.19
     public static ZipExtraField createExtraFieldNoDefault(final short headerId) {
-        final Supplier<ZipExtraField> provider = IMPLEMENTATIONS.get(headerId);
-        return provider != null ? provider.get() : null;
+        int idx = Arrays.binarySearch(SORTEDS_HEADER_IDS, headerId);
+        return idx >= 0 ? SORTED_PROVIDERS[idx].get() : null;
     }
 
     /**
