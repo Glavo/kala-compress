@@ -52,9 +52,9 @@ import kala.compress.utils.ByteUtils;
  */
 public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
     /// The Info-ZIP Unix UID/GID extra field identifier.
-    static final ZipShort HEADER_ID = new ZipShort(0x7875);
+    static final short HEADER_ID = (short) 0x7875;
     /// The length of the empty central directory data.
-    private static final ZipShort ZERO = new ZipShort(0);
+    private static final int ZERO = 0;
     /// The default UID and GID.
     private static final long ONE_THOUSAND = 1000;
     /// The serialization version.
@@ -101,10 +101,10 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
     /**
      * Length of the extra field in the central directory data - without Header-ID or length specifier.
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
+    public int getCentralDirectoryLength() {
         return ZERO;
     }
 
@@ -124,7 +124,7 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
      * @return the value for the header id for this extrafield
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return HEADER_ID;
     }
 
@@ -149,11 +149,11 @@ public class X7875_NewUnix implements ZipExtraField, Cloneable, Serializable {
     /**
      * Length of the extra field in the local file data - without Header-ID or length specifier.
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(3 + getValueLength(uid) + getValueLength(gid));
+    public int getLocalFileDataLength() {
+        return 3 + getValueLength(uid) + getValueLength(gid);
     }
 
     /// Returns the minimum unsigned byte length, using one byte for zero.

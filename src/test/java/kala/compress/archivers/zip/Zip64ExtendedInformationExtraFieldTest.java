@@ -17,20 +17,22 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.math.BigInteger;
 import java.util.zip.ZipException;
 
 import org.junit.jupiter.api.Test;
 
 public class Zip64ExtendedInformationExtraFieldTest {
 
-    private static final ZipEightByteInteger SIZE = new ZipEightByteInteger(0x12345678);
-    private static final ZipEightByteInteger CSIZE = new ZipEightByteInteger(0x9ABCDEF);
-    private static final ZipEightByteInteger OFF = new ZipEightByteInteger(BigInteger.valueOf(0xABCDEF091234567L).shiftLeft(4).setBit(3));
-    private static final ZipLong DISK = new ZipLong(0x12);
+    private static final long SIZE = 0x12345678;
+    private static final long CSIZE = 0x9ABCDEF;
+    private static final long OFF = 0xABCDEF0912345678L;
+    private static final int DISK = 0x12;
 
     private static void checkDisk(final byte[] b, final int off) {
         assertEquals(0x12, b[0 + off]);
@@ -73,24 +75,24 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testReadCDSizesAndOffset() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[24];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(CSIZE.getBytes(), 0, b, 8, 8);
-        System.arraycopy(OFF.getBytes(), 0, b, 16, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(CSIZE, 8), 0, b, 8, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(OFF, 8), 0, b, 16, 8);
         f.parseFromCentralDirectoryData(b, 0, b.length);
         assertEquals(SIZE, f.getSize());
         assertEquals(CSIZE, f.getCompressedSize());
         assertEquals(OFF, f.getRelativeHeaderOffset());
-        assertNull(f.getDiskStartNumber());
+        assertFalse(f.hasDiskStartNumber());
     }
 
     @Test
     public void testReadCDSizesOffsetAndDisk() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[28];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(CSIZE.getBytes(), 0, b, 8, 8);
-        System.arraycopy(OFF.getBytes(), 0, b, 16, 8);
-        System.arraycopy(DISK.getBytes(), 0, b, 24, 4);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(CSIZE, 8), 0, b, 8, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(OFF, 8), 0, b, 16, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(DISK, 4), 0, b, 24, 4);
         f.parseFromCentralDirectoryData(b, 0, b.length);
         assertEquals(SIZE, f.getSize());
         assertEquals(CSIZE, f.getCompressedSize());
@@ -102,12 +104,12 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testReadCDSomethingAndDisk() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[12];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(DISK.getBytes(), 0, b, 8, 4);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(DISK, 4), 0, b, 8, 4);
         f.parseFromCentralDirectoryData(b, 0, b.length);
-        assertNull(f.getSize());
-        assertNull(f.getCompressedSize());
-        assertNull(f.getRelativeHeaderOffset());
+        assertFalse(f.hasSize());
+        assertFalse(f.hasCompressedSize());
+        assertFalse(f.hasRelativeHeaderOffset());
         assertEquals(DISK, f.getDiskStartNumber());
     }
 
@@ -115,13 +117,13 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testReadLFHSizesAndDisk() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[20];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(CSIZE.getBytes(), 0, b, 8, 8);
-        System.arraycopy(DISK.getBytes(), 0, b, 16, 4);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(CSIZE, 8), 0, b, 8, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(DISK, 4), 0, b, 16, 4);
         f.parseFromLocalFileData(b, 0, b.length);
         assertEquals(SIZE, f.getSize());
         assertEquals(CSIZE, f.getCompressedSize());
-        assertNull(f.getRelativeHeaderOffset());
+        assertFalse(f.hasRelativeHeaderOffset());
         assertEquals(DISK, f.getDiskStartNumber());
     }
 
@@ -129,24 +131,24 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testReadLFHSizesAndOffset() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[24];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(CSIZE.getBytes(), 0, b, 8, 8);
-        System.arraycopy(OFF.getBytes(), 0, b, 16, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(CSIZE, 8), 0, b, 8, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(OFF, 8), 0, b, 16, 8);
         f.parseFromLocalFileData(b, 0, b.length);
         assertEquals(SIZE, f.getSize());
         assertEquals(CSIZE, f.getCompressedSize());
         assertEquals(OFF, f.getRelativeHeaderOffset());
-        assertNull(f.getDiskStartNumber());
+        assertFalse(f.hasDiskStartNumber());
     }
 
     @Test
     public void testReadLFHSizesOffsetAndDisk() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[28];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(CSIZE.getBytes(), 0, b, 8, 8);
-        System.arraycopy(OFF.getBytes(), 0, b, 16, 8);
-        System.arraycopy(DISK.getBytes(), 0, b, 24, 4);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(CSIZE, 8), 0, b, 8, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(OFF, 8), 0, b, 16, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(DISK, 4), 0, b, 24, 4);
         f.parseFromLocalFileData(b, 0, b.length);
         assertEquals(SIZE, f.getSize());
         assertEquals(CSIZE, f.getCompressedSize());
@@ -158,44 +160,44 @@ public class Zip64ExtendedInformationExtraFieldTest {
     public void testReadLFHSizesOnly() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[16];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
-        System.arraycopy(CSIZE.getBytes(), 0, b, 8, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(CSIZE, 8), 0, b, 8, 8);
         f.parseFromLocalFileData(b, 0, b.length);
         assertEquals(SIZE, f.getSize());
         assertEquals(CSIZE, f.getCompressedSize());
-        assertNull(f.getRelativeHeaderOffset());
-        assertNull(f.getDiskStartNumber());
+        assertFalse(f.hasRelativeHeaderOffset());
+        assertFalse(f.hasDiskStartNumber());
     }
 
     @Test
     public void testReparseCDSingleEightByteData() throws ZipException {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField();
         final byte[] b = new byte[8];
-        System.arraycopy(SIZE.getBytes(), 0, b, 0, 8);
+        System.arraycopy(ByteUtils.toLittleEndian(SIZE, 8), 0, b, 0, 8);
         f.parseFromCentralDirectoryData(b, 0, b.length);
         f.reparseCentralDirectoryData(true, false, false, false);
         assertEquals(SIZE, f.getSize());
-        assertNull(f.getCompressedSize());
-        assertNull(f.getRelativeHeaderOffset());
-        assertNull(f.getDiskStartNumber());
-        f.setSize(null);
+        assertFalse(f.hasCompressedSize());
+        assertFalse(f.hasRelativeHeaderOffset());
+        assertFalse(f.hasDiskStartNumber());
+        f.clearSize();
         f.reparseCentralDirectoryData(false, true, false, false);
-        assertNull(f.getSize());
+        assertFalse(f.hasSize());
         assertEquals(SIZE, f.getCompressedSize());
-        assertNull(f.getRelativeHeaderOffset());
-        assertNull(f.getDiskStartNumber());
-        f.setCompressedSize(null);
+        assertFalse(f.hasRelativeHeaderOffset());
+        assertFalse(f.hasDiskStartNumber());
+        f.clearCompressedSize();
         f.reparseCentralDirectoryData(false, false, true, false);
-        assertNull(f.getSize());
-        assertNull(f.getCompressedSize());
+        assertFalse(f.hasSize());
+        assertFalse(f.hasCompressedSize());
         assertEquals(SIZE, f.getRelativeHeaderOffset());
-        assertNull(f.getDiskStartNumber());
+        assertFalse(f.hasDiskStartNumber());
     }
 
     @Test
     public void testWriteCDOnlySizes() {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField(SIZE, CSIZE);
-        assertEquals(new ZipShort(16), f.getCentralDirectoryLength());
+        assertEquals(16, f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(16, b.length);
         checkSizes(b);
@@ -203,8 +205,9 @@ public class Zip64ExtendedInformationExtraFieldTest {
 
     @Test
     public void testWriteCDSizeAndDisk() {
-        final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField(SIZE, CSIZE, null, DISK);
-        assertEquals(new ZipShort(20), f.getCentralDirectoryLength());
+        final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField(SIZE, CSIZE);
+        f.setDiskStartNumber(DISK);
+        assertEquals(20, f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(20, b.length);
         checkSizes(b);
@@ -213,8 +216,9 @@ public class Zip64ExtendedInformationExtraFieldTest {
 
     @Test
     public void testWriteCDSizeAndOffset() {
-        final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField(SIZE, CSIZE, OFF, null);
-        assertEquals(new ZipShort(24), f.getCentralDirectoryLength());
+        final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField(SIZE, CSIZE);
+        f.setRelativeHeaderOffset(OFF);
+        assertEquals(24, f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(24, b.length);
         checkSizes(b);
@@ -224,7 +228,7 @@ public class Zip64ExtendedInformationExtraFieldTest {
     @Test
     public void testWriteCDSizeOffsetAndDisk() {
         final Zip64ExtendedInformationExtraField f = new Zip64ExtendedInformationExtraField(SIZE, CSIZE, OFF, DISK);
-        assertEquals(new ZipShort(28), f.getCentralDirectoryLength());
+        assertEquals(28, f.getCentralDirectoryLength());
         final byte[] b = f.getCentralDirectoryData();
         assertEquals(28, b.length);
         checkSizes(b);

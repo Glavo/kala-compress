@@ -30,7 +30,7 @@ package kala.compress.archivers.zip;
  */
 public class UnicodeCommentExtraField extends AbstractUnicodeExtraField {
 
-    public static final ZipShort UCOM_ID = new ZipShort(0x6375);
+    public static final short UCOM_ID = (short) 0x6375;
 
     public UnicodeCommentExtraField() {
     }
@@ -58,7 +58,7 @@ public class UnicodeCommentExtraField extends AbstractUnicodeExtraField {
     }
 
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return UCOM_ID;
     }
 

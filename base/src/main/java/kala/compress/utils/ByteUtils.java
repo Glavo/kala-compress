@@ -171,6 +171,21 @@ public final class ByteUtils {
         return l;
     }
 
+    /// Returns the low-order bytes of a value in little-endian order.
+    ///
+    /// @param value the raw bit pattern to encode
+    /// @param length the number of bytes, from 0 through 8
+    /// @return a new array containing the encoded bytes
+    /// @throws IllegalArgumentException if length is outside 0 through 8
+    public static byte[] toLittleEndian(final long value, final int length) {
+        if (length < 0 || length > Long.BYTES) {
+            throw new IllegalArgumentException("Length must be between 0 and 8: " + length);
+        }
+        final byte[] data = new byte[length];
+        toLittleEndian(data, value, 0, length);
+        return data;
+    }
+
     /// Inserts the given value into the array as a little-endian sequence of the given length starting at the given offset.
     ///
     /// @param b      the array to write into

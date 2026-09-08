@@ -17,6 +17,8 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.Arrays;
@@ -73,7 +75,7 @@ public abstract class AbstractUnicodeExtraField implements ZipExtraField {
         data = new byte[5 + unicodeName.length];
         // version 1
         data[0] = 0x01;
-        System.arraycopy(ZipLong.getBytes(nameCRC32), 0, data, 1, 4);
+        ByteUtils.setUnsignedIntLE(data, 1, nameCRC32);
         System.arraycopy(unicodeName, 0, data, 5, unicodeName.length);
     }
 
@@ -90,11 +92,11 @@ public abstract class AbstractUnicodeExtraField implements ZipExtraField {
     }
 
     @Override
-    public ZipShort getCentralDirectoryLength() {
+    public int getCentralDirectoryLength() {
         if (data == null) {
             assembleData();
         }
-        return new ZipShort(data != null ? data.length : 0);
+        return data != null ? data.length : 0;
     }
 
     @Override
@@ -103,7 +105,7 @@ public abstract class AbstractUnicodeExtraField implements ZipExtraField {
     }
 
     @Override
-    public ZipShort getLocalFileDataLength() {
+    public int getLocalFileDataLength() {
         return getCentralDirectoryLength();
     }
 
@@ -146,7 +148,7 @@ public abstract class AbstractUnicodeExtraField implements ZipExtraField {
             throw new ZipException("Unsupported version [" + version + "] for UniCode path extra data.");
         }
 
-        nameCRC32 = ZipLong.getValue(buffer, offset + 1);
+        nameCRC32 = ByteUtils.getUnsignedIntLE(buffer, offset + 1);
         unicodeName = new byte[length - 5];
         System.arraycopy(buffer, offset + 5, unicodeName, 0, length - 5);
         data = null;

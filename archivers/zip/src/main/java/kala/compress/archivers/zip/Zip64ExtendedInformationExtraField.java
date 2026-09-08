@@ -43,11 +43,19 @@ import kala.compress.utils.ByteUtils;
  */
 public class Zip64ExtendedInformationExtraField implements ZipExtraField {
 
-    static final ZipShort HEADER_ID = new ZipShort(0x0001);
+    static final short HEADER_ID = (short) 0x0001;
 
     private static final String LFH_MUST_HAVE_BOTH_SIZES_MSG = "Zip64 extended information must contain" + " both size values in the local file header.";
-    private ZipEightByteInteger size, compressedSize, relativeHeaderOffset;
-    private ZipLong diskStart;
+    /// The optional fields present in this extra field.
+    private int presentFields;
+    /// The raw unsigned 64-bit uncompressed size.
+    private long size;
+    /// The raw unsigned 64-bit compressed size.
+    private long compressedSize;
+    /// The raw unsigned 64-bit local header offset.
+    private long relativeHeaderOffset;
+    /// The raw unsigned 32-bit starting disk number.
+    private int diskStart;
 
     /**
      * Stored in {@link #parseFromCentralDirectoryData parseFromCentralDirectoryData} so it can be reused when ZipFile calls {@link #reparseCentralDirectoryData
@@ -72,11 +80,10 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
      *
      * @param size           the entry's original size
      * @param compressedSize the entry's compressed size
-     *
-     * @throws IllegalArgumentException if size or compressedSize is null
      */
-    public Zip64ExtendedInformationExtraField(final ZipEightByteInteger size, final ZipEightByteInteger compressedSize) {
-        this(size, compressedSize, null, null);
+    public Zip64ExtendedInformationExtraField(final long size, final long compressedSize) {
+        setSize(size);
+        setCompressedSize(compressedSize);
     }
 
     /**
@@ -86,25 +93,23 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
      * @param compressedSize       the entry's compressed size
      * @param relativeHeaderOffset the entry's offset
      * @param diskStart            the disk start
-     *
-     * @throws IllegalArgumentException if size or compressedSize is null
      */
-    public Zip64ExtendedInformationExtraField(final ZipEightByteInteger size, final ZipEightByteInteger compressedSize,
-            final ZipEightByteInteger relativeHeaderOffset, final ZipLong diskStart) {
-        this.size = size;
-        this.compressedSize = compressedSize;
-        this.relativeHeaderOffset = relativeHeaderOffset;
-        this.diskStart = diskStart;
+    public Zip64ExtendedInformationExtraField(final long size, final long compressedSize,
+            final long relativeHeaderOffset, final int diskStart) {
+        setSize(size);
+        setCompressedSize(compressedSize);
+        setRelativeHeaderOffset(relativeHeaderOffset);
+        setDiskStartNumber(diskStart);
     }
 
     private int addSizes(final byte[] data) {
         int off = 0;
-        if (size != null) {
-            System.arraycopy(size.getBytes(), 0, data, 0, DWORD);
+        if (hasSize()) {
+            ByteUtils.setLongLE(data, 0, size);
             off += DWORD;
         }
-        if (compressedSize != null) {
-            System.arraycopy(compressedSize.getBytes(), 0, data, off, DWORD);
+        if (hasCompressedSize()) {
+            ByteUtils.setLongLE(data, off, compressedSize);
             off += DWORD;
         }
         return off;
@@ -112,52 +117,57 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
 
     @Override
     public byte[] getCentralDirectoryData() {
-        final byte[] data = new byte[getCentralDirectoryLength().getValue()];
+        final byte[] data = new byte[getCentralDirectoryLength()];
         int off = addSizes(data);
-        if (relativeHeaderOffset != null) {
-            System.arraycopy(relativeHeaderOffset.getBytes(), 0, data, off, DWORD);
+        if (hasRelativeHeaderOffset()) {
+            ByteUtils.setLongLE(data, off, relativeHeaderOffset);
             off += DWORD;
         }
-        if (diskStart != null) {
-            System.arraycopy(diskStart.getBytes(), 0, data, off, WORD);
+        if (hasDiskStartNumber()) {
+            ByteUtils.setIntLE(data, off, diskStart);
             off += WORD; // NOSONAR - assignment as documentation
         }
         return data;
     }
 
     @Override
-    public ZipShort getCentralDirectoryLength() {
-        return new ZipShort((size != null ? DWORD : 0) + (compressedSize != null ? DWORD : 0) + (relativeHeaderOffset != null ? DWORD : 0)
-                + (diskStart != null ? WORD : 0));
+    public int getCentralDirectoryLength() {
+        return ((hasSize() ? DWORD : 0) + (hasCompressedSize() ? DWORD : 0) + (hasRelativeHeaderOffset() ? DWORD : 0)
+                + (hasDiskStartNumber() ? WORD : 0));
     }
 
-    /**
-     * The compressed size stored in this extra field.
-     *
-     * @return The compressed size stored in this extra field.
-     */
-    public ZipEightByteInteger getCompressedSize() {
+    /// Returns the unsigned 64-bit compressed size as a raw bit pattern.
+    ///
+    /// @throws IllegalStateException if the field is absent
+    public long getCompressedSize() {
+        if (!hasCompressedSize()) {
+            throw new IllegalStateException("CompressedSize is not present");
+        }
         return compressedSize;
     }
 
-    /**
-     * The disk start number stored in this extra field.
-     *
-     * @return The disk start number stored in this extra field.
-     */
-    public ZipLong getDiskStartNumber() {
+    /// Returns the unsigned 32-bit starting disk number as a raw bit pattern.
+    ///
+    /// @throws IllegalStateException if the field is absent
+    public int getDiskStartNumber() {
+        if (!hasDiskStartNumber()) {
+            throw new IllegalStateException("DiskStartNumber is not present");
+        }
         return diskStart;
     }
 
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return HEADER_ID;
     }
 
+    /// Returns local data containing both sizes, or an empty array if neither size is present.
+    ///
+    /// @throws IllegalArgumentException if exactly one size is present
     @Override
     public byte[] getLocalFileDataData() {
-        if (size != null || compressedSize != null) {
-            if (size == null || compressedSize == null) {
+        if (hasSize() || hasCompressedSize()) {
+            if (!hasSize() || !hasCompressedSize()) {
                 throw new IllegalArgumentException(LFH_MUST_HAVE_BOTH_SIZES_MSG);
             }
             final byte[] data = new byte[2 * DWORD];
@@ -167,26 +177,34 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
         return ByteUtils.EMPTY_BYTE_ARRAY;
     }
 
+    /// Returns 16 if both sizes are present, or zero if neither is present.
+    ///
+    /// @throws IllegalArgumentException if exactly one size is present
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(size != null ? 2 * DWORD : 0);
+    public int getLocalFileDataLength() {
+        if (hasSize() != hasCompressedSize()) {
+            throw new IllegalArgumentException(LFH_MUST_HAVE_BOTH_SIZES_MSG);
+        }
+        return hasSize() ? 2 * DWORD : 0;
     }
 
-    /**
-     * The relative header offset stored in this extra field.
-     *
-     * @return The relative header offset stored in this extra field.
-     */
-    public ZipEightByteInteger getRelativeHeaderOffset() {
+    /// Returns the unsigned 64-bit local header offset as a raw bit pattern.
+    ///
+    /// @throws IllegalStateException if the field is absent
+    public long getRelativeHeaderOffset() {
+        if (!hasRelativeHeaderOffset()) {
+            throw new IllegalStateException("RelativeHeaderOffset is not present");
+        }
         return relativeHeaderOffset;
     }
 
-    /**
-     * The uncompressed size stored in this extra field.
-     *
-     * @return The uncompressed size stored in this extra field.
-     */
-    public ZipEightByteInteger getSize() {
+    /// Returns the unsigned 64-bit uncompressed size as a raw bit pattern.
+    ///
+    /// @throws IllegalStateException if the field is absent
+    public long getSize() {
+        if (!hasSize()) {
+            throw new IllegalStateException("Size is not present");
+        }
         return size;
     }
 
@@ -205,13 +223,13 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
         if (length >= 3 * DWORD + WORD) {
             parseFromLocalFileData(buffer, offset, length);
         } else if (length == 3 * DWORD) {
-            size = new ZipEightByteInteger(buffer, offset);
+            setSize(ByteUtils.getLongLE(buffer, offset));
             offset += DWORD;
-            compressedSize = new ZipEightByteInteger(buffer, offset);
+            setCompressedSize(ByteUtils.getLongLE(buffer, offset));
             offset += DWORD;
-            relativeHeaderOffset = new ZipEightByteInteger(buffer, offset);
+            setRelativeHeaderOffset(ByteUtils.getLongLE(buffer, offset));
         } else if (length % DWORD == WORD) {
-            diskStart = new ZipLong(buffer, offset + length - WORD);
+            setDiskStartNumber(ByteUtils.getIntLE(buffer, offset + length - WORD));
         }
     }
 
@@ -227,18 +245,18 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
         if (length < 2 * DWORD) {
             throw new ZipException(LFH_MUST_HAVE_BOTH_SIZES_MSG);
         }
-        size = new ZipEightByteInteger(buffer, offset);
+        setSize(ByteUtils.getLongLE(buffer, offset));
         offset += DWORD;
-        compressedSize = new ZipEightByteInteger(buffer, offset);
+        setCompressedSize(ByteUtils.getLongLE(buffer, offset));
         offset += DWORD;
         int remaining = length - 2 * DWORD;
         if (remaining >= DWORD) {
-            relativeHeaderOffset = new ZipEightByteInteger(buffer, offset);
+            setRelativeHeaderOffset(ByteUtils.getLongLE(buffer, offset));
             offset += DWORD;
             remaining -= DWORD;
         }
         if (remaining >= WORD) {
-            diskStart = new ZipLong(buffer, offset);
+            setDiskStartNumber(ByteUtils.getIntLE(buffer, offset));
             offset += WORD; // NOSONAR - assignment as documentation
             remaining -= WORD; // NOSONAR - assignment as documentation
         }
@@ -269,57 +287,97 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
             }
             int offset = 0;
             if (hasUncompressedSize) {
-                size = new ZipEightByteInteger(rawCentralDirectoryData, offset);
+                setSize(ByteUtils.getLongLE(rawCentralDirectoryData, offset));
                 offset += DWORD;
             }
             if (hasCompressedSize) {
-                compressedSize = new ZipEightByteInteger(rawCentralDirectoryData, offset);
+                setCompressedSize(ByteUtils.getLongLE(rawCentralDirectoryData, offset));
                 offset += DWORD;
             }
             if (hasRelativeHeaderOffset) {
-                relativeHeaderOffset = new ZipEightByteInteger(rawCentralDirectoryData, offset);
+                setRelativeHeaderOffset(ByteUtils.getLongLE(rawCentralDirectoryData, offset));
                 offset += DWORD;
             }
             if (hasDiskStart) {
-                diskStart = new ZipLong(rawCentralDirectoryData, offset);
+                setDiskStartNumber(ByteUtils.getIntLE(rawCentralDirectoryData, offset));
                 offset += WORD; // NOSONAR - assignment as documentation
             }
         }
     }
 
-    /**
-     * The uncompressed size stored in this extra field.
-     *
-     * @param compressedSize The uncompressed size stored in this extra field.
-     */
-    public void setCompressedSize(final ZipEightByteInteger compressedSize) {
+    /// Sets the unsigned 64-bit compressed size and marks it present.
+    ///
+    /// @param compressedSize the raw bit pattern
+    public void setCompressedSize(final long compressedSize) {
         this.compressedSize = compressedSize;
+        presentFields |= 2;
     }
 
-    /**
-     * The disk start number stored in this extra field.
-     *
-     * @param ds The disk start number stored in this extra field.
-     */
-    public void setDiskStartNumber(final ZipLong ds) {
-        diskStart = ds;
+    /// Returns whether the unsigned 64-bit compressed size is present.
+    public boolean hasCompressedSize() {
+        return (presentFields & 2) != 0;
     }
 
-    /**
-     * The relative header offset stored in this extra field.
-     *
-     * @param rho The relative header offset stored in this extra field.
-     */
-    public void setRelativeHeaderOffset(final ZipEightByteInteger rho) {
-        relativeHeaderOffset = rho;
+    /// Clears the unsigned 64-bit compressed size.
+    public void clearCompressedSize() {
+        presentFields &= ~2;
+        compressedSize = 0;
     }
 
-    /**
-     * The uncompressed size stored in this extra field.
-     *
-     * @param size The uncompressed size stored in this extra field.
-     */
-    public void setSize(final ZipEightByteInteger size) {
+    /// Sets the unsigned 32-bit starting disk number and marks it present.
+    ///
+    /// @param diskStart the raw bit pattern
+    public void setDiskStartNumber(final int diskStart) {
+        this.diskStart = diskStart;
+        presentFields |= 8;
+    }
+
+    /// Returns whether the unsigned 32-bit starting disk number is present.
+    public boolean hasDiskStartNumber() {
+        return (presentFields & 8) != 0;
+    }
+
+    /// Clears the unsigned 32-bit starting disk number.
+    public void clearDiskStartNumber() {
+        presentFields &= ~8;
+        diskStart = 0;
+    }
+
+    /// Sets the unsigned 64-bit local header offset and marks it present.
+    ///
+    /// @param relativeHeaderOffset the raw bit pattern
+    public void setRelativeHeaderOffset(final long relativeHeaderOffset) {
+        this.relativeHeaderOffset = relativeHeaderOffset;
+        presentFields |= 4;
+    }
+
+    /// Returns whether the unsigned 64-bit local header offset is present.
+    public boolean hasRelativeHeaderOffset() {
+        return (presentFields & 4) != 0;
+    }
+
+    /// Clears the unsigned 64-bit local header offset.
+    public void clearRelativeHeaderOffset() {
+        presentFields &= ~4;
+        relativeHeaderOffset = 0;
+    }
+
+    /// Sets the unsigned 64-bit uncompressed size and marks it present.
+    ///
+    /// @param size the raw bit pattern
+    public void setSize(final long size) {
         this.size = size;
+        presentFields |= 1;
+    }
+
+    /// Returns whether the unsigned 64-bit uncompressed size is present.
+    public boolean hasSize() {
+        return (presentFields & 1) != 0;
+    }
+
+    /// Clears the unsigned 64-bit uncompressed size.
+    public void clearSize() {
+        presentFields &= ~1;
+        size = 0;
     }
 }

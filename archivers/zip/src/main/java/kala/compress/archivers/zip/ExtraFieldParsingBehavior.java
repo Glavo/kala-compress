@@ -25,19 +25,15 @@ import java.util.zip.ZipException;
  */
 public interface ExtraFieldParsingBehavior extends UnparseableExtraFieldBehavior {
 
-    /**
-     * Creates an instance of ZipExtraField for the given id.
-     * <p>
-     * A good default implementation would be {@link ExtraFieldUtils#createExtraField}.
-     * </p>
-     *
-     * @param headerId the id for the extra field
-     * @return an instance of ZipExtraField, must not be {@code null}
-     * @throws ZipException           if an error occurs
-     * @throws InstantiationException if unable to instantiate the class, not thrown by Commons Compress.
-     * @throws IllegalAccessException if not allowed to instantiate the class, not thrown by Commons Compress.
-     */
-    ZipExtraField createExtraField(ZipShort headerId) throws ZipException, InstantiationException, IllegalAccessException;
+    /// Creates an extra field for the given identifier.
+    /// A default implementation may delegate to [ExtraFieldUtils#createExtraField(short)].
+    ///
+    /// @param headerId the unsigned 16-bit identifier as a raw bit pattern
+    /// @return an extra field, never null
+    /// @throws ZipException if creation fails
+    /// @throws InstantiationException if the class cannot be instantiated
+    /// @throws IllegalAccessException if instantiating the class is not permitted
+    ZipExtraField createExtraField(short headerId) throws ZipException, InstantiationException, IllegalAccessException;
 
     /**
      * Fills in the extra field data for a single extra field.

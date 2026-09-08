@@ -18,6 +18,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import static kala.compress.archivers.zip.ZipConstants.DWORD;
 import static kala.compress.archivers.zip.ZipConstants.SHORT;
 import static kala.compress.archivers.zip.ZipConstants.WORD;
@@ -214,11 +216,11 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
             + " A common cause for this is a ZIP archive containing a ZIP archive."
             + " See https://commons.apache.org/proper/commons-compress/zip.html#ZipArchiveInputStream_vs_ZipFile";
 
-    private static final byte[] LFH = ZipLong.LFH_SIG.getBytes();
+    private static final byte[] LFH = ByteUtils.toLittleEndian(ZipConstants.LFH_SIG, 4);
 
-    private static final byte[] CFH = ZipLong.CFH_SIG.getBytes();
+    private static final byte[] CFH = ByteUtils.toLittleEndian(ZipConstants.CFH_SIG, 4);
 
-    private static final byte[] DD = ZipLong.DD_SIG.getBytes();
+    private static final byte[] DD = ByteUtils.toLittleEndian(ZipConstants.DD_SIG, 4);
 
     private static final byte[] APK_SIGNING_BLOCK_MAGIC = { 'A', 'P', 'K', ' ', 'S', 'i', 'g', ' ', 'B', 'l', 'o', 'c', 'k', ' ', '4', '2', };
 
@@ -248,7 +250,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         return checksig(ZipArchiveOutputStream.LFH_SIG, signature) // normal file
                 || checksig(ZipArchiveOutputStream.EOCD_SIG, signature) // empty zip
                 || checksig(ZipArchiveOutputStream.DD_SIG, signature) // split zip
-                || checksig(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER.getBytes(), signature);
+                || checksig(ByteUtils.toLittleEndian(ZipConstants.SINGLE_SEGMENT_SPLIT_MARKER, 4), signature);
     }
 
     /** Whether to look for and use Unicode extra fields. */
@@ -666,14 +668,14 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
             return null;
         }
 
-        final ZipLong sig = new ZipLong(lfhBuf);
-        if (!sig.equals(ZipLong.LFH_SIG)) {
-            if (sig.equals(ZipLong.CFH_SIG) || sig.equals(ZipLong.AED_SIG) || isApkSigningBlock(lfhBuf)) {
+        final int sig = ByteUtils.getIntLE(lfhBuf, 0);
+        if (sig != ZipConstants.LFH_SIG) {
+            if (sig == ZipConstants.CFH_SIG || sig == ZipConstants.AED_SIG || isApkSigningBlock(lfhBuf)) {
                 hitCentralDirectory = true;
                 skipRemainderOfArchive();
                 return null;
             }
-            throw new ZipException(String.format("Unexpected record signature: 0x%x", sig.getValue()));
+            throw new ZipException(String.format("Unexpected record signature: 0x%x", sig));
         }
 
         // off: go past the signature
@@ -681,7 +683,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         current = new CurrentEntry();
 
         // get version
-        final int versionMadeBy = ZipShort.getValue(lfhBuf, off);
+        final int versionMadeBy = ByteUtils.getUnsignedShortLE(lfhBuf, off);
         off += SHORT;
         current.entry.setPlatform(ZipArchiveReader.toPlatform(versionMadeBy));
 
@@ -693,31 +695,31 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
         off += SHORT;
 
-        current.entry.setMethod(ZipShort.getValue(lfhBuf, off));
+        current.entry.setMethod(ByteUtils.getUnsignedShortLE(lfhBuf, off));
         off += SHORT;
 
-        current.entry.setDosTime(ZipLong.getValue(lfhBuf, off));
+        current.entry.setDosTime(ByteUtils.getUnsignedIntLE(lfhBuf, off));
         off += WORD;
 
-        ZipLong size = null, cSize = null;
+        long size = 0, cSize = 0;
         if (!current.hasDataDescriptor) {
-            current.entry.setCrc(ZipLong.getValue(lfhBuf, off));
+            current.entry.setCrc(ByteUtils.getUnsignedIntLE(lfhBuf, off));
             off += WORD;
 
-            cSize = new ZipLong(lfhBuf, off);
+            cSize = ByteUtils.getUnsignedIntLE(lfhBuf, off);
             off += WORD;
 
-            size = new ZipLong(lfhBuf, off);
+            size = ByteUtils.getUnsignedIntLE(lfhBuf, off);
             off += WORD;
         } else {
             off += 3 * WORD;
         }
 
-        final int fileNameLen = ZipShort.getValue(lfhBuf, off);
+        final int fileNameLen = ByteUtils.getUnsignedShortLE(lfhBuf, off);
 
         off += SHORT;
 
-        final int extraLen = ZipShort.getValue(lfhBuf, off);
+        final int extraLen = ByteUtils.getUnsignedShortLE(lfhBuf, off);
         off += SHORT; // NOSONAR - assignment as documentation
 
         final byte[] fileName = readRange(fileNameLen);
@@ -805,7 +807,9 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
      */
     private boolean isApkSigningBlock(final byte[] suspectLocalFileHeader) throws IOException {
         // length of block excluding the size field itself
-        final BigInteger len = ZipEightByteInteger.getValue(suspectLocalFileHeader);
+        final long rawLength = ByteUtils.getLongLE(suspectLocalFileHeader, 0);
+        final BigInteger len = rawLength >= 0 ? BigInteger.valueOf(rawLength)
+                : BigInteger.valueOf(rawLength & Long.MAX_VALUE).setBit(63);
         // LFH has already been read and all but the first eight bytes contain (part of) the APK signing block,
         // also subtract 16 bytes in order to position us at the magic string
         BigInteger toSkip = len.add(BigInteger.valueOf(DWORD - suspectLocalFileHeader.length - (long) APK_SIGNING_BLOCK_MAGIC.length));
@@ -846,7 +850,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
     /**
      * Records whether a Zip64 extra is present and sets the size information from it if sizes are 0xFFFFFFFF and the entry doesn't use a data descriptor.
      */
-    private void processZip64Extra(final ZipLong size, final ZipLong cSize) throws ZipException {
+    private void processZip64Extra(final long size, final long cSize) throws ZipException {
         final ZipExtraField extra = current.entry.getExtraField(Zip64ExtendedInformationExtraField.HEADER_ID);
         if (extra != null && !(extra instanceof Zip64ExtendedInformationExtraField)) {
             throw new ZipException("archive contains unparseable zip64 extra field");
@@ -855,30 +859,29 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         current.usesZip64 = z64 != null;
         if (!current.hasDataDescriptor) {
             if (z64 != null // same as current.usesZip64 but avoids NPE warning
-                    && (ZipLong.ZIP64_MAGIC.equals(cSize) || ZipLong.ZIP64_MAGIC.equals(size))) {
-                if (z64.getCompressedSize() == null || z64.getSize() == null) {
-                    // avoid NPE if it's a corrupted ZIP archive
+                    && (cSize == ZipConstants.ZIP64_MAGIC || size == ZipConstants.ZIP64_MAGIC)) {
+                if (!z64.hasCompressedSize() || !z64.hasSize()) {
                     throw new ZipException("archive contains corrupted zip64 extra field");
                 }
-                long s = z64.getCompressedSize().getLongValue();
+                long s = z64.getCompressedSize();
                 if (s < 0) {
                     throw new ZipException("broken archive, entry with negative compressed size");
                 }
                 current.entry.setCompressedSize(s);
-                s = z64.getSize().getLongValue();
+                s = z64.getSize();
                 if (s < 0) {
                     throw new ZipException("broken archive, entry with negative size");
                 }
                 current.entry.setSize(s);
-            } else if (cSize != null && size != null) {
-                if (cSize.getValue() < 0) {
+            } else {
+                if (cSize < 0) {
                     throw new ZipException("broken archive, entry with negative compressed size");
                 }
-                current.entry.setCompressedSize(cSize.getValue());
-                if (size.getValue() < 0) {
+                current.entry.setCompressedSize(cSize);
+                if (size < 0) {
                     throw new ZipException("broken archive, entry with negative size");
                 }
-                current.entry.setSize(size.getValue());
+                current.entry.setSize(size);
             }
         }
     }
@@ -940,13 +943,13 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
 
     private void readDataDescriptor() throws IOException {
         readFully(wordBuf);
-        ZipLong val = new ZipLong(wordBuf);
-        if (ZipLong.DD_SIG.equals(val)) {
+        int val = ByteUtils.getIntLE(wordBuf, 0);
+        if (val == ZipConstants.DD_SIG) {
             // data descriptor with signature, skip sig
             readFully(wordBuf);
-            val = new ZipLong(wordBuf);
+            val = ByteUtils.getIntLE(wordBuf, 0);
         }
-        current.entry.setCrc(val.getValue());
+        current.entry.setCrc(Integer.toUnsignedLong(val));
 
         // if there is a ZIP64 extra field, sizes are eight bytes
         // each, otherwise four bytes each. Unfortunately some
@@ -960,26 +963,26 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         // If so, push back eight bytes and assume sizes are four
         // bytes, otherwise sizes are eight bytes each.
         readFully(twoDwordBuf);
-        final ZipLong potentialSig = new ZipLong(twoDwordBuf, DWORD);
-        if (potentialSig.equals(ZipLong.CFH_SIG) || potentialSig.equals(ZipLong.LFH_SIG)) {
+        final int potentialSig = ByteUtils.getIntLE(twoDwordBuf, DWORD);
+        if (potentialSig == ZipConstants.CFH_SIG || potentialSig == ZipConstants.LFH_SIG) {
             pushback(twoDwordBuf, DWORD, DWORD);
-            long size = ZipLong.getValue(twoDwordBuf);
+            long size = ByteUtils.getUnsignedIntLE(twoDwordBuf, 0);
             if (size < 0) {
                 throw new ZipException("broken archive, entry with negative compressed size");
             }
             current.entry.setCompressedSize(size);
-            size = ZipLong.getValue(twoDwordBuf, WORD);
+            size = ByteUtils.getUnsignedIntLE(twoDwordBuf, WORD);
             if (size < 0) {
                 throw new ZipException("broken archive, entry with negative size");
             }
             current.entry.setSize(size);
         } else {
-            long size = ZipEightByteInteger.getLongValue(twoDwordBuf);
+            long size = ByteUtils.getLongLE(twoDwordBuf, 0);
             if (size < 0) {
                 throw new ZipException("broken archive, entry with negative compressed size");
             }
             current.entry.setCompressedSize(size);
-            size = ZipEightByteInteger.getLongValue(twoDwordBuf, DWORD);
+            size = ByteUtils.getLongLE(twoDwordBuf, DWORD);
             if (size < 0) {
                 throw new ZipException("broken archive, entry with negative size");
             }
@@ -1016,16 +1019,16 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         try {
             READ_LOOP: for (int i = 0; ; ) {
                 for (int j = 0; i <= PREAMBLE_GARBAGE_MAX_SIZE - 4 && j <= header.length - 4; ++j, ++i) {
-                    final ZipLong sig = new ZipLong(header, j);
-                    if (sig.equals(ZipLong.LFH_SIG) ||
-                        sig.equals(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER) ||
-                        sig.equals(ZipLong.DD_SIG)) {
+                    final int sig = ByteUtils.getIntLE(header, j);
+                    if (sig == ZipConstants.LFH_SIG ||
+                        sig == ZipConstants.SINGLE_SEGMENT_SPLIT_MARKER ||
+                        sig == ZipConstants.DD_SIG) {
                         // regular archive containing at least one entry:
                         System.arraycopy(header, j, header, 0, header.length - j);
                         readFully(header, header.length - j);
                         break READ_LOOP;
                     }
-                    if (sig.equals(new ZipLong(ZipArchiveOutputStream.EOCD_SIG))) {
+                    if (sig == ByteUtils.getIntLE(ZipArchiveOutputStream.EOCD_SIG, 0)) {
                         // empty archive:
                         pushback(header, j, header.length - j);
                         return false;
@@ -1042,14 +1045,14 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
         } catch (final EOFException ex) {
             throw new ZipException("Cannot find zip signature within the file");
         }
-        final ZipLong sig = new ZipLong(lfhBuf);
+        final int sig = ByteUtils.getIntLE(lfhBuf, 0);
 
-        if (!skipSplitSig && sig.equals(ZipLong.DD_SIG)) {
+        if (!skipSplitSig && sig == ZipConstants.DD_SIG) {
             throw new UnsupportedZipFeatureException(UnsupportedZipFeatureException.Feature.SPLITTING);
         }
 
         // the split ZIP signature(08074B50) should only be skipped when the skipSplitSig is set
-        if (sig.equals(ZipLong.SINGLE_SEGMENT_SPLIT_MARKER) || sig.equals(ZipLong.DD_SIG)) {
+        if (sig == ZipConstants.SINGLE_SEGMENT_SPLIT_MARKER || sig == ZipConstants.DD_SIG) {
             // Just skip over the marker.
             System.arraycopy(lfhBuf, 4, lfhBuf, 0, lfhBuf.length - 4);
             readFully(lfhBuf, lfhBuf.length - 4);
@@ -1292,7 +1295,7 @@ public class ZipArchiveInputStream extends ArchiveInputStream<ZipArchiveEntry> i
             realSkip((long) ZipArchiveReader.MIN_EOCD_SIZE - WORD /* signature */ - SHORT /* comment len */);
             readFully(shortBuf);
             // file comment
-            final int commentLen = ZipShort.getValue(shortBuf);
+            final int commentLen = ByteUtils.getUnsignedShortLE(shortBuf, 0);
             if (commentLen >= 0) {
                 realSkip(commentLen);
                 return;

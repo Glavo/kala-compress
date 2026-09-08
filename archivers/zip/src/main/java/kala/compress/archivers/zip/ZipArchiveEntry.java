@@ -174,7 +174,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         }
 
         @Override
-        public ZipExtraField createExtraField(final ZipShort headerId) {
+        public ZipExtraField createExtraField(final short headerId) {
             return ExtraFieldUtils.createExtraField(headerId);
         }
 
@@ -420,7 +420,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
 
     private NameSource nameSource = NameSource.NAME;
 
-    private final Function<ZipShort, ZipExtraField> extraFieldFactory;
+    private final Function<Short, ZipExtraField> extraFieldFactory;
 
     private CommentSource commentSource = CommentSource.COMMENT;
 
@@ -447,7 +447,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
      * @param options           options indicating how symbolic links are handled.
      * @throws IOException if an I/O error occurs.
      */
-    private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final Path inputPath, final String entryName,
+    private ZipArchiveEntry(final Function<Short, ZipExtraField> extraFieldFactory, final Path inputPath, final String entryName,
                             final LinkOption... options) throws IOException {
         this(extraFieldFactory, toEntryName(inputPath, entryName, options));
         setAttributes(inputPath, options);
@@ -463,7 +463,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
      * @param extraFieldFactory custom lookup factory for extra fields or null
      * @param name              the name of the entry
      */
-    private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final String name) {
+    private ZipArchiveEntry(final Function<Short, ZipExtraField> extraFieldFactory, final String name) {
         this.extraFieldFactory = extraFieldFactory;
         setName(name);
     }
@@ -479,7 +479,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
      * @param entry             the entry to get fields from
      * @throws ZipException on error
      */
-    private ZipArchiveEntry(final Function<ZipShort, ZipExtraField> extraFieldFactory, final ZipEntry entry) throws ZipException {
+    private ZipArchiveEntry(final Function<Short, ZipExtraField> extraFieldFactory, final ZipEntry entry) throws ZipException {
         this(extraFieldFactory, entry.getName());
         method = entry.getMethod();
         size = entry.getSize();
@@ -538,7 +538,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
     /// @throws IllegalArgumentException if name exceeds 65535 characters
     /// @since 1.26.0
     public ZipArchiveEntry(final String name) {
-        this((Function<ZipShort, ZipExtraField>) null, name);
+        this((Function<Short, ZipExtraField>) null, name);
     }
 
     /// Creates a ZIP entry by copying the entry metadata.
@@ -716,8 +716,8 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
                && dataOffset == other.dataOffset && generalPurposeBit.equals(other.generalPurposeBit);
     }
 
-    private ZipExtraField findMatching(final ZipShort headerId, final List<ZipExtraField> fs) {
-        return fs.stream().filter(f -> headerId.equals(f.getHeaderId())).findFirst().orElse(null);
+    private ZipExtraField findMatching(final short headerId, final List<ZipExtraField> fs) {
+        return fs.stream().filter(f -> headerId == f.getHeaderId()).findFirst().orElse(null);
     }
 
     private ZipExtraField findUnparseable(final List<ZipExtraField> fs) {
@@ -865,16 +865,14 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         return externalAttributes;
     }
 
-    /**
-     * Gets an extra field by its header id.
-     *
-     * @param type the header id
-     * @return null if no such field exists.
-     */
-    public ZipExtraField getExtraField(final ZipShort type) {
+    /// Returns the extra field with the given identifier.
+    ///
+    /// @param type the unsigned 16-bit identifier as a raw bit pattern
+    /// @return the field, or null if none exists
+    public ZipExtraField getExtraField(final short type) {
         if (extraFields != null) {
             for (final ZipExtraField extraField : extraFields) {
-                if (type.equals(extraField.getHeaderId())) {
+                if (type == extraField.getHeaderId()) {
                     return extraField;
                 }
             }
@@ -1163,13 +1161,13 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         }
     }
 
-    private void internalRemoveExtraField(final ZipShort type) {
+    private void internalRemoveExtraField(final short type) {
         if (extraFields == null) {
             return;
         }
         final List<ZipExtraField> newResult = new ArrayList<>();
         for (final ZipExtraField extraField : extraFields) {
-            if (!type.equals(extraField.getHeaderId())) {
+            if (type != extraField.getHeaderId()) {
                 newResult.add(extraField);
             }
         }
@@ -1267,7 +1265,7 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         if (extraFieldFactory != null) {
             return ExtraFieldUtils.parse(data, local, new ExtraFieldParsingBehavior() {
                 @Override
-                public ZipExtraField createExtraField(final ZipShort headerId) throws ZipException, InstantiationException, IllegalAccessException {
+                public ZipExtraField createExtraField(final short headerId) throws ZipException, InstantiationException, IllegalAccessException {
                     final ZipExtraField field = extraFieldFactory.apply(headerId);
                     return field == null ? parsingBehavior.createExtraField(headerId) : field;
                 }
@@ -1289,9 +1287,9 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
 
     /// Removes an extra field, reapplying remaining timestamps if a timestamp field is removed.
     ///
-    /// @param type the type of extra field to remove
+    /// @param type the unsigned 16-bit identifier as a raw bit pattern
     /// @throws NoSuchElementException if no field with this type exists
-    public void removeExtraField(final ZipShort type) {
+    public void removeExtraField(final short type) {
         final ZipExtraField removed = getExtraField(type);
         if (removed == null) {
             throw new NoSuchElementException();
@@ -1489,8 +1487,8 @@ public class ZipArchiveEntry implements ArchiveEntry, EntryStreamOffsets, Clonea
         final List<ZipExtraField> fields = new ArrayList<>();
         if (extraFields != null) {
             for (final ZipExtraField field : extraFields) {
-                final ZipShort id = field.getHeaderId();
-                if (!X5455_ExtendedTimestamp.HEADER_ID.equals(id) && !X000A_NTFS.HEADER_ID.equals(id)) {
+                final short id = field.getHeaderId();
+                if (X5455_ExtendedTimestamp.HEADER_ID != id && X000A_NTFS.HEADER_ID != id) {
                     fields.add(field);
                 }
             }

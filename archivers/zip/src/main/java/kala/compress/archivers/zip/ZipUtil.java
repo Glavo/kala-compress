@@ -16,6 +16,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import kala.compress.utils.TimeUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -291,7 +293,7 @@ public abstract class ZipUtil {
      * @param offset The offset within the output buffer of the first byte to be written. must be non-negative and no larger than {@code buf.length-4}
      */
     public static void toDosTime(final long t, final byte[] buf, final int offset) {
-        ZipLong.putLong(javaToDosTime(t), buf, offset);
+        ByteUtils.setUnsignedIntLE(buf, offset, javaToDosTime(t));
     }
 
     /**

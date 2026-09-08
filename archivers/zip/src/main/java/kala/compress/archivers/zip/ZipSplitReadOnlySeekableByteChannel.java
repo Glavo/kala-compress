@@ -17,6 +17,8 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -246,8 +248,8 @@ public class ZipSplitReadOnlySeekableByteChannel extends MultiReadOnlySeekableBy
 
         zipSplitSignatureByteBuffer.rewind();
         channel.read(zipSplitSignatureByteBuffer);
-        final ZipLong signature = new ZipLong(zipSplitSignatureByteBuffer.array());
-        if (!signature.equals(ZipLong.DD_SIG)) {
+        final int signature = ByteUtils.getIntLE(zipSplitSignatureByteBuffer.array(), 0);
+        if (signature != ZipConstants.DD_SIG) {
             channel.position(0L);
             throw new IOException("The first ZIP split segment does not begin with split ZIP file signature");
         }

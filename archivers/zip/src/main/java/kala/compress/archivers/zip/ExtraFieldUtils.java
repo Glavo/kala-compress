@@ -16,6 +16,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -114,7 +116,7 @@ public class ExtraFieldUtils {
     /**
      * Static registry of known extra fields.
      */
-    private static final HashMap<ZipShort, Supplier<ZipExtraField>> IMPLEMENTATIONS;
+    private static final HashMap<Short, Supplier<ZipExtraField>> IMPLEMENTATIONS;
 
     static {
         IMPLEMENTATIONS = new HashMap<>();
@@ -136,13 +138,11 @@ public class ExtraFieldUtils {
 
     static final ZipExtraField[] EMPTY_ZIP_EXTRA_FIELD_ARRAY = {};
 
-    /**
-     * Creates an instance of the appropriate ExtraField, falls back to {@link UnrecognizedExtraField UnrecognizedExtraField}.
-     *
-     * @param headerId the header identifier
-     * @return an instance of the appropriate ExtraField
-     */
-    public static ZipExtraField createExtraField(final ZipShort headerId) {
+    /// Creates an extra field, falling back to [UnrecognizedExtraField] for unknown identifiers.
+    ///
+    /// @param headerId the unsigned 16-bit identifier as a raw bit pattern
+    /// @return a new extra field
+    public static ZipExtraField createExtraField(final short headerId) {
         final ZipExtraField field = createExtraFieldNoDefault(headerId);
         if (field != null) {
             return field;
@@ -152,14 +152,12 @@ public class ExtraFieldUtils {
         return u;
     }
 
-    /**
-     * Creates an instance of the appropriate {@link ZipExtraField}.
-     *
-     * @param headerId the header identifier
-     * @return an instance of the appropriate {@link ZipExtraField} or null if the id is not supported
-     * @since 1.19
-     */
-    public static ZipExtraField createExtraFieldNoDefault(final ZipShort headerId) {
+    /// Creates an extra field for a supported identifier.
+    ///
+    /// @param headerId the unsigned 16-bit identifier as a raw bit pattern
+    /// @return a new extra field, or null if the identifier is unsupported
+    /// @since 1.19
+    public static ZipExtraField createExtraFieldNoDefault(final short headerId) {
         final Supplier<ZipExtraField> provider = IMPLEMENTATIONS.get(headerId);
         return provider != null ? provider.get() : null;
     }
@@ -193,7 +191,7 @@ public class ExtraFieldUtils {
             }
             return ze;
         } catch (final ArrayIndexOutOfBoundsException e) {
-            throw (ZipException) new ZipException("Failed to parse corrupt ZIP extra field of type " + Integer.toHexString(ze.getHeaderId().getValue()))
+            throw (ZipException) new ZipException("Failed to parse corrupt ZIP extra field of type " + Integer.toHexString(Short.toUnsignedInt(ze.getHeaderId())))
                     .initCause(e);
         }
     }
@@ -211,13 +209,13 @@ public class ExtraFieldUtils {
 
         int sum = WORD * regularExtraFieldCount;
         for (final ZipExtraField element : data) {
-            sum += element.getCentralDirectoryLength().getValue();
+            sum += element.getCentralDirectoryLength();
         }
         final byte[] result = new byte[sum];
         int start = 0;
         for (int i = 0; i < regularExtraFieldCount; i++) {
-            System.arraycopy(data[i].getHeaderId().getBytes(), 0, result, start, 2);
-            System.arraycopy(data[i].getCentralDirectoryLength().getBytes(), 0, result, start + 2, 2);
+            ByteUtils.setUnsignedShortLE(result, start, data[i].getHeaderId());
+            ByteUtils.setUnsignedShortLE(result, start + 2, data[i].getCentralDirectoryLength());
             start += WORD;
             final byte[] central = data[i].getCentralDirectoryData();
             if (central != null) {
@@ -247,14 +245,14 @@ public class ExtraFieldUtils {
 
         int sum = WORD * regularExtraFieldCount;
         for (final ZipExtraField element : data) {
-            sum += element.getLocalFileDataLength().getValue();
+            sum += element.getLocalFileDataLength();
         }
 
         final byte[] result = new byte[sum];
         int start = 0;
         for (int i = 0; i < regularExtraFieldCount; i++) {
-            System.arraycopy(data[i].getHeaderId().getBytes(), 0, result, start, 2);
-            System.arraycopy(data[i].getLocalFileDataLength().getBytes(), 0, result, start + 2, 2);
+            ByteUtils.setUnsignedShortLE(result, start, data[i].getHeaderId());
+            ByteUtils.setUnsignedShortLE(result, start + 2, data[i].getLocalFileDataLength());
             start += WORD;
             final byte[] local = data[i].getLocalFileDataData();
             if (local != null) {
@@ -310,7 +308,7 @@ public class ExtraFieldUtils {
         int start = 0;
         final int dataLength = data.length;
         LOOP: while (start < dataLength) {
-            final int length = dataLength - start < WORD ? -1 : new ZipShort(data, start + 2).getValue();
+            final int length = dataLength - start < WORD ? -1 : ByteUtils.getUnsignedShortLE(data, start + 2);
             if (length < 0 || length > dataLength - start - WORD) {
                 final ZipExtraField field = parsingBehavior.onUnparseableExtraField(data, start, dataLength - start, local, length);
                 if (field != null) {
@@ -321,7 +319,7 @@ public class ExtraFieldUtils {
                 // available data
                 break LOOP;
             }
-            final ZipShort headerId = new ZipShort(data, start);
+            final short headerId = ByteUtils.getShortLE(data, start);
             try {
                 final ZipExtraField ze = Objects.requireNonNull(parsingBehavior.createExtraField(headerId), "createExtraField must not return null");
                 v.add(Objects.requireNonNull(parsingBehavior.fill(ze, data, start + WORD, length, local), "fill must not return null"));
@@ -349,7 +347,7 @@ public class ExtraFieldUtils {
         return parse(data, local, new ExtraFieldParsingBehavior() {
 
             @Override
-            public ZipExtraField createExtraField(final ZipShort headerId) {
+            public ZipExtraField createExtraField(final short headerId) {
                 return ExtraFieldUtils.createExtraField(headerId);
             }
 

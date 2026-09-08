@@ -18,6 +18,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.util.zip.ZipException;
 
 /**
@@ -40,7 +42,7 @@ public class ResourceAlignmentExtraField implements ZipExtraField {
     /**
      * Extra field id used for storing alignment and padding.
      */
-    public static final ZipShort ID = new ZipShort(0xa11e);
+    public static final short ID = (short) 0xa11e;
 
     public static final int BASE_SIZE = 2;
 
@@ -95,29 +97,29 @@ public class ResourceAlignmentExtraField implements ZipExtraField {
 
     @Override
     public byte[] getCentralDirectoryData() {
-        return ZipShort.getBytes(alignment | (allowMethodChange ? ALLOW_METHOD_MESSAGE_CHANGE_FLAG : 0));
+        return ByteUtils.toLittleEndian(alignment | (allowMethodChange ? ALLOW_METHOD_MESSAGE_CHANGE_FLAG : 0), 2);
     }
 
     @Override
-    public ZipShort getCentralDirectoryLength() {
-        return new ZipShort(BASE_SIZE);
+    public int getCentralDirectoryLength() {
+        return BASE_SIZE;
     }
 
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return ID;
     }
 
     @Override
     public byte[] getLocalFileDataData() {
         final byte[] content = new byte[BASE_SIZE + padding];
-        ZipShort.putShort(alignment | (allowMethodChange ? ALLOW_METHOD_MESSAGE_CHANGE_FLAG : 0), content, 0);
+        ByteUtils.setUnsignedShortLE(content, 0, alignment | (allowMethodChange ? ALLOW_METHOD_MESSAGE_CHANGE_FLAG : 0));
         return content;
     }
 
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(BASE_SIZE + padding);
+    public int getLocalFileDataLength() {
+        return BASE_SIZE + padding;
     }
 
     @Override
@@ -125,7 +127,7 @@ public class ResourceAlignmentExtraField implements ZipExtraField {
         if (length < BASE_SIZE) {
             throw new ZipException("Too short content for ResourceAlignmentExtraField (0xa11e): " + length);
         }
-        final int alignmentValue = ZipShort.getValue(buffer, offset);
+        final int alignmentValue = ByteUtils.getUnsignedShortLE(buffer, offset);
         this.alignment = (short) (alignmentValue & ALLOW_METHOD_MESSAGE_CHANGE_FLAG - 1);
         this.allowMethodChange = (alignmentValue & ALLOW_METHOD_MESSAGE_CHANGE_FLAG) != 0;
     }

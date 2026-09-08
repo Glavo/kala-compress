@@ -19,6 +19,8 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.EOFException;
@@ -230,7 +232,7 @@ public class ZipArchiveReader implements Closeable {
         /* relative offset of local header */ + ZipConstants.WORD;
     // @formatter:on
 
-    private static final long CFH_SIG = ZipLong.getValue(ZipArchiveOutputStream.CFH_SIG);
+    private static final long CFH_SIG = ByteUtils.getUnsignedIntLE(ZipArchiveOutputStream.CFH_SIG, 0);
 
     /// Length of the "End of central directory record" - which is supposed to be the last structure of the archive - without file comment.
     static final int MIN_EOCD_SIZE =
@@ -1273,31 +1275,31 @@ public class ZipArchiveReader implements Closeable {
             z64.reparseCentralDirectoryData(hasUncompressedSize, hasCompressedSize, hasRelativeHeaderOffset, hasDiskStart);
 
             if (hasUncompressedSize) {
-                final long size = z64.getSize().getLongValue();
+                final long size = z64.getSize();
                 if (size < 0) {
                     throw new IOException("broken archive, entry with negative size");
                 }
                 entry.setSize(size);
             } else if (hasCompressedSize) {
-                z64.setSize(new ZipEightByteInteger(entry.getSize()));
+                z64.setSize(entry.getSize());
             }
 
             if (hasCompressedSize) {
-                final long size = z64.getCompressedSize().getLongValue();
+                final long size = z64.getCompressedSize();
                 if (size < 0) {
                     throw new IOException("broken archive, entry with negative compressed size");
                 }
                 entry.setCompressedSize(size);
             } else if (hasUncompressedSize) {
-                z64.setCompressedSize(new ZipEightByteInteger(entry.getCompressedSize()));
+                z64.setCompressedSize(entry.getCompressedSize());
             }
 
             if (hasRelativeHeaderOffset) {
-                entry.setLocalHeaderOffset(z64.getRelativeHeaderOffset().getLongValue());
+                entry.setLocalHeaderOffset(z64.getRelativeHeaderOffset());
             }
 
             if (hasDiskStart) {
-                entry.setDiskNumberStart(z64.getDiskStartNumber().getValue());
+                entry.setDiskNumberStart(Integer.toUnsignedLong(z64.getDiskStartNumber()));
             }
         }
     }
@@ -1324,6 +1326,6 @@ public class ZipArchiveReader implements Closeable {
     /// Checks whether the archive starts with an LFH. If it doesn't, it may be an empty archive.
     private boolean startsWithLocalFileHeader() throws IOException {
         archive.position(firstLocalFileHeaderOffset);
-        return archive.readInt() == ZipLong.LFH_SIG.getIntValue();
+        return archive.readInt() == ZipConstants.LFH_SIG;
     }
 }

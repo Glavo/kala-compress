@@ -15,6 +15,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
@@ -54,8 +56,8 @@ class ZipArchiveEntryApiTest {
         assertArrayEquals(tail, central.getCentralDirectoryExtra());
 
         final byte[] oversized = new byte[65535 + length];
-        ZipShort.putShort(0x5555, oversized, 0);
-        ZipShort.putShort(65531, oversized, 2);
+        ByteUtils.setUnsignedShortLE(oversized, 0, 0x5555);
+        ByteUtils.setUnsignedShortLE(oversized, 2, 65531);
         assertThrows(IllegalArgumentException.class, () -> entry.setExtra(oversized));
         assertArrayEquals(tail, entry.getExtra());
         assertArrayEquals(tail, entry.getUnparseableExtraFieldData().getLocalFileDataData());
@@ -77,7 +79,7 @@ class ZipArchiveEntryApiTest {
                 }
             }
             final UnrecognizedExtraField padding = new UnrecognizedExtraField();
-            padding.setHeaderId(new ZipShort(0x5555));
+            padding.setHeaderId((short) 0x5555);
             padding.setLocalFileDataData(new byte[(existingTime ? 65535 : 65500) - entry.getExtra().length - 4]);
             entry.addExtraField(padding);
             final byte[] extra = entry.getExtra().clone();
@@ -119,7 +121,7 @@ class ZipArchiveEntryApiTest {
     @ValueSource(longs = {Long.MIN_VALUE + 1, Long.MIN_VALUE + 116444736000000000L - 1})
     void extremeNtfsTimestamp(final long value) {
         final X000A_NTFS ntfs = new X000A_NTFS();
-        ntfs.setModifyTime(new ZipEightByteInteger(value));
+        ntfs.setModifyTime(value);
         final byte[] extra = ExtraFieldUtils.mergeLocalFileDataData(new ZipExtraField[]{ntfs});
         final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
         entry.setExtra(extra);
@@ -260,7 +262,7 @@ class ZipArchiveEntryApiTest {
         entry.setExtraFields(new ZipExtraField[]{unix, ntfs});
         assertEquals(ntfsTime, entry.getLastModifiedTime());
 
-        final ZipShort removed = removeNtfs ? X000A_NTFS.HEADER_ID : X5455_ExtendedTimestamp.HEADER_ID;
+        final short removed = removeNtfs ? X000A_NTFS.HEADER_ID : X5455_ExtendedTimestamp.HEADER_ID;
         entry.removeExtraField(removed);
         assertNull(entry.getExtraField(removed));
         final FileTime expected = removeNtfs ? unixTime : ntfsTime;
@@ -435,8 +437,8 @@ class ZipArchiveEntryApiTest {
                 output.putNextEntry(expected);
                 output.closeEntry();
             }
-            assertEquals(ZipLong.getValue(bytes.toByteArray(), ZipEntry.LOCTIM),
-                    ZipLong.getValue(write(entry), ZipEntry.LOCTIM));
+            assertEquals(ByteUtils.getUnsignedIntLE(bytes.toByteArray(), ZipEntry.LOCTIM),
+                    ByteUtils.getUnsignedIntLE(write(entry), ZipEntry.LOCTIM));
         }
     }
 

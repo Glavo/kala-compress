@@ -27,8 +27,9 @@ import kala.compress.utils.ByteUtils;
  */
 public final class JarMarker implements ZipExtraField {
 
-    static final ZipShort ID = new ZipShort(0xCAFE);
-    private static final ZipShort NULL = new ZipShort(0);
+    static final short ID = (short) 0xCAFE;
+    /// The marker has no data bytes.
+    private static final int DATA_LENGTH = 0;
     private static final JarMarker DEFAULT = new JarMarker();
 
     /**
@@ -61,8 +62,8 @@ public final class JarMarker implements ZipExtraField {
      * @return 0
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
-        return NULL;
+    public int getCentralDirectoryLength() {
+        return DATA_LENGTH;
     }
 
     /**
@@ -71,7 +72,7 @@ public final class JarMarker implements ZipExtraField {
      * @return the header id
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return ID;
     }
 
@@ -91,8 +92,8 @@ public final class JarMarker implements ZipExtraField {
      * @return 0
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return NULL;
+    public int getLocalFileDataLength() {
+        return DATA_LENGTH;
     }
 
     /**

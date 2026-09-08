@@ -20,7 +20,6 @@ import kala.compress.utils.ByteUtils;
 import kala.compress.utils.TimeUtils;
 
 import java.nio.file.attribute.FileTime;
-import java.util.Objects;
 import java.util.zip.ZipException;
 
 /**
@@ -72,44 +71,45 @@ public class X000A_NTFS implements ZipExtraField {
      *
      * @since 1.23
      */
-    public static final ZipShort HEADER_ID = new ZipShort(0x000a);
+    public static final short HEADER_ID = (short) 0x000a;
 
-    private static final ZipShort TIME_ATTR_TAG = new ZipShort(0x0001);
-    private static final ZipShort TIME_ATTR_SIZE = new ZipShort(3 * 8);
+    private static final short TIME_ATTR_TAG = (short) 0x0001;
+    private static final int TIME_ATTR_SIZE = 3 * 8;
 
     /// The missing-timestamp marker recognized by java.util.zip.
-    private static final ZipEightByteInteger TIME_NOT_AVAILABLE = new ZipEightByteInteger(Long.MIN_VALUE);
+    private static final long TIME_NOT_AVAILABLE = (Long.MIN_VALUE);
 
-    private static ZipEightByteInteger fileTimeToZip(final FileTime time) {
+    /// Encodes a timestamp, using the missing-time marker for null.
+    private static long fileTimeToZip(final FileTime time) {
         if (time == null) {
-            return null;
+            return TIME_NOT_AVAILABLE;
         }
-        return new ZipEightByteInteger(TimeUtils.toNtfsTime(time));
+        return TimeUtils.toNtfsTime(time);
     }
 
     /// Decodes a timestamp, accepting both the JDK marker and legacy zero values as absent.
-    private static FileTime zipToFileTime(final ZipEightByteInteger z) {
-        if (z == null || TIME_NOT_AVAILABLE.equals(z) || ZipEightByteInteger.ZERO.equals(z)) {
+    private static FileTime zipToFileTime(final long z) {
+        if (z == TIME_NOT_AVAILABLE || z == 0) {
             return null;
         }
-        return TimeUtils.ntfsTimeToFileTime(z.getLongValue());
+        return TimeUtils.ntfsTimeToFileTime(z);
     }
 
     /// The encoded modification time or a missing-time marker.
-    private ZipEightByteInteger modifyTime = TIME_NOT_AVAILABLE;
+    private long modifyTime = TIME_NOT_AVAILABLE;
 
     /// The encoded access time or a missing-time marker.
-    private ZipEightByteInteger accessTime = TIME_NOT_AVAILABLE;
+    private long accessTime = TIME_NOT_AVAILABLE;
 
     /// The encoded creation time or a missing-time marker.
-    private ZipEightByteInteger createTime = TIME_NOT_AVAILABLE;
+    private long createTime = TIME_NOT_AVAILABLE;
 
     @Override
     public boolean equals(final Object o) {
         if (o instanceof X000A_NTFS) {
             final X000A_NTFS xf = (X000A_NTFS) o;
 
-            return Objects.equals(modifyTime, xf.modifyTime) && Objects.equals(accessTime, xf.accessTime) && Objects.equals(createTime, xf.createTime);
+            return modifyTime == xf.modifyTime && accessTime == xf.accessTime && createTime == xf.createTime;
         }
         return false;
     }
@@ -126,7 +126,7 @@ public class X000A_NTFS implements ZipExtraField {
 
     /// Returns the encoded access time in 100-nanosecond units since 1601-01-01 UTC.
     /// Unset times use [Long#MIN_VALUE]; a parsed zero is also treated as absent.
-    public ZipEightByteInteger getAccessTime() {
+    public long getAccessTime() {
         return accessTime;
     }
 
@@ -147,10 +147,10 @@ public class X000A_NTFS implements ZipExtraField {
      * For X5455 the central length is often smaller than the local length, because central cannot contain access or create timestamps.
      * </p>
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
+    public int getCentralDirectoryLength() {
         return getLocalFileDataLength();
     }
 
@@ -166,7 +166,7 @@ public class X000A_NTFS implements ZipExtraField {
 
     /// Returns the encoded creation time in 100-nanosecond units since 1601-01-01 UTC.
     /// Unset times use [Long#MIN_VALUE]; a parsed zero is also treated as absent.
-    public ZipEightByteInteger getCreateTime() {
+    public long getCreateTime() {
         return createTime;
     }
 
@@ -176,7 +176,7 @@ public class X000A_NTFS implements ZipExtraField {
      * @return the value for the header id for this extrafield
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return HEADER_ID;
     }
 
@@ -187,32 +187,32 @@ public class X000A_NTFS implements ZipExtraField {
      */
     @Override
     public byte[] getLocalFileDataData() {
-        final byte[] data = new byte[getLocalFileDataLength().getValue()];
+        final byte[] data = new byte[getLocalFileDataLength()];
         int pos = 4;
-        ByteUtils.setUnsignedShortLE(data, pos, TIME_ATTR_TAG.getValue());
+        ByteUtils.setUnsignedShortLE(data, pos, TIME_ATTR_TAG);
         pos += 2;
-        ByteUtils.setUnsignedShortLE(data, pos, TIME_ATTR_SIZE.getValue());
+        ByteUtils.setUnsignedShortLE(data, pos, TIME_ATTR_SIZE);
         pos += 2;
-        ByteUtils.setLongLE(data, pos, modifyTime.getLongValue());
+        ByteUtils.setLongLE(data, pos, modifyTime);
         pos += 8;
-        ByteUtils.setLongLE(data, pos, accessTime.getLongValue());
+        ByteUtils.setLongLE(data, pos, accessTime);
         pos += 8;
-        ByteUtils.setLongLE(data, pos, createTime.getLongValue());
+        ByteUtils.setLongLE(data, pos, createTime);
         return data;
     }
 
-    private static final ZipShort LOCAL_FILE_DATA_LENGTH = new ZipShort(4 /* reserved */
+    private static final int LOCAL_FILE_DATA_LENGTH = 4 /* reserved */
             + 2 /* Tag#1 */
             + 2 /* Size#1 */
-            + 3 * 8 /* time values */);
+            + 3 * 8 /* time values */;
 
     /**
      * Gets the length of the extra field in the local file data - without Header-ID or length specifier.
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
+    public int getLocalFileDataLength() {
         return LOCAL_FILE_DATA_LENGTH;
     }
 
@@ -228,24 +228,18 @@ public class X000A_NTFS implements ZipExtraField {
 
     /// Returns the encoded modification time in 100-nanosecond units since 1601-01-01 UTC.
     /// Unset times use [Long#MIN_VALUE]; a parsed zero is also treated as absent.
-    public ZipEightByteInteger getModifyTime() {
+    public long getModifyTime() {
         return modifyTime;
     }
 
     @Override
     public int hashCode() {
         int hc = -123;
-        if (modifyTime != null) {
-            hc ^= modifyTime.hashCode();
-        }
-        if (accessTime != null) {
-            // Since accessTime is often same as modifyTime,
-            // this prevents them from XOR negating each other.
-            hc ^= Integer.rotateLeft(accessTime.hashCode(), 11);
-        }
-        if (createTime != null) {
-            hc ^= Integer.rotateLeft(createTime.hashCode(), 22);
-        }
+        hc ^= Long.hashCode(modifyTime);
+        // Since accessTime is often same as modifyTime,
+        // this prevents them from XOR negating each other.
+        hc ^= Integer.rotateLeft(Long.hashCode(accessTime), 11);
+        hc ^= Integer.rotateLeft(Long.hashCode(createTime), 22);
         return hc;
     }
 
@@ -274,27 +268,27 @@ public class X000A_NTFS implements ZipExtraField {
         offset += 4;
 
         while (offset + 4 <= len) {
-            final ZipShort tag = new ZipShort(data, offset);
+            final short tag = ByteUtils.getShortLE(data, offset);
             offset += 2;
-            if (tag.equals(TIME_ATTR_TAG)) {
+            if (tag == TIME_ATTR_TAG) {
                 readTimeAttr(data, offset, len - offset);
                 break;
             }
-            final ZipShort size = new ZipShort(data, offset);
-            offset += 2 + size.getValue();
+            final int size = ByteUtils.getUnsignedShortLE(data, offset);
+            offset += 2 + size;
         }
     }
 
     private void readTimeAttr(final byte[] data, int offset, final int length) {
         if (length >= 2 + 3 * 8) {
-            final ZipShort tagValueLength = new ZipShort(data, offset);
-            if (TIME_ATTR_SIZE.equals(tagValueLength)) {
+            final int tagValueLength = ByteUtils.getUnsignedShortLE(data, offset);
+            if (TIME_ATTR_SIZE == tagValueLength) {
                 offset += 2;
-                modifyTime = new ZipEightByteInteger(data, offset);
+                modifyTime = ByteUtils.getLongLE(data, offset);
                 offset += 8;
-                accessTime = new ZipEightByteInteger(data, offset);
+                accessTime = ByteUtils.getLongLE(data, offset);
                 offset += 8;
-                createTime = new ZipEightByteInteger(data, offset);
+                createTime = ByteUtils.getLongLE(data, offset);
             }
         }
     }
@@ -320,9 +314,9 @@ public class X000A_NTFS implements ZipExtraField {
 
     /// Sets the encoded access time.
     ///
-    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or null to clear it
-    public void setAccessTime(final ZipEightByteInteger t) {
-        accessTime = t == null ? TIME_NOT_AVAILABLE : t;
+    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or [Long#MIN_VALUE] to clear it
+    public void setAccessTime(final long t) {
+        accessTime = t;
     }
 
     /**
@@ -337,9 +331,9 @@ public class X000A_NTFS implements ZipExtraField {
 
     /// Sets the encoded creation time.
     ///
-    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or null to clear it
-    public void setCreateTime(final ZipEightByteInteger t) {
-        createTime = t == null ? TIME_NOT_AVAILABLE : t;
+    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or [Long#MIN_VALUE] to clear it
+    public void setCreateTime(final long t) {
+        createTime = t;
     }
 
     /**
@@ -354,9 +348,9 @@ public class X000A_NTFS implements ZipExtraField {
 
     /// Sets the encoded modification time.
     ///
-    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or null to clear it
-    public void setModifyTime(final ZipEightByteInteger t) {
-        modifyTime = t == null ? TIME_NOT_AVAILABLE : t;
+    /// @param t the timestamp in 100-nanosecond units since 1601-01-01 UTC, or [Long#MIN_VALUE] to clear it
+    public void setModifyTime(final long t) {
+        modifyTime = t;
     }
 
     /**

@@ -25,13 +25,13 @@ final class ZipConstants {
     /** Masks last eight bits */
     static final int BYTE_MASK = 0xFF;
 
-    /** Length of a ZipShort in bytes */
+    /** Length of a 16-bit field in bytes */
     static final int SHORT = 2;
 
-    /** Length of a ZipLong in bytes */
+    /** Length of a 32-bit field in bytes */
     static final int WORD = 4;
 
-    /** Length of a ZipEightByteInteger in bytes */
+    /** Length of a 64-bit field in bytes */
     static final int DWORD = 8;
 
     /** Initial ZIP specification version */
@@ -59,6 +59,17 @@ final class ZipConstants {
      * Value stored in four-byte size and similar fields if ZIP64 extensions are used.
      */
     static final long ZIP64_MAGIC = 0xFFFFFFFFL;
+
+    /// Central file header signature.
+    static final int CFH_SIG = 0x02014B50;
+    /// Local file header signature.
+    static final int LFH_SIG = 0x04034B50;
+    /// Data descriptor and split archive signature.
+    static final int DD_SIG = 0x08074B50;
+    /// Single-segment split archive marker.
+    static final int SINGLE_SEGMENT_SPLIT_MARKER = 0x30304B50;
+    /// Archive extra data record signature.
+    static final int AED_SIG = 0x08064B50;
 
     private ZipConstants() {
     }

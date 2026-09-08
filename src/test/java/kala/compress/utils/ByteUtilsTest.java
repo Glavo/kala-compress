@@ -38,6 +38,20 @@ import org.junit.jupiter.api.Test;
 
 public class ByteUtilsTest {
 
+    /// Encodes low-order bytes without sign extension beyond the requested width.
+    @Test
+    void testToLittleEndianArray() {
+        final long value = 0xFEDCBA9876543210L;
+        final byte[] expected = {0x10, 0x32, 0x54, 0x76, (byte) 0x98, (byte) 0xba, (byte) 0xdc, (byte) 0xfe};
+        for (int length = 0; length <= Long.BYTES; length++) {
+            assertArrayEquals(Arrays.copyOf(expected, length), toLittleEndian(value, length));
+        }
+        assertArrayEquals(new byte[]{-1, -1}, toLittleEndian(-1, 2));
+        assertArrayEquals(new byte[]{-1, -1, -1, -1}, toLittleEndian(-1, 4));
+        assertThrows(IllegalArgumentException.class, () -> toLittleEndian(value, -1));
+        assertThrows(IllegalArgumentException.class, () -> toLittleEndian(value, 9));
+    }
+
     @Test
     public void testFromLittleEndianFromArray() {
         final byte[] b = { 1, 2, 3, 4, 5 };

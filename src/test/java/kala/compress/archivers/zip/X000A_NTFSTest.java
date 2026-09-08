@@ -34,9 +34,9 @@ public class X000A_NTFSTest {
         final X000A_NTFS field = new X000A_NTFS();
         field.setAccessFileTime(FileTime.from(Instant.parse("2024-03-04T12:34:56Z")));
         field.setAccessFileTime(null);
-        assertEquals(Long.MIN_VALUE, field.getModifyTime().getLongValue());
-        assertEquals(Long.MIN_VALUE, field.getAccessTime().getLongValue());
-        assertEquals(Long.MIN_VALUE, field.getCreateTime().getLongValue());
+        assertEquals(Long.MIN_VALUE, field.getModifyTime());
+        assertEquals(Long.MIN_VALUE, field.getAccessTime());
+        assertEquals(Long.MIN_VALUE, field.getCreateTime());
         final ZipArchiveEntry holder = new ZipArchiveEntry("entry");
         holder.addExtraField(field);
         final ZipEntry jdk = new ZipEntry("entry");

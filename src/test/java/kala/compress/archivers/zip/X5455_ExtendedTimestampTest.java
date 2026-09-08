@@ -46,10 +46,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 public class X5455_ExtendedTimestampTest {
-    private static final ZipShort X5455 = new ZipShort(0x5455);
+    private static final short X5455 = (short) 0x5455;
 
-    private static final ZipLong ZERO_TIME = new ZipLong(0);
-    private static final ZipLong MAX_TIME_SECONDS = new ZipLong(Integer.MAX_VALUE);
+    private static final int ZERO_TIME = 0;
+    private static final int MAX_TIME_SECONDS = (Integer.MAX_VALUE);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd/HH:mm:ss Z");
 
     static {
@@ -89,7 +89,7 @@ public class X5455_ExtendedTimestampTest {
         xf = new X5455_ExtendedTimestamp();
     }
 
-    private void parseReparse(final byte providedFlags, final ZipLong time, final byte expectedFlags, final byte[] expectedLocal,
+    private void parseReparse(final byte providedFlags, final Integer time, final byte expectedFlags, final byte[] expectedLocal,
             final byte[] almostExpectedCentral) throws ZipException {
 
         // We're responsible for expectedCentral's flags. Too annoying to set in caller.
@@ -97,9 +97,21 @@ public class X5455_ExtendedTimestampTest {
         System.arraycopy(almostExpectedCentral, 0, expectedCentral, 0, almostExpectedCentral.length);
         expectedCentral[0] = expectedFlags;
 
-        xf.setModifyTime(time);
-        xf.setAccessTime(time);
-        xf.setCreateTime(time);
+        if (time == null) {
+            xf.clearModifyTime();
+        } else {
+            xf.setModifyTime(time);
+        }
+        if (time == null) {
+            xf.clearAccessTime();
+        } else {
+            xf.setAccessTime(time);
+        }
+        if (time == null) {
+            xf.clearCreateTime();
+        } else {
+            xf.setCreateTime(time);
+        }
         xf.setFlags(providedFlags);
         byte[] result = xf.getLocalFileDataData();
         assertArrayEquals(expectedLocal, result);
@@ -121,9 +133,21 @@ public class X5455_ExtendedTimestampTest {
         }
 
         // Do the same as above, but with Central Directory data:
-        xf.setModifyTime(time);
-        xf.setAccessTime(time);
-        xf.setCreateTime(time);
+        if (time == null) {
+            xf.clearModifyTime();
+        } else {
+            xf.setModifyTime(time);
+        }
+        if (time == null) {
+            xf.clearAccessTime();
+        } else {
+            xf.setAccessTime(time);
+        }
+        if (time == null) {
+            xf.clearCreateTime();
+        } else {
+            xf.setCreateTime(time);
+        }
         xf.setFlags(providedFlags);
         result = xf.getCentralDirectoryData();
         assertArrayEquals(expectedCentral, result);
@@ -139,7 +163,7 @@ public class X5455_ExtendedTimestampTest {
         }
     }
 
-    private void parseReparse(final ZipLong time, final byte[] expectedLocal, final byte[] almostExpectedCentral) throws ZipException {
+    private void parseReparse(final Integer time, final byte[] expectedLocal, final byte[] almostExpectedCentral) throws ZipException {
         parseReparse(expectedLocal[0], time, expectedLocal[0], expectedLocal, almostExpectedCentral);
     }
 
@@ -190,11 +214,11 @@ public class X5455_ExtendedTimestampTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         final long timeMillis = cal.getTimeInMillis();
-        final ZipLong time = new ZipLong(timeMillis / 1000);
+        final int time = (int) (timeMillis / 1000);
 
         // set too big
         // Java time is 1000 x larger (milliseconds).
-        assertThrows(IllegalArgumentException.class, () -> xf.setModifyFileTime(FileTime.fromMillis(1000L * (MAX_TIME_SECONDS.getValue() + 1L))),
+        assertThrows(IllegalArgumentException.class, () -> xf.setModifyFileTime(FileTime.fromMillis(1000L * (MAX_TIME_SECONDS + 1L))),
                 "Time too big for 32 bits!");
 
         // get/set modify time
@@ -212,11 +236,11 @@ public class X5455_ExtendedTimestampTest {
         assertEquals(timeMillis, xf.getModifyFileTime().toMillis());
         assertTrue(xf.isBit0_modifyTimePresent());
         // Null
-        xf.setModifyTime(null);
+        xf.clearModifyTime();
         assertNull(xf.getModifyFileTime());
         assertFalse(xf.isBit0_modifyTimePresent());
         xf.setModifyFileTime(null);
-        assertNull(xf.getModifyTime());
+        assertFalse(xf.hasModifyTime());
         assertNull(xf.getModifyFileTime());
         assertFalse(xf.isBit0_modifyTimePresent());
 
@@ -235,11 +259,11 @@ public class X5455_ExtendedTimestampTest {
         assertEquals(timeMillis, xf.getAccessFileTime().toMillis());
         assertTrue(xf.isBit1_accessTimePresent());
         // Null
-        xf.setAccessTime(null);
+        xf.clearAccessTime();
         assertNull(xf.getAccessFileTime());
         assertFalse(xf.isBit1_accessTimePresent());
         xf.setAccessFileTime(null);
-        assertNull(xf.getAccessTime());
+        assertFalse(xf.hasAccessTime());
         assertNull(xf.getAccessFileTime());
         assertFalse(xf.isBit1_accessTimePresent());
 
@@ -258,11 +282,11 @@ public class X5455_ExtendedTimestampTest {
         assertEquals(timeMillis, xf.getCreateFileTime().toMillis());
         assertTrue(xf.isBit2_createTimePresent());
         // Null
-        xf.setCreateTime(null);
+        xf.clearCreateTime();
         assertNull(xf.getCreateFileTime());
         assertFalse(xf.isBit2_createTimePresent());
         xf.setCreateFileTime(null);
-        assertNull(xf.getCreateTime());
+        assertFalse(xf.hasCreateTime());
         assertNull(xf.getCreateFileTime());
         assertFalse(xf.isBit2_createTimePresent());
 
@@ -278,8 +302,8 @@ public class X5455_ExtendedTimestampTest {
         assertFalse(xf.isBit1_accessTimePresent());
         assertFalse(xf.isBit2_createTimePresent());
         // Local length=1, Central length=1 (flags only!)
-        assertEquals(1, xf.getLocalFileDataLength().getValue());
-        assertEquals(1, xf.getCentralDirectoryLength().getValue());
+        assertEquals(1, xf.getLocalFileDataLength());
+        assertEquals(1, xf.getCentralDirectoryLength());
 
         // get/set flags: 001
         xf.setFlags((byte) 1);
@@ -288,8 +312,8 @@ public class X5455_ExtendedTimestampTest {
         assertFalse(xf.isBit1_accessTimePresent());
         assertFalse(xf.isBit2_createTimePresent());
         // Local length=5, Central length=5 (flags + mod)
-        assertEquals(5, xf.getLocalFileDataLength().getValue());
-        assertEquals(5, xf.getCentralDirectoryLength().getValue());
+        assertEquals(5, xf.getLocalFileDataLength());
+        assertEquals(5, xf.getCentralDirectoryLength());
 
         // get/set flags: 010
         xf.setFlags((byte) 2);
@@ -298,8 +322,8 @@ public class X5455_ExtendedTimestampTest {
         assertTrue(xf.isBit1_accessTimePresent());
         assertFalse(xf.isBit2_createTimePresent());
         // Local length=5, Central length=1
-        assertEquals(5, xf.getLocalFileDataLength().getValue());
-        assertEquals(1, xf.getCentralDirectoryLength().getValue());
+        assertEquals(5, xf.getLocalFileDataLength());
+        assertEquals(1, xf.getCentralDirectoryLength());
 
         // get/set flags: 100
         xf.setFlags((byte) 4);
@@ -308,8 +332,8 @@ public class X5455_ExtendedTimestampTest {
         assertFalse(xf.isBit1_accessTimePresent());
         assertTrue(xf.isBit2_createTimePresent());
         // Local length=5, Central length=1
-        assertEquals(5, xf.getLocalFileDataLength().getValue());
-        assertEquals(1, xf.getCentralDirectoryLength().getValue());
+        assertEquals(5, xf.getLocalFileDataLength());
+        assertEquals(1, xf.getCentralDirectoryLength());
 
         // get/set flags: 111
         xf.setFlags((byte) 7);
@@ -318,8 +342,8 @@ public class X5455_ExtendedTimestampTest {
         assertTrue(xf.isBit1_accessTimePresent());
         assertTrue(xf.isBit2_createTimePresent());
         // Local length=13, Central length=5
-        assertEquals(13, xf.getLocalFileDataLength().getValue());
-        assertEquals(5, xf.getCentralDirectoryLength().getValue());
+        assertEquals(13, xf.getLocalFileDataLength());
+        assertEquals(5, xf.getCentralDirectoryLength());
 
         // get/set flags: 11111111
         xf.setFlags((byte) -1);
@@ -328,8 +352,8 @@ public class X5455_ExtendedTimestampTest {
         assertTrue(xf.isBit1_accessTimePresent());
         assertTrue(xf.isBit2_createTimePresent());
         // Local length=13, Central length=5
-        assertEquals(13, xf.getLocalFileDataLength().getValue());
-        assertEquals(5, xf.getCentralDirectoryLength().getValue());
+        assertEquals(13, xf.getLocalFileDataLength());
+        assertEquals(5, xf.getCentralDirectoryLength());
     }
 
     @Test

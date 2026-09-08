@@ -43,19 +43,13 @@ public interface ZipExtraField {
      */
     byte[] getCentralDirectoryData();
 
-    /**
-     * Length of the extra field in the central directory - without Header-ID or length specifier.
-     *
-     * @return the length of the field in the central directory
-     */
-    ZipShort getCentralDirectoryLength();
+    /// Returns the central directory data length in bytes, excluding the field header.
+    int getCentralDirectoryLength();
 
-    /**
-     * The Header-ID.
-     *
-     * @return The HeaderId value
-     */
-    ZipShort getHeaderId();
+    /// Returns the unsigned 16-bit field identifier as a raw bit pattern.
+    ///
+    /// @throws IllegalStateException if this field requires an identifier that has not been set
+    short getHeaderId();
 
     /**
      * The actual data to put into local file data - without Header-ID or length specifier.
@@ -64,12 +58,8 @@ public interface ZipExtraField {
      */
     byte[] getLocalFileDataData();
 
-    /**
-     * Length of the extra field in the local file data - without Header-ID or length specifier.
-     *
-     * @return the length of the field in the local file data
-     */
-    ZipShort getLocalFileDataLength();
+    /// Returns the local file data length in bytes, excluding the field header.
+    int getLocalFileDataLength();
 
     /**
      * Populate data from this array as if it was in central directory data.

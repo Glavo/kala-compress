@@ -18,10 +18,11 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.io.Serializable;
 import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.zip.ZipException;
 
 import kala.compress.utils.TimeUtils;
@@ -78,7 +79,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      *
      * @since 1.23
      */
-    public static final ZipShort HEADER_ID = new ZipShort(0x5455);
+    public static final short HEADER_ID = (short) 0x5455;
 
     /**
      * The bit set inside the flags by when the last modification time is present in this extra field.
@@ -93,46 +94,40 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      */
     public static final byte CREATE_TIME_BIT = 4;
 
-    /**
-     * Utility method converts {@link FileTime} into a ZipLong (seconds since epoch).
-     * <p/>
-     * Also makes sure the converted ZipLong is not too big to fit in 32 unsigned bits.
-     *
-     * @param time {@link FileTime} to convert to ZipLong
-     * @return ZipLong
-     */
-    private static ZipLong fileTimeToZipLong(final FileTime time) {
-        return time == null ? null : unixTimeToZipLong(TimeUtils.toUnixTime(time));
-    }
-
-    private static FileTime unixTimeToFileTime(final ZipLong unixTime) {
-        return unixTime != null ? TimeUtils.unixTimeToFileTime(unixTime.getIntValue()) : null;
-    }
-    // The 3 boolean fields (below) come from this flag's byte. The remaining 5 bits
-    // are ignored according to the current version of the spec (December 2012).
-
-    private static ZipLong unixTimeToZipLong(final long unixTime) {
-        if (!TimeUtils.isUnixTime(unixTime)) {
-            throw new IllegalArgumentException("X5455 timestamps must fit in a signed 32 bit integer: " + unixTime);
+    /// Converts a FileTime to signed 32-bit Unix seconds.
+    private static int toUnixSeconds(final FileTime time) {
+        final long seconds = TimeUtils.toUnixTime(time);
+        if (!TimeUtils.isUnixTime(seconds)) {
+            throw new IllegalArgumentException("X5455 timestamps must fit in a signed 32 bit integer: " + seconds);
         }
-        return new ZipLong(unixTime);
+        return (int) seconds;
     }
 
+    /// Identifies timestamp values actually stored, independently of the serialized flags.
+    private byte presentFields;
+
+    /// The flags supplied by the caller or read from the archive.
     private byte flags;
     // Note: even if bit1 and bit2 are set, the Central data will still not contain
     // access/create fields: only local data ever holds those! This causes
     // some of our implementation to look a little odd, with seemingly spurious
-    // != null and length checks.
+    // presence and length checks.
+    /// Whether the modification time is enabled for serialization.
     private boolean bit0_modifyTimePresent;
+    /// Whether the access time is enabled for serialization.
     private boolean bit1_accessTimePresent;
 
+    /// Whether the creation time is enabled for serialization.
     private boolean bit2_createTimePresent;
 
-    private ZipLong modifyTime;
+    /// The signed modification time in Unix seconds.
+    private int modifyTime;
 
-    private ZipLong accessTime;
+    /// The signed access time in Unix seconds.
+    private int accessTime;
 
-    private ZipLong createTime;
+    /// The signed creation time in Unix seconds.
+    private int createTime;
 
     /**
      * Constructor for X5455_ExtendedTimestamp.
@@ -150,10 +145,10 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         if (o instanceof X5455_ExtendedTimestamp) {
             final X5455_ExtendedTimestamp xf = (X5455_ExtendedTimestamp) o;
 
-            // The ZipLong==ZipLong clauses handle the cases where both are null.
-            // and only last 3 bits of flags matter.
-            return (flags & 0x07) == (xf.flags & 0x07) && Objects.equals(modifyTime, xf.modifyTime) && Objects.equals(accessTime, xf.accessTime)
-                    && Objects.equals(createTime, xf.createTime);
+            // Only the last three flag bits affect equality.
+            return (flags & 0x07) == (xf.flags & 0x07) && presentFields == xf.presentFields
+                    && (!hasModifyTime() || modifyTime == xf.modifyTime) && (!hasAccessTime() || accessTime == xf.accessTime)
+                    && (!hasCreateTime() || createTime == xf.createTime);
         }
         return false;
     }
@@ -166,16 +161,30 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * @since 1.23
      */
     public FileTime getAccessFileTime() {
-        return unixTimeToFileTime(accessTime);
+        return hasAccessTime() ? TimeUtils.unixTimeToFileTime(accessTime) : null;
     }
 
-    /**
-     * Gets the access time (seconds since epoch) of this ZIP entry as a ZipLong object, or null if no such timestamp exists in the ZIP entry.
-     *
-     * @return access time (seconds since epoch) or null.
-     */
-    public ZipLong getAccessTime() {
+    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC.
+    ///
+    /// @throws IllegalStateException if the timestamp is absent
+    public int getAccessTime() {
+        if (!hasAccessTime()) {
+            throw new IllegalStateException("Access time is not present");
+        }
         return accessTime;
+    }
+
+    /// Returns whether the access timestamp value is stored, independently of the flags.
+    public boolean hasAccessTime() {
+        return (presentFields & ACCESS_TIME_BIT) != 0;
+    }
+
+    /// Clears the access timestamp and its flag.
+    public void clearAccessTime() {
+        presentFields &= ~ACCESS_TIME_BIT;
+        flags &= ~ACCESS_TIME_BIT;
+        bit1_accessTimePresent = false;
+        accessTime = 0;
     }
 
     /**
@@ -187,7 +196,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
     public byte[] getCentralDirectoryData() {
         // Truncate out create & access time (last 8 bytes) from
         // the copy of the local data we obtained:
-        return Arrays.copyOf(getLocalFileDataData(), getCentralDirectoryLength().getValue());
+        return Arrays.copyOf(getLocalFileDataData(), getCentralDirectoryLength());
     }
 
     /**
@@ -197,11 +206,11 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * For X5455 the central length is often smaller than the local length, because central cannot contain access or create timestamps.
      * </p>
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
-        return new ZipShort(1 + (bit0_modifyTimePresent ? 4 : 0));
+    public int getCentralDirectoryLength() {
+        return 1 + (bit0_modifyTimePresent && hasModifyTime() ? 4 : 0);
     }
 
     /**
@@ -212,22 +221,30 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * @since 1.23
      */
     public FileTime getCreateFileTime() {
-        return unixTimeToFileTime(createTime);
+        return hasCreateTime() ? TimeUtils.unixTimeToFileTime(createTime) : null;
     }
 
-    /**
-     * <p>
-     * Gets the create time (seconds since epoch) of this ZIP entry as a ZipLong object, or null if no such timestamp exists in the ZIP entry.
-     * </p>
-     * <p>
-     * Note: modern Linux file systems (e.g., ext2) do not appear to store a "create time" value, and so it's usually omitted altogether in the ZIP extra field.
-     * Perhaps other Unix systems track this.
-     * </p>
-     *
-     * @return create time (seconds since epoch) or null.
-     */
-    public ZipLong getCreateTime() {
+    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC.
+    ///
+    /// @throws IllegalStateException if the timestamp is absent
+    public int getCreateTime() {
+        if (!hasCreateTime()) {
+            throw new IllegalStateException("Create time is not present");
+        }
         return createTime;
+    }
+
+    /// Returns whether the create timestamp value is stored, independently of the flags.
+    public boolean hasCreateTime() {
+        return (presentFields & CREATE_TIME_BIT) != 0;
+    }
+
+    /// Clears the create timestamp and its flag.
+    public void clearCreateTime() {
+        presentFields &= ~CREATE_TIME_BIT;
+        flags &= ~CREATE_TIME_BIT;
+        bit2_createTimePresent = false;
+        createTime = 0;
     }
 
     /**
@@ -253,7 +270,7 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * @return the value for the header id for this extrafield
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return HEADER_ID;
     }
 
@@ -264,22 +281,22 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      */
     @Override
     public byte[] getLocalFileDataData() {
-        final byte[] data = new byte[getLocalFileDataLength().getValue()];
+        final byte[] data = new byte[getLocalFileDataLength()];
         int pos = 0;
         data[pos++] = 0;
-        if (bit0_modifyTimePresent) {
+        if (bit0_modifyTimePresent && hasModifyTime()) {
             data[0] |= MODIFY_TIME_BIT;
-            System.arraycopy(modifyTime.getBytes(), 0, data, pos, 4);
+            ByteUtils.setIntLE(data, pos, modifyTime);
             pos += 4;
         }
-        if (bit1_accessTimePresent && accessTime != null) {
+        if (bit1_accessTimePresent && hasAccessTime()) {
             data[0] |= ACCESS_TIME_BIT;
-            System.arraycopy(accessTime.getBytes(), 0, data, pos, 4);
+            ByteUtils.setIntLE(data, pos, accessTime);
             pos += 4;
         }
-        if (bit2_createTimePresent && createTime != null) {
+        if (bit2_createTimePresent && hasCreateTime()) {
             data[0] |= CREATE_TIME_BIT;
-            System.arraycopy(createTime.getBytes(), 0, data, pos, 4);
+            ByteUtils.setIntLE(data, pos, createTime);
             pos += 4; // NOSONAR - assignment as documentation
         }
         return data;
@@ -288,12 +305,12 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
     /**
      * Gets the length of the extra field in the local file data - without Header-ID or length specifier.
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(1 + (bit0_modifyTimePresent ? 4 : 0) + (bit1_accessTimePresent && accessTime != null ? 4 : 0)
-                + (bit2_createTimePresent && createTime != null ? 4 : 0));
+    public int getLocalFileDataLength() {
+        return (1 + (bit0_modifyTimePresent && hasModifyTime() ? 4 : 0) + (bit1_accessTimePresent && hasAccessTime() ? 4 : 0)
+                + (bit2_createTimePresent && hasCreateTime() ? 4 : 0));
     }
 
     /**
@@ -304,31 +321,45 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      * @since 1.23
      */
     public FileTime getModifyFileTime() {
-        return unixTimeToFileTime(modifyTime);
+        return hasModifyTime() ? TimeUtils.unixTimeToFileTime(modifyTime) : null;
     }
 
-    /**
-     * Gets the modify time (seconds since epoch) of this ZIP entry as a ZipLong object, or null if no such timestamp exists in the ZIP entry.
-     *
-     * @return modify time (seconds since epoch) or null.
-     */
-    public ZipLong getModifyTime() {
+    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC.
+    ///
+    /// @throws IllegalStateException if the timestamp is absent
+    public int getModifyTime() {
+        if (!hasModifyTime()) {
+            throw new IllegalStateException("Modify time is not present");
+        }
         return modifyTime;
+    }
+
+    /// Returns whether the modify timestamp value is stored, independently of the flags.
+    public boolean hasModifyTime() {
+        return (presentFields & MODIFY_TIME_BIT) != 0;
+    }
+
+    /// Clears the modify timestamp and its flag.
+    public void clearModifyTime() {
+        presentFields &= ~MODIFY_TIME_BIT;
+        flags &= ~MODIFY_TIME_BIT;
+        bit0_modifyTimePresent = false;
+        modifyTime = 0;
     }
 
     @Override
     public int hashCode() {
         int hc = -123 * (flags & 0x07); // only last 3 bits of flags matter
-        if (modifyTime != null) {
-            hc ^= modifyTime.hashCode();
+        if (hasModifyTime()) {
+            hc ^= Integer.hashCode(modifyTime);
         }
-        if (accessTime != null) {
+        if (hasAccessTime()) {
             // Since accessTime is often same as modifyTime,
             // this prevents them from XOR negating each other.
-            hc ^= Integer.rotateLeft(accessTime.hashCode(), 11);
+            hc ^= Integer.rotateLeft(Integer.hashCode(accessTime), 11);
         }
-        if (createTime != null) {
-            hc ^= Integer.rotateLeft(createTime.hashCode(), 22);
+        if (hasCreateTime()) {
+            hc ^= Integer.rotateLeft(Integer.hashCode(createTime), 22);
         }
         return hc;
     }
@@ -389,19 +420,22 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         final int len = offset + length;
         setFlags(data[offset++]);
         if (bit0_modifyTimePresent && offset + 4 <= len) {
-            modifyTime = new ZipLong(data, offset);
+            modifyTime = ByteUtils.getIntLE(data, offset);
+            presentFields |= MODIFY_TIME_BIT;
             offset += 4;
         } else {
             bit0_modifyTimePresent = false;
         }
         if (bit1_accessTimePresent && offset + 4 <= len) {
-            accessTime = new ZipLong(data, offset);
+            accessTime = ByteUtils.getIntLE(data, offset);
+            presentFields |= ACCESS_TIME_BIT;
             offset += 4;
         } else {
             bit1_accessTimePresent = false;
         }
         if (bit2_createTimePresent && offset + 4 <= len) {
-            createTime = new ZipLong(data, offset);
+            createTime = ByteUtils.getIntLE(data, offset);
+            presentFields |= CREATE_TIME_BIT;
             offset += 4; // NOSONAR - assignment as documentation
         } else {
             bit2_createTimePresent = false;
@@ -413,75 +447,54 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
      */
     private void reset() {
         setFlags((byte) 0);
-        this.modifyTime = null;
-        this.accessTime = null;
-        this.createTime = null;
+        presentFields = 0;
+        this.modifyTime = 0;
+        this.accessTime = 0;
+        this.createTime = 0;
     }
 
-    /**
-     * <p>
-     * Sets the acccess time as a {@link FileTime} of this ZIP entry. Supplied value is truncated to per-second precision (milliseconds zeroed-out).
-     * </p>
-     * <p>
-     * Note: the setters for flags and timestamps are decoupled. Even if the timestamp is not-null, it will only be written out if the corresponding bit in the
-     * flags is also set.
-     * </p>
-     *
-     * @param time access time as {@link FileTime}
-     * @since 1.23
-     */
+    /// Sets the access time with second precision, or clears it if null.
+    ///
+    /// @param time the timestamp, or null
+    /// @throws IllegalArgumentException if the Unix seconds do not fit in a signed int
     public void setAccessFileTime(final FileTime time) {
-        setAccessTime(fileTimeToZipLong(time));
+        if (time == null) {
+            clearAccessTime();
+        } else {
+            setAccessTime(toUnixSeconds(time));
+        }
     }
 
-    /**
-     * <p>
-     * Sets the access time (seconds since epoch) of this ZIP entry using a ZipLong object
-     * </p>
-     * <p>
-     * Note: the setters for flags and timestamps are decoupled. Even if the timestamp is not-null, it will only be written out if the corresponding bit in the
-     * flags is also set.
-     * </p>
-     *
-     * @param l ZipLong of the access time (seconds per epoch)
-     */
-    public void setAccessTime(final ZipLong l) {
-        bit1_accessTimePresent = l != null;
-        flags = (byte) (l != null ? flags | ACCESS_TIME_BIT : flags & ~ACCESS_TIME_BIT);
-        this.accessTime = l;
+    /// Sets the access timestamp and its flag.
+    ///
+    /// @param time signed seconds since 1970-01-01 UTC
+    public void setAccessTime(final int time) {
+        accessTime = time;
+        presentFields |= ACCESS_TIME_BIT;
+        flags |= ACCESS_TIME_BIT;
+        bit1_accessTimePresent = true;
     }
 
-    /**
-     * <p>
-     * Sets the create time as a {@link FileTime} of this ZIP entry. Supplied value is truncated to per-second precision (milliseconds zeroed-out).
-     * </p>
-     * <p>
-     * Note: the setters for flags and timestamps are decoupled. Even if the timestamp is not-null, it will only be written out if the corresponding bit in the
-     * flags is also set.
-     * </p>
-     *
-     * @param time create time as {@link FileTime}
-     * @since 1.23
-     */
+    /// Sets the create time with second precision, or clears it if null.
+    ///
+    /// @param time the timestamp, or null
+    /// @throws IllegalArgumentException if the Unix seconds do not fit in a signed int
     public void setCreateFileTime(final FileTime time) {
-        setCreateTime(fileTimeToZipLong(time));
+        if (time == null) {
+            clearCreateTime();
+        } else {
+            setCreateTime(toUnixSeconds(time));
+        }
     }
 
-    /**
-     * <p>
-     * Sets the create time (seconds since epoch) of this ZIP entry using a ZipLong object
-     * </p>
-     * <p>
-     * Note: the setters for flags and timestamps are decoupled. Even if the timestamp is not-null, it will only be written out if the corresponding bit in the
-     * flags is also set.
-     * </p>
-     *
-     * @param l ZipLong of the create time (seconds per epoch)
-     */
-    public void setCreateTime(final ZipLong l) {
-        bit2_createTimePresent = l != null;
-        flags = (byte) (l != null ? flags | CREATE_TIME_BIT : flags & ~CREATE_TIME_BIT);
-        this.createTime = l;
+    /// Sets the create timestamp and its flag.
+    ///
+    /// @param time signed seconds since 1970-01-01 UTC
+    public void setCreateTime(final int time) {
+        createTime = time;
+        presentFields |= CREATE_TIME_BIT;
+        flags |= CREATE_TIME_BIT;
+        bit2_createTimePresent = true;
     }
 
     /**
@@ -504,37 +517,26 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         this.bit2_createTimePresent = (flags & CREATE_TIME_BIT) == CREATE_TIME_BIT;
     }
 
-    /**
-     * <p>
-     * Sets the modify time as a {@link FileTime} of this ZIP entry. Supplied value is truncated to per-second precision (milliseconds zeroed-out).
-     * </p>
-     * <p>
-     * Note: the setters for flags and timestamps are decoupled. Even if the timestamp is not-null, it will only be written out if the corresponding bit in the
-     * flags is also set.
-     * </p>
-     *
-     * @param time modify time as {@link FileTime}
-     * @since 1.23
-     */
+    /// Sets the modify time with second precision, or clears it if null.
+    ///
+    /// @param time the timestamp, or null
+    /// @throws IllegalArgumentException if the Unix seconds do not fit in a signed int
     public void setModifyFileTime(final FileTime time) {
-        setModifyTime(fileTimeToZipLong(time));
+        if (time == null) {
+            clearModifyTime();
+        } else {
+            setModifyTime(toUnixSeconds(time));
+        }
     }
 
-    /**
-     * <p>
-     * Sets the modify time (seconds since epoch) of this ZIP entry using a ZipLong object.
-     * </p>
-     * <p>
-     * Note: the setters for flags and timestamps are decoupled. Even if the timestamp is not-null, it will only be written out if the corresponding bit in the
-     * flags is also set.
-     * </p>
-     *
-     * @param l ZipLong of the modify time (seconds per epoch)
-     */
-    public void setModifyTime(final ZipLong l) {
-        bit0_modifyTimePresent = l != null;
-        flags = (byte) (l != null ? flags | MODIFY_TIME_BIT : flags & ~MODIFY_TIME_BIT);
-        this.modifyTime = l;
+    /// Sets the modify timestamp and its flag.
+    ///
+    /// @param time signed seconds since 1970-01-01 UTC
+    public void setModifyTime(final int time) {
+        modifyTime = time;
+        presentFields |= MODIFY_TIME_BIT;
+        flags |= MODIFY_TIME_BIT;
+        bit0_modifyTimePresent = true;
     }
 
     /**
@@ -547,13 +549,13 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         final StringBuilder buf = new StringBuilder();
         buf.append("0x5455 Zip Extra Field: Flags=");
         buf.append(Integer.toBinaryString(ZipUtil.unsignedIntToSignedByte(flags))).append(" ");
-        if (bit0_modifyTimePresent && modifyTime != null) {
+        if (bit0_modifyTimePresent && hasModifyTime()) {
             buf.append(" Modify:[").append(getModifyFileTime()).append("] ");
         }
-        if (bit1_accessTimePresent && accessTime != null) {
+        if (bit1_accessTimePresent && hasAccessTime()) {
             buf.append(" Access:[").append(getAccessFileTime()).append("] ");
         }
-        if (bit2_createTimePresent && createTime != null) {
+        if (bit2_createTimePresent && hasCreateTime()) {
             buf.append(" Create:[").append(getCreateFileTime()).append("] ");
         }
         return buf.toString();

@@ -16,6 +16,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 /**
  * Parser/encoder for the "general purpose bit" field in ZIP's local file and central directory headers.
  *
@@ -75,7 +77,7 @@ public final class GeneralPurposeBit implements Cloneable {
      * @return parsed flags
      */
     public static GeneralPurposeBit parse(final byte[] data, final int offset) {
-        final int generalPurposeFlag = ZipShort.getValue(data, offset);
+        final int generalPurposeFlag = ByteUtils.getUnsignedShortLE(data, offset);
         return parse(generalPurposeFlag);
     }
 
@@ -136,8 +138,8 @@ public final class GeneralPurposeBit implements Cloneable {
      * @param offset The offset within the output buffer of the first byte to be written. must be non-negative and no larger than {@code buf.length-2}
      */
     public void encode(final byte[] buf, final int offset) {
-        ZipShort.putShort((dataDescriptorFlag ? DATA_DESCRIPTOR_FLAG : 0) | (languageEncodingFlag ? UFT8_NAMES_FLAG : 0)
-                | (encryptionFlag ? ENCRYPTION_FLAG : 0) | (strongEncryptionFlag ? STRONG_ENCRYPTION_FLAG : 0), buf, offset);
+        ByteUtils.setUnsignedShortLE(buf, offset, (dataDescriptorFlag ? DATA_DESCRIPTOR_FLAG : 0) | (languageEncodingFlag ? UFT8_NAMES_FLAG : 0)
+                | (encryptionFlag ? ENCRYPTION_FLAG : 0) | (strongEncryptionFlag ? STRONG_ENCRYPTION_FLAG : 0));
     }
 
     @Override

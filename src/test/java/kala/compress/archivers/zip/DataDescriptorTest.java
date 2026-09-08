@@ -16,6 +16,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +41,7 @@ public class DataDescriptorTest {
 
     private int findCentralDirectory(final byte[] data) {
         // not a ZIP64 archive, no comment, "End of central directory record" at the end
-        return (int) ZipLong.getValue(data, data.length - 22 + 16);
+        return (int) ByteUtils.getUnsignedIntLE(data, data.length - 22 + 16);
     }
 
     @Test
@@ -67,17 +69,17 @@ public class DataDescriptorTest {
         assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);
 
         final int ddStart = cdhStart - 16;
-        assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));
-        final long crcFromLFH = ZipLong.getValue(data, 14);
-        final long cSizeFromLFH = ZipLong.getValue(data, 18);
-        final long sizeFromLFH = ZipLong.getValue(data, 22);
+        assertNotEquals(ZipConstants.DD_SIG, ByteUtils.getIntLE(data, ddStart));
+        final long crcFromLFH = ByteUtils.getUnsignedIntLE(data, 14);
+        final long cSizeFromLFH = ByteUtils.getUnsignedIntLE(data, 18);
+        final long sizeFromLFH = ByteUtils.getUnsignedIntLE(data, 22);
         assertEquals(3, sizeFromLFH);
 
-        final long crcFromCDH = ZipLong.getValue(data, cdhStart + 16);
+        final long crcFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 16);
         assertEquals(crcFromLFH, crcFromCDH);
-        final long cSizeFromCDH = ZipLong.getValue(data, cdhStart + 20);
+        final long cSizeFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 20);
         assertEquals(cSizeFromLFH, cSizeFromCDH);
-        final long sizeFromCDH = ZipLong.getValue(data, cdhStart + 24);
+        final long sizeFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 24);
         assertEquals(sizeFromLFH, sizeFromCDH);
     }
 
@@ -119,17 +121,17 @@ public class DataDescriptorTest {
         assertArrayEquals(new byte[] { 0, 8 }, gpbInCDH);
 
         final int ddStart = cdhStart - 16;
-        assertNotEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));
-        final long crcFromLFH = ZipLong.getValue(data, 14);
-        final long cSizeFromLFH = ZipLong.getValue(data, 18);
-        final long sizeFromLFH = ZipLong.getValue(data, 22);
+        assertNotEquals(ZipConstants.DD_SIG, ByteUtils.getIntLE(data, ddStart));
+        final long crcFromLFH = ByteUtils.getUnsignedIntLE(data, 14);
+        final long cSizeFromLFH = ByteUtils.getUnsignedIntLE(data, 18);
+        final long sizeFromLFH = ByteUtils.getUnsignedIntLE(data, 22);
         assertEquals(3, sizeFromLFH);
 
-        final long crcFromCDH = ZipLong.getValue(data, cdhStart + 16);
+        final long crcFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 16);
         assertEquals(crcFromLFH, crcFromCDH);
-        final long cSizeFromCDH = ZipLong.getValue(data, cdhStart + 20);
+        final long cSizeFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 20);
         assertEquals(cSizeFromLFH, cSizeFromCDH);
-        final long sizeFromCDH = ZipLong.getValue(data, cdhStart + 24);
+        final long sizeFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 24);
         assertEquals(sizeFromLFH, sizeFromCDH);
     }
 
@@ -159,17 +161,17 @@ public class DataDescriptorTest {
         assertArrayEquals(new byte[] { 8, 8 }, gpbInCDH);
 
         final int ddStart = cdhStart - 16;
-        assertEquals(ZipLong.DD_SIG, new ZipLong(data, ddStart));
-        final long crcFromDD = ZipLong.getValue(data, ddStart + 4);
-        final long cSizeFromDD = ZipLong.getValue(data, ddStart + 8);
-        final long sizeFromDD = ZipLong.getValue(data, ddStart + 12);
+        assertEquals(ZipConstants.DD_SIG, ByteUtils.getIntLE(data, ddStart));
+        final long crcFromDD = ByteUtils.getUnsignedIntLE(data, ddStart + 4);
+        final long cSizeFromDD = ByteUtils.getUnsignedIntLE(data, ddStart + 8);
+        final long sizeFromDD = ByteUtils.getUnsignedIntLE(data, ddStart + 12);
         assertEquals(3, sizeFromDD);
 
-        final long crcFromCDH = ZipLong.getValue(data, cdhStart + 16);
+        final long crcFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 16);
         assertEquals(crcFromDD, crcFromCDH);
-        final long cSizeFromCDH = ZipLong.getValue(data, cdhStart + 20);
+        final long cSizeFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 20);
         assertEquals(cSizeFromDD, cSizeFromCDH);
-        final long sizeFromCDH = ZipLong.getValue(data, cdhStart + 24);
+        final long sizeFromCDH = ByteUtils.getUnsignedIntLE(data, cdhStart + 24);
         assertEquals(sizeFromDD, sizeFromCDH);
     }
 }

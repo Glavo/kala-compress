@@ -32,7 +32,7 @@ import java.util.Arrays;
  * @NotThreadSafe
  */
 public final class UnparseableExtraFieldData implements ZipExtraField {
-    private static final ZipShort HEADER_ID = new ZipShort(0xACC1);
+    private static final short HEADER_ID = (short) 0xACC1;
 
     private byte[] localFileData;
     private byte[] centralDirectoryData;
@@ -53,8 +53,8 @@ public final class UnparseableExtraFieldData implements ZipExtraField {
      * @return The CentralDirectoryLength value
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
-        return centralDirectoryData == null ? getLocalFileDataLength() : new ZipShort(centralDirectoryData.length);
+    public int getCentralDirectoryLength() {
+        return centralDirectoryData == null ? getLocalFileDataLength() : (centralDirectoryData.length);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class UnparseableExtraFieldData implements ZipExtraField {
      * @return a completely arbitrary value that should be ignored.
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return HEADER_ID;
     }
 
@@ -83,8 +83,8 @@ public final class UnparseableExtraFieldData implements ZipExtraField {
      * @return The LocalFileDataLength value
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(localFileData == null ? 0 : localFileData.length);
+    public int getLocalFileDataLength() {
+        return localFileData == null ? 0 : localFileData.length;
     }
 
     /**

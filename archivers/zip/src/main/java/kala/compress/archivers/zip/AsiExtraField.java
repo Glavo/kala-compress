@@ -18,6 +18,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import static kala.compress.archivers.zip.ZipConstants.SHORT;
 import static kala.compress.archivers.zip.ZipConstants.WORD;
 
@@ -61,7 +63,7 @@ import java.util.zip.ZipException;
  */
 public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
 
-    static final ZipShort HEADER_ID = new ZipShort(0x756E);
+    static final short HEADER_ID = (short) 0x756E;
     private static final int MIN_SIZE = WORD + SHORT + WORD + SHORT + SHORT;
 
     /**
@@ -126,7 +128,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
      * @return the centralDirectory length
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
+    public int getCentralDirectoryLength() {
         return getLocalFileDataLength();
     }
 
@@ -145,7 +147,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
      * @return the value for the header id for this extrafield
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return HEADER_ID;
     }
 
@@ -166,15 +168,15 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
     @Override
     public byte[] getLocalFileDataData() {
         // CRC will be added later
-        final byte[] data = new byte[getLocalFileDataLength().getValue() - WORD];
-        System.arraycopy(ZipShort.getBytes(getMode()), 0, data, 0, 2);
+        final byte[] data = new byte[getLocalFileDataLength() - WORD];
+        ByteUtils.setUnsignedShortLE(data, 0, getMode());
 
         final byte[] linkArray = getLinkedFile().getBytes(StandardCharsets.UTF_8);
         // CheckStyle:MagicNumber OFF
-        System.arraycopy(ZipLong.getBytes(linkArray.length), 0, data, 2, WORD);
+        ByteUtils.setUnsignedIntLE(data, 2, linkArray.length);
 
-        System.arraycopy(ZipShort.getBytes(getUserId()), 0, data, 6, 2);
-        System.arraycopy(ZipShort.getBytes(getGroupId()), 0, data, 8, 2);
+        ByteUtils.setUnsignedShortLE(data, 6, getUserId());
+        ByteUtils.setUnsignedShortLE(data, 8, getGroupId());
 
         System.arraycopy(linkArray, 0, data, 10, linkArray.length);
         // CheckStyle:MagicNumber ON
@@ -184,7 +186,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
         final long checksum = crc.getValue();
 
         final byte[] result = new byte[data.length + WORD];
-        System.arraycopy(ZipLong.getBytes(checksum), 0, result, 0, WORD);
+        ByteUtils.setUnsignedIntLE(result, 0, checksum);
         System.arraycopy(data, 0, result, WORD, data.length);
         return result;
     }
@@ -192,12 +194,12 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
     /**
      * Length of the extra field in the local file data - without Header-ID or length specifier.
      *
-     * @return a {@code ZipShort} for the length of the data of this extra field
+     * @return the length of the data of this extra field
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
+    public int getLocalFileDataLength() {
         // @formatter:off
-        return new ZipShort(WORD      // CRC
+        return (WORD      // CRC
                           + 2         // Mode
                           + WORD      // SizDev
                           + 2         // UID
@@ -281,7 +283,7 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
             throw new ZipException("The length is too short, only " + length + " bytes, expected at least " + MIN_SIZE);
         }
 
-        final long givenChecksum = ZipLong.getValue(data, offset);
+        final long givenChecksum = ByteUtils.getUnsignedIntLE(data, offset);
         final byte[] tmp = new byte[length - WORD];
         System.arraycopy(data, offset + WORD, tmp, 0, length - WORD);
         crc.reset();
@@ -291,14 +293,14 @@ public class AsiExtraField implements ZipExtraField, UnixStat, Cloneable {
             throw new ZipException("Bad CRC checksum, expected " + Long.toHexString(givenChecksum) + " instead of " + Long.toHexString(realChecksum));
         }
 
-        final int newMode = ZipShort.getValue(tmp, 0);
+        final int newMode = ByteUtils.getUnsignedShortLE(tmp, 0);
         // CheckStyle:MagicNumber OFF
-        final int linkArrayLength = (int) ZipLong.getValue(tmp, 2);
+        final int linkArrayLength = (int) ByteUtils.getUnsignedIntLE(tmp, 2);
         if (linkArrayLength < 0 || linkArrayLength > tmp.length - 10) {
             throw new ZipException("Bad symbolic link name length " + linkArrayLength + " in ASI extra field");
         }
-        uid = ZipShort.getValue(tmp, 6);
-        gid = ZipShort.getValue(tmp, 8);
+        uid = ByteUtils.getUnsignedShortLE(tmp, 6);
+        gid = ByteUtils.getUnsignedShortLE(tmp, 8);
         if (linkArrayLength == 0) {
             link = "";
         } else {

@@ -17,6 +17,8 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,15 +58,15 @@ public class ExtraFieldUtilsTest implements UnixStat {
      * Header-ID of a ZipExtraField not supported by Commons Compress.
      *
      * <p>
-     * Used to be ZipShort(1) but this is the ID of the Zip64 extra field.
+     * Used to be short(1) but this is the ID of the Zip64 extra field.
      * </p>
      */
-    static final ZipShort UNRECOGNIZED_HEADER = new ZipShort(0x5555);
+    static final short UNRECOGNIZED_HEADER = (short) 0x5555;
 
     /**
      * Header-ID of a ZipExtraField not supported by Commons Compress used for the ArrayIndexOutOfBoundsTest.
      */
-    static final ZipShort AIOB_HEADER = new ZipShort(0x1000);
+    static final short AIOB_HEADER = (short) 0x1000;
     private AsiExtraField a;
     private UnrecognizedExtraField dummy;
     private byte[] data;
@@ -84,11 +86,11 @@ public class ExtraFieldUtilsTest implements UnixStat {
         aLocal = a.getLocalFileDataData();
         final byte[] dummyLocal = dummy.getLocalFileDataData();
         data = new byte[4 + aLocal.length + 4 + dummyLocal.length];
-        System.arraycopy(a.getHeaderId().getBytes(), 0, data, 0, 2);
-        System.arraycopy(a.getLocalFileDataLength().getBytes(), 0, data, 2, 2);
+        System.arraycopy(ByteUtils.toLittleEndian(a.getHeaderId(), 2), 0, data, 0, 2);
+        System.arraycopy(ByteUtils.toLittleEndian(a.getLocalFileDataLength(), 2), 0, data, 2, 2);
         System.arraycopy(aLocal, 0, data, 4, aLocal.length);
-        System.arraycopy(dummy.getHeaderId().getBytes(), 0, data, 4 + aLocal.length, 2);
-        System.arraycopy(dummy.getLocalFileDataLength().getBytes(), 0, data, 4 + aLocal.length + 2, 2);
+        System.arraycopy(ByteUtils.toLittleEndian(dummy.getHeaderId(), 2), 0, data, 4 + aLocal.length, 2);
+        System.arraycopy(ByteUtils.toLittleEndian(dummy.getLocalFileDataLength(), 2), 0, data, 4 + aLocal.length + 2, 2);
         System.arraycopy(dummyLocal, 0, data, 4 + aLocal.length + 4, dummyLocal.length);
 
     }
@@ -107,7 +109,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         final byte[] dummyCentral = dummy.getCentralDirectoryData();
         final byte[] data2 = new byte[4 + aLocal.length + 4 + dummyCentral.length];
         System.arraycopy(data, 0, data2, 0, 4 + aLocal.length + 2);
-        System.arraycopy(dummy.getCentralDirectoryLength().getBytes(), 0, data2, 4 + aLocal.length + 2, 2);
+        System.arraycopy(ByteUtils.toLittleEndian(dummy.getCentralDirectoryLength(), 2), 0, data2, 4 + aLocal.length + 2, 2);
         System.arraycopy(dummyCentral, 0, data2, 4 + aLocal.length + 4, dummyCentral.length);
 
         final byte[] central = ExtraFieldUtils.mergeCentralDirectoryData(new ZipExtraField[] { a, dummy });
@@ -121,7 +123,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
     @Test
     public void testMergeWithUnparseableData() throws Exception {
         final ZipExtraField d = new UnparseableExtraFieldData();
-        final byte[] b = UNRECOGNIZED_HEADER.getBytes();
+        final byte[] b = ByteUtils.toLittleEndian(UNRECOGNIZED_HEADER, 2);
         d.parseFromLocalFileData(new byte[] { b[0], b[1], 1, 0 }, 0, 4);
         final byte[] local = ExtraFieldUtils.mergeLocalFileDataData(new ZipExtraField[] { a, d });
         assertEquals(data.length - 1, local.length, "local length");
@@ -152,7 +154,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         assertInstanceOf(AsiExtraField.class, ze[0], "type field 1");
         assertEquals(040755, ((AsiExtraField) ze[0]).getMode(), "mode field 1");
         assertInstanceOf(UnrecognizedExtraField.class, ze[1], "type field 2");
-        assertEquals(1, ze[1].getLocalFileDataLength().getValue(), "data length field 2");
+        assertEquals(1, ze[1].getLocalFileDataLength(), "data length field 2");
 
         final byte[] data2 = new byte[data.length - 1];
         System.arraycopy(data, 0, data2, 0, data2.length);
@@ -168,7 +170,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         assertInstanceOf(AsiExtraField.class, ze[0], "type field 1");
         assertEquals(040755, ((AsiExtraField) ze[0]).getMode(), "mode field 1");
         assertInstanceOf(UnrecognizedExtraField.class, ze[1], "type field 2");
-        assertEquals(1, ze[1].getCentralDirectoryLength().getValue(), "data length field 2");
+        assertEquals(1, ze[1].getCentralDirectoryLength(), "data length field 2");
 
     }
 
@@ -179,7 +181,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         assertInstanceOf(AsiExtraField.class, ze[0], "type field 1");
         assertEquals(040755, ((AsiExtraField) ze[0]).getMode(), "mode field 1");
         assertInstanceOf(UnrecognizedExtraField.class, ze[1], "type field 2");
-        assertEquals(1, ze[1].getLocalFileDataLength().getValue(), "data length field 2");
+        assertEquals(1, ze[1].getLocalFileDataLength(), "data length field 2");
 
         final byte[] data2 = new byte[data.length - 1];
         System.arraycopy(data, 0, data2, 0, data2.length);
@@ -188,7 +190,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         assertInstanceOf(AsiExtraField.class, ze[0], "type field 1");
         assertEquals(040755, ((AsiExtraField) ze[0]).getMode(), "mode field 1");
         assertInstanceOf(UnparseableExtraFieldData.class, ze[1], "type field 2");
-        assertEquals(4, ze[1].getLocalFileDataLength().getValue(), "data length field 2");
+        assertEquals(4, ze[1].getLocalFileDataLength(), "data length field 2");
         for (int i = 0; i < 4; i++) {
             assertEquals(data2[data.length - 5 + i], ze[1].getLocalFileDataData()[i], "byte number " + i);
         }
@@ -201,7 +203,7 @@ public class ExtraFieldUtilsTest implements UnixStat {
         assertInstanceOf(AsiExtraField.class, ze[0], "type field 1");
         assertEquals(040755, ((AsiExtraField) ze[0]).getMode(), "mode field 1");
         assertInstanceOf(UnrecognizedExtraField.class, ze[1], "type field 2");
-        assertEquals(1, ze[1].getLocalFileDataLength().getValue(), "data length field 2");
+        assertEquals(1, ze[1].getLocalFileDataLength(), "data length field 2");
 
         final byte[] data2 = new byte[data.length - 1];
         System.arraycopy(data, 0, data2, 0, data2.length);

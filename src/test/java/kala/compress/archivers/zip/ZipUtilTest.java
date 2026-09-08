@@ -17,6 +17,8 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -47,7 +49,7 @@ public class ZipUtilTest {
 
     private Date time;
 
-    private ZipLong zl;
+    private int zl;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -70,7 +72,7 @@ public class ZipUtilTest {
         result[1] = (byte) ((value & 0xFF00) >> 8);
         result[2] = (byte) ((value & 0xFF0000) >> 16);
         result[3] = (byte) ((value & 0xFF000000L) >> 24);
-        zl = new ZipLong(result);
+        zl = ByteUtils.getIntLE(result, 0);
     }
 
     @Test
@@ -94,7 +96,7 @@ public class ZipUtilTest {
         long testDate = ZipUtil.dosToJavaTime(testDosTime);
         assertEquals(testDate, cal.getTimeInMillis());
 
-        testDosTime = new ZipLong(ZipUtil.toDosTime(time.getTime())).getValue();
+        testDosTime = ByteUtils.getUnsignedIntLE(ZipUtil.toDosTime(time.getTime()), 0);
         testDate = ZipUtil.dosToJavaTime(testDosTime);
         // the minimal time unit for dos time is 2 seconds
         assertEquals(testDate / 2000, time.getTime() / 2000);
@@ -113,21 +115,21 @@ public class ZipUtilTest {
     @Test
     public void testInsideCalendar_bigValue() {
         final long date = toLocalInstant("2097-11-27T23:59:59").toEpochMilli();
-        final long value = ZipLong.getValue(ZipUtil.toDosTime(date));
+        final long value = ByteUtils.getUnsignedIntLE(ZipUtil.toDosTime(date), 0);
         assertDosDate(value, 2097, 11, 27, 23, 59, 58); // DOS dates only store even seconds
     }
 
     @Test
     public void testInsideCalendar_long() {
         final long date = toLocalInstant("1985-02-01T09:00:00").toEpochMilli();
-        final long value = ZipLong.getValue(ZipUtil.toDosTime(date));
+        final long value = ByteUtils.getUnsignedIntLE(ZipUtil.toDosTime(date), 0);
         assertDosDate(value, 1985, 2, 1, 9, 0, 0);
     }
 
     @Test
     public void testInsideCalendar_modernDate() {
         final long date = toLocalInstant("2022-12-27T16:18:23").toEpochMilli();
-        final long value = ZipLong.getValue(ZipUtil.toDosTime(date));
+        final long value = ByteUtils.getUnsignedIntLE(ZipUtil.toDosTime(date), 0);
         assertDosDate(value, 2022, 12, 27, 16, 18, 22); // DOS dates only store even seconds
     }
 
@@ -164,7 +166,7 @@ public class ZipUtilTest {
     @Test
     public void testOutsideCalendar_long() {
         final long date = toLocalInstant("1975-01-31T23:00:00").toEpochMilli();
-        final long value = ZipLong.getValue(ZipUtil.toDosTime(date));
+        final long value = ByteUtils.getUnsignedIntLE(ZipUtil.toDosTime(date), 0);
         assertDosDate(value, 1980, 1, 1, 0, 0, 0);
     }
 
@@ -243,8 +245,8 @@ public class ZipUtilTest {
     }
 
     @Test
-    public void testZipLong() {
-        final ZipLong test = new ZipLong(ZipUtil.toDosTime(time.getTime()));
-        assertEquals(test.getValue(), zl.getValue());
+    public void testDosTimeBytes() {
+        final int test = ByteUtils.getIntLE(ZipUtil.toDosTime(time.getTime()), 0);
+        assertEquals(test, zl);
     }
 }

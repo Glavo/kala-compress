@@ -18,6 +18,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.util.zip.ZipException;
 
 /**
@@ -47,7 +49,7 @@ import java.util.zip.ZipException;
  */
 public class X0015_CertificateIdForFile extends PKWareExtraHeader {
 
-    static final ZipShort HEADER_ID = new ZipShort(0x0015);
+    static final short HEADER_ID = (short) 0x0015;
 
     private int rcount;
 
@@ -79,7 +81,7 @@ public class X0015_CertificateIdForFile extends PKWareExtraHeader {
     public void parseFromCentralDirectoryData(final byte[] data, final int offset, final int length) throws ZipException {
         assertMinimalLength(4, length);
         super.parseFromCentralDirectoryData(data, offset, length);
-        this.rcount = ZipShort.getValue(data, offset);
-        this.hashAlg = HashAlgorithm.getAlgorithmByCode(ZipShort.getValue(data, offset + 2));
+        this.rcount = ByteUtils.getUnsignedShortLE(data, offset);
+        this.hashAlg = HashAlgorithm.getAlgorithmByCode(ByteUtils.getUnsignedShortLE(data, offset + 2));
     }
 }

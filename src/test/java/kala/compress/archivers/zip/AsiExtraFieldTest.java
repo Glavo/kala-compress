@@ -108,7 +108,7 @@ public class AsiExtraFieldTest implements UnixStat {
                 5, 0, 6, 0 }; // uid, gid
         final AsiExtraField a1 = new AsiExtraField();
         a1.parseFromLocalFileData(data1, 0, data1.length);
-        assertEquals(data1.length, a1.getLocalFileDataLength().getValue(), "length plain file");
+        assertEquals(data1.length, a1.getLocalFileDataLength(), "length plain file");
         assertFalse(a1.isLink(), "plain file, no link");
         assertFalse(a1.isDirectory(), "plain file, no dir");
         assertEquals(FILE_FLAG | 0123, a1.getMode(), "mode plain file");
@@ -122,7 +122,7 @@ public class AsiExtraFieldTest implements UnixStat {
                 (byte) 't', (byte) 'e', (byte) 's', (byte) 't' };
         final AsiExtraField a2 = new AsiExtraField();
         a2.parseFromLocalFileData(data2, 0, data2.length);
-        assertEquals(data2.length, a2.getLocalFileDataLength().getValue(), "length link");
+        assertEquals(data2.length, a2.getLocalFileDataLength(), "length link");
         assertTrue(a2.isLink(), "link, is link");
         assertFalse(a2.isDirectory(), "link, no dir");
         assertEquals(LINK_FLAG | 0123, a2.getMode(), "mode link");
@@ -136,7 +136,7 @@ public class AsiExtraFieldTest implements UnixStat {
                 5, 0, 6, 0 }; // uid, gid
         final AsiExtraField a3 = new AsiExtraField();
         a3.parseFromLocalFileData(data3, 0, data3.length);
-        assertEquals(data3.length, a3.getLocalFileDataLength().getValue(), "length dir");
+        assertEquals(data3.length, a3.getLocalFileDataLength(), "length dir");
         assertFalse(a3.isLink(), "dir, no link");
         assertTrue(a3.isDirectory(), "dir, is dir");
         assertEquals(DIR_FLAG | 0123, a3.getMode(), "mode dir");

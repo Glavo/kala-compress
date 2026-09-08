@@ -18,6 +18,8 @@
  */
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import java.util.zip.ZipException;
 
 /**
@@ -48,7 +50,7 @@ import java.util.zip.ZipException;
  */
 public class X0016_CertificateIdForCentralDirectory extends PKWareExtraHeader {
 
-    static final ZipShort HEADER_ID = new ZipShort(0x0016);
+    static final short HEADER_ID = (short) 0x0016;
 
     private int rcount;
 
@@ -80,7 +82,7 @@ public class X0016_CertificateIdForCentralDirectory extends PKWareExtraHeader {
     public void parseFromCentralDirectoryData(final byte[] data, final int offset, final int length) throws ZipException {
         assertMinimalLength(4, length);
         // TODO: double check we really do not want to call super here
-        this.rcount = ZipShort.getValue(data, offset);
-        this.hashAlg = HashAlgorithm.getAlgorithmByCode(ZipShort.getValue(data, offset + 2));
+        this.rcount = ByteUtils.getUnsignedShortLE(data, offset);
+        this.hashAlg = HashAlgorithm.getAlgorithmByCode(ByteUtils.getUnsignedShortLE(data, offset + 2));
     }
 }

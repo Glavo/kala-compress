@@ -17,6 +17,8 @@
 
 package kala.compress.archivers.zip;
 
+import kala.compress.utils.ByteUtils;
+
 import static kala.compress.AbstractTest.getFile;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,7 +128,7 @@ public class Zip64SupportIT {
         a.seek(cdOffsetLoc);
         final byte[] cdOffset = new byte[8];
         a.readFully(cdOffset);
-        a.seek(ZipEightByteInteger.getLongValue(cdOffset));
+        a.seek(ByteUtils.getLongLE(cdOffset, 0));
         return end;
     }
 
@@ -134,7 +136,7 @@ public class Zip64SupportIT {
         a.seek(end - 22 + 16);
         final byte[] cdOffset = new byte[4];
         a.readFully(cdOffset);
-        a.seek(ZipLong.getValue(cdOffset));
+        a.seek(ByteUtils.getUnsignedIntLE(cdOffset, 0));
         return end;
     }
 
@@ -316,7 +318,7 @@ public class Zip64SupportIT {
                 final long expectedZ64EocdOffset = end - 22 /* eocd.length */
                         - 20 /* z64 eocd locator.length */
                         - 56 /* z64 eocd without extensible data sector */;
-                final byte[] loc = ZipEightByteInteger.getBytes(expectedZ64EocdOffset);
+                final byte[] loc = ByteUtils.toLittleEndian(expectedZ64EocdOffset, 8);
                 a.seek(end - 22 - 20);
                 final byte[] z64EocdLoc = new byte[20];
                 a.readFully(z64EocdLoc);
@@ -353,7 +355,7 @@ public class Zip64SupportIT {
                 a.seek(expectedZ64EocdOffset + 48 /* skip size */);
                 final byte[] cdOffset = new byte[8];
                 a.readFully(cdOffset);
-                final long cdLoc = ZipEightByteInteger.getLongValue(cdOffset);
+                final long cdLoc = ByteUtils.getLongLE(cdOffset, 0);
 
                 // finally verify there really is a central
                 // directory entry where the Zip64 EOCD claims
@@ -475,7 +477,7 @@ public class Zip64SupportIT {
                 final byte[] offset = new byte[8];
                 a.readFully(offset);
                 // verify there is an LFH where the CD claims it
-                a.seek(ZipEightByteInteger.getLongValue(offset));
+                a.seek(ByteUtils.getLongLE(offset, 0));
                 final byte[] sig = new byte[4];
                 a.readFully(sig);
                 assertArrayEquals(new byte[] { (byte) 0x50, (byte) 0x4b, 3, 4, }, sig, "LFH signature");
@@ -2291,8 +2293,8 @@ public class Zip64SupportIT {
                 continue;
             }
 
-            assertNull(((Zip64ExtendedInformationExtraField) extraField).getRelativeHeaderOffset());
-            assertNull(((Zip64ExtendedInformationExtraField) extraField).getDiskStartNumber());
+            assertFalse(((Zip64ExtendedInformationExtraField) extraField).hasRelativeHeaderOffset());
+            assertFalse(((Zip64ExtendedInformationExtraField) extraField).hasDiskStartNumber());
         }
 
         // with Zip64Mode.Always, the relative header offset and disk number start will be

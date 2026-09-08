@@ -161,7 +161,7 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
         }
     }
 
-    private final ZipShort headerId;
+    private final short headerId;
 
     /**
      * Extra field data in local file data - without Header-ID or length specifier.
@@ -173,7 +173,7 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
      */
     private byte[] centralData;
 
-    protected PKWareExtraHeader(final ZipShort headerId) {
+    protected PKWareExtraHeader(final short headerId) {
         this.headerId = headerId;
     }
 
@@ -202,9 +202,9 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
      * @return the central data length
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
+    public int getCentralDirectoryLength() {
         if (centralData != null) {
-            return new ZipShort(centralData.length);
+            return centralData.length;
         }
         return getLocalFileDataLength();
     }
@@ -215,7 +215,7 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
      * @return the header id
      */
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return headerId;
     }
 
@@ -235,8 +235,8 @@ public abstract class PKWareExtraHeader implements ZipExtraField {
      * @return the length of the local data
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(localData != null ? localData.length : 0);
+    public int getLocalFileDataLength() {
+        return localData != null ? localData.length : 0;
     }
 
     /**

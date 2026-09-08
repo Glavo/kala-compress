@@ -70,7 +70,7 @@ public class X7875_NewUnixTest {
             expected[3 + uidLength + i] = gidBytes[gidBytes.length - 1 - i];
         }
         assertArrayEquals(expected, xf.getLocalFileDataData());
-        assertEquals(expected.length, xf.getLocalFileDataLength().getValue());
+        assertEquals(expected.length, xf.getLocalFileDataLength());
         final X7875_NewUnix parsed = new X7875_NewUnix();
         parsed.parseFromLocalFileData(expected, 0, expected.length);
         assertEquals(uid, parsed.getUID());
@@ -112,7 +112,7 @@ public class X7875_NewUnixTest {
         xf.parseFromLocalFileData(data, offset, length);
         assertEquals(255, xf.getUID());
         assertEquals(Long.MAX_VALUE, xf.getGID());
-        assertEquals(12, xf.getLocalFileDataLength().getValue());
+        assertEquals(12, xf.getLocalFileDataLength());
     }
 
     /// Rejects oversized identifiers and preserves their bytes through the default entry parsing policy.
@@ -133,8 +133,8 @@ public class X7875_NewUnixTest {
             }
             assertThrows(ZipException.class, () -> xf.parseFromLocalFileData(data, 0, data.length));
             final byte[] extra = new byte[4 + data.length];
-            ZipShort.putShort(0x7875, extra, 0);
-            ZipShort.putShort(data.length, extra, 2);
+            ByteUtils.setUnsignedShortLE(extra, 0, 0x7875);
+            ByteUtils.setUnsignedShortLE(extra, 2, data.length);
             System.arraycopy(data, 0, extra, 4, data.length);
             final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
             entry.setExtra(extra);
@@ -151,7 +151,7 @@ public class X7875_NewUnixTest {
         }
     }
 
-    private static final ZipShort X7875 = new ZipShort(0x7875);
+    private static final short X7875 = (short) 0x7875;
 
     private X7875_NewUnix xf;
 
@@ -173,9 +173,9 @@ public class X7875_NewUnixTest {
         xf.setGID(gid);
         if (expected.length < 5) {
             // We never emit zero-length entries.
-            assertEquals(5, xf.getLocalFileDataLength().getValue());
+            assertEquals(5, xf.getLocalFileDataLength());
         } else {
-            assertEquals(expected.length, xf.getLocalFileDataLength().getValue());
+            assertEquals(expected.length, xf.getLocalFileDataLength());
         }
         byte[] result = xf.getLocalFileDataData();
         if (expected.length < 5) {
@@ -192,7 +192,7 @@ public class X7875_NewUnixTest {
         assertEquals(expectedUID, xf.getUID());
         assertEquals(expectedGID, xf.getGID());
 
-        assertEquals(0, xf.getCentralDirectoryLength().getValue());
+        assertEquals(0, xf.getCentralDirectoryLength());
         result = xf.getCentralDirectoryData();
         assertArrayEquals(ByteUtils.EMPTY_BYTE_ARRAY, result);
 

@@ -30,7 +30,7 @@ package kala.compress.archivers.zip;
  */
 public class UnicodePathExtraField extends AbstractUnicodeExtraField {
 
-    public static final ZipShort UPATH_ID = new ZipShort(0x7075);
+    public static final short UPATH_ID = (short) 0x7075;
 
     public UnicodePathExtraField() {
     }
@@ -58,7 +58,7 @@ public class UnicodePathExtraField extends AbstractUnicodeExtraField {
     }
 
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
         return UPATH_ID;
     }
 }

@@ -34,7 +34,10 @@ public class UnrecognizedExtraField implements ZipExtraField {
     /**
      * The Header-ID.
      */
-    private ZipShort headerId;
+    private short headerId;
+
+    /// Whether the field identifier has been set.
+    private boolean headerIdSet;
 
     /**
      * Extra field data in local file data - without Header-ID or length specifier.
@@ -65,21 +68,33 @@ public class UnrecognizedExtraField implements ZipExtraField {
      * @return the central data length
      */
     @Override
-    public ZipShort getCentralDirectoryLength() {
+    public int getCentralDirectoryLength() {
         if (centralData != null) {
-            return new ZipShort(centralData.length);
+            return centralData.length;
         }
         return getLocalFileDataLength();
     }
 
-    /**
-     * Gets the header id.
-     *
-     * @return the header id
-     */
+    /// Returns the unsigned 16-bit identifier as a raw bit pattern.
+    ///
+    /// @throws IllegalStateException if the identifier has not been set
     @Override
-    public ZipShort getHeaderId() {
+    public short getHeaderId() {
+        if (!headerIdSet) {
+            throw new IllegalStateException("Header ID has not been set");
+        }
         return headerId;
+    }
+
+    /// Returns whether the field identifier has been set.
+    public boolean hasHeaderId() {
+        return headerIdSet;
+    }
+
+    /// Clears the field identifier.
+    public void clearHeaderId() {
+        headerIdSet = false;
+        headerId = 0;
     }
 
     /**
@@ -98,8 +113,8 @@ public class UnrecognizedExtraField implements ZipExtraField {
      * @return the length of the local data
      */
     @Override
-    public ZipShort getLocalFileDataLength() {
-        return new ZipShort(localData != null ? localData.length : 0);
+    public int getLocalFileDataLength() {
+        return localData != null ? localData.length : 0;
     }
 
     /**
@@ -137,13 +152,12 @@ public class UnrecognizedExtraField implements ZipExtraField {
         centralData = ZipUtil.copy(data);
     }
 
-    /**
-     * Sets the header id.
-     *
-     * @param headerId the header id to use
-     */
-    public void setHeaderId(final ZipShort headerId) {
+    /// Sets the field identifier.
+    ///
+    /// @param headerId the unsigned 16-bit identifier as a raw bit pattern
+    public void setHeaderId(final short headerId) {
         this.headerId = headerId;
+        headerIdSet = true;
     }
 
     /**
