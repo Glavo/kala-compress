@@ -1010,7 +1010,7 @@ public class ZipArchiveReader implements Closeable {
     ///
     /// @return a map of zip entries that didn't have the language encoding flag set when read.
     private Map<ZipArchiveEntry, NameAndComment> populateFromCentralDirectory() throws IOException {
-        final HashMap<ZipArchiveEntry, NameAndComment> noUTF8Flag = new HashMap<>();
+        HashMap<ZipArchiveEntry, NameAndComment> noUTF8Flag = null;
 
         positionAtCentralDirectory();
         centralDirectoryStartOffset = archive.position();
@@ -1027,10 +1027,19 @@ public class ZipArchiveReader implements Closeable {
             IOUtils.readFully(archive, cfhBuffer);
             cfhBuffer.rewind();
 
-            readCentralDirectoryEntry(noUTF8Flag, cfhBuffer);
+            final Entry ze = new Entry();
+
+            NameAndComment nameAndComment = readCentralDirectoryEntry(ze, cfhBuffer);
             sig = archive.readUnsignedInt();
+
+            if (nameAndComment != null) {
+                if (noUTF8Flag == null) {
+                    noUTF8Flag = new HashMap<>();
+                }
+                noUTF8Flag.put(ze, nameAndComment);
+            }
         }
-        return noUTF8Flag;
+        return Objects.requireNonNullElse(noUTF8Flag, Collections.emptyMap());
     }
 
     /// Searches for either the &quot;Zip64 end of central directory locator&quot; or the &quot;End of central dir record&quot;, parses it and positions the
@@ -1106,11 +1115,7 @@ public class ZipArchiveReader implements Closeable {
     }
 
     /// Reads an individual entry of the central directory, creates an ZipArchiveEntry from it and adds it to the global maps.
-    ///
-    /// @param noUTF8Flag map used to collect entries whose names and comments may be replaced using Unicode extra fields
-    private void readCentralDirectoryEntry(final Map<ZipArchiveEntry, NameAndComment> noUTF8Flag, final ByteBuffer cfhBuffer) throws IOException {
-        final Entry ze = new Entry();
-
+    private NameAndComment readCentralDirectoryEntry(final Entry ze, final ByteBuffer cfhBuffer) throws IOException {
         final int versionMadeBy = Short.toUnsignedInt(cfhBuffer.getShort());
         ze.setVersionMadeBy(versionMadeBy);
         ze.setPlatform(toPlatform(versionMadeBy));
@@ -1178,12 +1183,11 @@ public class ZipArchiveReader implements Closeable {
             throw new EOFException();
         }
         ze.setComment(Charsets.decode(entryEncoding, comment));
-
-        if (!hasUTF8Flag && useUnicodeExtraFields) {
-            noUTF8Flag.put(ze, new NameAndComment(fileName, comment));
-        }
-
         ze.setStreamContiguous(true);
+
+        return hasUTF8Flag || !useUnicodeExtraFields
+                ? null
+                : new NameAndComment(fileName, comment);
     }
 
     /// Walks through all recorded entries and adds the data available from the local file header.
