@@ -21,23 +21,137 @@ package kala.compress.archivers.zip;
 import static kala.compress.AbstractTest.getFile;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.zip.ZipException;
+import java.util.Arrays;
+import java.math.BigInteger;
 
 import kala.compress.utils.ByteUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class X7875_NewUnixTest {
 
-    private static final ZipShort X7875 = new ZipShort(0x7875);
-
-    private static byte[] trimTest(final byte[] b) {
-        return X7875_NewUnix.trimLeadingZeroesForceMinLength(b);
+    /// Checks minimal encoding at every byte-length boundary against an independent BigInteger representation.
+    @Test
+    void testEncodingBoundaries() throws ZipException {
+        assertEncoding(0);
+        assertEncoding(1);
+        for (int bits = 8; bits < Long.SIZE; bits += 8) {
+            assertEncoding((1L << bits) - 1);
+            assertEncoding(1L << bits);
+        }
+        assertEncoding(Long.MAX_VALUE);
     }
+
+    /// Checks the bytes, length, and parsed values for an identifier and its complementary GID.
+    private void assertEncoding(final long uid) throws ZipException {
+        final long gid = Long.MAX_VALUE - uid;
+        xf.setUID(uid);
+        xf.setGID(gid);
+        final byte[] uidBytes = BigInteger.valueOf(uid).toByteArray();
+        final byte[] gidBytes = BigInteger.valueOf(gid).toByteArray();
+        final int uidLength = uidBytes.length > 1 && uidBytes[0] == 0 ? uidBytes.length - 1 : uidBytes.length;
+        final int gidLength = gidBytes.length > 1 && gidBytes[0] == 0 ? gidBytes.length - 1 : gidBytes.length;
+        final byte[] expected = new byte[3 + uidLength + gidLength];
+        expected[0] = 1;
+        expected[1] = (byte) uidLength;
+        expected[2 + uidLength] = (byte) gidLength;
+        for (int i = 0; i < uidLength; i++) {
+            expected[2 + i] = uidBytes[uidBytes.length - 1 - i];
+        }
+        for (int i = 0; i < gidLength; i++) {
+            expected[3 + uidLength + i] = gidBytes[gidBytes.length - 1 - i];
+        }
+        assertArrayEquals(expected, xf.getLocalFileDataData());
+        assertEquals(expected.length, xf.getLocalFileDataLength().getValue());
+        final X7875_NewUnix parsed = new X7875_NewUnix();
+        parsed.parseFromLocalFileData(expected, 0, expected.length);
+        assertEquals(uid, parsed.getUID());
+        assertEquals(gid, parsed.getGID());
+        assertEquals(xf, parsed);
+        assertEquals(xf.hashCode(), parsed.hashCode());
+    }
+
+    /// Preserves the unsigned interpretation of negative int inputs and rejects smaller values without changing state.
+    @ParameterizedTest
+    @ValueSource(longs = {-1, -2, Integer.MIN_VALUE})
+    void testNegativeInputs(final long value) {
+        xf.setUID(value);
+        xf.setGID(value);
+        final long expected = Integer.toUnsignedLong((int) value);
+        assertEquals(expected, xf.getUID());
+        assertEquals(expected, xf.getGID());
+        for (final long invalid : new long[]{Integer.MIN_VALUE - 1L, Long.MIN_VALUE}) {
+            assertThrows(IllegalArgumentException.class, () -> xf.setUID(invalid));
+            assertThrows(IllegalArgumentException.class, () -> xf.setGID(invalid));
+            assertEquals(expected, xf.getUID());
+            assertEquals(expected, xf.getGID());
+        }
+    }
+
+    /// Accepts the maximum encoded length when excess high-order bytes are zero, including nonzero array offsets.
+    @ParameterizedTest
+    @ValueSource(ints = {8, 9, 255})
+    void testZeroPaddedValues(final int valueLength) throws ZipException {
+        final int offset = 5;
+        final int length = 3 + 2 * valueLength;
+        final byte[] data = new byte[offset + length + 2];
+        Arrays.fill(data, 0, offset, (byte) 0xff);
+        data[offset] = 1;
+        data[offset + 1] = (byte) valueLength;
+        data[offset + 2 + valueLength] = (byte) valueLength;
+        data[offset + 2] = (byte) 0xff;
+        ByteUtils.setLongLE(data, offset + 3 + valueLength, Long.MAX_VALUE);
+        xf.parseFromLocalFileData(data, offset, length);
+        assertEquals(255, xf.getUID());
+        assertEquals(Long.MAX_VALUE, xf.getGID());
+        assertEquals(12, xf.getLocalFileDataLength().getValue());
+    }
+
+    /// Rejects oversized identifiers and preserves their bytes through the default entry parsing policy.
+    @ParameterizedTest
+    @ValueSource(ints = {8, 9, 255})
+    void testOversizedValues(final int valueLength) {
+        for (final boolean oversizedUid : new boolean[]{false, true}) {
+            final byte[] data = new byte[valueLength + 4];
+            data[0] = 1;
+            if (oversizedUid) {
+                data[1] = (byte) valueLength;
+                data[1 + valueLength] = (byte) 0x80;
+                data[2 + valueLength] = 1;
+            } else {
+                data[1] = 1;
+                data[3] = (byte) valueLength;
+                data[data.length - 1] = (byte) 0x80;
+            }
+            assertThrows(ZipException.class, () -> xf.parseFromLocalFileData(data, 0, data.length));
+            final byte[] extra = new byte[4 + data.length];
+            ZipShort.putShort(0x7875, extra, 0);
+            ZipShort.putShort(data.length, extra, 2);
+            System.arraycopy(data, 0, extra, 4, data.length);
+            final ZipArchiveEntry entry = new ZipArchiveEntry("entry");
+            entry.setExtra(extra);
+            assertInstanceOf(UnrecognizedExtraField.class, entry.getExtraField(X7875));
+            assertArrayEquals(extra, entry.getExtra());
+        }
+    }
+
+    /// Rejects missing size bytes and identifier data at the declared field boundary.
+    @Test
+    void testTruncatedValues() {
+        for (final byte[] data : new byte[][]{{1, 0}, {1, 2, 0, 1}, {1, 1, 0, 2, 0}}) {
+            assertThrows(ZipException.class, () -> xf.parseFromLocalFileData(data, 0, data.length));
+        }
+    }
+
+    private static final ZipShort X7875 = new ZipShort(0x7875);
 
     private X7875_NewUnix xf;
 
@@ -195,32 +309,4 @@ public class X7875_NewUnixTest {
         }
     }
 
-    @Test
-    public void testTrimLeadingZeroesForceMinLength4() {
-        final byte[] NULL = null;
-        final byte[] EMPTY = ByteUtils.EMPTY_BYTE_ARRAY;
-        final byte[] ONE_ZERO = { 0 };
-        final byte[] TWO_ZEROES = { 0, 0 };
-        final byte[] FOUR_ZEROES = { 0, 0, 0, 0 };
-        final byte[] SEQUENCE = { 1, 2, 3 };
-        final byte[] SEQUENCE_LEADING_ZERO = { 0, 1, 2, 3 };
-        final byte[] SEQUENCE_LEADING_ZEROES = { 0, 0, 0, 0, 0, 0, 0, 1, 2, 3 };
-        final byte[] TRAILING_ZERO = { 1, 2, 3, 0 };
-        final byte[] PADDING_ZERO = { 0, 1, 2, 3, 0 };
-        final byte[] SEQUENCE6 = { 1, 2, 3, 4, 5, 6 };
-        final byte[] SEQUENCE6_LEADING_ZERO = { 0, 1, 2, 3, 4, 5, 6 };
-
-        assertSame(NULL, trimTest(NULL));
-        assertArrayEquals(ONE_ZERO, trimTest(EMPTY));
-        assertArrayEquals(ONE_ZERO, trimTest(ONE_ZERO));
-        assertArrayEquals(ONE_ZERO, trimTest(TWO_ZEROES));
-        assertArrayEquals(ONE_ZERO, trimTest(FOUR_ZEROES));
-        assertArrayEquals(SEQUENCE, trimTest(SEQUENCE));
-        assertArrayEquals(SEQUENCE, trimTest(SEQUENCE_LEADING_ZERO));
-        assertArrayEquals(SEQUENCE, trimTest(SEQUENCE_LEADING_ZEROES));
-        assertArrayEquals(TRAILING_ZERO, trimTest(TRAILING_ZERO));
-        assertArrayEquals(TRAILING_ZERO, trimTest(PADDING_ZERO));
-        assertArrayEquals(SEQUENCE6, trimTest(SEQUENCE6));
-        assertArrayEquals(SEQUENCE6, trimTest(SEQUENCE6_LEADING_ZERO));
-    }
 }

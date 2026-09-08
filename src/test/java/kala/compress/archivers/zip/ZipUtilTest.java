@@ -81,24 +81,6 @@ public class ZipUtilTest {
     }
 
     @Test
-    public void testBigToLong() {
-        final BigInteger big1 = BigInteger.valueOf(1);
-        final BigInteger big2 = BigInteger.valueOf(Long.MAX_VALUE);
-        final BigInteger big3 = BigInteger.valueOf(Long.MIN_VALUE);
-
-        assertEquals(1L, ZipUtil.toLong(big1));
-        assertEquals(Long.MAX_VALUE, ZipUtil.toLong(big2));
-        assertEquals(Long.MIN_VALUE, ZipUtil.toLong(big3));
-
-        final BigInteger big4 = big2.add(big1);
-        assertThrows(IllegalArgumentException.class, () -> ZipUtil.toLong(big4), "Should have thrown IllegalArgumentException");
-
-        final BigInteger big5 = big3.subtract(big1);
-        assertThrows(IllegalArgumentException.class, () -> ZipUtil.toLong(big5),
-                "ZipUtil.bigToLong(BigInteger) should have thrown IllegalArgumentException");
-    }
-
-    @Test
     public void testFromDosTime() {
         long testDosTime = 1 << 21;
         final Calendar cal = Calendar.getInstance();
@@ -158,30 +140,6 @@ public class ZipUtilTest {
         // The lowest data/time expressable as DOS Time, see comment in ZipUtil#DOSTIME_BEFORE_1980
         final long lowestExpressableDosTime = 1 << 21 | 1 << 16; // 0x210000
         assertTrue(ZipUtil.isDosTime(ZipUtil.dosToJavaTime(lowestExpressableDosTime)));
-    }
-
-    @Test
-    public void testLongToBig() {
-        final long l0 = 0;
-        final long l1 = 1;
-        final long l2 = -1;
-        final long l3 = Integer.MIN_VALUE;
-        final long l4 = Long.MAX_VALUE;
-        final long l5 = Long.MIN_VALUE;
-
-        final BigInteger big0 = ZipUtil.longToBig(l0);
-        final BigInteger big1 = ZipUtil.longToBig(l1);
-        final BigInteger big2 = ZipUtil.longToBig(l2);
-        final BigInteger big3 = ZipUtil.longToBig(l3);
-        final BigInteger big4 = ZipUtil.longToBig(l4);
-
-        assertEquals(0, big0.longValue());
-        assertEquals(1, big1.longValue());
-        assertEquals(0xFFFFFFFFL, big2.longValue());
-        assertEquals(0x80000000L, big3.longValue());
-        assertEquals(Long.MAX_VALUE, big4.longValue());
-
-        assertThrows(IllegalArgumentException.class, () -> ZipUtil.longToBig(l5), "ZipUtil.longToBig(long) should have thrown IllegalArgumentException");
     }
 
     @Test

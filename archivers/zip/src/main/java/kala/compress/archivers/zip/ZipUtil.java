@@ -18,7 +18,6 @@ package kala.compress.archivers.zip;
 
 import kala.compress.utils.TimeUtils;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -210,27 +209,6 @@ public abstract class ZipUtil {
     }
 
     /**
-     * <p>
-     * Converts a long into a BigInteger. Negative numbers between -1 and -2^31 are treated as unsigned 32 bit (e.g., positive) integers. Negative numbers below
-     * -2^31 cause an IllegalArgumentException to be thrown.
-     * </p>
-     *
-     * @param l long to convert to BigInteger.
-     * @return BigInteger representation of the provided long.
-     */
-    static BigInteger longToBig(long l) {
-        if (l < Integer.MIN_VALUE) {
-            throw new IllegalArgumentException("Negative longs < -2^31 not permitted: [" + l + "]");
-        }
-        if (l < 0 && l >= Integer.MIN_VALUE) {
-            // If someone passes in a -2, they probably mean 4294967294
-            // (For example, Unix UID/GID's are 32 bit unsigned.)
-            l = adjustToLong((int) l);
-        }
-        return BigInteger.valueOf(l);
-    }
-
-    /**
      * Reverses a byte[] array. Reverses in-place (thus provided array is mutated), but also returns same for convenience.
      *
      * @param array to reverse (mutated in-place, but also returned for convenience).
@@ -320,20 +298,6 @@ public abstract class ZipUtil {
      */
     public static void toDosTime(final long t, final byte[] buf, final int offset) {
         ZipLong.putLong(javaToDosTime(t), buf, offset);
-    }
-
-    /**
-     * Converts a BigInteger to a long, and throws a NumberFormatException if the BigInteger is too big.
-     *
-     * @param big BigInteger to convert.
-     * @return {@code BigInteger} converted to a {@code long}.
-     */
-    static long toLong(final BigInteger big) {
-        try {
-            return big.longValueExact();
-        } catch (final ArithmeticException e) {
-            throw new NumberFormatException("The BigInteger cannot fit inside a 64 bit java long: [" + big + "]");
-        }
     }
 
     /**
