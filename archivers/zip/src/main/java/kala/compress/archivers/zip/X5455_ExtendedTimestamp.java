@@ -164,14 +164,9 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         return hasAccessTime() ? TimeUtils.unixTimeToFileTime(accessTime) : null;
     }
 
-    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC.
-    ///
-    /// @throws IllegalStateException if the timestamp is absent
-    public int getAccessTime() {
-        if (!hasAccessTime()) {
-            throw new IllegalStateException("Access time is not present");
-        }
-        return accessTime;
+    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC, or null if absent.
+    public Integer getAccessTime() {
+        return hasAccessTime() ? accessTime : null;
     }
 
     /// Returns whether the access timestamp value is stored, independently of the flags.
@@ -224,14 +219,9 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         return hasCreateTime() ? TimeUtils.unixTimeToFileTime(createTime) : null;
     }
 
-    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC.
-    ///
-    /// @throws IllegalStateException if the timestamp is absent
-    public int getCreateTime() {
-        if (!hasCreateTime()) {
-            throw new IllegalStateException("Create time is not present");
-        }
-        return createTime;
+    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC, or null if absent.
+    public Integer getCreateTime() {
+        return hasCreateTime() ? createTime : null;
     }
 
     /// Returns whether the create timestamp value is stored, independently of the flags.
@@ -324,14 +314,9 @@ public class X5455_ExtendedTimestamp implements ZipExtraField, Cloneable, Serial
         return hasModifyTime() ? TimeUtils.unixTimeToFileTime(modifyTime) : null;
     }
 
-    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC.
-    ///
-    /// @throws IllegalStateException if the timestamp is absent
-    public int getModifyTime() {
-        if (!hasModifyTime()) {
-            throw new IllegalStateException("Modify time is not present");
-        }
-        return modifyTime;
+    /// Returns the signed Unix timestamp in seconds since 1970-01-01 UTC, or null if absent.
+    public Integer getModifyTime() {
+        return hasModifyTime() ? modifyTime : null;
     }
 
     /// Returns whether the modify timestamp value is stored, independently of the flags.

@@ -11,8 +11,7 @@ Based on [apache/commons-compress@d0aec98](https://github.com/apache/commons-com
 Breaking Changes:
 
 * `ZipArchiveEntry` no longer extends `java.util.zip.ZipEntry`. Its public methods and constants remain available, and the timestamp setters and `clone()` now return `ZipArchiveEntry`. Constructors accepting JDK ZIP and JAR entries remain available.
-* Remove `ZipShort`, `ZipLong`, and `ZipEightByteInteger` in favor of primitive values. Extra field identifiers now use `short` with unsigned 16-bit semantics, data lengths use `int`, and other numeric fields use `int` or `long`.
-* Replace nullable numeric getters and setters in `Zip64ExtendedInformationExtraField`, `X5455_ExtendedTimestamp`, and `UnrecognizedExtraField` with primitive APIs and explicit `has...()` / `clear...()` methods. Primitive getters throw `IllegalStateException` when the corresponding value is absent.
+* Remove `ZipShort`, `ZipLong`, and `ZipEightByteInteger` in favor of standard Java numeric types. Extra field identifiers now use `short` with unsigned 16-bit semantics, data lengths use `int`, and other numeric fields use `int` or `long`, boxed where nullable.
 
 ## 1.27.1-4 (2026-09-04)
 

@@ -136,24 +136,14 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
                 + (hasDiskStartNumber() ? WORD : 0));
     }
 
-    /// Returns the unsigned 64-bit compressed size as a raw bit pattern.
-    ///
-    /// @throws IllegalStateException if the field is absent
-    public long getCompressedSize() {
-        if (!hasCompressedSize()) {
-            throw new IllegalStateException("CompressedSize is not present");
-        }
-        return compressedSize;
+    /// Returns the unsigned 64-bit compressed size as a raw bit pattern, or null if absent.
+    public Long getCompressedSize() {
+        return hasCompressedSize() ? compressedSize : null;
     }
 
-    /// Returns the unsigned 32-bit starting disk number as a raw bit pattern.
-    ///
-    /// @throws IllegalStateException if the field is absent
-    public int getDiskStartNumber() {
-        if (!hasDiskStartNumber()) {
-            throw new IllegalStateException("DiskStartNumber is not present");
-        }
-        return diskStart;
+    /// Returns the unsigned 32-bit starting disk number as a raw bit pattern, or null if absent.
+    public Integer getDiskStartNumber() {
+        return hasDiskStartNumber() ? diskStart : null;
     }
 
     @Override
@@ -188,24 +178,14 @@ public class Zip64ExtendedInformationExtraField implements ZipExtraField {
         return hasSize() ? 2 * DWORD : 0;
     }
 
-    /// Returns the unsigned 64-bit local header offset as a raw bit pattern.
-    ///
-    /// @throws IllegalStateException if the field is absent
-    public long getRelativeHeaderOffset() {
-        if (!hasRelativeHeaderOffset()) {
-            throw new IllegalStateException("RelativeHeaderOffset is not present");
-        }
-        return relativeHeaderOffset;
+    /// Returns the unsigned 64-bit local header offset as a raw bit pattern, or null if absent.
+    public Long getRelativeHeaderOffset() {
+        return hasRelativeHeaderOffset() ? relativeHeaderOffset : null;
     }
 
-    /// Returns the unsigned 64-bit uncompressed size as a raw bit pattern.
-    ///
-    /// @throws IllegalStateException if the field is absent
-    public long getSize() {
-        if (!hasSize()) {
-            throw new IllegalStateException("Size is not present");
-        }
-        return size;
+    /// Returns the unsigned 64-bit uncompressed size as a raw bit pattern, or null if absent.
+    public Long getSize() {
+        return hasSize() ? size : null;
     }
 
     @Override

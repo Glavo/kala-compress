@@ -71,7 +71,7 @@ class ZipPrimitiveFieldsTest {
         }
     }
 
-    /// Checks that absence is distinct from every raw value and absent getters fail explicitly.
+    /// Checks that absent getters return null, distinct from every raw value.
     private static void assertPresence(final Zip64ExtendedInformationExtraField field, final int mask, final long value) {
         assertEquals((mask & 1) != 0, field.hasSize());
         assertEquals((mask & 2) != 0, field.hasCompressedSize());
@@ -80,22 +80,22 @@ class ZipPrimitiveFieldsTest {
         if (field.hasSize()) {
             assertEquals(value, field.getSize());
         } else {
-            assertThrows(IllegalStateException.class, field::getSize);
+            assertNull(field.getSize());
         }
         if (field.hasCompressedSize()) {
             assertEquals(value, field.getCompressedSize());
         } else {
-            assertThrows(IllegalStateException.class, field::getCompressedSize);
+            assertNull(field.getCompressedSize());
         }
         if (field.hasRelativeHeaderOffset()) {
             assertEquals(value, field.getRelativeHeaderOffset());
         } else {
-            assertThrows(IllegalStateException.class, field::getRelativeHeaderOffset);
+            assertNull(field.getRelativeHeaderOffset());
         }
         if (field.hasDiskStartNumber()) {
             assertEquals((int) value, field.getDiskStartNumber());
         } else {
-            assertThrows(IllegalStateException.class, field::getDiskStartNumber);
+            assertNull(field.getDiskStartNumber());
         }
     }
 
@@ -104,7 +104,9 @@ class ZipPrimitiveFieldsTest {
     @ValueSource(ints = {0, -1, Integer.MIN_VALUE, Integer.MAX_VALUE})
     void extendedTimestampPresence(final int seconds) throws Exception {
         final X5455_ExtendedTimestamp field = new X5455_ExtendedTimestamp();
-        assertThrows(IllegalStateException.class, field::getModifyTime);
+        assertNull(field.getModifyTime());
+        assertNull(field.getAccessTime());
+        assertNull(field.getCreateTime());
         field.setModifyTime(seconds);
         field.setAccessTime(seconds);
         field.setCreateTime(seconds);
@@ -117,6 +119,8 @@ class ZipPrimitiveFieldsTest {
         assertTrue(field.hasAccessTime());
         assertTrue(field.hasCreateTime());
         assertEquals(seconds, field.getModifyTime());
+        assertEquals(seconds, field.getAccessTime());
+        assertEquals(seconds, field.getCreateTime());
         assertEquals(FileTime.from(seconds, TimeUnit.SECONDS), field.getModifyFileTime());
         field.setFlags((byte) 7);
         assertArrayEquals(bytes, field.getLocalFileDataData());
@@ -126,14 +130,17 @@ class ZipPrimitiveFieldsTest {
         assertEquals(seconds, parsed.getModifyTime());
         assertFalse(parsed.hasAccessTime());
         assertFalse(parsed.hasCreateTime());
-        assertThrows(IllegalStateException.class, parsed::getAccessTime);
-        assertThrows(IllegalStateException.class, parsed::getCreateTime);
+        assertNull(parsed.getAccessTime());
+        assertNull(parsed.getCreateTime());
         field.clearModifyTime();
         field.clearAccessTime();
         field.clearCreateTime();
         assertFalse(field.hasModifyTime());
         assertFalse(field.hasAccessTime());
         assertFalse(field.hasCreateTime());
+        assertNull(field.getModifyTime());
+        assertNull(field.getAccessTime());
+        assertNull(field.getCreateTime());
         assertNull(field.getModifyFileTime());
         assertArrayEquals(new byte[]{0}, field.getLocalFileDataData());
     }
