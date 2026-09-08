@@ -144,12 +144,6 @@ public abstract class ZipUtil {
         return null;
     }
 
-    static void copy(final byte[] from, final byte[] to, final int offset) {
-        if (from != null) {
-            System.arraycopy(from, 0, to, offset, from.length);
-        }
-    }
-
     /**
      * Converts DOS time to Java time (number of milliseconds since epoch).
      *
